@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">Connected sustainable commercial district</title>
+<desc id="desc">An illuminated modern commercial building surrounded by trees and connected through a network of people, property and sustainability symbols.</desc>
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102e58"/><stop offset=".55" stop-color="#0b1830"/><stop offset="1" stop-color="#07111f"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4e9fe8" stop-opacity=".78"/><stop offset=".48" stop-color="#102c50" stop-opacity=".96"/><stop offset="1" stop-color="#08182b"/></linearGradient>
+ <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#50d7ff"/><stop offset="1" stop-color="#86aaff"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+ <filter id="shadow"><feGaussianBlur stdDeviation="8"/></filter>
+</defs>
+<rect width="1200" height="700" rx="34" fill="url(#sky)"/>
+<circle cx="880" cy="205" r="190" fill="#1d73b8" opacity=".13" filter="url(#blur)"/>
+<path d="M0 520 Q220 470 420 520 T820 510 T1200 500 V700 H0Z" fill="#071421"/>
+<path d="M0 600 Q260 550 500 600 T1000 580 T1200 590" fill="none" stroke="#1b5074" stroke-width="2" opacity=".65"/>
+<!-- skyline -->
+<g fill="#102c49" opacity=".9">
+ <path d="M35 410V290h74v120M120 410V230h92v180M225 410V320h68v90M965 410V260h72v150M1050 410V205h92v205M1150 410V300h40v110"/>
+</g>
+<g stroke="#3977a5" stroke-width="3" opacity=".4">
+ <path d="M50 315h42m-42 25h42m-42 25h42M140 260h52m-52 28h52m-52 28h52M1070 235h52m-52 28h52m-52 28h52"/>
+</g>
+<!-- main building -->
+<ellipse cx="640" cy="595" rx="420" ry="35" fill="#3aa7e8" opacity=".17" filter="url(#shadow)"/>
+<path d="M260 570V330l210-120 430 95v265Z" fill="url(#glass)" stroke="#7dc8ff" stroke-width="3"/>
+<path d="M260 330l210-120v360H260Z" fill="#0d2744" stroke="#5ca9df" stroke-width="2"/>
+<path d="M470 210l430 95v360H470Z" fill="url(#glass)" stroke="#8bcfff" stroke-width="3"/>
+<path d="M470 210v455M580 234v431M690 258v407M800 282v383" stroke="#6cb8eb" stroke-width="5" opacity=".72"/>
+<path d="M260 390h640M260 460h640M260 530h640" stroke="#6cb8eb" stroke-width="4" opacity=".72"/>
+<path d="M260 330l210-120 430 95" fill="none" stroke="#b8e6ff" stroke-width="5"/>
+<!-- warm office lights -->
+<g fill="#ffdc9a" opacity=".85">
+ <path d="M295 410h42v30h-42zm65 0h42v30h-42zm65 0h28v30h-28zM505 330h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48z"/>
+ <path d="M505 480h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48zm78 0h48v35h-48z"/>
+</g>
+<!-- trees -->
+<g stroke="#2e9b75" stroke-width="8" stroke-linecap="round" fill="none">
+ <path d="M165 585v-130m0 62l-44-48m44 22l40-55M1000 590V450m0 65l-42-48m42 25l42-57M1100 595V480m0 50l-35-42m35 20l37-48"/>
+</g>
+<g fill="#1d765b">
+ <circle cx="165" cy="425" r="58"/><circle cx="115" cy="455" r="40"/><circle cx="208" cy="465" r="42"/>
+ <circle cx="1000" cy="430" r="60"/><circle cx="955" cy="462" r="38"/><circle cx="1048" cy="462" r="42"/>
+ <circle cx="1100" cy="455" r="45"/><circle cx="1065" cy="478" r="31"/><circle cx="1140" cy="480" r="33"/>
+</g>
+<g fill="#49b88a" opacity=".55"><circle cx="150" cy="414" r="20"/><circle cx="985" cy="416" r="22"/><circle cx="1110" cy="440" r="18"/></g>
+<!-- network arc and nodes -->
+<path d="M175 170 Q590 -20 1025 165" fill="none" stroke="url(#glow)" stroke-width="3" stroke-dasharray="8 12" opacity=".8"/>
+<g fill="#0b1d35" stroke="#8bd8ff" stroke-width="3">
+ <circle cx="250" cy="125" r="48"/><circle cx="500" cy="75" r="48"/><circle cx="760" cy="83" r="48"/><circle cx="1000" cy="155" r="48"/>
+</g>
+<g fill="none" stroke="#a8e6ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+ <!-- leaf -->
+ <path d="M228 135q5-38 43-45q-2 38-43 45zm0 0l-12 16m12-16l18-19"/>
+ <!-- people -->
+ <circle cx="485" cy="62" r="9"/><circle cx="510" cy="62" r="9"/><path d="M469 91q2-19 16-19t16 19m-2 0q2-19 16-19t16 19"/>
+ <!-- building -->
+ <path d="M739 102V59h42v43m-32-32h7m10 0h7m-24 14h7m10 0h7m-24 14h7m10 0h7"/>
+ <!-- circular arrows -->
+ <path d="M982 145a23 23 0 0 1 39-15l7 7m0-17v17h-17m-8 42a23 23 0 0 1-39-15l-7-7m0 17v-17h17"/>
+</g>
+<g fill="#d9f2ff" opacity=".9"><circle cx="365" cy="165" r="3"/><circle cx="630" cy="135" r="3"/><circle cx="875" cy="125" r="3"/><circle cx="930" cy="300" r="2"/></g>
+<path d="M280 610h650" stroke="#4ecbff" stroke-width="3" opacity=".7"/>
+</svg>
