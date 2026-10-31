@@ -12,6 +12,18 @@
   <style>
     :root{color-scheme:dark;--impact-bg:#0b1120;--impact-panel:#111827;--impact-line:rgba(148,163,184,.18);--impact-muted:#a8b4c7;--impact-blue:#7db4ff;--impact-white:#f8fafc}
     *{box-sizing:border-box}
+    /* Let the shared animated particle layer show through the page canvas. */
+    html[data-appearance="dark"],html[data-appearance="dark"] body,
+    html[data-appearance="dark"] main,html[data-appearance="dark"] .impact-wrap,
+    html[data-appearance="dark"] section,html[data-appearance="dark"] .section,
+    html[data-appearance="dark"] .hero,html[data-appearance="dark"] .impact-nav,
+    html[data-appearance="dark"] footer{
+      background:transparent!important;
+      background-color:transparent!important;
+      background-image:none!important;
+    }
+    /* Preserve intentional content surfaces while removing the solid page canvas. */
+    html[data-appearance="dark"] .closing{background:#111c30!important}
     body{background:var(--impact-bg);color:var(--impact-white);font-family:"DM Sans","Segoe UI",Arial,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
     .impact-wrap{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:44px 0 90px}
     .impact-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px max(20px,calc((100vw - 1120px)/2));border-bottom:1px solid var(--impact-line)}
