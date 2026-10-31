@@ -20,7 +20,12 @@
     .impact-back{color:#dbeafe;text-decoration:none;border:1px solid rgba(125,180,255,.35);border-radius:999px;padding:10px 16px;font-size:.9rem}
     .impact-back:hover{background:rgba(125,180,255,.1)}
     .eyebrow{color:var(--impact-blue);font-size:.78rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase}
-    .hero{padding:58px 0 48px;max-width:900px}
+    .hero{padding:58px 0 48px;max-width:none;display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:38px;align-items:center}
+    .hero-copy{min-width:0}
+    .hero-visual{position:relative;min-width:0;border-radius:22px;overflow:hidden;border:1px solid rgba(125,180,255,.3);box-shadow:0 22px 70px rgba(0,0,0,.35),0 0 38px rgba(42,144,220,.12)}
+    .hero-visual img{display:block;width:100%;height:auto;aspect-ratio:12/7;object-fit:cover}
+    .hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,17,32,.12),transparent 55%),linear-gradient(0deg,rgba(7,17,31,.22),transparent 45%);pointer-events:none}
+    .hero-caption{position:absolute;z-index:1;left:18px;bottom:16px;padding:8px 12px;border-radius:999px;background:rgba(7,17,31,.78);border:1px solid rgba(191,219,254,.28);color:#dbeafe;font-size:.78rem;backdrop-filter:blur(8px)}
     h1{font-size:clamp(2.6rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.065em;margin:18px 0 24px}
     .hero p{font-size:clamp(1.05rem,2vw,1.28rem);line-height:1.75;color:#c4cfdf;max-width:790px;margin:0}
     .hero-note{margin-top:28px;padding:16px 19px;border-left:3px solid var(--impact-blue);background:rgba(17,24,39,.72);color:#cbd5e1;max-width:790px;line-height:1.65}
@@ -52,7 +57,7 @@
     .closing p{color:#c4cfdf;line-height:1.8;max-width:780px}
     .closing a{display:inline-block;margin-top:12px;padding:12px 18px;border-radius:999px;background:#dbeafe;color:#071d4a;text-decoration:none;font-weight:750}
     footer{border-top:1px solid var(--impact-line);padding:25px 20px;text-align:center;color:#8795aa;font-size:.85rem}
-    @media(max-width:760px){.impact-wrap{width:min(100% - 30px,1120px);padding-top:25px}.impact-nav{padding:17px 15px}.impact-stats,.impact-grid{grid-template-columns:1fr}.chain{grid-template-columns:repeat(2,1fr)}.stakeholders{grid-template-columns:1fr}.hero{padding:42px 0 35px}.closing{padding:26px}}
+    @media(max-width:760px){.impact-wrap{width:min(100% - 30px,1120px);padding-top:25px}.impact-nav{padding:17px 15px}.impact-stats,.impact-grid{grid-template-columns:1fr}.chain{grid-template-columns:repeat(2,1fr)}.stakeholders{grid-template-columns:1fr}.hero{padding:42px 0 35px;grid-template-columns:1fr;gap:24px}.hero-visual{max-width:100%}.closing{padding:26px}}
     @media(max-width:420px){.chain{grid-template-columns:1fr}.impact-back{font-size:.82rem;padding:9px 12px}}
   </style>
 </head>
@@ -64,10 +69,16 @@
 
   <main class="impact-wrap">
     <section class="hero">
-      <div class="eyebrow">The wider purpose of connected property markets</div>
-      <h1>Better connected work can create value beyond the deal.</h1>
-      <p>Hamlet is being built to help commercial property professionals work with better information, stronger connections and less fragmentation. The potential impact reaches beyond brokers: it touches businesses seeking premises, property owners, employees, local economies and the quality of the built environment.</p>
-      <div class="hero-note"><strong>Our impact ambition:</strong> make the commercial property ecosystem more accessible, productive, transparent and sustainability-aware — while giving professionals practical digital tools to do better work.</div>
+      <div class="hero-copy">
+        <div class="eyebrow">The wider purpose of connected property markets</div>
+        <h1>Better connected work can create value beyond the deal.</h1>
+        <p>Hamlet is being built to help commercial property professionals work with better information, stronger connections and less fragmentation. The potential impact reaches beyond brokers: it touches businesses seeking premises, property owners, employees, local economies and the quality of the built environment.</p>
+        <div class="hero-note"><strong>Our impact ambition:</strong> make the commercial property ecosystem more accessible, productive, transparent and sustainability-aware — while giving professionals practical digital tools to do better work.</div>
+      </div>
+      <figure class="hero-visual">
+        <img src="/assets/images/hamlet-social-impact.svg" alt="Illustration of a modern, energy-conscious commercial district connected by symbols representing people, buildings and the circular economy" fetchpriority="high" decoding="async">
+        <figcaption class="hero-caption">People · Property · Progress</figcaption>
+      </figure>
     </section>
 
     <section class="impact-stats" aria-label="Impact ambition">
