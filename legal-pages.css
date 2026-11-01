@@ -223,3 +223,72 @@ body.legal-page nav.workspace-nav{
     gap:12px!important;
   }
 }
+
+
+/* Final legal-header override: isolate from legacy 404-header mobile wrapping rules. */
+body.legal-page .legal-topbar .legal-topbar-inner{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  width:min(1120px,calc(100% - 3rem))!important;
+  min-height:68px!important;
+  margin-inline:auto!important;
+  padding:12px 0!important;
+  gap:16px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+body.legal-page .legal-topbar .legal-brand{
+  display:inline-flex!important;
+  flex:0 1 auto!important;
+  align-items:center!important;
+  justify-self:auto!important;
+  max-width:none!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+body.legal-page .legal-topbar .legal-actions{
+  display:inline-flex!important;
+  flex:0 0 auto!important;
+  width:auto!important;
+  max-width:max-content!important;
+  min-width:0!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  justify-self:auto!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.legal-page .legal-topbar .legal-signin{
+  display:inline-flex!important;
+  flex:0 0 auto!important;
+  min-width:88px!important;
+  min-height:40px!important;
+  padding:0 16px!important;
+  border-radius:999px!important;
+  background:#075bea!important;
+  color:#fff!important;
+  white-space:nowrap!important;
+}
+@media(max-width:760px){
+  body.legal-page .legal-topbar .legal-topbar-inner{
+    width:calc(100% - 2rem)!important;
+    flex-wrap:nowrap!important;
+    gap:12px!important;
+    padding:12px 0!important;
+  }
+  body.legal-page .legal-topbar .legal-actions{
+    flex:0 0 auto!important;
+    width:auto!important;
+    max-width:max-content!important;
+    margin:0!important;
+  }
+}
