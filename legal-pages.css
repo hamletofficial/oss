@@ -183,3 +183,43 @@ body.legal-page .hamlet-search-dialog {
   position: relative;
   z-index: 2147483001 !important;
 }
+
+
+/* Legal-page header: one balanced desktop row, with no secondary search strip. */
+body.legal-page .legal-topbar{
+  width:100%!important;
+  min-height:68px!important;
+  background:#071d4a!important;
+}
+body.legal-page .legal-topbar .legal-topbar-inner{
+  width:min(1120px,calc(100% - 3rem))!important;
+  min-height:68px!important;
+  margin-inline:auto!important;
+  padding:12px 0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  justify-content:normal!important;
+  gap:24px!important;
+}
+body.legal-page .legal-topbar .legal-brand{
+  justify-self:start!important;
+  margin:0!important;
+}
+body.legal-page .legal-topbar .legal-actions{
+  justify-self:end!important;
+  margin:0!important;
+}
+/* The global search is useful on product pages, but disrupts the compact legal header. */
+body.legal-page .hamlet-global-search-row,
+body.legal-page .hamlet-global-search,
+body.legal-page > .hamlet-primary-nav,
+body.legal-page nav.workspace-nav{
+  display:none!important;
+}
+@media(max-width:600px){
+  body.legal-page .legal-topbar .legal-topbar-inner{
+    width:calc(100% - 2rem)!important;
+    gap:12px!important;
+  }
+}
