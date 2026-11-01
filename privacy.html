@@ -11,7 +11,40 @@
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-2">
-  </head>
+    <style id="legal-header-horizontal">
+    /* Keep the Hamlet wordmark and Sign in control on one horizontal row. */
+    body.legal-page .legal-topbar .legal-topbar-inner{
+      display:flex!important;
+      flex-direction:row!important;
+      flex-wrap:nowrap!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+      gap:12px!important;
+    }
+    body.legal-page .legal-topbar .legal-brand{
+      display:inline-flex!important;
+      align-items:center!important;
+      flex:0 1 auto!important;
+      min-width:0!important;
+      max-width:none!important;
+      white-space:nowrap!important;
+    }
+    body.legal-page .legal-topbar .legal-actions{
+      display:inline-flex!important;
+      flex:0 0 auto!important;
+      align-items:center!important;
+      justify-content:center!important;
+      margin-left:auto!important;
+    }
+    body.legal-page .legal-topbar .legal-signin{
+      display:inline-flex!important;
+      flex:0 0 auto!important;
+      align-items:center!important;
+      justify-content:center!important;
+      white-space:nowrap!important;
+    }
+  </style>
+</head>
 <body class="legal-page">
   <header class="legal-topbar hamlet-404-header" role="banner">
     <div class="legal-topbar-inner">
