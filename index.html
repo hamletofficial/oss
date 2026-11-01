@@ -308,6 +308,17 @@
     .top-links .signin{padding:10px 18px;border-radius:999px;background:#075bea;color:#fff!important;font-weight:750}
     @media(max-width:900px){.top-links a:not(.signin){display:none}}
     @media(max-width:540px){.topbar-inner{padding:13px 18px}}
+    /* Keep the homepage wordmark and sign-in control on one horizontal header row, including mobile. */
+    .hamlet-404-header .topbar-inner{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+    .hamlet-404-header .brand{display:inline-flex;align-items:center;flex:0 0 auto;white-space:nowrap}
+    .hamlet-404-header .top-links{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;flex:0 0 auto;margin-left:auto}
+    .hamlet-404-header .top-links .signin{display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap}
+    @media(max-width:540px){
+      .hamlet-404-header .topbar-inner{padding:12px 16px!important;gap:10px!important}
+      .hamlet-404-header .brand{font-size:1.45rem!important}
+      .hamlet-404-header .top-links{gap:0!important;font-size:.82rem}
+      .hamlet-404-header .top-links .signin{padding:8px 13px!important}
+    }
 </style>
   </head>
 <body>
