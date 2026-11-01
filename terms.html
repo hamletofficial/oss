@@ -12,37 +12,100 @@
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-2">
   <style id="root-brand-background">body{background:#111827!important}</style>
-  <style id="legal-header-horizontal">
-    /* Keep the Hamlet wordmark and Sign in control on one horizontal row. */
+    <style id="legal-header-horizontal">
+    /* Keep the wordmark and sign-in control visible on one clean row. */
+    body.legal-page .legal-topbar{
+      display:block!important;
+      min-height:68px!important;
+      height:auto!important;
+      padding:0!important;
+      background:#071d4a!important;
+      border:0!important;
+      box-shadow:none!important;
+    }
     body.legal-page .legal-topbar .legal-topbar-inner{
-      display:flex!important;
-      flex-direction:row!important;
-      flex-wrap:nowrap!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
       align-items:center!important;
-      justify-content:space-between!important;
+      justify-content:normal!important;
       gap:12px!important;
+      width:100%!important;
+      min-height:68px!important;
+      margin:0 auto!important;
+      padding:12px 22px!important;
+      background:transparent!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
     }
     body.legal-page .legal-topbar .legal-brand{
       display:inline-flex!important;
       align-items:center!important;
-      flex:0 1 auto!important;
-      min-width:0!important;
-      max-width:none!important;
+      justify-self:start!important;
+      visibility:visible!important;
+      opacity:1!important;
+      position:relative!important;
+      z-index:2!important;
+      flex:none!important;
+      width:auto!important;
+      max-width:100%!important;
+      margin:0!important;
+      color:#f8fafc!important;
+      font-size:1.45rem!important;
+      font-weight:850!important;
+      line-height:1!important;
       white-space:nowrap!important;
+      overflow:visible!important;
+      text-overflow:clip!important;
+    }
+    body.legal-page .legal-topbar .legal-brand .brand-dot{
+      color:#bfdbfe!important;
     }
     body.legal-page .legal-topbar .legal-actions{
       display:inline-flex!important;
-      flex:0 0 auto!important;
       align-items:center!important;
-      justify-content:center!important;
-      margin-left:auto!important;
+      justify-content:flex-end!important;
+      justify-self:end!important;
+      position:relative!important;
+      z-index:2!important;
+      flex:none!important;
+      width:auto!important;
+      min-width:0!important;
+      max-width:max-content!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
     }
     body.legal-page .legal-topbar .legal-signin{
       display:inline-flex!important;
-      flex:0 0 auto!important;
       align-items:center!important;
       justify-content:center!important;
+      min-height:40px!important;
+      min-width:88px!important;
+      margin:0!important;
+      padding:0 16px!important;
+      border:1px solid rgba(96,165,250,.45)!important;
+      border-radius:999px!important;
+      background:#075bea!important;
+      color:#fff!important;
+      font-size:.86rem!important;
+      font-weight:750!important;
+      line-height:1.2!important;
+      text-decoration:none!important;
       white-space:nowrap!important;
+      box-shadow:none!important;
+    }
+    @media(max-width:600px){
+      body.legal-page .legal-topbar .legal-topbar-inner{
+        grid-template-columns:minmax(0,1fr) auto!important;
+        padding:12px 22px!important;
+        gap:10px!important;
+      }
+      body.legal-page .legal-topbar .legal-brand{font-size:1.4rem!important}
+      body.legal-page .legal-topbar .legal-signin{min-height:38px!important;padding:0 14px!important}
     }
   </style>
 </head>
