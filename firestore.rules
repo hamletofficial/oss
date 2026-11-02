@@ -5,6 +5,7 @@ service cloud.firestore {
     // Server-issued, device-scoped session claim backed by an active registry row.
     function hasActiveSession() {
       return request.auth != null
+        && request.auth.token.keys().hasAny(['hamletSessionId'])
         && request.auth.token.hamletSessionId is string
         && exists(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId))
         && get(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.active == true
