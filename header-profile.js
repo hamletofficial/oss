@@ -151,7 +151,7 @@
   var INACTIVITY_LIMIT_MS = 17 * 60 * 1000;
   var INACTIVITY_WARNING_MS = 16 * 60 * 1000;
   var INACTIVITY_STORAGE_KEY = 'hamlet:lastActivityAt';
-  var INACTIVITY_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll', 'click'];
+  var INACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'mousemove', 'keydown', 'touchstart', 'wheel', 'scroll', 'click'];
 
   function readLastActivity() {
     try { var value = Number(localStorage.getItem(INACTIVITY_STORAGE_KEY)); return Number.isFinite(value) && value > 0 ? value : 0; }
