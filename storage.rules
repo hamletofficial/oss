@@ -2,11 +2,18 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    // Validate the Firebase token's per-device session against the Firestore registry.
+    function hasActiveSession() {
+      return request.auth != null
+        && request.auth.token.hamletSessionId is string
+        && firestore.get(/databases/(default)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.active == true
+        && firestore.get(/databases/(default)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.expiresAt > request.time;
+    }
     // Commercial property photographs are publicly readable because the
     // matching listings are public on /portfolio.html. Uploads remain owner-scoped.
     match /commercialPropertyImages/{userId}/{propertyId}/{fileName} {
       allow read: if true;
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.size > 0
         && request.resource.size <= 8 * 1024 * 1024
@@ -15,7 +22,7 @@ service firebase.storage {
         && request.resource.metadata.ownerUid == request.auth.uid
         && request.resource.metadata.propertyId == propertyId;
       allow update: if false;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow delete: if hasActiveSession() && request.auth.uid == userId;
     }
 
     // Residential listing photos: owners upload into their own property folder; published portfolio photos are publicly readable.
@@ -23,7 +30,7 @@ service firebase.storage {
     // Residential listing photos: owners upload into their own property folder; published portfolio photos are publicly readable.
     match /residentialPropertyImages/{userId}/{propertyId}/{fileName} {
       allow read: if true;
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.size > 0
         && request.resource.size <= 8 * 1024 * 1024
@@ -32,7 +39,7 @@ service firebase.storage {
         && request.resource.metadata.ownerUid == request.auth.uid
         && request.resource.metadata.propertyId == propertyId;
       allow update: if false;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow delete: if hasActiveSession() && request.auth.uid == userId;
     }
 
     // Message files are accessible only to authenticated participants in the corresponding Firestore directMessages record.
@@ -41,12 +48,12 @@ service firebase.storage {
         return firestore.get(/databases/(default)/documents/directMessages/$(messageId));
       }
       function isParticipant() {
-        return request.auth != null
+        return hasActiveSession()
           && messageDoc().data.participants is list
           && request.auth.uid in messageDoc().data.participants;
       }
       allow read: if isParticipant();
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && messageDoc().data.senderUid == request.auth.uid
         && request.resource.size <= 2 * 1024 * 1024
         && request.resource.contentType in [
@@ -68,15 +75,15 @@ service firebase.storage {
         ]
         && request.resource.name.matches('.*\\.(pdf|doc|docx|docm|dot|dotx|dotm|xls|xlsx|xlsm|xlsb|xlt|xltx|xltm|csv|rtf)$');
       allow update: if false;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && messageDoc().data.senderUid == request.auth.uid;
     }
 
     // Broker social feed attachments: image files and PDFs only, uploaded by the
     // owner of the post. Files are readable only by authenticated community members.
     match /brokerPostAttachments/{userId}/{postId}/{fileName} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
+      allow read: if hasActiveSession();
+      allow create: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.size <= 10 * 1024 * 1024
         && !request.resource.name.matches('.*\\.(doc|docx|docm|dot|dotx|dotm|xls|xlsx|xlsm|xlsb|xlt|xltx|xltm|csv|rtf)$')
@@ -92,7 +99,7 @@ service firebase.storage {
           )
         );
       allow update: if false;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && request.auth.uid == userId;
     }
 
@@ -103,10 +110,10 @@ service firebase.storage {
       function ownedDeal() {
         return firestore.get(/databases/(default)/documents/hamletDeals/$(dealId)).data.uid == userId;
       }
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && request.auth.uid == userId
         && ownedDeal();
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.auth.uid == userId
         && ownedDeal()
         && request.resource.size > 0
@@ -125,7 +132,7 @@ service firebase.storage {
         ]
         && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)$');
       allow update: if false;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && request.auth.uid == userId
         && ownedDeal();
     }
