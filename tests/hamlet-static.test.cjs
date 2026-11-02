@@ -38,7 +38,7 @@ test('mailbox bulk-delete action only removes messages sent by the signed-in mem
   assert.match(deleteConversation[1], /m\.senderUid===me\.uid&&m\.recipientUid===otherUid/);
   assert.match(deleteConversation[1], /Messages sent by the other member will remain/);
   assert.match(messagesHtml, /Delete My Messages/);
-  assert.match(firestore, /allow delete: if hasActiveSession()\s*&& request\.auth\.uid == resource\.data\.senderUid\s*&& request\.auth\.uid in resource\.data\.participants;/);
+  assert.match(firestore, /allow delete: if hasActiveSession\(\)\s*&& request\.auth\.uid == resource\.data\.senderUid\s*&& request\.auth\.uid in resource\.data\.participants;/);
 });
 
 test('workspace search includes authenticated messages alongside deals, properties and public profiles', () => {
