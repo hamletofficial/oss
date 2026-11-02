@@ -57,7 +57,7 @@
     'archive.html', 'dashboard.html', 'live.html', 'portfolio.html',
     'residential.html', 'resi-resources.html', 'resources.html', 'members.html',
     'directory.html', 'profile.html', 'editprofile.html', 'posts.html',
-    'rankings.html', 'messages.html', 'requests.html', 'settings.html',
+    'rankings.html', 'messages.html', 'requests.html', 'settings.html', 'insights.html',
     'admin.html', 'login.html', 'invoice.html', 'loggedout.html',
     'callback.html', 'success.html', 'insights.html', 'search.html'
   ]);
