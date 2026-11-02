@@ -118,6 +118,7 @@
   function loadIndex() {
     if (!indexPromise) {
       const privateFiles = new Set([
+        'insights.html',
         'archive.html', 'dashboard.html', 'live.html', 'portfolio.html',
         'residential.html', 'resi-resources.html', 'resources.html', 'members.html',
         'directory.html', 'profile.html', 'editprofile.html', 'posts.html',
