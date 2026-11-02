@@ -1000,3 +1000,123 @@ exports.getSuperAdminAccountMetrics = onCall({
 
 // Register the broker rankings Firestore trigger.
 Object.assign(exports, require("./hamlet-rankings"));
+
+
+// Hamlet device-scoped session management. OAuth/MFA sign-in is completed by
+// Firebase Auth before the browser exchanges its identity for this session claim.
+function getHamletSessionStore() {
+  try { admin.app(); } catch (error) { admin.initializeApp(); }
+  return admin.firestore();
+}
+function getHamletDeviceSessionRef(uid, sessionId) {
+  return getHamletSessionStore().collection("userSessions").doc(uid)
+    .collection("sessions").doc(sessionId);
+}
+async function requireHamletDeviceSession(request) {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Sign in to continue.");
+  const sessionId = request.auth.token && request.auth.token.hamletSessionId;
+  if (typeof sessionId !== "string" || !/^[A-Za-z0-9_-]{20,80}$/.test(sessionId)) {
+    throw new HttpsError("unauthenticated", "This device session is not registered. Sign in again.");
+  }
+  const ref = getHamletDeviceSessionRef(request.auth.uid, sessionId);
+  const snap = await ref.get();
+  const data = snap.exists ? snap.data() : null;
+  const expiry = data && data.expiresAt && data.expiresAt.toMillis ? data.expiresAt.toMillis() : 0;
+  if (!data || data.active !== true || expiry <= Date.now()) {
+    throw new HttpsError("unauthenticated", "This device session has expired or been revoked. Sign in again.");
+  }
+  return {uid: request.auth.uid, sessionId: sessionId, ref: ref};
+}
+function hamletDeviceExpiry() {
+  return admin.firestore.Timestamp.fromMillis(Date.now() + 17 * 60 * 1000);
+}
+
+exports.createHamletDeviceSession = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Complete sign-in before creating a device session.");
+  const uid = request.auth.uid;
+  const claim = request.auth.token && request.auth.token.hamletSessionId;
+  if (claim) {
+    const active = await requireHamletDeviceSession(request);
+    return {ok:true,alreadyActive:true,sessionId:active.sessionId};
+  }
+  const sessionId = request.data && request.data.sessionId;
+  if (typeof sessionId !== "string" || !/^[A-Za-z0-9_-]{20,80}$/.test(sessionId)) {
+    throw new HttpsError("invalid-argument", "A valid device session identifier is required.");
+  }
+  const deviceName = typeof request.data.deviceName === "string"
+    ? request.data.deviceName.replace(/[<>\r\n]/g,"").trim().slice(0,100) : "Unknown device";
+  const userAgent = typeof request.data.userAgent === "string"
+    ? request.data.userAgent.replace(/[\r\n]/g," ").slice(0,300) : "";
+  const ref = getHamletDeviceSessionRef(uid,sessionId);
+  const old = await ref.get();
+  const oldData = old.exists ? old.data() : {};
+  const oldExpiry = oldData.expiresAt && oldData.expiresAt.toMillis ? oldData.expiresAt.toMillis() : 0;
+  if (oldData.active !== true || oldExpiry <= Date.now()) {
+    await ref.set({
+      uid:uid,sessionId:sessionId,active:true,deviceName:deviceName,userAgent:userAgent,
+      createdAt:admin.firestore.FieldValue.serverTimestamp(),
+      lastActivityAt:admin.firestore.FieldValue.serverTimestamp(),
+      expiresAt:hamletDeviceExpiry(),
+      revokedAt:admin.firestore.FieldValue.delete()
+    },{merge:true});
+  }
+  const customToken = await admin.auth().createCustomToken(uid,{hamletSessionId:sessionId});
+  return {ok:true,customToken:customToken,sessionId:sessionId};
+});
+
+exports.recordHamletDeviceActivity = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
+  const session = await requireHamletDeviceSession(request);
+  const expiry = hamletDeviceExpiry();
+  await session.ref.update({
+    lastActivityAt:admin.firestore.FieldValue.serverTimestamp(),
+    expiresAt:expiry,
+    updatedAt:admin.firestore.FieldValue.serverTimestamp()
+  });
+  return {ok:true,expiresAt:expiry.toMillis()};
+});
+
+exports.listHamletDeviceSessions = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
+  const current = await requireHamletDeviceSession(request);
+  const snapshot = await getHamletSessionStore().collection("userSessions").doc(current.uid)
+    .collection("sessions").orderBy("createdAt","desc").limit(50).get();
+  return {
+    ok:true,currentSessionId:current.sessionId,
+    sessions:snapshot.docs.map(function(doc) {
+      const d=doc.data()||{};
+      return {
+        sessionId:doc.id,deviceName:d.deviceName||"Unknown device",userAgent:d.userAgent||"",
+        active:d.active===true,current:doc.id===current.sessionId,
+        createdAt:d.createdAt&&d.createdAt.toMillis?d.createdAt.toMillis():null,
+        lastActivityAt:d.lastActivityAt&&d.lastActivityAt.toMillis?d.lastActivityAt.toMillis():null,
+        expiresAt:d.expiresAt&&d.expiresAt.toMillis?d.expiresAt.toMillis():null
+      };
+    })
+  };
+});
+
+exports.revokeHamletDeviceSession = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
+  const current = await requireHamletDeviceSession(request);
+  const targetId=request.data&&request.data.sessionId;
+  if(typeof targetId!=="string"||!/^[A-Za-z0-9_-]{20,80}$/.test(targetId))
+    throw new HttpsError("invalid-argument","A valid session identifier is required.");
+  const ref=getHamletDeviceSessionRef(current.uid,targetId);
+  const snap=await ref.get();
+  if(!snap.exists) throw new HttpsError("not-found","That device session could not be found.");
+  await ref.set({active:false,revokedAt:admin.firestore.FieldValue.serverTimestamp(),revokedBySessionId:current.sessionId},{merge:true});
+  return {ok:true,revokedCurrent:targetId===current.sessionId};
+});
+
+exports.revokeOtherHamletDeviceSessions = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
+  const current=await requireHamletDeviceSession(request);
+  const snapshot=await getHamletSessionStore().collection("userSessions").doc(current.uid)
+    .collection("sessions").where("active","==",true).get();
+  const batch=getHamletSessionStore().batch();
+  let revoked=0;
+  snapshot.docs.forEach(function(doc) {
+    if(doc.id===current.sessionId)return;
+    batch.set(doc.ref,{active:false,revokedAt:admin.firestore.FieldValue.serverTimestamp(),revokedBySessionId:current.sessionId},{merge:true});
+    revoked++;
+  });
+  if(revoked)await batch.commit();
+  return {ok:true,revoked:revoked,currentSessionId:current.sessionId};
+});
