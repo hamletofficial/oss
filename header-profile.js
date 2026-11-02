@@ -150,7 +150,7 @@
   var inactivityState = { uid: null, timer: null, warning: null, lastWrite: 0 };
   var INACTIVITY_LIMIT_MS = 17 * 60 * 1000;
   var INACTIVITY_WARNING_MS = 16 * 60 * 1000;
-  var INACTIVITY_STORAGE_KEY = 'hamlet:lastActivityAt';
+  var INACTIVITY_STORAGE_KEY = null;
   var INACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'mousemove', 'keydown', 'touchstart', 'wheel', 'scroll', 'click'];
 
   // Device-scoped session bootstrap. The server issues a custom Firebase token
@@ -168,6 +168,7 @@
         id = Array.from(bytes).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
         localStorage.setItem(DEVICE_SESSION_ID_KEY, id);
       }
+      INACTIVITY_STORAGE_KEY = 'hamlet:lastActivityAt:' + id;
       return id;
     } catch (error) {
       console.error('Hamlet could not initialise a secure device session identifier:', error);
@@ -198,6 +199,7 @@
       if (tokenResult.claims && tokenResult.claims.hamletSessionId) {
         return callSessionFunction('recordHamletDeviceActivity', {}, user).then(function () {
           deviceActivityLastSent = Date.now();
+          window.dispatchEvent(new CustomEvent('hamlet:session-ready'));
           return null;
         });
       }
@@ -212,6 +214,7 @@
         return firebase.auth().signInWithCustomToken(result.customToken);
       }).then(function () {
         deviceActivityLastSent = Date.now();
+        window.dispatchEvent(new CustomEvent('hamlet:session-ready'));
         return null;
       });
     }).catch(function (error) {
@@ -242,7 +245,7 @@
   }
 
   function readLastActivity() {
-    try { var value = Number(localStorage.getItem(INACTIVITY_STORAGE_KEY)); return Number.isFinite(value) && value > 0 ? value : 0; }
+    try { if (!INACTIVITY_STORAGE_KEY) return 0; var value = Number(localStorage.getItem(INACTIVITY_STORAGE_KEY)); return Number.isFinite(value) && value > 0 ? value : 0; }
     catch (error) { return 0; }
   }
   function closeInactivityWarning() {
@@ -272,7 +275,8 @@
     var now = Date.now();
     if (!force && now - inactivityState.lastWrite < 1000) return;
     inactivityState.lastWrite = now;
-    try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(now)); } catch (error) {}
+    try { if (INACTIVITY_STORAGE_KEY) localStorage.setItem(INACTIVITY_STORAGE_KEY, String(now)); } catch (error) {}
+    heartbeatHamletDeviceSession(false);
     closeInactivityWarning(); scheduleInactivityCheck();
   }
   function inactivityActivityHandler() { recordInactivityActivity(false); }
@@ -290,7 +294,7 @@
     if (!inactivityState.uid) return;
     if (inactivityState.timer) window.clearTimeout(inactivityState.timer);
     var last = readLastActivity();
-    if (!last) { last = Date.now(); try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(last)); } catch (error) {} }
+    if (!last) { last = Date.now(); try { if (INACTIVITY_STORAGE_KEY) localStorage.setItem(INACTIVITY_STORAGE_KEY, String(last)); } catch (error) {} }
     var elapsed = Date.now() - last;
     if (elapsed >= INACTIVITY_LIMIT_MS) { expireInactiveSession(); return; }
     if (elapsed >= INACTIVITY_WARNING_MS) showInactivityWarning();
@@ -301,7 +305,7 @@
     if (!inactivityState.uid) return;
     var auth = window.firebase && firebase.auth ? firebase.auth() : null;
     stopInactivityMonitor();
-    try { localStorage.removeItem(INACTIVITY_STORAGE_KEY); } catch (error) {}
+    try { if (INACTIVITY_STORAGE_KEY) localStorage.removeItem(INACTIVITY_STORAGE_KEY); } catch (error) {}
     var destination = '/login.html?reason=session-timeout';
     if (auth) auth.signOut().catch(function (error) {
       console.warn('Hamlet inactivity sign-out encountered an error:', error);
@@ -312,7 +316,7 @@
     stopInactivityMonitor();
     if (!user || window.location.pathname.split('/').pop() === 'login.html') return;
     inactivityState.uid = user.uid;
-    if (!readLastActivity()) { try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(Date.now())); } catch (error) {} }
+    if (!readLastActivity() && INACTIVITY_STORAGE_KEY) { try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(Date.now())); } catch (error) {} }
     INACTIVITY_EVENTS.forEach(function (name) { document.addEventListener(name, inactivityActivityHandler, true); });
     window.addEventListener('storage', inactivityStorageHandler);
     scheduleInactivityCheck();
@@ -409,6 +413,8 @@
 
     try {
       firebase.auth().onAuthStateChanged(function (user) {
+        if (user) bootstrapHamletDeviceSession(user);
+        else window.dispatchEvent(new CustomEvent('hamlet:session-signed-out'));
         startInactivityMonitor(user || null);
         updateProfile(user || null);
       });
