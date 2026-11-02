@@ -153,6 +153,94 @@
   var INACTIVITY_STORAGE_KEY = 'hamlet:lastActivityAt';
   var INACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'mousemove', 'keydown', 'touchstart', 'wheel', 'scroll', 'click'];
 
+  // Device-scoped session bootstrap. The server issues a custom Firebase token
+  // containing a signed session ID; each browser profile has its own session.
+  var deviceSessionBootstrap = false;
+  var deviceActivityLastSent = 0;
+  var DEVICE_SESSION_ID_KEY = 'hamlet:deviceSessionId';
+  function getDeviceSessionId() {
+    try {
+      var id = localStorage.getItem(DEVICE_SESSION_ID_KEY);
+      if (!id || !/^[A-Za-z0-9_-]{20,80}$/.test(id)) {
+        var bytes = new Uint8Array(24);
+        if (!window.crypto || !window.crypto.getRandomValues) throw new Error('Secure random generator unavailable.');
+        window.crypto.getRandomValues(bytes);
+        id = Array.from(bytes).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        localStorage.setItem(DEVICE_SESSION_ID_KEY, id);
+      }
+      return id;
+    } catch (error) {
+      console.error('Hamlet could not initialise a secure device session identifier:', error);
+      return null;
+    }
+  }
+  function callSessionFunction(name, data, user) {
+    return user.getIdToken().then(function (token) {
+      return fetch('https://us-central1-wale-491805.cloudfunctions.net/' + name, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'Authorization':'Bearer ' + token},
+        body: JSON.stringify({data:data || {}})
+      });
+    }).then(function (response) {
+      return response.json().then(function (payload) {
+        if (!response.ok || payload.error) {
+          var message = payload.error && payload.error.message ? payload.error.message : 'Session service request failed.';
+          throw new Error(message);
+        }
+        return payload.result;
+      });
+    });
+  }
+  function bootstrapHamletDeviceSession(user) {
+    if (!user || deviceSessionBootstrap || window.location.pathname.split('/').pop() === 'login.html') return;
+    deviceSessionBootstrap = true;
+    user.getIdTokenResult().then(function (tokenResult) {
+      if (tokenResult.claims && tokenResult.claims.hamletSessionId) {
+        return callSessionFunction('recordHamletDeviceActivity', {}, user).then(function () {
+          deviceActivityLastSent = Date.now();
+          return null;
+        });
+      }
+      var sessionId = getDeviceSessionId();
+      if (!sessionId) throw new Error('A secure device session could not be created on this browser.');
+      return callSessionFunction('createHamletDeviceSession', {
+        sessionId: sessionId,
+        deviceName: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Web browser',
+        userAgent: navigator.userAgent || ''
+      }, user).then(function (result) {
+        if (!result || !result.customToken) throw new Error('The session service did not return a secure session token.');
+        return firebase.auth().signInWithCustomToken(result.customToken);
+      }).then(function () {
+        deviceActivityLastSent = Date.now();
+        return null;
+      });
+    }).catch(function (error) {
+      console.error('Hamlet device session could not be established:', error);
+      if (user && firebase.auth().currentUser && firebase.auth().currentUser.uid === user.uid) {
+        firebase.auth().signOut().finally(function () {
+          window.location.replace('/login.html?reason=session-security');
+        });
+      }
+    }).finally(function () {
+      deviceSessionBootstrap = false;
+    });
+  }
+  function heartbeatHamletDeviceSession(force) {
+    var user = firebase.auth && firebase.auth().currentUser;
+    if (!user) return;
+    var now = Date.now();
+    if (!force && now - deviceActivityLastSent < 60000) return;
+    deviceActivityLastSent = now;
+    callSessionFunction('recordHamletDeviceActivity', {}, user).catch(function (error) {
+      console.warn('Hamlet could not renew this device session:', error);
+      if (/expired|revoked|not registered/i.test(error.message || '')) {
+        firebase.auth().signOut().finally(function () {
+          window.location.replace('/login.html?reason=session-timeout');
+        });
+      }
+    });
+  }
+
   function readLastActivity() {
     try { var value = Number(localStorage.getItem(INACTIVITY_STORAGE_KEY)); return Number.isFinite(value) && value > 0 ? value : 0; }
     catch (error) { return 0; }
