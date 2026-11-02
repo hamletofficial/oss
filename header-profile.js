@@ -231,7 +231,7 @@
     var user = firebase.auth && firebase.auth().currentUser;
     if (!user) return;
     var now = Date.now();
-    if (!force && now - deviceActivityLastSent < 60000) return;
+    if (!force && now - deviceActivityLastSent < 10000) return;
     deviceActivityLastSent = now;
     callSessionFunction('recordHamletDeviceActivity', {}, user).catch(function (error) {
       console.warn('Hamlet could not renew this device session:', error);
