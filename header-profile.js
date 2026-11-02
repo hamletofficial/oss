@@ -206,7 +206,6 @@
       var sessionId = getDeviceSessionId();
       if (!sessionId) throw new Error('A secure device session could not be created on this browser.');
       return callSessionFunction('createHamletDeviceSession', {
-        sessionId: sessionId,
         deviceName: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Web browser',
         userAgent: navigator.userAgent || ''
       }, user).then(function (result) {
