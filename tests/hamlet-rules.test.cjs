@@ -2,11 +2,17 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {initializeTestEnvironment, assertSucceeds, assertFails} = require('@firebase/rules-unit-testing');
-const {doc, getDoc, setDoc, deleteDoc, serverTimestamp} = require('firebase/firestore');
+const {doc, getDoc, setDoc, deleteDoc, serverTimestamp, Timestamp} = require('firebase/firestore');
 const {ref, uploadBytes, getBytes} = require('firebase/storage');
 
 let env;
 const projectId = 'demo-hamlet-rules';
+
+function sessionContext(uid) {
+  const sessionId = 'session_' + uid + '_0123456789abcdef';
+  return env.authenticatedContext(uid, {hamletSessionId: sessionId});
+}
+
 
 test.before(async () => {
   env = await initializeTestEnvironment({
@@ -30,6 +36,12 @@ test.beforeEach(async () => {
       owner: '', client: '', notes: '', createdAt: '2026-10-13T00:00:00.000Z',
       updatedAt: new Date(),
     });
+    for (const uid of ['owner', 'other']) {
+      const sessionId = 'session_' + uid + '_0123456789abcdef';
+      await setDoc(doc(context.firestore(), 'userSessions', uid, 'sessions', sessionId), {
+        uid, sessionId, active: true, expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000)
+      });
+    }
   });
 });
 
@@ -46,8 +58,8 @@ test('only a message sender can permanently delete their own message', async () 
     });
   });
 
-  const owner = env.authenticatedContext('owner').firestore();
-  const other = env.authenticatedContext('other').firestore();
+  const owner = sessionContext('owner').firestore();
+  const other = sessionContext('other').firestore();
 
   await assertFails(deleteDoc(doc(other, 'directMessages/message-from-owner')));
   await assertFails(deleteDoc(doc(owner, 'directMessages/message-from-other')));
@@ -56,8 +68,8 @@ test('only a message sender can permanently delete their own message', async () 
 });
 
 test('deal records are private to the broker UID', async () => {
-  const owner = env.authenticatedContext('owner').firestore();
-  const other = env.authenticatedContext('other').firestore();
+  const owner = sessionContext('owner').firestore();
+  const other = sessionContext('other').firestore();
   await assertSucceeds(getDoc(doc(owner, 'hamletDeals/deal-owner')));
   await assertFails(getDoc(doc(other, 'hamletDeals/deal-owner')));
 });
@@ -71,8 +83,8 @@ test('history entries are readable by their owner but never client-writable', as
       createdAt: new Date(),
     });
   });
-  const owner = env.authenticatedContext('owner').firestore();
-  const other = env.authenticatedContext('other').firestore();
+  const owner = sessionContext('owner').firestore();
+  const other = sessionContext('other').firestore();
   await assertSucceeds(getDoc(doc(owner, 'hamletDealEvents/event-1')));
   await assertFails(getDoc(doc(other, 'hamletDealEvents/event-1')));
   await assertFails(setDoc(doc(owner, 'hamletDealEvents/fake'), {
@@ -83,8 +95,8 @@ test('history entries are readable by their owner but never client-writable', as
 });
 
 test('transaction document metadata is private and tied to an owned deal', async () => {
-  const owner = env.authenticatedContext('owner').firestore();
-  const other = env.authenticatedContext('other').firestore();
+  const owner = sessionContext('owner').firestore();
+  const other = sessionContext('other').firestore();
   const metadata = {
     id: 'doc-1', uid: 'owner', dealId: 'deal-owner', title: 'Heads of terms',
     category: 'Legal', fileName: 'heads.pdf',
@@ -101,8 +113,8 @@ test('transaction document metadata is private and tied to an owned deal', async
 });
 
 test('saved searches can be maintained by their owner only', async () => {
-  const owner = env.authenticatedContext('owner').firestore();
-  const other = env.authenticatedContext('other').firestore();
+  const owner = sessionContext('owner').firestore();
+  const other = sessionContext('other').firestore();
   const search = {
     id: 'search-1', uid: 'owner', name: 'Acquisitions', query: 'London',
     stage: '', type: 'Acquisition', alertsEnabled: true, lastMatchedIds: [],
@@ -117,8 +129,8 @@ test('saved searches can be maintained by their owner only', async () => {
 });
 
 test('transaction files are owner-restricted in Firebase Storage', async () => {
-  const ownerStorage = env.authenticatedContext('owner').storage();
-  const otherStorage = env.authenticatedContext('other').storage();
+  const ownerStorage = sessionContext('owner').storage();
+  const otherStorage = sessionContext('other').storage();
   const filePath = 'hamletDocuments/owner/deal-owner/doc-1/heads.pdf';
   await assertSucceeds(uploadBytes(ref(ownerStorage, filePath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertSucceeds(getBytes(ref(ownerStorage, filePath)));
