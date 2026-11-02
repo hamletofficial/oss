@@ -66,7 +66,7 @@ test('commercial deal calculator computes rental yields, unit pricing and option
 
 test('transaction history is append-only and owner-scoped', () => {
   assert.match(firestore, /match \/hamletDealEvents\/{eventId}/);
-  assert.match(firestore, /allow read: if hasActiveSession\(\) && resource\.data\.uid == request\.auth\.uid/);
+  assert.ok(firestore.includes('allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;'));
   assert.match(firestore, /allow create, update, delete: if false;/);
   assert.match(functions, /exports\.recordHamletDealHistory = onDocumentWritten/);
   assert.match(firestore, /request\.resource\.data\.createdAt == request\.time/);
