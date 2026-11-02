@@ -145,6 +145,91 @@
     }
   }
 
+
+  // Shared 17-minute inactivity timeout. State survives refreshes and is shared across tabs.
+  var inactivityState = { uid: null, timer: null, warning: null, lastWrite: 0 };
+  var INACTIVITY_LIMIT_MS = 17 * 60 * 1000;
+  var INACTIVITY_WARNING_MS = 16 * 60 * 1000;
+  var INACTIVITY_STORAGE_KEY = 'hamlet:lastActivityAt';
+  var INACTIVITY_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll', 'click'];
+
+  function readLastActivity() {
+    try { var value = Number(localStorage.getItem(INACTIVITY_STORAGE_KEY)); return Number.isFinite(value) && value > 0 ? value : 0; }
+    catch (error) { return 0; }
+  }
+  function closeInactivityWarning() {
+    if (inactivityState.warning) { inactivityState.warning.remove(); inactivityState.warning = null; }
+  }
+  function showInactivityWarning() {
+    if (inactivityState.warning || !inactivityState.uid) return;
+    var overlay = document.createElement('div');
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'hamlet-inactivity-title');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:20px;background:rgba(2,6,23,.76);font:500 15px/1.5 system-ui,sans-serif;';
+    var card = document.createElement('section');
+    card.style.cssText = 'width:min(420px,100%);padding:24px;border:1px solid #334155;border-radius:16px;background:#111827;color:#f9fafb;box-shadow:0 24px 70px rgba(0,0,0,.45);';
+    var title = document.createElement('h2'); title.id = 'hamlet-inactivity-title'; title.textContent = 'Still there?';
+    title.style.cssText = 'margin:0 0 8px;font-size:1.2rem;color:#fff;';
+    var copy = document.createElement('p'); copy.textContent = 'You will be signed out in 60 seconds due to inactivity. Continue working to keep your session active.';
+    copy.style.cssText = 'margin:0 0 18px;color:#cbd5e1;';
+    var button = document.createElement('button'); button.type = 'button'; button.textContent = 'Stay signed in';
+    button.style.cssText = 'min-height:44px;padding:10px 16px;border:0;border-radius:8px;background:#1d4ed8;color:#fff;font:700 14px system-ui;cursor:pointer;';
+    button.addEventListener('click', function () { recordInactivityActivity(true); });
+    card.appendChild(title); card.appendChild(copy); card.appendChild(button); overlay.appendChild(card);
+    document.body.appendChild(overlay); inactivityState.warning = overlay; button.focus();
+  }
+  function recordInactivityActivity(force) {
+    if (!inactivityState.uid) return;
+    var now = Date.now();
+    if (!force && now - inactivityState.lastWrite < 1000) return;
+    inactivityState.lastWrite = now;
+    try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(now)); } catch (error) {}
+    closeInactivityWarning(); scheduleInactivityCheck();
+  }
+  function inactivityActivityHandler() { recordInactivityActivity(false); }
+  function inactivityStorageHandler(event) {
+    if (event.key === INACTIVITY_STORAGE_KEY && inactivityState.uid) { closeInactivityWarning(); scheduleInactivityCheck(); }
+  }
+  function stopInactivityMonitor() {
+    if (inactivityState.timer) window.clearTimeout(inactivityState.timer);
+    inactivityState.timer = null;
+    INACTIVITY_EVENTS.forEach(function (name) { document.removeEventListener(name, inactivityActivityHandler, true); });
+    window.removeEventListener('storage', inactivityStorageHandler);
+    closeInactivityWarning(); inactivityState.uid = null;
+  }
+  function scheduleInactivityCheck() {
+    if (!inactivityState.uid) return;
+    if (inactivityState.timer) window.clearTimeout(inactivityState.timer);
+    var last = readLastActivity();
+    if (!last) { last = Date.now(); try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(last)); } catch (error) {} }
+    var elapsed = Date.now() - last;
+    if (elapsed >= INACTIVITY_LIMIT_MS) { expireInactiveSession(); return; }
+    if (elapsed >= INACTIVITY_WARNING_MS) showInactivityWarning();
+    var next = elapsed < INACTIVITY_WARNING_MS ? INACTIVITY_WARNING_MS - elapsed : INACTIVITY_LIMIT_MS - elapsed;
+    inactivityState.timer = window.setTimeout(scheduleInactivityCheck, Math.max(250, Math.min(next, 15000)));
+  }
+  function expireInactiveSession() {
+    if (!inactivityState.uid) return;
+    var auth = window.firebase && firebase.auth ? firebase.auth() : null;
+    stopInactivityMonitor();
+    try { localStorage.removeItem(INACTIVITY_STORAGE_KEY); } catch (error) {}
+    var destination = '/login.html?reason=session-timeout';
+    if (auth) auth.signOut().catch(function (error) {
+      console.warn('Hamlet inactivity sign-out encountered an error:', error);
+    }).finally(function () { window.location.replace(destination); });
+    else window.location.replace(destination);
+  }
+  function startInactivityMonitor(user) {
+    stopInactivityMonitor();
+    if (!user || /(?:^|\\/)login\\.html$/.test(window.location.pathname)) return;
+    inactivityState.uid = user.uid;
+    if (!readLastActivity()) { try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(Date.now())); } catch (error) {} }
+    INACTIVITY_EVENTS.forEach(function (name) { document.addEventListener(name, inactivityActivityHandler, true); });
+    window.addEventListener('storage', inactivityStorageHandler);
+    scheduleInactivityCheck();
+  }
+
   function updateProfile(user) {
     stopProfileListeners();
     stopMailListener();
@@ -236,6 +321,7 @@
 
     try {
       firebase.auth().onAuthStateChanged(function (user) {
+        startInactivityMonitor(user || null);
         updateProfile(user || null);
       });
     } catch (error) {
