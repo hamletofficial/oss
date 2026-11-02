@@ -973,7 +973,7 @@ exports.getSuperAdminAccountMetrics = onCall({
       String(token.email || "").trim().toLowerCase() !== allowedEmail ||
       token.email_verified !== true ||
       !token.firebase ||
-      token.firebase.sign_in_provider !== "password") {
+      !(token.firebase.sign_in_provider === "password" || (token.firebase.sign_in_provider === "custom" && token.hamletOriginalSignInProvider === "password" && token.hamletMfaVerified === true))) {
     throw new HttpsError("permission-denied", "Only the verified designated Super Administrator may retrieve these metrics.");
   }
   try {
