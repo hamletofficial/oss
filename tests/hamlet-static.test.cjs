@@ -38,7 +38,7 @@ test('mailbox bulk-delete action only removes messages sent by the signed-in mem
   assert.match(deleteConversation[1], /m\.senderUid===me\.uid&&m\.recipientUid===otherUid/);
   assert.match(deleteConversation[1], /Messages sent by the other member will remain/);
   assert.match(messagesHtml, /Delete My Messages/);
-  assert.match(firestore, /allow delete: if hasActiveSession()\\s*&& request\\.auth\\.uid == resource\\.data\\.senderUid\\s*&& request\\.auth\\.uid in resource\\.data\\.participants;/);
+  assert.match(firestore, /allow delete: if hasActiveSession()\s*&& request\.auth\.uid == resource\.data\.senderUid\s*&& request\.auth\.uid in resource\.data\.participants;/);
 });
 
 test('workspace search includes authenticated messages alongside deals, properties and public profiles', () => {
@@ -66,7 +66,7 @@ test('commercial deal calculator computes rental yields, unit pricing and option
 
 test('transaction history is append-only and owner-scoped', () => {
   assert.match(firestore, /match \/hamletDealEvents\/{eventId}/);
-  assert.match(firestore, /allow read: if hasActiveSession() && resource\\.data\\.uid == request\\.auth\\.uid/);
+  assert.match(firestore, /allow read: if hasActiveSession() && resource\.data\.uid == request\.auth\.uid/);
   assert.match(firestore, /allow create, update, delete: if false;/);
   assert.match(functions, /exports\.recordHamletDealHistory = onDocumentWritten/);
   assert.match(firestore, /request\.resource\.data\.createdAt == request\.time/);
