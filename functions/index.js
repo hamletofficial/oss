@@ -112,6 +112,7 @@ exports.submitPressCommunications = onCall({
 }, async function(request) {
   const data = request.data || {};
   if (!request.auth) throw new HttpsError("unauthenticated", "Sign in before submitting a press communication.");
+  await requireHamletDeviceSession(request);
   const allowed = ["companyName", "pressOfficer", "officerEmail", "destinationEmail", "phoneNumber", "pressReleaseUrl", "headline", "announcementType", "embargoDate", "summary", "notes"];
   var unexpected = Object.keys(data).filter(function(field) { return allowed.indexOf(field) === -1; });
   if (unexpected.length) {
@@ -173,6 +174,7 @@ exports.getPressCommunications = onCall({
   cors: true,
 }, async function(request) {
   if (!request.auth) throw new HttpsError("unauthenticated", "Sign in before viewing your archive.");
+  await requireHamletDeviceSession(request);
   try {
     const snapshot = await getPressDb().collection("pressCommunications")
       .where("requesterUid", "==", request.auth.uid)
@@ -202,6 +204,7 @@ exports.deletePressCommunications = onCall({
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign in before deleting a brief.");
   }
+  await requireHamletDeviceSession(request);
 
   const ids = request.data && Array.isArray(request.data.ids) ? request.data.ids : [];
   const uniqueIds = Array.from(new Set(ids.filter(function(id) {
@@ -920,6 +923,7 @@ exports.getSuperAdminAccounts = onCall({
   if (!user || !token) {
     throw new HttpsError("unauthenticated", "Sign in to view Firebase accounts.");
   }
+  await requireHamletDeviceSession(request);
   if (user.uid !== allowedUid ||
       String(token.email || "").trim().toLowerCase() !== allowedEmail ||
       token.email_verified !== true ||
@@ -969,6 +973,7 @@ exports.getSuperAdminAccountMetrics = onCall({
   if (!user || !token) {
     throw new HttpsError("unauthenticated", "Sign in to view administrator metrics.");
   }
+  await requireHamletDeviceSession(request);
   if (user.uid !== allowedUid ||
       String(token.email || "").trim().toLowerCase() !== allowedEmail ||
       token.email_verified !== true ||
