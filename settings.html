@@ -199,6 +199,16 @@
         </div>
         <div id="mfaMessage" class="status-note" role="status" aria-live="polite"></div>
       </section>
+      <section class="settings-card" id="deviceManagementCard" aria-labelledby="deviceManagementHeading">
+        <h2 id="deviceManagementHeading" style="margin-top:0">Device Management</h2>
+        <p class="status-note">Review browsers signed in to Hamlet. Each device session expires after 17 minutes of inactivity.</p>
+        <div id="deviceSessionStatus" class="status-note" role="status" aria-live="polite">Loading device sessions…</div>
+        <div id="deviceSessionList" style="display:grid;gap:.75rem;margin-top:1rem"></div>
+        <div class="mfa-actions">
+          <button class="btn btn-outline" id="refreshDeviceSessions" type="button">Refresh devices</button>
+          <button class="btn btn-outline" id="revokeOtherDeviceSessions" type="button">Sign out other devices</button>
+        </div>
+      </section>
       <section class="settings-card" aria-labelledby="privacySettingsHeading">
         <h2 id="privacySettingsHeading" style="margin-top:0">Privacy</h2>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
