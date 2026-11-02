@@ -413,7 +413,7 @@
 
     try {
       firebase.auth().onAuthStateChanged(function (user) {
-        if (user) bootstrapHamletDeviceSession(user);
+        if (user) { getDeviceSessionId(); bootstrapHamletDeviceSession(user); }
         else window.dispatchEvent(new CustomEvent('hamlet:session-signed-out'));
         startInactivityMonitor(user || null);
         updateProfile(user || null);
