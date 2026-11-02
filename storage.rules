@@ -5,6 +5,7 @@ service firebase.storage {
     // Validate the Firebase token's per-device session against the Firestore registry.
     function hasActiveSession() {
       return request.auth != null
+        && request.auth.token.keys().hasAny(['hamletSessionId'])
         && request.auth.token.hamletSessionId is string
         && firestore.get(/databases/(default)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.active == true
         && firestore.get(/databases/(default)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.expiresAt > request.time;
