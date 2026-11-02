@@ -156,6 +156,7 @@
   // Device-scoped session bootstrap. The server issues a custom Firebase token
   // containing a signed session ID; each browser profile has its own session.
   var deviceSessionBootstrap = false;
+  var deviceSessionBootstrapPromise = null;
   var deviceActivityLastSent = 0;
   var DEVICE_SESSION_ID_KEY = 'hamlet:deviceSessionId';
   function getDeviceSessionId() {
@@ -192,42 +193,55 @@
       });
     });
   }
-  function bootstrapHamletDeviceSession(user) {
-    if (!user || deviceSessionBootstrap || window.location.pathname.split('/').pop() === 'login.html') return;
+function bootstrapHamletDeviceSession(user) {
+    if (!user || window.location.pathname.split('/').pop() === 'login.html') {
+      return Promise.resolve(null);
+    }
+    if (deviceSessionBootstrapPromise) return deviceSessionBootstrapPromise;
+
     deviceSessionBootstrap = true;
-    user.getIdTokenResult().then(function (tokenResult) {
+    deviceSessionBootstrapPromise = user.getIdTokenResult().then(function (tokenResult) {
       if (tokenResult.claims && tokenResult.claims.hamletSessionId) {
-        return callSessionFunction('recordHamletDeviceActivity', {}, user).then(function () {
-          deviceActivityLastSent = Date.now();
-          window.dispatchEvent(new CustomEvent('hamlet:session-ready'));
-          return null;
-        });
+        return callSessionFunction('recordHamletDeviceActivity', {}, user);
       }
-      var sessionId = getDeviceSessionId();
-      if (!sessionId) throw new Error('A secure device session could not be created on this browser.');
+
       return callSessionFunction('createHamletDeviceSession', {
         deviceName: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || 'Web browser',
         userAgent: navigator.userAgent || ''
       }, user).then(function (result) {
-        if (!result || !result.customToken) throw new Error('The session service did not return a secure session token.');
+        if (!result || !result.customToken) {
+          throw new Error('The session service did not return a secure session token.');
+        }
         return firebase.auth().signInWithCustomToken(result.customToken);
-      }).then(function () {
-        deviceActivityLastSent = Date.now();
-        window.dispatchEvent(new CustomEvent('hamlet:session-ready'));
-        return null;
+      });
+    }).then(function () {
+      var sessionUser = firebase.auth().currentUser;
+      if (!sessionUser || sessionUser.uid !== user.uid) {
+        throw new Error('The authenticated device session could not be confirmed.');
+      }
+      return sessionUser.getIdTokenResult(true).then(function (sessionToken) {
+        if (!sessionToken.claims || !sessionToken.claims.hamletSessionId) {
+          throw new Error('The active Firebase identity is missing its device-session claim.');
+        }
+        return sessionUser;
       });
     }).catch(function (error) {
       console.error('Hamlet device session could not be established:', error);
-      if (user && firebase.auth().currentUser && firebase.auth().currentUser.uid === user.uid) {
-        firebase.auth().signOut().finally(function () {
-          window.location.replace('/login.html?reason=session-security');
-        });
-      }
+      var currentUser = firebase.auth().currentUser;
+      var signOut = currentUser && currentUser.uid === user.uid
+        ? firebase.auth().signOut()
+        : Promise.resolve();
+      return signOut.then(function () {
+        window.location.replace('/login.html?reason=session-security');
+        throw error;
+      });
     }).finally(function () {
       deviceSessionBootstrap = false;
+      deviceSessionBootstrapPromise = null;
     });
-  }
-  function heartbeatHamletDeviceSession(force) {
+
+    return deviceSessionBootstrapPromise;
+  }  function heartbeatHamletDeviceSession(force) {
     var user = firebase.auth && firebase.auth().currentUser;
     if (!user) return;
     var now = Date.now();
@@ -412,10 +426,28 @@
 
     try {
       firebase.auth().onAuthStateChanged(function (user) {
-        if (user) { getDeviceSessionId(); bootstrapHamletDeviceSession(user); }
-        else window.dispatchEvent(new CustomEvent('hamlet:session-signed-out'));
-        startInactivityMonitor(user || null);
-        updateProfile(user || null);
+        if (!user) {
+          stopInactivityMonitor();
+          updateProfile(null);
+          window.dispatchEvent(new CustomEvent('hamlet:session-signed-out'));
+          return;
+        }
+
+        // Ignore the intermediate auth event emitted during custom-token exchange.
+        if (deviceSessionBootstrap) return;
+
+        getDeviceSessionId();
+        bootstrapHamletDeviceSession(user).then(function (sessionUser) {
+          if (!sessionUser || !firebase.auth().currentUser ||
+              firebase.auth().currentUser.uid !== sessionUser.uid) return;
+
+          // Start protected-page activity only after the server session claim is verified.
+          startInactivityMonitor(sessionUser);
+          updateProfile(sessionUser);
+          window.dispatchEvent(new CustomEvent('hamlet:session-ready'));
+        }).catch(function (error) {
+          console.error('Hamlet protected-page initialisation was stopped:', error);
+        });
       });
     } catch (error) {
       updateProfile(null);
