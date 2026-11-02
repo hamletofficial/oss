@@ -1,0 +1,20 @@
+name: Hamlet device-session rules tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [security/17-minute-inactivity-timeout]
+
+jobs:
+  firebase-rules-emulator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install emulator test dependencies
+        run: npm install --no-save firebase-tools @firebase/rules-unit-testing firebase
+      - name: Run Firestore and Storage emulator tests
+        run: npx firebase emulators:exec --only firestore,storage --project demo-hamlet-device-sessions "node --test tests/device-session-rules.test.mjs"
