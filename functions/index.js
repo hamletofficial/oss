@@ -1034,6 +1034,12 @@ function hamletDeviceExpiry() {
 exports.createHamletDeviceSession = onCall({region:"us-central1",invoker:"public",cors:true}, async function(request) {
   if (!request.auth) throw new HttpsError("unauthenticated", "Complete sign-in before creating a device session.");
   const uid = request.auth.uid;
+  const account = await admin.auth().getUser(uid);
+  const enrolledFactors = account.multiFactor && Array.isArray(account.multiFactor.enrolledFactors) ? account.multiFactor.enrolledFactors : [];
+  const firebaseSignIn = request.auth.token && request.auth.token.firebase;
+  if (enrolledFactors.length && !(firebaseSignIn && firebaseSignIn.sign_in_second_factor)) {
+    throw new HttpsError("permission-denied", "Complete your enrolled second-factor challenge before establishing a device session.");
+  }
   const claim = request.auth.token && request.auth.token.hamletSessionId;
   if (claim) {
     const active = await requireHamletDeviceSession(request);
