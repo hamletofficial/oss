@@ -2,10 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Server-enforced administrator identity. Keep this UID aligned with the
+    // Every authenticated client request must present a server-issued,
+    // device-scoped session claim backed by an active, unexpired registry row.
+    function hasActiveSession() {
+      return request.auth != null
+        && request.auth.token.hamletSessionId is string
+        && request.auth.token.hamletSessionId.matches('^[A-Za-z0-9_-]{20,80}    // Server-enforced administrator identity. Keep this UID aligned with the
     // dedicated email/password account checked by /app/hamlet/admin.html.
     function isSuperAdmin() {
-      return request.auth != null
+      return hasActiveSession()
         && request.auth.uid == '6epDJRISlBbRPWKosDZZWuiGQzK2';
     }
 
@@ -14,7 +19,7 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && username.matches('^[a-z0-9_]{3,20}$')
         && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
@@ -22,18 +27,18 @@ service cloud.firestore {
 
       // A claimed username is immutable; its owner may release it when changing names.
       allow update: if false;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && resource.data.uid == request.auth.uid;
     }
 
     match /publicProfiles/{userId} {
       // Owners can always read their own profile; public visitors see public profiles.
       allow read: if isSuperAdmin()
-        || (request.auth != null && request.auth.uid == userId)
+        || (hasActiveSession() && request.auth.uid == userId)
         || resource.data.isPublic == true;
 
       // New profiles cannot self-assert verification or broker-ranking metrics.
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.uid == userId
         && request.resource.data.isPublic == true
@@ -49,7 +54,7 @@ service cloud.firestore {
         ]);
 
       // Owners may update profile fields, but not verification or ranking fields.
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.uid == userId
         && request.resource.data.isPublic is bool
@@ -63,27 +68,27 @@ service cloud.firestore {
           'rankingsUpdatedAt'
         ]);
 
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && request.auth.uid == userId;
     }
 
     // Browser push tokens are private to the signed-in account that registered them.
     match /userPushTokens/{userId}/tokens/{tokenId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if request.auth != null
+      allow read: if hasActiveSession() && request.auth.uid == userId;
+      allow create, update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.token is string
         && request.resource.data.token.size() > 20
         && request.resource.data.token.size() <= 4096
         && request.resource.data.platform == 'web';
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow delete: if hasActiveSession() && request.auth.uid == userId;
     }
 
     match /directMessages/{messageId} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && request.auth.uid in resource.data.participants;
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.senderUid == request.auth.uid
         && request.resource.data.recipientUid is string
         && request.resource.data.recipientUid != request.auth.uid
@@ -103,7 +108,7 @@ service cloud.firestore {
 
       // Participants must be Firebase-authenticated to update conversation metadata.
       // Only the authenticated sender may anonymise their own message.
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && request.auth.uid in resource.data.participants
         && (
           (
@@ -131,16 +136,16 @@ service cloud.firestore {
         );
 
       // A member may permanently delete only messages they sent; a recipient cannot erase the sender's record.
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && request.auth.uid == resource.data.senderUid
         && request.auth.uid in resource.data.participants;
     }
 
     // Each authenticated user has a private archive of conversation threads.
     match /userMessageArchives/{userId}/conversations/{conversationId} {
-      allow read, delete: if request.auth != null
+      allow read, delete: if hasActiveSession()
         && request.auth.uid == userId;
-      allow create, update: if request.auth != null
+      allow create, update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.ownerUid == userId
         && request.resource.data.otherUid == conversationId
@@ -150,27 +155,27 @@ service cloud.firestore {
     // Each member controls their own blocked-member list. A blocked recipient can read
     // only the specific record that indicates whether they are blocked by that member.
     match /userMessageBlocks/{userId}/blockedUsers/{otherUid} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (request.auth.uid == userId || request.auth.uid == otherUid);
-      allow create, update: if request.auth != null
+      allow create, update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.blockedUid == otherUid
         && request.resource.data.blockedAt == request.time;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && request.auth.uid == userId;
     }
 
     // Members can manage their own private Important flags for mailbox messages.
     match /userMessageFlags/{userId}/flaggedMessages/{messageId} {
-      allow read, delete: if request.auth != null
+      allow read, delete: if hasActiveSession()
         && request.auth.uid == userId;
-      allow create, update: if request.auth != null
+      allow create, update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.messageId == messageId;
     }
 
     match /insightsFeed/{insightId} {
-      allow read: if request.auth != null;
+      allow read: if hasActiveSession();
       allow create, update, delete: if false;
     }
 
@@ -178,21 +183,21 @@ service cloud.firestore {
     // They are never publicly readable; public visitors use the whitelisted
     // publicProperties projection below.
     match /commercialProperties/{propertyId} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (isSuperAdmin() || resource.data.ownerUid == request.auth.uid);
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.ownerUid == request.auth.uid
         && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
         && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
 
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == request.auth.uid
         && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
         && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
 
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid;
     }
 
@@ -210,7 +215,7 @@ service cloud.firestore {
       }
 
       function verifiedListingOwner() {
-        return request.auth != null
+        return hasActiveSession()
           && request.resource.data.ownerUid == request.auth.uid
           && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
           && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
@@ -245,30 +250,30 @@ service cloud.firestore {
         && request.resource.data.photoUrls is list
         && request.resource.data.photoUrls.size() <= 6;
 
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid;
     }
 
     match /residentialProperties/{propertyId} {
       // Published listings are visible to authenticated members; drafts stay private to their owner and the designated administrator.
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (isSuperAdmin()
           || resource.data.ownerUid == request.auth.uid
           || resource.data.status == 'Published');
       // Only Entrust-verified members may publish a new residential record.
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.createdByUid == request.auth.uid
         && request.resource.data.status in ['Published', 'Draft', 'Under Offer', 'Sold / Let']
         && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
         && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
       // Owners can maintain their own records; identity verification is required to publish new records.
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == request.auth.uid
         && ((!('createdByUid' in resource.data) && !('createdByUid' in request.resource.data))
           || request.resource.data.createdByUid == resource.data.createdByUid);
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid;
     }
 
@@ -281,7 +286,7 @@ service cloud.firestore {
         ]);
       }
       function verifiedResidentialOwner() {
-        return request.auth != null
+        return hasActiveSession()
           && request.resource.data.ownerUid == request.auth.uid
           && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
           && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
@@ -305,12 +310,12 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time
         && request.resource.data.photoUrls is list
         && request.resource.data.photoUrls.size() <= 6;
-      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+      allow delete: if hasActiveSession() && resource.data.ownerUid == request.auth.uid;
     }
 
     match /brokerReviews/{reviewId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
+      allow read: if hasActiveSession();
+      allow create: if hasActiveSession()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 1
@@ -375,9 +380,9 @@ service cloud.firestore {
     // Broker social posts are readable to authenticated members. A post can only
     // be created or deleted by the UID recorded as its owner; posts are immutable.
     match /brokerPosts/{postId} {
-      allow read: if request.auth != null;
+      allow read: if hasActiveSession();
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.keys().hasAll(['ownerUid', 'body', 'createdAt'])
         && request.resource.data.keys().hasOnly(['ownerUid', 'body', 'bodyHtml', 'createdAt', 'attachments', 'repostOf'])
         && request.resource.data.ownerUid == request.auth.uid
@@ -402,13 +407,13 @@ service cloud.firestore {
             && request.resource.data.repostOf.ownerUid != request.auth.uid));
 
       allow update: if false;
-      allow delete: if request.auth != null
+      allow delete: if hasActiveSession()
         && resource.data.ownerUid == request.auth.uid;
 
       match /replies/{replyId} {
-        allow read: if request.auth != null;
+        allow read: if hasActiveSession();
 
-        allow create: if request.auth != null
+        allow create: if hasActiveSession()
           && exists(/databases/$(database)/documents/brokerPosts/$(postId))
           && get(/databases/$(database)/documents/brokerPosts/$(postId)).data.ownerUid != request.auth.uid
           && request.resource.data.keys().hasAll(['ownerUid', 'body', 'createdAt'])
@@ -422,7 +427,7 @@ service cloud.firestore {
         allow update: if false;
         // A reply author may delete their reply. The parent post's author can
         // also remove replies when deleting that post.
-        allow delete: if request.auth != null
+        allow delete: if hasActiveSession()
           && (
             resource.data.ownerUid == request.auth.uid
             || get(/databases/$(database)/documents/brokerPosts/$(postId)).data.ownerUid == request.auth.uid
@@ -433,10 +438,10 @@ service cloud.firestore {
     // A member's likes are stored only in that member's private subcollection.
     // No other member (including the author of a liked post) can read them.
     match /userPostLikes/{userId}/likes/{postId} {
-      allow read, delete: if request.auth != null
+      allow read, delete: if hasActiveSession()
         && request.auth.uid == userId;
 
-      allow create, update: if request.auth != null
+      allow create, update: if hasActiveSession()
         && request.auth.uid == userId
         && request.resource.data.keys().hasAll(['postId', 'likedAt'])
         && request.resource.data.keys().hasOnly(['postId', 'likedAt'])
@@ -451,9 +456,9 @@ service cloud.firestore {
       // The designated super-admin may inspect deal authorship for platform auditing.
       // All other authenticated members can read only their own private deal records.
       allow read: if isSuperAdmin()
-        || (request.auth != null && resource.data.uid == request.auth.uid);
+        || (hasActiveSession() && resource.data.uid == request.auth.uid);
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.keys().hasAll([
           'id','uid','name','property','type','value','stage','owner','client','notes','createdAt','updatedAt'
         ])
@@ -516,7 +521,7 @@ service cloud.firestore {
         && request.resource.data.createdAt.size() <= 50
         && request.resource.data.updatedAt == request.time;
 
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasAll([
           'id','uid','name','property','type','value','stage','owner','client','notes','createdAt','updatedAt'
@@ -579,15 +584,15 @@ service cloud.firestore {
             && (!('notes' in request.resource.data.sustainability) || (request.resource.data.sustainability.notes is string && request.resource.data.sustainability.notes.size() <= 600))))
         && request.resource.data.updatedAt == request.time;
 
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
     }
 
     // Critical-path milestones are private, owner-managed records. A separate
     // server-only delivery log prevents ordinary clients from spoofing sent reminders.
     match /hamletReminders/{reminderId} {
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
 
-      allow create: if request.auth != null
+      allow create: if hasActiveSession()
         && request.resource.data.keys().hasAll([
           'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
         ])
@@ -617,7 +622,7 @@ service cloud.firestore {
         && request.resource.data.createdAt.size() <= 50
         && request.resource.data.updatedAt == request.time;
 
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasAll([
           'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
@@ -647,7 +652,7 @@ service cloud.firestore {
         && request.resource.data.done is bool
         && request.resource.data.updatedAt == request.time;
 
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
     }
 
     match /hamletReminderDeliveries/{deliveryId} {
@@ -660,14 +665,14 @@ service cloud.firestore {
     // History entries are created only by the trusted Cloud Function.
     // Authenticated owners can read their own records; clients cannot alter them.
     match /hamletDealEvents/{eventId} {
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if false;
     }
 
     // Immutable audit events are written by trusted Cloud Functions only.
     // Super-admins can inspect platform-wide history; members can read their own.
     match /hamletDealEvents/{eventId} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
           && request.auth.token.email_verified == true
           || resource.data.uid == request.auth.uid);
@@ -675,7 +680,7 @@ service cloud.firestore {
     }
 
     match /hamletPropertyEvents/{eventId} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
           && request.auth.token.email_verified == true
           || resource.data.uid == request.auth.uid);
@@ -683,7 +688,7 @@ service cloud.firestore {
     }
 
     match /hamletResidentialPropertyEvents/{eventId} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
         && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
           && request.auth.token.email_verified == true
           || resource.data.uid == request.auth.uid);
@@ -693,8 +698,8 @@ service cloud.firestore {
     // Private transaction document metadata. Binary files live in a matching
     // owner-scoped Storage path and are separately protected by storage.rules.
     match /hamletDocuments/{documentId} {
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow create: if request.auth != null
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+      allow create: if hasActiveSession()
         && request.resource.data.keys().hasAll(['id','uid','dealId','title','category','fileName','storagePath','size','contentType','notes','createdAt'])
         && request.resource.data.keys().hasOnly(['id','uid','dealId','title','category','fileName','storagePath','size','contentType','notes','createdAt'])
         && request.resource.data.id == documentId
@@ -719,14 +724,14 @@ service cloud.firestore {
         && request.resource.data.notes.size() <= 300
         && request.resource.data.createdAt == request.time;
       allow update: if false;
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
     }
 
     // Saved searches are private to their owner and keep the alert cursor used
     // to detect new matching deals when the workspace is opened.
     match /hamletSavedSearches/{searchId} {
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow create: if request.auth != null
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+      allow create: if hasActiveSession()
         && request.resource.data.keys().hasAll(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
         && request.resource.data.keys().hasOnly(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
         && request.resource.data.id == searchId
@@ -744,7 +749,7 @@ service cloud.firestore {
         && request.resource.data.createdAt is string
         && request.resource.data.createdAt.size() <= 50
         && request.resource.data.updatedAt == request.time;
-      allow update: if request.auth != null
+      allow update: if hasActiveSession()
         && resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasAll(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
         && request.resource.data.keys().hasOnly(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
@@ -762,7 +767,7 @@ service cloud.firestore {
         && request.resource.data.lastMatchedIds is list
         && request.resource.data.lastMatchedIds.size() <= 500
         && request.resource.data.updatedAt == request.time;
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
     }
 
     // Search analytics events: bounded, minimally identifying client-submitted records.
@@ -781,7 +786,7 @@ service cloud.firestore {
         && request.resource.data.uid == null
         && request.resource.data.createdAt == request.time
       ) || (
-        request.auth != null
+        hasActiveSession()
         && request.resource.data.keys().hasAll(['query','area','path','uid','createdAt'])
         && request.resource.data.keys().hasOnly(['query','area','path','uid','createdAt'])
         && request.resource.data.query is string
@@ -800,7 +805,823 @@ service cloud.firestore {
     // Read-only platform-wide access for the designated Hamlet super administrator.
     // Keep this identity aligned with the administrator configured in admin.html.
     match /{document=**} {
-      allow read: if request.auth != null
+      allow read: if hasActiveSession()
+        && request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
+        && request.auth.token.email_verified == true;
+    }
+
+  }
+}
+)
+        && exists(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId))
+        && get(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.active == true
+        && get(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.expiresAt > request.time;
+    }
+
+    // Session registry is server-owned. Clients may only use the callable
+    // Session Manager API; direct client access is prohibited.
+    match /userSessions/{userId}/sessions/{sessionId} {
+      allow read, write: if false;
+    }
+    // Server-enforced administrator identity. Keep this UID aligned with the
+    // dedicated email/password account checked by /app/hamlet/admin.html.
+    function isSuperAdmin() {
+      return hasActiveSession()
+        && request.auth.uid == '6epDJRISlBbRPWKosDZZWuiGQzK2';
+    }
+
+    // Public username registry. Exact lookups are allowed; enumeration is not.
+    match /usernames/{username} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if hasActiveSession()
+        && username.matches('^[a-z0-9_]{3,20}$')
+        && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+
+      // A claimed username is immutable; its owner may release it when changing names.
+      allow update: if false;
+      allow delete: if hasActiveSession()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    match /publicProfiles/{userId} {
+      // Owners can always read their own profile; public visitors see public profiles.
+      allow read: if isSuperAdmin()
+        || (hasActiveSession() && request.auth.uid == userId)
+        || resource.data.isPublic == true;
+
+      // New profiles cannot self-assert verification or broker-ranking metrics.
+      allow create: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.isPublic == true
+        && request.resource.data.username is string
+        && request.resource.data.username.matches('^[a-z0-9_]{3,20}$')
+        && (!('onfidoVerified' in request.resource.data)
+          || request.resource.data.onfidoVerified == false)
+        && !request.resource.data.keys().hasAny([
+          'closedDealCount',
+          'closedDealValueTotal',
+          'averageClosedDealValue',
+          'rankingsUpdatedAt'
+        ]);
+
+      // Owners may update profile fields, but not verification or ranking fields.
+      allow update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.isPublic is bool
+        && request.resource.data.username is string
+        && request.resource.data.username.matches('^[a-z0-9_]{3,20}$')
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'onfidoVerified',
+          'closedDealCount',
+          'closedDealValueTotal',
+          'averageClosedDealValue',
+          'rankingsUpdatedAt'
+        ]);
+
+      allow delete: if hasActiveSession()
+        && request.auth.uid == userId;
+    }
+
+    // Browser push tokens are private to the signed-in account that registered them.
+    match /userPushTokens/{userId}/tokens/{tokenId} {
+      allow read: if hasActiveSession() && request.auth.uid == userId;
+      allow create, update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 20
+        && request.resource.data.token.size() <= 4096
+        && request.resource.data.platform == 'web';
+      allow delete: if hasActiveSession() && request.auth.uid == userId;
+    }
+
+    match /directMessages/{messageId} {
+      allow read: if hasActiveSession()
+        && request.auth.uid in resource.data.participants;
+
+      allow create: if hasActiveSession()
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.recipientUid is string
+        && request.resource.data.recipientUid != request.auth.uid
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        && request.auth.uid in request.resource.data.participants
+        && request.resource.data.recipientUid in request.resource.data.participants
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 5000
+        && request.resource.data.sentAt == request.time
+        && request.resource.data.pinnedBy is list
+        && request.resource.data.readBy is list
+        && (!('attachments' in request.resource.data)
+          || (request.resource.data.attachments is list
+            && request.resource.data.attachments.size() <= 5));
+
+      // Participants must be Firebase-authenticated to update conversation metadata.
+      // Only the authenticated sender may anonymise their own message.
+      allow update: if hasActiveSession()
+        && request.auth.uid in resource.data.participants
+        && (
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedBy','readBy'])
+            && request.resource.data.pinnedBy is list
+            && request.resource.data.readBy is list
+          )
+          ||
+          (
+            request.auth.uid == resource.data.senderUid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['attachments'])
+            && request.resource.data.attachments is list
+            && request.resource.data.attachments.size() <= 5
+          )
+          ||
+          (
+            request.auth.uid == resource.data.senderUid
+            && (!('anonymised' in resource.data) || resource.data.anonymised != true)
+            && request.resource.data.diff(resource.data).affectedKeys().hasAll(['body','anonymised','anonymisedAt'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['body','anonymised','anonymisedAt'])
+            && request.resource.data.body == '[Message anonymised]'
+            && request.resource.data.anonymised == true
+            && request.resource.data.anonymisedAt == request.time
+          )
+        );
+
+      // A member may permanently delete only messages they sent; a recipient cannot erase the sender's record.
+      allow delete: if hasActiveSession()
+        && request.auth.uid == resource.data.senderUid
+        && request.auth.uid in resource.data.participants;
+    }
+
+    // Each authenticated user has a private archive of conversation threads.
+    match /userMessageArchives/{userId}/conversations/{conversationId} {
+      allow read, delete: if hasActiveSession()
+        && request.auth.uid == userId;
+      allow create, update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.ownerUid == userId
+        && request.resource.data.otherUid == conversationId
+        && request.resource.data.archivedAt == request.time;
+    }
+
+    // Each member controls their own blocked-member list. A blocked recipient can read
+    // only the specific record that indicates whether they are blocked by that member.
+    match /userMessageBlocks/{userId}/blockedUsers/{otherUid} {
+      allow read: if hasActiveSession()
+        && (request.auth.uid == userId || request.auth.uid == otherUid);
+      allow create, update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.blockedUid == otherUid
+        && request.resource.data.blockedAt == request.time;
+      allow delete: if hasActiveSession()
+        && request.auth.uid == userId;
+    }
+
+    // Members can manage their own private Important flags for mailbox messages.
+    match /userMessageFlags/{userId}/flaggedMessages/{messageId} {
+      allow read, delete: if hasActiveSession()
+        && request.auth.uid == userId;
+      allow create, update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.messageId == messageId;
+    }
+
+    match /insightsFeed/{insightId} {
+      allow read: if hasActiveSession();
+      allow create, update, delete: if false;
+    }
+
+    // Private commercial-property source records may contain account metadata.
+    // They are never publicly readable; public visitors use the whitelisted
+    // publicProperties projection below.
+    match /commercialProperties/{propertyId} {
+      allow read: if hasActiveSession()
+        && (isSuperAdmin() || resource.data.ownerUid == request.auth.uid);
+
+      allow create: if hasActiveSession()
+        && request.resource.data.ownerUid == request.auth.uid
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+
+      allow update: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+
+      allow delete: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Public projection: only approved listing fields are stored here. Never
+    // copy ownerEmail or other private account metadata into this collection.
+    match /publicProperties/{propertyId} {
+      function publicListingKeysAreAllowed() {
+        return request.resource.data.keys().hasOnly([
+          'ownerUid','ownerName','propertyName','propertyType','address','postcode',
+          'availability','size','askingRent','contactName','contactEmail','propertyUrl',
+          'status','description','sustainabilityStandard','sustainabilityStatus',
+          'certificationClass','certificateReference','certifier','certificationDate',
+          'certificateUrl','sustainabilityNotes','photoUrls','createdAt','updatedAt'
+        ]);
+      }
+
+      function verifiedListingOwner() {
+        return hasActiveSession()
+          && request.resource.data.ownerUid == request.auth.uid
+          && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+          && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+      }
+
+      allow read: if true;
+
+      // New submissions use server timestamps. Existing owner-held submissions
+      // may be safely projected during migration while preserving their original date.
+      allow create: if verifiedListingOwner()
+        && publicListingKeysAreAllowed()
+        && request.resource.data.propertyName is string
+        && request.resource.data.propertyName.size() >= 1
+        && request.resource.data.propertyName.size() <= 180
+        && (
+          request.resource.data.createdAt == request.time
+          || (
+            exists(/databases/$(database)/documents/commercialProperties/$(propertyId))
+            && get(/databases/$(database)/documents/commercialProperties/$(propertyId)).data.ownerUid == request.auth.uid
+            && request.resource.data.createdAt == get(/databases/$(database)/documents/commercialProperties/$(propertyId)).data.createdAt
+          )
+        )
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.photoUrls is list
+        && request.resource.data.photoUrls.size() <= 6;
+
+      allow update: if verifiedListingOwner()
+        && resource.data.ownerUid == request.auth.uid
+        && publicListingKeysAreAllowed()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.photoUrls is list
+        && request.resource.data.photoUrls.size() <= 6;
+
+      allow delete: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /residentialProperties/{propertyId} {
+      // Published listings are visible to authenticated members; drafts stay private to their owner and the designated administrator.
+      allow read: if hasActiveSession()
+        && (isSuperAdmin()
+          || resource.data.ownerUid == request.auth.uid
+          || resource.data.status == 'Published');
+      // Only Entrust-verified members may publish a new residential record.
+      allow create: if hasActiveSession()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.status in ['Published', 'Draft', 'Under Offer', 'Sold / Let']
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+      // Owners can maintain their own records; identity verification is required to publish new records.
+      allow update: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid
+        && ((!('createdByUid' in resource.data) && !('createdByUid' in request.resource.data))
+          || request.resource.data.createdByUid == resource.data.createdByUid);
+      allow delete: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Public residential listing projection. Private source records remain in residentialProperties.
+    match /publicResidentialProperties/{propertyId} {
+      function publicResidentialKeysAllowed() {
+        return request.resource.data.keys().hasOnly([
+          'ownerUid','ownerName','propertyName','propertyType','address','postcode',
+          'bedrooms','askingPrice','availability','tenure','propertyUrl','status','description','photoUrls','createdAt','updatedAt'
+        ]);
+      }
+      function verifiedResidentialOwner() {
+        return hasActiveSession()
+          && request.resource.data.ownerUid == request.auth.uid
+          && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+          && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+      }
+      allow read: if true;
+      allow create: if verifiedResidentialOwner()
+        && publicResidentialKeysAllowed()
+        && request.resource.data.propertyName is string
+        && request.resource.data.propertyName.size() >= 1
+        && request.resource.data.propertyName.size() <= 180
+        && request.resource.data.status in ['Published', 'Under Offer', 'Sold / Let']
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.photoUrls is list
+        && request.resource.data.photoUrls.size() <= 6;
+      allow update: if verifiedResidentialOwner()
+        && resource.data.ownerUid == request.auth.uid
+        && publicResidentialKeysAllowed()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.status in ['Published', 'Under Offer', 'Sold / Let']
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.photoUrls is list
+        && request.resource.data.photoUrls.size() <= 6;
+      allow delete: if hasActiveSession() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /brokerReviews/{reviewId} {
+      allow read: if hasActiveSession();
+      allow create: if hasActiveSession()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.review is string
+        && request.resource.data.review.size() >= 1
+        && request.resource.data.review.size() <= 3000
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if false;
+    }
+
+    match /callbackRequests/{requestId} {
+      allow create: if
+        request.resource.data.keys().hasAll([
+          'name',
+          'jobTitle',
+          'organisation',
+          'sector',
+          'email',
+          'phone',
+          'country',
+          'callbackTime',
+          'message',
+          'consent',
+          'submittedAt',
+          'source'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 150
+        && request.resource.data.jobTitle is string
+        && request.resource.data.jobTitle.size() >= 2
+        && request.resource.data.jobTitle.size() <= 150
+        && request.resource.data.organisation is string
+        && request.resource.data.organisation.size() >= 2
+        && request.resource.data.organisation.size() <= 200
+        && request.resource.data.sector is string
+        && request.resource.data.sector.size() >= 2
+        && request.resource.data.sector.size() <= 150
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 5
+        && request.resource.data.phone.size() <= 50
+        && request.resource.data.country is string
+        && request.resource.data.country.size() >= 2
+        && request.resource.data.country.size() <= 100
+        && request.resource.data.callbackTime is string
+        && request.resource.data.callbackTime.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 5000
+        && request.resource.data.consent == true
+        && request.resource.data.source == 'callback.html'
+        && request.resource.data.submittedAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+
+    // Broker social posts are readable to authenticated members. A post can only
+    // be created or deleted by the UID recorded as its owner; posts are immutable.
+    match /brokerPosts/{postId} {
+      allow read: if hasActiveSession();
+
+      allow create: if hasActiveSession()
+        && request.resource.data.keys().hasAll(['ownerUid', 'body', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['ownerUid', 'body', 'bodyHtml', 'createdAt', 'attachments', 'repostOf'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 140
+        && (!('bodyHtml' in request.resource.data)
+          || (request.resource.data.bodyHtml is string
+            && request.resource.data.bodyHtml.size() <= 4000))
+        && request.resource.data.createdAt == request.time
+        && (!('attachments' in request.resource.data)
+          || (request.resource.data.attachments is list
+            && request.resource.data.attachments.size() <= 5))
+        && (!('repostOf' in request.resource.data)
+          || (request.resource.data.repostOf is map
+            && request.resource.data.repostOf.keys().hasOnly(['postId', 'ownerUid', 'authorName'])
+            && request.resource.data.repostOf.postId is string
+            && request.resource.data.repostOf.ownerUid is string
+            && request.resource.data.repostOf.authorName is string
+            && exists(/databases/$(database)/documents/brokerPosts/$(request.resource.data.repostOf.postId))
+            && get(/databases/$(database)/documents/brokerPosts/$(request.resource.data.repostOf.postId)).data.ownerUid == request.resource.data.repostOf.ownerUid
+            && request.resource.data.repostOf.ownerUid != request.auth.uid));
+
+      allow update: if false;
+      allow delete: if hasActiveSession()
+        && resource.data.ownerUid == request.auth.uid;
+
+      match /replies/{replyId} {
+        allow read: if hasActiveSession();
+
+        allow create: if hasActiveSession()
+          && exists(/databases/$(database)/documents/brokerPosts/$(postId))
+          && get(/databases/$(database)/documents/brokerPosts/$(postId)).data.ownerUid != request.auth.uid
+          && request.resource.data.keys().hasAll(['ownerUid', 'body', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['ownerUid', 'body', 'createdAt'])
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.body is string
+          && request.resource.data.body.size() >= 1
+          && request.resource.data.body.size() <= 140
+          && request.resource.data.createdAt == request.time;
+
+        allow update: if false;
+        // A reply author may delete their reply. The parent post's author can
+        // also remove replies when deleting that post.
+        allow delete: if hasActiveSession()
+          && (
+            resource.data.ownerUid == request.auth.uid
+            || get(/databases/$(database)/documents/brokerPosts/$(postId)).data.ownerUid == request.auth.uid
+          );
+      }
+    }
+
+    // A member's likes are stored only in that member's private subcollection.
+    // No other member (including the author of a liked post) can read them.
+    match /userPostLikes/{userId}/likes/{postId} {
+      allow read, delete: if hasActiveSession()
+        && request.auth.uid == userId;
+
+      allow create, update: if hasActiveSession()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasAll(['postId', 'likedAt'])
+        && request.resource.data.keys().hasOnly(['postId', 'likedAt'])
+        && request.resource.data.postId == postId
+        && request.resource.data.likedAt == request.time
+        && exists(/databases/$(database)/documents/brokerPosts/$(postId));
+    }
+
+
+    // Hamlet deal records are private to the signed-in broker who owns them.
+    match /hamletDeals/{dealId} {
+      // The designated super-admin may inspect deal authorship for platform auditing.
+      // All other authenticated members can read only their own private deal records.
+      allow read: if isSuperAdmin()
+        || (hasActiveSession() && resource.data.uid == request.auth.uid);
+
+      allow create: if hasActiveSession()
+        && request.resource.data.keys().hasAll([
+          'id','uid','name','property','type','value','stage','owner','client','notes','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id','uid','name','property','propertyResourceId','contactUid','type','value','stage','owner','client','notes','sustainability','createdAt','updatedAt'
+        ])
+        && request.resource.data.id == dealId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.property is string
+        && request.resource.data.property.size() <= 120
+        && (!('propertyResourceId' in request.resource.data)
+          || request.resource.data.propertyResourceId == ''
+          || (request.resource.data.propertyResourceId is string
+            && request.resource.data.propertyResourceId.size() <= 200
+            && exists(/databases/$(database)/documents/commercialProperties/$(request.resource.data.propertyResourceId))
+            && get(/databases/$(database)/documents/commercialProperties/$(request.resource.data.propertyResourceId)).data.ownerUid == request.auth.uid))
+        && (!('contactUid' in request.resource.data)
+          || (request.resource.data.contactUid is string
+            && request.resource.data.contactUid.size() <= 128
+            && exists(/databases/$(database)/documents/publicProfiles/$(request.resource.data.contactUid))))
+        && request.resource.data.type in ['Acquisition','Disposal','Leasing','Investment','Development']
+        && request.resource.data.value is number
+        && request.resource.data.value >= 0
+        && request.resource.data.stage in [
+          'Initial Inspection','LOI Issued','Due Diligence','Under Contract',
+          'Lease Execution','Closing','Commission Payout','Closed'
+        ]
+        && request.resource.data.owner is string
+        && request.resource.data.owner.size() <= 80
+        && request.resource.data.client is string
+        && request.resource.data.client.size() <= 100
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 1000
+        && (!request.resource.data.keys().hasAny(['sustainability'])
+          || (request.resource.data.sustainability is map
+            && request.resource.data.sustainability.keys().hasOnly([
+              'leedLevel','leedScore','leedReference','leedDate','leedStatus',
+              'breeamRating','breeamScore','breeamReference','breeamDate','breeamStatus',
+              'epc','energy','carbon','water','notes'
+            ])
+            && (!('leedLevel' in request.resource.data.sustainability) || request.resource.data.sustainability.leedLevel is string)
+            && (!('leedScore' in request.resource.data.sustainability) || request.resource.data.sustainability.leedScore == '' || (request.resource.data.sustainability.leedScore is number && request.resource.data.sustainability.leedScore >= 0 && request.resource.data.sustainability.leedScore <= 110))
+            && (!('leedReference' in request.resource.data.sustainability) || (request.resource.data.sustainability.leedReference is string && request.resource.data.sustainability.leedReference.size() <= 120))
+            && (!('leedDate' in request.resource.data.sustainability) || request.resource.data.sustainability.leedDate is string)
+            && (!('leedStatus' in request.resource.data.sustainability) || request.resource.data.sustainability.leedStatus in ['not-verified','verified-by-member','document-attached','expired','in-progress'])
+            && (!('breeamRating' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamRating is string)
+            && (!('breeamScore' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamScore == '' || (request.resource.data.sustainability.breeamScore is number && request.resource.data.sustainability.breeamScore >= 0 && request.resource.data.sustainability.breeamScore <= 100))
+            && (!('breeamReference' in request.resource.data.sustainability) || (request.resource.data.sustainability.breeamReference is string && request.resource.data.sustainability.breeamReference.size() <= 120))
+            && (!('breeamDate' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamDate is string)
+            && (!('breeamStatus' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamStatus in ['not-verified','verified-by-member','document-attached','expired','in-progress'])
+            && (!('epc' in request.resource.data.sustainability) || request.resource.data.sustainability.epc is string)
+            && (!('energy' in request.resource.data.sustainability) || (request.resource.data.sustainability.energy is string && request.resource.data.sustainability.energy.size() <= 100))
+            && (!('carbon' in request.resource.data.sustainability) || (request.resource.data.sustainability.carbon is string && request.resource.data.sustainability.carbon.size() <= 100))
+            && (!('water' in request.resource.data.sustainability) || (request.resource.data.sustainability.water is string && request.resource.data.sustainability.water.size() <= 100))
+            && (!('notes' in request.resource.data.sustainability) || (request.resource.data.sustainability.notes is string && request.resource.data.sustainability.notes.size() <= 600))))
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdAt.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if hasActiveSession()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'id','uid','name','property','type','value','stage','owner','client','notes','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id','uid','name','property','propertyResourceId','contactUid','type','value','stage','owner','client','notes','sustainability','createdAt','updatedAt'
+        ])
+        && request.resource.data.id == dealId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.property is string
+        && request.resource.data.property.size() <= 120
+        && (!('propertyResourceId' in request.resource.data)
+          || request.resource.data.propertyResourceId == ''
+          || (request.resource.data.propertyResourceId is string
+            && request.resource.data.propertyResourceId.size() <= 200
+            && exists(/databases/$(database)/documents/commercialProperties/$(request.resource.data.propertyResourceId))
+            && get(/databases/$(database)/documents/commercialProperties/$(request.resource.data.propertyResourceId)).data.ownerUid == request.auth.uid))
+        && (!('contactUid' in request.resource.data)
+          || (request.resource.data.contactUid is string
+            && request.resource.data.contactUid.size() <= 128
+            && exists(/databases/$(database)/documents/publicProfiles/$(request.resource.data.contactUid))))
+        && request.resource.data.type in ['Acquisition','Disposal','Leasing','Investment','Development']
+        && request.resource.data.value is number
+        && request.resource.data.value >= 0
+        && request.resource.data.stage in [
+          'Initial Inspection','LOI Issued','Due Diligence','Under Contract',
+          'Lease Execution','Closing','Commission Payout','Closed'
+        ]
+        && request.resource.data.owner is string
+        && request.resource.data.owner.size() <= 80
+        && request.resource.data.client is string
+        && request.resource.data.client.size() <= 100
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 1000
+        && (!request.resource.data.keys().hasAny(['sustainability'])
+          || (request.resource.data.sustainability is map
+            && request.resource.data.sustainability.keys().hasOnly([
+              'leedLevel','leedScore','leedReference','leedDate','leedStatus',
+              'breeamRating','breeamScore','breeamReference','breeamDate','breeamStatus',
+              'epc','energy','carbon','water','notes'
+            ])
+            && (!('leedLevel' in request.resource.data.sustainability) || request.resource.data.sustainability.leedLevel is string)
+            && (!('leedScore' in request.resource.data.sustainability) || request.resource.data.sustainability.leedScore == '' || (request.resource.data.sustainability.leedScore is number && request.resource.data.sustainability.leedScore >= 0 && request.resource.data.sustainability.leedScore <= 110))
+            && (!('leedReference' in request.resource.data.sustainability) || (request.resource.data.sustainability.leedReference is string && request.resource.data.sustainability.leedReference.size() <= 120))
+            && (!('leedDate' in request.resource.data.sustainability) || request.resource.data.sustainability.leedDate is string)
+            && (!('leedStatus' in request.resource.data.sustainability) || request.resource.data.sustainability.leedStatus in ['not-verified','verified-by-member','document-attached','expired','in-progress'])
+            && (!('breeamRating' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamRating is string)
+            && (!('breeamScore' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamScore == '' || (request.resource.data.sustainability.breeamScore is number && request.resource.data.sustainability.breeamScore >= 0 && request.resource.data.sustainability.breeamScore <= 100))
+            && (!('breeamReference' in request.resource.data.sustainability) || (request.resource.data.sustainability.breeamReference is string && request.resource.data.sustainability.breeamReference.size() <= 120))
+            && (!('breeamDate' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamDate is string)
+            && (!('breeamStatus' in request.resource.data.sustainability) || request.resource.data.sustainability.breeamStatus in ['not-verified','verified-by-member','document-attached','expired','in-progress'])
+            && (!('epc' in request.resource.data.sustainability) || request.resource.data.sustainability.epc is string)
+            && (!('energy' in request.resource.data.sustainability) || (request.resource.data.sustainability.energy is string && request.resource.data.sustainability.energy.size() <= 100))
+            && (!('carbon' in request.resource.data.sustainability) || (request.resource.data.sustainability.carbon is string && request.resource.data.sustainability.carbon.size() <= 100))
+            && (!('water' in request.resource.data.sustainability) || (request.resource.data.sustainability.water is string && request.resource.data.sustainability.water.size() <= 100))
+            && (!('notes' in request.resource.data.sustainability) || (request.resource.data.sustainability.notes is string && request.resource.data.sustainability.notes.size() <= 600))))
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
+    }
+
+    // Critical-path milestones are private, owner-managed records. A separate
+    // server-only delivery log prevents ordinary clients from spoofing sent reminders.
+    match /hamletReminders/{reminderId} {
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+
+      allow create: if hasActiveSession()
+        && request.resource.data.keys().hasAll([
+          'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
+        ])
+        && request.resource.data.id == reminderId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.dealId is string
+        && request.resource.data.dealId.size() <= 200
+        && request.resource.data.dueDate is string
+        && request.resource.data.dueDate.size() == 10
+        && request.resource.data.owner is string
+        && request.resource.data.owner.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 1000
+        && request.resource.data.leadDays is int
+        && request.resource.data.leadDays >= 0
+        && request.resource.data.leadDays <= 30
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 800
+        && request.resource.data.done is bool
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdAt.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if hasActiveSession()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'id','uid','title','dealId','dueDate','owner','email','leadDays','notes','done','createdAt','updatedAt'
+        ])
+        && request.resource.data.id == reminderId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.dealId is string
+        && request.resource.data.dealId.size() <= 200
+        && request.resource.data.dueDate is string
+        && request.resource.data.dueDate.size() == 10
+        && request.resource.data.owner is string
+        && request.resource.data.owner.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 1000
+        && request.resource.data.leadDays is int
+        && request.resource.data.leadDays >= 0
+        && request.resource.data.leadDays <= 30
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 800
+        && request.resource.data.done is bool
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
+    }
+
+    match /hamletReminderDeliveries/{deliveryId} {
+      allow read, write: if false;
+    }
+
+
+    // Hamlet transaction history is append-only for authenticated clients.
+    // Server administrators can retain/export these events independently.
+    // History entries are created only by the trusted Cloud Function.
+    // Authenticated owners can read their own records; clients cannot alter them.
+    match /hamletDealEvents/{eventId} {
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+
+    // Immutable audit events are written by trusted Cloud Functions only.
+    // Super-admins can inspect platform-wide history; members can read their own.
+    match /hamletDealEvents/{eventId} {
+      allow read: if hasActiveSession()
+        && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
+          && request.auth.token.email_verified == true
+          || resource.data.uid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    match /hamletPropertyEvents/{eventId} {
+      allow read: if hasActiveSession()
+        && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
+          && request.auth.token.email_verified == true
+          || resource.data.uid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    match /hamletResidentialPropertyEvents/{eventId} {
+      allow read: if hasActiveSession()
+        && (request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
+          && request.auth.token.email_verified == true
+          || resource.data.uid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
+    // Private transaction document metadata. Binary files live in a matching
+    // owner-scoped Storage path and are separately protected by storage.rules.
+    match /hamletDocuments/{documentId} {
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+      allow create: if hasActiveSession()
+        && request.resource.data.keys().hasAll(['id','uid','dealId','title','category','fileName','storagePath','size','contentType','notes','createdAt'])
+        && request.resource.data.keys().hasOnly(['id','uid','dealId','title','category','fileName','storagePath','size','contentType','notes','createdAt'])
+        && request.resource.data.id == documentId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.dealId is string
+        && exists(/databases/$(database)/documents/hamletDeals/$(request.resource.data.dealId))
+        && get(/databases/$(database)/documents/hamletDeals/$(request.resource.data.dealId)).data.uid == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.category is string
+        && request.resource.data.category.size() <= 50
+        && request.resource.data.fileName is string
+        && request.resource.data.fileName.size() <= 180
+        && request.resource.data.storagePath is string
+        && request.resource.data.storagePath.matches('hamletDocuments/' + request.auth.uid + '/.*')
+        && request.resource.data.size is int
+        && request.resource.data.size > 0
+        && request.resource.data.size <= 15 * 1024 * 1024
+        && request.resource.data.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 300
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
+    }
+
+    // Saved searches are private to their owner and keep the alert cursor used
+    // to detect new matching deals when the workspace is opened.
+    match /hamletSavedSearches/{searchId} {
+      allow read: if hasActiveSession() && resource.data.uid == request.auth.uid;
+      allow create: if hasActiveSession()
+        && request.resource.data.keys().hasAll(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
+        && request.resource.data.id == searchId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.query is string
+        && request.resource.data.query.size() <= 100
+        && request.resource.data.stage in ['', 'Initial Inspection','LOI Issued','Due Diligence','Under Contract','Lease Execution','Closing','Commission Payout','Closed']
+        && request.resource.data.type in ['', 'Acquisition','Disposal','Leasing','Investment','Development']
+        && request.resource.data.alertsEnabled is bool
+        && request.resource.data.lastMatchedIds is list
+        && request.resource.data.lastMatchedIds.size() <= 500
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdAt.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+      allow update: if hasActiveSession()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['id','uid','name','query','stage','type','alertsEnabled','lastMatchedIds','createdAt','updatedAt'])
+        && request.resource.data.id == searchId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.query is string
+        && request.resource.data.query.size() <= 100
+        && request.resource.data.stage in ['', 'Initial Inspection','LOI Issued','Due Diligence','Under Contract','Lease Execution','Closing','Commission Payout','Closed']
+        && request.resource.data.type in ['', 'Acquisition','Disposal','Leasing','Investment','Development']
+        && request.resource.data.alertsEnabled is bool
+        && request.resource.data.lastMatchedIds is list
+        && request.resource.data.lastMatchedIds.size() <= 500
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if hasActiveSession() && resource.data.uid == request.auth.uid;
+    }
+
+    // Search analytics events: bounded, minimally identifying client-submitted records.
+    // Reads are granted only to the designated super administrator by the catch-all rule below.
+    match /searchAnalyticsEvents/{eventId} {
+      allow create: if (
+        request.resource.data.keys().hasAll(['query','area','path','uid','createdAt'])
+        && request.resource.data.keys().hasOnly(['query','area','path','uid','createdAt'])
+        && request.resource.data.query is string
+        && request.resource.data.query.size() >= 2
+        && request.resource.data.query.size() <= 100
+        && request.resource.data.area is string
+        && request.resource.data.area.size() <= 80
+        && request.resource.data.path is string
+        && request.resource.data.path.size() <= 160
+        && request.resource.data.uid == null
+        && request.resource.data.createdAt == request.time
+      ) || (
+        hasActiveSession()
+        && request.resource.data.keys().hasAll(['query','area','path','uid','createdAt'])
+        && request.resource.data.keys().hasOnly(['query','area','path','uid','createdAt'])
+        && request.resource.data.query is string
+        && request.resource.data.query.size() >= 2
+        && request.resource.data.query.size() <= 100
+        && request.resource.data.area is string
+        && request.resource.data.area.size() <= 80
+        && request.resource.data.path is string
+        && request.resource.data.path.size() <= 160
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+      );
+      allow update, delete: if false;
+    }
+
+    // Read-only platform-wide access for the designated Hamlet super administrator.
+    // Keep this identity aligned with the administrator configured in admin.html.
+    match /{document=**} {
+      allow read: if hasActiveSession()
         && request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
         && request.auth.token.email_verified == true;
     }
