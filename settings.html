@@ -772,6 +772,8 @@
           revokeOtherDeviceSessionsBtn.disabled=false;
         }
       });
+      window.addEventListener('hamlet:session-ready', loadDeviceSessions);
+      window.addEventListener('hamlet:session-signed-out', function () { if (deviceSessionStatus) deviceSessionStatus.textContent = 'Sign in to manage your devices.'; });
       auth.onAuthStateChanged(function (user) {
         if (!user) { showSignedOut(); return; }
         showSignedIn(user);
