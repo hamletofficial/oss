@@ -190,6 +190,26 @@
   <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-2">
   <link rel="stylesheet" href="/app-page-transition.css">
   <link rel="stylesheet" href="/theme.css?v=20261029-2">
+
+  <style id="live-background-image-preservation">
+    /* Keep the page-level canvas transparent so the existing image remains visible. */
+    html, html body,
+    body.auth-pending,
+    body.auth-pending .page-wrapper,
+    .page-wrapper,
+    main.resource-shell {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+    body::before {
+      z-index: 0;
+    }
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body class="auth-pending">
 <div class="page-wrapper">
