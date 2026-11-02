@@ -698,6 +698,80 @@
         mfaPanel.hidden = true;
         mfaMessage.textContent = '';
       });
+      const deviceSessionStatus = document.getElementById('deviceSessionStatus');
+      const deviceSessionList = document.getElementById('deviceSessionList');
+      const refreshDeviceSessionsBtn = document.getElementById('refreshDeviceSessions');
+      const revokeOtherDeviceSessionsBtn = document.getElementById('revokeOtherDeviceSessions');
+      async function callDeviceSessionApi(name, data) {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Sign in to manage devices.');
+        const token = await user.getIdToken();
+        const response = await fetch('https://us-central1-wale-491805.cloudfunctions.net/' + name, {
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer ' + token},
+          body:JSON.stringify({data:data || {}})
+        });
+        const payload = await response.json();
+        if (!response.ok || payload.error) throw new Error(payload.error && payload.error.message || 'Device management is unavailable.');
+        return payload.result;
+      }
+      function formatDeviceDate(value) {
+        return value ? new Date(value).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'}) : 'Not available';
+      }
+      async function loadDeviceSessions() {
+        if (!deviceSessionStatus || !deviceSessionList) return;
+        deviceSessionStatus.textContent='Loading device sessions…';
+        deviceSessionList.replaceChildren();
+        if(refreshDeviceSessionsBtn)refreshDeviceSessionsBtn.disabled=true;
+        if(revokeOtherDeviceSessionsBtn)revokeOtherDeviceSessionsBtn.disabled=true;
+        try {
+          const result=await callDeviceSessionApi('listHamletDeviceSessions');
+          const sessions=result.sessions||[];
+          deviceSessionStatus.textContent=sessions.length ? sessions.length+' registered device session(s).' : 'No registered device sessions found.';
+          sessions.forEach(function(session) {
+            const card=document.createElement('article');
+            card.style.cssText='padding:14px;border:1px solid #334155;border-radius:10px;background:#1f2937;color:#f3f4f6;';
+            const title=document.createElement('strong');
+            title.style.color='#fff';
+            title.textContent=session.deviceName+(session.current?' · This device':'');
+            const details=document.createElement('p');
+            details.style.cssText='margin:6px 0;color:#cbd5e1;font-size:.88rem;';
+            details.textContent=(session.active?'Active':'Revoked')+' · Last activity: '+formatDeviceDate(session.lastActivityAt)+' · Expires: '+formatDeviceDate(session.expiresAt);
+            const agent=document.createElement('p');
+            agent.style.cssText='margin:0;color:#94a3b8;font-size:.78rem;overflow-wrap:anywhere;';
+            agent.textContent=session.userAgent||'Browser details unavailable';
+            card.append(title,details,agent);
+            if(session.active&&!session.current) {
+              const revoke=document.createElement('button');
+              revoke.type='button';revoke.className='btn btn-outline';revoke.textContent='Sign out this device';revoke.style.marginTop='10px';
+              revoke.addEventListener('click',async function(){
+                revoke.disabled=true;
+                try { await callDeviceSessionApi('revokeHamletDeviceSession',{sessionId:session.sessionId}); await loadDeviceSessions(); }
+                catch(error){deviceSessionStatus.textContent=error.message;revoke.disabled=false;}
+              });
+              card.appendChild(revoke);
+            }
+            deviceSessionList.appendChild(card);
+          });
+        } catch(error) {
+          deviceSessionStatus.textContent=error.message||'Unable to load device sessions.';
+        } finally {
+          if(refreshDeviceSessionsBtn)refreshDeviceSessionsBtn.disabled=false;
+          if(revokeOtherDeviceSessionsBtn)revokeOtherDeviceSessionsBtn.disabled=false;
+        }
+      }
+      if(refreshDeviceSessionsBtn)refreshDeviceSessionsBtn.addEventListener('click',loadDeviceSessions);
+      if(revokeOtherDeviceSessionsBtn)revokeOtherDeviceSessionsBtn.addEventListener('click',async function(){
+        if(!window.confirm('Sign out all other devices connected to this Hamlet account?'))return;
+        revokeOtherDeviceSessionsBtn.disabled=true;
+        try {
+          const result=await callDeviceSessionApi('revokeOtherHamletDeviceSessions');
+          deviceSessionStatus.textContent=(result.revoked||0)+' other device session(s) signed out.';
+          await loadDeviceSessions();
+        } catch(error) {
+          deviceSessionStatus.textContent=error.message||'Unable to sign out other devices.';
+          revokeOtherDeviceSessionsBtn.disabled=false;
+        }
+      });
       auth.onAuthStateChanged(function (user) {
         if (!user) { showSignedOut(); return; }
         showSignedIn(user);
