@@ -924,7 +924,7 @@ exports.getSuperAdminAccounts = onCall({
       String(token.email || "").trim().toLowerCase() !== allowedEmail ||
       token.email_verified !== true ||
       !token.firebase ||
-      token.firebase.sign_in_provider !== "password") {
+      !(token.firebase.sign_in_provider === "password" || (token.firebase.sign_in_provider === "custom" && token.hamletOriginalSignInProvider === "password" && token.hamletMfaVerified === true))) {
     throw new HttpsError("permission-denied", "Only the verified designated Super Administrator may retrieve Firebase accounts.");
   }
   const suppliedToken = request.data && request.data.pageToken;
@@ -1066,7 +1066,8 @@ exports.createHamletDeviceSession = onCall({region:"us-central1",invoker:"public
       revokedAt:admin.firestore.FieldValue.delete()
     },{merge:true});
   }
-  const customToken = await admin.auth().createCustomToken(uid,{hamletSessionId:sessionId});
+  const customClaims = {hamletSessionId:sessionId,hamletOriginalSignInProvider:(request.auth.token.firebase && request.auth.token.firebase.sign_in_provider) || "unknown",hamletMfaVerified:!!(request.auth.token.firebase && request.auth.token.firebase.sign_in_second_factor)};
+  const customToken = await admin.auth().createCustomToken(uid,customClaims);
   return {ok:true,customToken:customToken,sessionId:sessionId};
 });
 
