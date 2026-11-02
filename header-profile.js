@@ -222,7 +222,7 @@
   }
   function startInactivityMonitor(user) {
     stopInactivityMonitor();
-    if (!user || /(?:^|\\/)login\\.html$/.test(window.location.pathname)) return;
+    if (!user || window.location.pathname.split('/').pop() === 'login.html') return;
     inactivityState.uid = user.uid;
     if (!readLastActivity()) { try { localStorage.setItem(INACTIVITY_STORAGE_KEY, String(Date.now())); } catch (error) {} }
     INACTIVITY_EVENTS.forEach(function (name) { document.addEventListener(name, inactivityActivityHandler, true); });
