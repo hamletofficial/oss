@@ -2,12 +2,20 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Every authenticated client request must present a server-issued,
-    // device-scoped session claim backed by an active, unexpired registry row.
+    // Server-issued, device-scoped session claim backed by an active registry row.
     function hasActiveSession() {
       return request.auth != null
         && request.auth.token.hamletSessionId is string
-        && request.auth.token.hamletSessionId.matches('^[A-Za-z0-9_-]{20,80}    // Server-enforced administrator identity. Keep this UID aligned with the
+        && exists(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId))
+        && get(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.active == true
+        && get(/databases/$(database)/documents/userSessions/$(request.auth.uid)/sessions/$(request.auth.token.hamletSessionId)).data.expiresAt > request.time;
+    }
+
+    // Session records are server-owned; clients use the callable Session Manager API.
+    match /userSessions/{userId}/sessions/{sessionId} {
+      allow read, write: if false;
+    }
+    // Server-enforced administrator identity. Keep this UID aligned with the
     // dedicated email/password account checked by /app/hamlet/admin.html.
     function isSuperAdmin() {
       return hasActiveSession()
