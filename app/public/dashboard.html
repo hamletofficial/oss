@@ -318,7 +318,7 @@
           const c=payload.certificate||{};
           if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate address and postcode do not match subsection 1. No EPC fields were changed.');
           const returnedNumber=String(c.certificate_number||c.certificateNumber||'').trim();
-          if(returnedNumber&&returnedNumber.replace(/\\D/g,'')!==certificateNumber)throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
+          if(returnedNumber&&returnedNumber.replace(/[^0-9]/g,'')!==certificateNumber)throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
           document.getElementById('epcRating').value=c.current_energy_efficiency_band||c.currentEnergyEfficiencyBand||'';
           document.getElementById('epcCertificateNumber').value=formatEpcNumber(returnedNumber||certificateNumber);
           const date=c.registration_date||c.registrationDate||'';
@@ -326,7 +326,7 @@
           document.getElementById('epcUprn').value=c.uprn||'';
           epcLookupStatus.textContent='Verified EPC certificate and applied it to '+address+'.';epcLookupStatus.className='status success';
         }catch(error){epcLookupStatus.textContent=error.message||'Could not verify EPC. Check the certificate number and property details.';epcLookupStatus.className='status error';}
-        finally{verifyEpcBtn.disabled=epcCertificateInput.value.length!==20;}
+        finally{verifyEpcBtn.disabled=epcCertificateInput.value.replace(/[^0-9]/g,'').length!==20;}
       });
       ['address','postcode'].forEach(id=>document.getElementById(id).addEventListener('input',function(){
         ['epcRating','epcCertificateNumber','epcRegistrationDate','epcUprn'].forEach(fieldId=>{document.getElementById(fieldId).value='';});
