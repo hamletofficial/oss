@@ -1,5 +1,6 @@
 name = "hamlet-ai-gateway-staging"
 main = "src/index.js"
+account_id = "6905aedcfe714343bcf5a3d3f79af954"
 compatibility_date = "2026-10-19"
 workers_dev = true
 
