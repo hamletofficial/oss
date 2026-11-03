@@ -120,7 +120,8 @@ async function handleEpcCertificate(request, env, origin) {
   if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
   let body;try{body=await readJsonLimited(request,8000);}catch{return json({error:"Provide a valid JSON request."},400,origin);}
   const certificateNumber=getText(body?.certificateNumber,80),address=getText(body?.address,250),postcode=getText(body?.postcode,20);
-  if(!certificateNumber||!address||!postcode)return json({error:"A certificate number, property address and postcode are required."},400,origin);
+  if(!/^\\d{20}$/.test(certificateNumber))return json({error:"Enter a valid 20-digit EPC certificate number."},400,origin);
+  if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
   const apiUrl=new URL("https://get-energy-performance-data.epb-integration.digital.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
