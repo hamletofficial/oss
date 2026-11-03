@@ -107,7 +107,7 @@ async function handleEpcSearch(request, env, origin) {
   let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
   const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
-  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/non-domestic/search");
+  const apiUrl=new URL("https://get-energy-performance-data.epb-integration.digital.communities.gov.uk/api/non-domestic/search");
   apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("page_size","100");
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
@@ -121,7 +121,7 @@ async function handleEpcCertificate(request, env, origin) {
   let body;try{body=await readJsonLimited(request,8000);}catch{return json({error:"Provide a valid JSON request."},400,origin);}
   const certificateNumber=getText(body?.certificateNumber,80),address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!certificateNumber||!address||!postcode)return json({error:"A certificate number, property address and postcode are required."},400,origin);
-  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
+  const apiUrl=new URL("https://get-energy-performance-data.epb-integration.digital.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(!upstream.ok){console.error("Government EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government EPC certificate verification failed."},upstream.status===404?404:502,origin);}
