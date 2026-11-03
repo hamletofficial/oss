@@ -262,11 +262,13 @@
         function render(places,epcRecords){
           close();
           addGroup('Google Places',places,choosePlace);
-          addGroup('Non-domestic EPC register',epcRecords,chooseEpcRecord,function(record){
+          function epcDetails(record){
             const address=epcAddress(record);
             const meta=[record.current_energy_efficiency_band||record.currentEnergyEfficiencyBand?'Band '+(record.current_energy_efficiency_band||record.currentEnergyEfficiencyBand):'',record.certificate_number||record.certificateNumber?formatEpcNumber(record.certificate_number||record.certificateNumber):''].filter(Boolean).join(' · ');
-            return{main:address+(record.postcode?', '+record.postcode:''),detail:meta||'Non-domestic certificate record'};
-          });
+            return{main:address+(record.postcode?', '+record.postcode:''),detail:meta||'EPC certificate record'};
+          }
+          addGroup('Domestic EPC register',epcRecords.filter(record=>record.certificateCategory==='domestic'),chooseEpcRecord,epcDetails);
+          addGroup('Non-domestic EPC register',epcRecords.filter(record=>record.certificateCategory==='non-domestic'),chooseEpcRecord,epcDetails);
           if(box.childElementCount){box.hidden=false;input.setAttribute('aria-expanded','true');}
         }
         function epcAddress(record){return [record.address_line_1||record.addressLine1,record.address_line_2||record.addressLine2,record.address_line_3||record.addressLine3,record.address_line_4||record.addressLine4,record.post_town||record.postTown].filter(Boolean).join(', ');}
@@ -282,7 +284,7 @@
           delete input.dataset.placeId;delete input.dataset.latitude;delete input.dataset.longitude;
           clearAppliedEpc();
           if(certificate&&typeof epcCertificateInput!=='undefined'){epcCertificateInput.value=formatEpcNumber(certificate);updateEpcNumberFeedback();}
-          status.textContent=certificate?'Non-domestic EPC address selected. Verify the certificate in subsection 3.':'Non-domestic EPC address selected. Check the address and postcode before saving.';
+          status.textContent=certificate?'EPC address selected. Verify the certificate in subsection 3.':'EPC address selected. Check the address and postcode before saving.';
         }
         async function choosePlace(prediction){
           const id=++seq;if(timer)clearTimeout(timer);close();status.textContent='Retrieving address details…';
@@ -314,7 +316,7 @@
             const results=await Promise.all([placesPromise,epcPromise]);
             if(id!==seq||input.value.trim()!==value||postcode.value.trim()!==pc)return;
             render(results[0],results[1]);
-            if(!box.hidden)status.textContent='Choose a Google Places result or a record from the non-domestic EPC register.';
+            if(!box.hidden)status.textContent='Choose a Google Places result or a domestic or non-domestic EPC register record.';
             else if(pc)status.textContent='No address or non-domestic EPC suggestions found. You can enter the details manually.';
           },300);
         }
