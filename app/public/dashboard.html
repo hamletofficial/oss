@@ -318,7 +318,7 @@
             else if(pc)status.textContent='No address or non-domestic EPC suggestions found. You can enter the details manually.';
           },300);
         }
-        input.addEventListener('input',()=>{updateMap(input.value);if(!postcode.value.trim()){const matchedPostcode=input.value.match(/\\b[A-Z]{1,2}\\d[A-Z\\d]?\\s*\\d[A-Z]{2}\\b/i);if(matchedPostcode)postcode.value=matchedPostcode[0].toUpperCase();}scheduleSearch(false);});
+        input.addEventListener('input',()=>{updateMap(input.value);if(!postcode.value.trim()){const matchedPostcode=input.value.match(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i);if(matchedPostcode)postcode.value=matchedPostcode[0].toUpperCase();}scheduleSearch(false);});
         postcode.addEventListener('input',()=>scheduleSearch(false));
         input.addEventListener('keydown',function(e){
           const items=Array.from(box.querySelectorAll('[role="option"]'));
@@ -384,7 +384,7 @@
       function epcMatchesProperty(record,address,postcode){
         const actualPostcode=epcNorm(record.postcode),expectedPostcode=epcNorm(postcode);
         const actualAddress=epcNorm([record.addressLine1||record.address_line_1,record.addressLine2||record.address_line_2,record.addressLine3||record.address_line_3,record.addressLine4||record.address_line_4,record.postTown||record.post_town].filter(Boolean).join(' '));
-        const expectedAddress=epcNorm(String(address||'').replace(/\\b[A-Z]{1,2}\\d[A-Z\\d]?\\s*\\d[A-Z]{2}\\b/i,''));
+        const expectedAddress=epcNorm(String(address||'').replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i,''));
         return Boolean(expectedPostcode&&actualPostcode===expectedPostcode&&expectedAddress&&actualAddress&&(actualAddress.includes(expectedAddress)||expectedAddress.includes(actualAddress)));
       }
       const epcDigitCount=document.getElementById('epcDigitCount');
