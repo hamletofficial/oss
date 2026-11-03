@@ -1,6 +1,12 @@
 name: Deploy Hamlet AI Worker to staging
 
 on:
+  push:
+    branches:
+      - feature/commercial-certifications-epc
+    paths:
+      - "worker/hamlet-ai/**"
+      - ".github/workflows/deploy-hamlet-ai-staging.yml"
   workflow_dispatch:
 
 permissions:
