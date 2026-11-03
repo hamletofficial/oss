@@ -183,13 +183,11 @@
             <div class="field full"><label for="propertyPhotos">Property photographs</label><input id="propertyPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="propertyPhotosHelp"><p class="photo-help" id="propertyPhotosHelp">Upload up to 6 JPEG, PNG or WebP images, maximum 8 MB each. Clear, current building or interior photographs work best. Uploaded images appear on the public portfolio and live member listings.</p><div class="photo-preview-grid" id="propertyPhotoPreview" aria-live="polite"></div></div>
                         <div class="field full form-section-heading"><h3>3. EPC and sustainability credentials</h3><p>Verify the Government non-domestic EPC against this property. Certificate details below come from the register; record additional sustainability standards separately.</p></div>
             <div class="field full" style="padding:1rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc">
-              <strong style="color:var(--ink)">Government non-domestic EPC record</strong>
-              <p class="photo-help" style="margin:.35rem 0 .75rem">Enter the 20-digit certificate number. Hamlet checks the register address and postcode against subsection 1, then shows the certificate data returned by the API. Available details vary by certificate scheme.</p>
-              <div class="field full" style="margin-top:.65rem"><label for="epcCertificateLookup">20-digit EPC certificate number</label><input id="epcCertificateLookup" type="text" inputmode="numeric" autocomplete="off" maxlength="24" pattern="[0-9]{4}(-[0-9]{4}){4}" placeholder="1234-5678-1234-5678-1234" aria-describedby="epcLookupHelp"><small class="photo-help" id="epcLookupHelp">Enter 20 digits; hyphens are added automatically. The certificate will be applied only when its property address and postcode match subsection 1. <span id="epcDigitCount" aria-live="polite">0 of 20 digits entered.</span></small></div>
-              <div class="form-actions" style="margin-top:.65rem"><button class="btn btn-primary" id="verifyEpcBtn" type="button" disabled>Verify and apply EPC</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter a 20-digit certificate number.</span></div>
+              <strong style="color:var(--ink)">Government EPC lookup</strong>
+              <p class="photo-help" style="margin:.35rem 0 .75rem">Searches non-domestic EPC records using the address and postcode entered in subsection 1. Confirm the returned address before applying the certificate.</p>
+              <div class="form-actions" style="margin-top:0"><button class="btn btn-outline" id="lookupEpcBtn" type="button">Find EPC for this property</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter the property address and postcode in subsection 1 first.</span></div>
+              <div class="field full" id="epcMatchField" hidden style="margin-top:.8rem"><label for="epcMatchSelect">Matching Government EPC record</label><select id="epcMatchSelect"><option value="">Choose a certificate</option></select><button class="btn btn-primary" id="applyEpcBtn" type="button" disabled>Apply selected EPC</button></div>
             </div>
-            <div class="field full form-section-heading"><h3>Government register data</h3><p>Read-only values returned for the verified certificate. Some values may be blank when they are not supplied for that scheme.</p></div>
-            <div class="field"><label for="epcCertificateNumber">EPC certificate number</label><input id="epcCertificateNumber" maxlength="80" readonly placeholder="Returned or verified certificate number"></div>
             <div class="field"><label for="epcRating">EPC energy efficiency band</label><input id="epcRating" maxlength="24" readonly placeholder="Where supplied by the register"></div>
             <div class="field"><label for="epcAssetRating">EPC asset rating score</label><input id="epcAssetRating" maxlength="24" readonly placeholder="Where supplied by the register"></div>
             <div class="field"><label for="epcStatus">Register status</label><input id="epcStatus" maxlength="80" readonly placeholder="Where supplied by the register"></div>
@@ -381,73 +379,52 @@
         }
       }
 
-      const epcCertificateInput=document.getElementById('epcCertificateLookup'),verifyEpcBtn=document.getElementById('verifyEpcBtn'),epcLookupStatus=document.getElementById('epcLookupStatus');
+      const epcLookupBtn=document.getElementById('lookupEpcBtn'),epcLookupStatus=document.getElementById('epcLookupStatus'),epcMatchField=document.getElementById('epcMatchField'),epcMatchSelect=document.getElementById('epcMatchSelect'),applyEpcBtn=document.getElementById('applyEpcBtn');
+      let epcMatches=[],epcSearchIdentity='';
       function epcNorm(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
       function epcMatchesProperty(record,address,postcode){
         const actualPostcode=epcNorm(record.postcode),expectedPostcode=epcNorm(postcode);
         const actualAddress=epcNorm([record.addressLine1||record.address_line_1,record.addressLine2||record.address_line_2,record.addressLine3||record.address_line_3,record.addressLine4||record.address_line_4,record.postTown||record.post_town].filter(Boolean).join(' '));
-        const expectedAddress=epcNorm(String(address||'').replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i,''));
+        const expectedAddress=epcNorm(address);
         return Boolean(expectedPostcode&&actualPostcode===expectedPostcode&&expectedAddress&&actualAddress&&(actualAddress.includes(expectedAddress)||expectedAddress.includes(actualAddress)));
       }
-      const epcDigitCount=document.getElementById('epcDigitCount');
-      function formatEpcNumber(value){const digits=String(value||'').replace(/\D/g,'').slice(0,20);return digits.match(/.{1,4}/g)?.join('-')||'';}
-      function updateEpcNumberFeedback(){
-        const raw=epcCertificateInput.value,caret=epcCertificateInput.selectionStart??raw.length;
-        const digits=raw.replace(/\D/g,'').slice(0,20),digitsBeforeCaret=raw.slice(0,caret).replace(/\D/g,'').length;
-        epcCertificateInput.value=formatEpcNumber(digits);
-        let newCaret=0,seen=0;while(newCaret<epcCertificateInput.value.length&&seen<digitsBeforeCaret){if(/[0-9]/.test(epcCertificateInput.value[newCaret]))seen++;newCaret++;}
-        if(digitsBeforeCaret>0&&digitsBeforeCaret%4===0&&digitsBeforeCaret<20)newCaret++;
-        epcCertificateInput.setSelectionRange(newCaret,newCaret);
-        const count=digits.length;
-        verifyEpcBtn.disabled=count!==20;
-        epcDigitCount.textContent=count+' of 20 digits entered.';
-        if(count<20){epcLookupStatus.textContent='Enter all 20 digits before verifying.';epcLookupStatus.className='status';}
-        else{epcLookupStatus.textContent='Certificate number ready to verify against subsection 1.';epcLookupStatus.className='status';}
-      }
-      epcCertificateInput.addEventListener('input',updateEpcNumberFeedback);
-      updateEpcNumberFeedback();
-      verifyEpcBtn.addEventListener('click',async function(){
-        const certificateNumber=epcCertificateInput.value.trim();
+      epcLookupBtn.addEventListener('click',async function(){
         const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
-        if(!/^[0-9]{4}(-[0-9]{4}){4}$/.test(certificateNumber)){epcLookupStatus.textContent='Enter the full 20-digit EPC certificate number.';epcLookupStatus.className='status error';return;}
-        if(!address||!postcode){epcLookupStatus.textContent='Enter the property address and postcode in subsection 1 first.';epcLookupStatus.className='status error';return;}
-        if(!currentUser){epcLookupStatus.textContent='Sign in is required to verify an EPC.';epcLookupStatus.className='status error';return;}
-        verifyEpcBtn.disabled=true;epcLookupStatus.textContent='Verifying the certificate and property address…';epcLookupStatus.className='status';
+        if(!address||!postcode){epcLookupStatus.textContent='Complete the address and postcode in subsection 1 first.';epcLookupStatus.className='status error';return;}
+        if(!currentUser){epcLookupStatus.textContent='Sign in is required for EPC retrieval.';epcLookupStatus.className='status error';return;}
+        epcLookupBtn.disabled=true;applyEpcBtn.disabled=true;epcMatchField.hidden=true;epcLookupStatus.textContent='Searching the Government EPC register…';epcLookupStatus.className='status';
+        epcMatches=[];epcSearchIdentity=epcNorm(address)+'|'+epcNorm(postcode);
         try{
-          const token=await currentUser.getIdToken(),response=await fetch('https://hamlet-ai-gateway-staging.alfred-mayaki.workers.dev/v1/epc-certificate',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({certificateNumber,address,postcode})});
+          const token=await currentUser.getIdToken(),response=await fetch('https://hamlet-ai-gateway-staging.alfred-mayaki.workers.dev/v1/epc-search',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({address,postcode})});
           const payload=await response.json().catch(()=>({}));
-          if(!response.ok)throw new Error(payload.error||'EPC certificate verification failed.');
-          const c=payload.certificate||{};
-          if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate address and postcode do not match subsection 1. No EPC fields were changed.');
-          const returnedNumber=String(c.certificate_number||c.certificateNumber||'').trim();
-          if(returnedNumber&&returnedNumber.replace(/[^0-9]/g,'')!==certificateNumber.replace(/[^0-9]/g,''))throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
-          const epcText=function(){for(const key of arguments){const value=c[key];if(value!==undefined&&value!==null&&typeof value!=='object')return String(value);}return '';};
-          const epcDate=function(value){return String(value||'').slice(0,10);};
-          const certificateAddress=[c.address_line_1||c.addressLine1,c.address_line_2||c.addressLine2,c.address_line_3||c.addressLine3,c.address_line_4||c.addressLine4,c.post_town||c.postTown].filter(Boolean).join(', ');
-          const technicalInfo=c.technical_information||c.technicalInformation||{};
-          const floorArea=technicalInfo.floor_area??technicalInfo.floorArea??c.floor_area??c.floorArea??'';
-          document.getElementById('epcRating').value=epcText('asset_rating_band','assetRatingBand','current_energy_efficiency_band','currentEnergyEfficiencyBand');
-          document.getElementById('epcAssetRating').value=epcText('asset_rating','assetRating');
-          document.getElementById('epcCertificateNumber').value=formatEpcNumber(returnedNumber||certificateNumber);
-          document.getElementById('epcStatus').value=epcText('status');
-          document.getElementById('epcAssessmentType').value=epcText('assessment_type','assessmentType');
-          document.getElementById('epcSchemaType').value=epcText('schema_type','schemaType');
-          document.getElementById('epcPropertyType').value=epcText('property_type','propertyType');
-          document.getElementById('epcAddress').value=certificateAddress;
-          document.getElementById('epcPostcode').value=epcText('postcode');
-          document.getElementById('epcFloorArea').value=floorArea===''?'':String(floorArea);
-          document.getElementById('epcInspectionDate').value=epcDate(c.inspection_date||c.inspectionDate);
-          document.getElementById('epcRegistrationDate').value=epcDate(c.registration_date||c.registrationDate||c.issue_date||c.issueDate);
-          document.getElementById('epcValidUntil').value=epcDate(c.valid_until||c.validUntil);
-          document.getElementById('epcMethodology').value=epcText('methodology');
-          epcLookupStatus.textContent='Verified EPC certificate and applied it to '+address+'.';epcLookupStatus.className='status success';
-        }catch(error){epcLookupStatus.textContent=error.message||'Could not verify EPC. Check the certificate number and property details.';epcLookupStatus.className='status error';}
-        finally{verifyEpcBtn.disabled=epcCertificateInput.value.replace(/[^0-9]/g,'').length!==20;}
+          if(!response.ok)throw new Error(payload.error||'Government EPC search failed.');
+          epcMatches=(Array.isArray(payload.records)?payload.records:[]).filter(r=>epcMatchesProperty(r,address,postcode));
+          if(!epcMatches.length){epcLookupStatus.textContent='No EPC matched both the property address and postcode. Check subsection 1 or enter EPC details manually.';return;}
+          epcMatchSelect.innerHTML='<option value="">Choose a matching certificate</option>';
+          epcMatches.forEach((r,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=[r.currentEnergyEfficiencyBand||'Band unavailable',r.certificateNumber,r.addressLine1,r.postcode,r.registrationDate?new Date(r.registrationDate).toLocaleDateString('en-GB'):null].filter(Boolean).join(' · ');epcMatchSelect.appendChild(o);});
+          epcMatchField.hidden=false;epcLookupStatus.textContent=epcMatches.length+' matched record(s). Select the certificate for this building.';epcLookupStatus.className='status success';
+        }catch(error){epcLookupStatus.textContent=error.message||'EPC lookup failed. Manual entry remains available.';epcLookupStatus.className='status error';}
+        finally{epcLookupBtn.disabled=false;}
       });
-      ['address','postcode'].forEach(id=>document.getElementById(id).addEventListener('input',function(){
-        ['epcRating','epcAssetRating','epcCertificateNumber','epcStatus','epcAssessmentType','epcSchemaType','epcPropertyType','epcAddress','epcPostcode','epcFloorArea','epcInspectionDate','epcRegistrationDate','epcValidUntil','epcMethodology','epcUprn'].forEach(fieldId=>{const field=document.getElementById(fieldId);if(field)field.value='';});
-        epcLookupStatus.textContent='Property details changed. Verify the EPC again.';epcLookupStatus.className='status';
-      }));
+      epcMatchSelect.addEventListener('change',()=>{applyEpcBtn.disabled=epcMatchSelect.value==='';});
+      applyEpcBtn.addEventListener('click',async function(){
+        const r=epcMatches[Number(epcMatchSelect.value)];if(!r)return;
+        const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
+        if(epcNorm(address)+'|'+epcNorm(postcode)!==epcSearchIdentity||!epcMatchesProperty(r,address,postcode)){epcLookupStatus.textContent='Property details changed. Search again before applying an EPC.';epcLookupStatus.className='status error';return;}
+        applyEpcBtn.disabled=true;epcLookupStatus.textContent='Verifying full certificate record…';epcLookupStatus.className='status';
+        try{
+          const token=await currentUser.getIdToken(),response=await fetch('https://hamlet-ai-gateway-staging.alfred-mayaki.workers.dev/v1/epc-certificate',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({certificateNumber:r.certificateNumber,address,postcode})});
+          const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||'EPC certificate verification failed.');
+          const c=payload.certificate||{};if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate does not match the submitted property. No EPC fields were changed.');
+          document.getElementById('epcRating').value=c.current_energy_efficiency_band||c.currentEnergyEfficiencyBand||r.currentEnergyEfficiencyBand||'';
+          document.getElementById('epcCertificateNumber').value=r.certificateNumber;
+          const date=c.registration_date||c.registrationDate||r.registrationDate||'';document.getElementById('epcRegistrationDate').value=String(date).slice(0,10);
+          document.getElementById('epcUprn').value=c.uprn||r.uprn||'';
+          epcLookupStatus.textContent='Verified EPC applied to '+address+'.';epcLookupStatus.className='status success';
+        }catch(error){epcLookupStatus.textContent=error.message||'Could not verify EPC. Manual entry remains available.';epcLookupStatus.className='status error';}
+        finally{applyEpcBtn.disabled=epcMatchSelect.value==='';}
+      });
+      ['address','postcode'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{epcMatches=[];epcMatchField.hidden=true;applyEpcBtn.disabled=true;}));
 
       document.getElementById('newPropertyBtn').addEventListener('click',function(){propertyFormPanel.hidden=false;propertyFormPanel.scrollIntoView({behavior:'smooth',block:'start'});});
       
