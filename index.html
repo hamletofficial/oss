@@ -86,6 +86,21 @@
     .card h3{margin:.45rem 0;font-size:1.08rem}
     .card p{margin:0 0 .8rem;color:var(--muted);font-size:.95rem}
     .card a{font-weight:700}
+    .module-card{position:relative;isolation:isolate;overflow:hidden}
+    .module-card::before{content:"";position:absolute;z-index:0;inset:0;background-image:var(--module-art);background-repeat:no-repeat;background-position:right center;background-size:auto 125%;opacity:.5;pointer-events:none}
+    .module-card>*{position:relative;z-index:1}
+    .module-card--deal{--module-art:url("/assets/images/module-deal-intelligence.svg")}
+    .module-card--listings{--module-art:url("/assets/images/module-live-property-listings.svg")}
+    .module-card--resources{--module-art:url("/assets/images/module-manage-resources.svg")}
+    .module-card--directory{--module-art:url("/assets/images/module-member-directory.svg")}
+    .module-card--messages{--module-art:url("/assets/images/module-messages.svg")}
+    .module-card--social{--module-art:url("/assets/images/module-social-feed.svg")}
+    .module-card--insights{--module-art:url("/assets/images/module-insights-feed.svg")}
+    .module-card--profile{--module-art:url("/assets/images/module-profile-identity.svg")}
+    .module-card--briefs{--module-art:url("/assets/images/module-communications-briefs.svg")}
+    .module-card--settings{--module-art:url("/assets/images/module-account-settings.svg")}
+    .module-card--rankings{--module-art:url("/assets/images/module-broker-rankings.svg")}
+    .module-card--ai{--module-art:url("/assets/images/module-ai-workflow-tools.svg")}
     .card,.capability,.ticks li,.workflow article,.launch-card,.price-card,.preview-column,.preview-deal,.preview-mini{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background-color .22s ease}
     @media(hover:hover) and (pointer:fine){.card:hover,.capability:hover,.ticks li:hover,.workflow article:hover,.launch-card:hover,.price-card:hover,.preview-column:hover,.preview-deal:hover,.preview-mini:hover{transform:translateY(-4px);border-color:#93c5fd;box-shadow:0 14px 30px #0005,0 0 0 1px #60a5fa26}
     .card:hover,.launch-card:hover,.price-card:hover{box-shadow:0 18px 36px #0006,0 0 24px #2563eb18}}
@@ -479,18 +494,18 @@
       <div class="container">
         <div class="section-heading"><h2>Explore the modules</h2><p>Each module has a specific role. Use the links below to go straight to the relevant part of the IBR and hamlet environment.</p></div>
         <div class="grid">
-          <article class="card"><h3>1. Deal intelligence</h3><p>Bring commercial real estate opportunities into sharper focus in the hamlet workspace. Use deal intelligence to maintain context, assess progress and identify the next action or critical-path item.</p><a href="/app/hamlet/index.html">Explore deal intelligence →</a></article>
-          <article class="card"><h3>2. Live property listings</h3><p>Browse published commercial property opportunities, search listing details and move between the listings view and your resource-management tools.</p><a href="/app/public/live.html">Browse live listings →</a></article>
-          <article class="card"><h3>3. Manage resources</h3><p>Manage your property resources from the dashboard. Posting access may be subject to the platform's identity-verification requirements and policies.</p><a href="/app/public/dashboard.html">Open resource dashboard →</a></article>
-          <article class="card"><h3>4. Member directory</h3><p>Find other members and use profile information to understand who you are contacting. Availability indicators reflect platform activity signals, not a promise of immediate response.</p><a href="/directory.html">Open directory →</a></article>
-          <article class="card"><h3>5. Messages</h3><p>Keep member-to-member conversations in the mailbox. Depending on the conversation tools available, you can organise messages and share supported attachments.</p><a href="/messages.html">Open messages →</a></article>
-          <article class="card"><h3>6. Social feed</h3><p>Share concise professional updates that are separate from formal property listings. Follow relevant activity, react to posts and participate in discussions.</p><a href="/posts.html">Open social feed →</a></article>
-          <article class="card"><h3>7. Insights Feed</h3><p>Explore the Insights Feed and review the published member subscription options through the Members Area.</p><a href="/insights.html">Explore Insights Feed →</a></article>
-          <article class="card"><h3>8. Profile and identity</h3><p>Keep your member profile and contact details current. Where requested, follow the platform's identity-verification process and read what a verification indicator does—and does not—mean.</p><a href="/profile.html">View your profile →</a></article>
-          <article class="card"><h3>9. Communications briefs</h3><p>Submit a structured press or communications brief with the announcement, organisation and contact details needed for follow-up.</p><a href="/requests.html">Submit a brief →</a></article>
-          <article class="card"><h3>10. Account and settings</h3><p>Review account information and available security controls. Use strong authentication and keep your sign-in credentials private.</p><a href="/settings.html">Open settings →</a></article>
-          <article class="card"><h3>11. Broker Rankings</h3><p>Recognise achievement and inspire healthy competition across the broker community. Rankings compare average completed deal value using qualifying closed deals recorded in Hamlet; they offer visibility into performance, not a complete measure of professional value.</p><a href="/rankings.html">Explore Broker Rankings →</a></article>
-          <article class="card"><h3>12. AI workflow tools</h3><p>Deal Assistant helps turn deal notes into suggested next steps, dependencies and critical-path questions. Listings Copilot helps draft property marketing copy from particulars and sustainability details you provide. Review all outputs for accuracy before use.</p><a href="/app/hamlet/ai-assistant.html?task=deal_copilot">Open Deal Assistant →</a><p style="margin:.45rem 0 0"><a href="/app/hamlet/ai-assistant.html?task=listing_assistant">Open Listings Copilot →</a></p></article>
+          <article class="card module-card module-card--deal"><h3>1. Deal intelligence</h3><p>Bring commercial real estate opportunities into sharper focus in the hamlet workspace. Use deal intelligence to maintain context, assess progress and identify the next action or critical-path item.</p><a href="/app/hamlet/index.html">Explore deal intelligence →</a></article>
+          <article class="card module-card module-card--listings"><h3>2. Live property listings</h3><p>Browse published commercial property opportunities, search listing details and move between the listings view and your resource-management tools.</p><a href="/app/public/live.html">Browse live listings →</a></article>
+          <article class="card module-card module-card--resources"><h3>3. Manage resources</h3><p>Manage your property resources from the dashboard. Posting access may be subject to the platform's identity-verification requirements and policies.</p><a href="/app/public/dashboard.html">Open resource dashboard →</a></article>
+          <article class="card module-card module-card--directory"><h3>4. Member directory</h3><p>Find other members and use profile information to understand who you are contacting. Availability indicators reflect platform activity signals, not a promise of immediate response.</p><a href="/directory.html">Open directory →</a></article>
+          <article class="card module-card module-card--messages"><h3>5. Messages</h3><p>Keep member-to-member conversations in the mailbox. Depending on the conversation tools available, you can organise messages and share supported attachments.</p><a href="/messages.html">Open messages →</a></article>
+          <article class="card module-card module-card--social"><h3>6. Social feed</h3><p>Share concise professional updates that are separate from formal property listings. Follow relevant activity, react to posts and participate in discussions.</p><a href="/posts.html">Open social feed →</a></article>
+          <article class="card module-card module-card--insights"><h3>7. Insights Feed</h3><p>Explore the Insights Feed and review the published member subscription options through the Members Area.</p><a href="/insights.html">Explore Insights Feed →</a></article>
+          <article class="card module-card module-card--profile"><h3>8. Profile and identity</h3><p>Keep your member profile and contact details current. Where requested, follow the platform's identity-verification process and read what a verification indicator does—and does not—mean.</p><a href="/profile.html">View your profile →</a></article>
+          <article class="card module-card module-card--briefs"><h3>9. Communications briefs</h3><p>Submit a structured press or communications brief with the announcement, organisation and contact details needed for follow-up.</p><a href="/requests.html">Submit a brief →</a></article>
+          <article class="card module-card module-card--settings"><h3>10. Account and settings</h3><p>Review account information and available security controls. Use strong authentication and keep your sign-in credentials private.</p><a href="/settings.html">Open settings →</a></article>
+          <article class="card module-card module-card--rankings"><h3>11. Broker Rankings</h3><p>Recognise achievement and inspire healthy competition across the broker community. Rankings compare average completed deal value using qualifying closed deals recorded in Hamlet; they offer visibility into performance, not a complete measure of professional value.</p><a href="/rankings.html">Explore Broker Rankings →</a></article>
+          <article class="card module-card module-card--ai"><h3>12. AI workflow tools</h3><p>Deal Assistant helps turn deal notes into suggested next steps, dependencies and critical-path questions. Listings Copilot helps draft property marketing copy from particulars and sustainability details you provide. Review all outputs for accuracy before use.</p><a href="/app/hamlet/ai-assistant.html?task=deal_copilot">Open Deal Assistant →</a><p style="margin:.45rem 0 0"><a href="/app/hamlet/ai-assistant.html?task=listing_assistant">Open Listings Copilot →</a></p></article>
         </div>
       </div>
     </section>
