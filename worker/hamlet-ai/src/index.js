@@ -107,7 +107,7 @@ async function handleEpcSearch(request, env, origin) {
   let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
   const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
-  const apiUrl=new URL("https://get-energy-performance-data.epb-integration.digital.communities.gov.uk/api/non-domestic/search");
+  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/non-domestic/search");
   apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("page_size","100");
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
@@ -124,14 +124,15 @@ async function handleEpcCertificate(request, env, origin) {
   if(!isFormatted&&!isUnformatted)return json({error:"Enter a valid EPC certificate number in 1234-5678-1234-5678-1234 format."},400,origin);
   if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
   const certificateNumber=isFormatted?certificateNumberInput:certificateNumberInput.match(/[0-9]{4}/g).join("-");
-  const apiUrl=new URL("https://get-energy-performance-data.epb-integration.digital.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
+  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(!upstream.ok){console.error("Government EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government EPC certificate verification failed."},upstream.status===404?404:502,origin);}
     const payload=await upstream.json(),certificate=payload?.data;if(!certificate||typeof certificate!=="object")return json({error:"Invalid certificate response from Government EPC service."},502,origin);
     const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const returnedAddress=[certificate.address_line_1,certificate.address_line_2,certificate.address_line_3,certificate.address_line_4,certificate.post_town].filter(Boolean).join(" ");
-    if(norm(certificate.postcode)!==norm(postcode)||!norm(returnedAddress)||!(norm(returnedAddress).includes(norm(address))||norm(address).includes(norm(returnedAddress))))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
+    const submittedAddress=address.replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i," ");
+    if(norm(certificate.postcode)!==norm(postcode)||!norm(returnedAddress)||!(norm(returnedAddress).includes(norm(submittedAddress))||norm(submittedAddress).includes(norm(returnedAddress))))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
     return json({certificate},200,origin);
   }catch(error){console.error("Government EPC certificate request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
 }
