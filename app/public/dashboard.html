@@ -184,24 +184,24 @@
                         <div class="field full form-section-heading"><h3>3. EPC and sustainability credentials</h3><p>Verify the Government non-domestic EPC against this property. Certificate details below come from the register; record additional sustainability standards separately.</p></div>
             <div class="field full" style="padding:1rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc">
               <strong style="color:var(--ink)">Government EPC lookup</strong>
-              <p class="photo-help" style="margin:.35rem 0 .75rem">Searches non-domestic EPC records using the address and postcode entered in subsection 1. Confirm the returned address before applying the certificate.</p>
-              <div class="form-actions" style="margin-top:0"><button class="btn btn-outline" id="lookupEpcBtn" type="button">Find EPC for this property</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter the property address and postcode in subsection 1 first.</span></div>
+              <p class="photo-help" style="margin:.35rem 0 .75rem">Searches the Government non-domestic EPC register using the address and postcode entered in subsection 1. You can also enter or correct every EPC field below manually while the upstream lookup service is unavailable. Manually entered details are not Government-verified.</p>
+              <div class="form-actions" style="margin-top:0"><button class="btn btn-outline" id="lookupEpcBtn" type="button">Find EPC for this property</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter the property address and postcode in subsection 1 first. Manual EPC entry is available below.</span></div>
               <div class="field full" id="epcMatchField" hidden style="margin-top:.8rem"><label for="epcMatchSelect">Matching Government EPC record</label><select id="epcMatchSelect"><option value="">Choose a certificate</option></select><button class="btn btn-primary" id="applyEpcBtn" type="button" disabled>Apply selected EPC</button></div>
             </div>
-            <div class="field"><label for="epcRating">EPC energy efficiency band</label><input id="epcRating" maxlength="24" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcAssetRating">EPC asset rating score</label><input id="epcAssetRating" maxlength="24" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcStatus">Register status</label><input id="epcStatus" maxlength="80" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcAssessmentType">Assessment type</label><input id="epcAssessmentType" maxlength="80" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcSchemaType">Certificate data schema</label><input id="epcSchemaType" maxlength="80" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcPropertyType">Property type / use</label><input id="epcPropertyType" maxlength="180" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcUprn">UPRN</label><input id="epcUprn" maxlength="20" readonly placeholder="Where available"></div>
-            <div class="field full"><label for="epcAddress">Address returned by EPC register</label><input id="epcAddress" maxlength="500" readonly placeholder="Verified certificate address"></div>
-            <div class="field"><label for="epcPostcode">Postcode returned by EPC register</label><input id="epcPostcode" maxlength="20" readonly placeholder="Verified certificate postcode"></div>
-            <div class="field"><label for="epcFloorArea">EPC floor area (m²)</label><input id="epcFloorArea" maxlength="24" readonly placeholder="Where supplied by the register"></div>
-            <div class="field"><label for="epcInspectionDate">Inspection date</label><input id="epcInspectionDate" type="date" readonly></div>
-            <div class="field"><label for="epcRegistrationDate">Registration date</label><input id="epcRegistrationDate" type="date" readonly></div>
-            <div class="field"><label for="epcValidUntil">Valid until</label><input id="epcValidUntil" type="date" readonly></div>
-            <div class="field"><label for="epcMethodology">Assessment methodology</label><input id="epcMethodology" maxlength="120" readonly placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcRating">EPC energy efficiency band</label><input id="epcRating" maxlength="24" placeholder="e.g. A, B, C, D, E, F or G" autocomplete="off"></div>
+            <div class="field"><label for="epcAssetRating">EPC asset rating score</label><input id="epcAssetRating" maxlength="24" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcStatus">Register status</label><input id="epcStatus" maxlength="80" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcAssessmentType">Assessment type</label><input id="epcAssessmentType" maxlength="80" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcSchemaType">Certificate data schema</label><input id="epcSchemaType" maxlength="80" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcPropertyType">Property type / use</label><input id="epcPropertyType" maxlength="180" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcUprn">UPRN</label><input id="epcUprn" maxlength="20" placeholder="Where available"></div>
+            <div class="field full"><label for="epcAddress">Address returned by EPC register</label><input id="epcAddress" maxlength="500" placeholder="Verified certificate address"></div>
+            <div class="field"><label for="epcPostcode">Postcode returned by EPC register</label><input id="epcPostcode" maxlength="20" placeholder="Verified certificate postcode"></div>
+            <div class="field"><label for="epcFloorArea">EPC floor area (m²)</label><input id="epcFloorArea" maxlength="24" placeholder="Where supplied by the register"></div>
+            <div class="field"><label for="epcInspectionDate">Inspection date</label><input id="epcInspectionDate" type="date"></div>
+            <div class="field"><label for="epcRegistrationDate">Registration date</label><input id="epcRegistrationDate" type="date"></div>
+            <div class="field"><label for="epcValidUntil">Valid until</label><input id="epcValidUntil" type="date"></div>
+            <div class="field"><label for="epcMethodology">Assessment methodology</label><input id="epcMethodology" maxlength="120" placeholder="Where supplied by the register"></div>
             <div class="field full form-section-heading"><h3>Other sustainability credentials</h3><p>Record voluntary or additional building-performance standards separately from the Government EPC.</p></div>
             <div class="field"><label for="sustainabilityStandard">Building standard</label><select id="sustainabilityStandard"><option value="">Not specified</option><option>Passivhaus</option><option>EnerPHit</option><option>Passivhaus and EnerPHit</option><option>Other sustainability standard</option></select></div>
             <div class="field"><label for="sustainabilityStatus">Credential status</label><select id="sustainabilityStatus"><option>Not certified</option><option>Evidence pending</option><option>In progress</option><option>Certified</option></select></div>
