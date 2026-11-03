@@ -174,7 +174,7 @@
             <div class="field full" style="padding:1rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc">
               <strong style="color:var(--ink)">Government EPC certificate</strong>
               <p class="photo-help" style="margin:.35rem 0 .75rem">Enter the certificate’s 20-digit number. Hamlet will retrieve it from the Government register and verify that its address and postcode match subsection 1.</p>
-              <div class="field full" style="margin-top:.65rem"><label for="epcCertificateLookup">20-digit EPC certificate number</label><input id="epcCertificateLookup" type="text" inputmode="numeric" autocomplete="off" maxlength="20" pattern="[0-9]{20}" placeholder="Enter 20 digits" aria-describedby="epcLookupHelp"><small class="photo-help" id="epcLookupHelp">Numbers only. The certificate will be applied only when its property address and postcode match subsection 1. <span id="epcDigitCount" aria-live="polite">0 of 20 digits entered.</span></small></div>
+              <div class="field full" style="margin-top:.65rem"><label for="epcCertificateLookup">20-digit EPC certificate number</label><input id="epcCertificateLookup" type="text" inputmode="numeric" autocomplete="off" maxlength="24" pattern="[0-9]{4}(-[0-9]{4}){4}" placeholder="1234-5678-1234-5678-1234" aria-describedby="epcLookupHelp"><small class="photo-help" id="epcLookupHelp">Enter 20 digits; hyphens are added automatically. The certificate will be applied only when its property address and postcode match subsection 1. <span id="epcDigitCount" aria-live="polite">0 of 20 digits entered.</span></small></div>
               <div class="form-actions" style="margin-top:.65rem"><button class="btn btn-primary" id="verifyEpcBtn" type="button" disabled>Verify and apply EPC</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter a 20-digit certificate number.</span></div>
             </div>
             <div class="field"><label for="epcRating">EPC energy rating</label><input id="epcRating" maxlength="8" readonly placeholder="Retrieved from Government EPC register"></div>
@@ -288,9 +288,15 @@
         return Boolean(expectedPostcode&&actualPostcode===expectedPostcode&&expectedAddress&&actualAddress&&(actualAddress.includes(expectedAddress)||expectedAddress.includes(actualAddress)));
       }
       const epcDigitCount=document.getElementById('epcDigitCount');
+      function formatEpcNumber(value){const digits=String(value||'').replace(/\D/g,'').slice(0,20);return digits.match(/.{1,4}/g)?.join('-')||'';}
       function updateEpcNumberFeedback(){
-        epcCertificateInput.value=epcCertificateInput.value.replace(/\D/g,'').slice(0,20);
-        const count=epcCertificateInput.value.length;
+        const raw=epcCertificateInput.value,caret=epcCertificateInput.selectionStart??raw.length;
+        const digits=raw.replace(/\D/g,'').slice(0,20),digitsBeforeCaret=raw.slice(0,caret).replace(/\D/g,'').length;
+        epcCertificateInput.value=formatEpcNumber(digits);
+        let newCaret=0,seen=0;while(newCaret<epcCertificateInput.value.length&&seen<digitsBeforeCaret){if(/[0-9]/.test(epcCertificateInput.value[newCaret]))seen++;newCaret++;}
+        if(digitsBeforeCaret>0&&digitsBeforeCaret%4===0&&digitsBeforeCaret<20)newCaret++;
+        epcCertificateInput.setSelectionRange(newCaret,newCaret);
+        const count=digits.length;
         verifyEpcBtn.disabled=count!==20;
         epcDigitCount.textContent=count+' of 20 digits entered.';
         if(count<20){epcLookupStatus.textContent='Enter all 20 digits before verifying.';epcLookupStatus.className='status';}
@@ -299,7 +305,7 @@
       epcCertificateInput.addEventListener('input',updateEpcNumberFeedback);
       updateEpcNumberFeedback();
       verifyEpcBtn.addEventListener('click',async function(){
-        const certificateNumber=epcCertificateInput.value.trim();
+        const certificateNumber=epcCertificateInput.value.replace(/-/g,'').trim();
         const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
         if(!/^\d{20}$/.test(certificateNumber)){epcLookupStatus.textContent='Enter the full 20-digit EPC certificate number.';epcLookupStatus.className='status error';return;}
         if(!address||!postcode){epcLookupStatus.textContent='Enter the property address and postcode in subsection 1 first.';epcLookupStatus.className='status error';return;}
@@ -312,15 +318,15 @@
           const c=payload.certificate||{};
           if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate address and postcode do not match subsection 1. No EPC fields were changed.');
           const returnedNumber=String(c.certificate_number||c.certificateNumber||'').trim();
-          if(returnedNumber&&returnedNumber!==certificateNumber)throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
+          if(returnedNumber&&returnedNumber.replace(/[^0-9]/g,'')!==certificateNumber)throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
           document.getElementById('epcRating').value=c.current_energy_efficiency_band||c.currentEnergyEfficiencyBand||'';
-          document.getElementById('epcCertificateNumber').value=returnedNumber||certificateNumber;
+          document.getElementById('epcCertificateNumber').value=formatEpcNumber(returnedNumber||certificateNumber);
           const date=c.registration_date||c.registrationDate||'';
           document.getElementById('epcRegistrationDate').value=String(date).slice(0,10);
           document.getElementById('epcUprn').value=c.uprn||'';
           epcLookupStatus.textContent='Verified EPC certificate and applied it to '+address+'.';epcLookupStatus.className='status success';
         }catch(error){epcLookupStatus.textContent=error.message||'Could not verify EPC. Check the certificate number and property details.';epcLookupStatus.className='status error';}
-        finally{verifyEpcBtn.disabled=epcCertificateInput.value.length!==20;}
+        finally{verifyEpcBtn.disabled=epcCertificateInput.value.replace(/[^0-9]/g,'').length!==20;}
       });
       ['address','postcode'].forEach(id=>document.getElementById(id).addEventListener('input',function(){
         ['epcRating','epcCertificateNumber','epcRegistrationDate','epcUprn'].forEach(fieldId=>{document.getElementById(fieldId).value='';});
