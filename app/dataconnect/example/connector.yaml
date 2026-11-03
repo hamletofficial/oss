@@ -1,6 +1,0 @@
-connectorId: example
-generate:
-  adminNodeSdk:
-    - outputDir: ..\..\wretch32\src\dataconnect-admin-generated
-      package: "@dataconnect/admin-generated"
-      packageJsonDir: ..\..\wretch32

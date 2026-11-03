@@ -102,19 +102,52 @@ function getText(value, maxLength) {
 }
 
 
+const EPC_DIAGNOSTIC_BODY_LIMIT = 512;
+
+function sanitizeEpcDiagnosticBody(raw, address, postcode) {
+  let text = String(raw || "").slice(0, EPC_DIAGNOSTIC_BODY_LIMIT);
+  for (const value of [address, postcode]) {
+    if (value) text = text.replaceAll(value, "[redacted]");
+  }
+  return text
+    .replace(/bearer\\s+[^\\s"',}]+/gi, "Bearer [redacted]")
+    .replace(/(["']?(?:authorization|token|api[_-]?key|address|postcode|email|phone|name)["']?\\s*[:=]\\s*)("[^"]*"|'[^']*'|[^\\s,;}]+)/gi, "$1[redacted]")
+    .slice(0, EPC_DIAGNOSTIC_BODY_LIMIT);
+}
+
 async function handleEpcSearch(request, env, origin) {
   if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
-  let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
-  const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
-  if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
-  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/non-domestic/search");
-  apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("page_size","100");
-  try{
-    const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
-    if(upstream.status===404)return json({records:[]},200,origin);
-    if(!upstream.ok){console.error("Government EPC search failed",{status:upstream.status});return json({error:upstream.status===429?"Government EPC service is busy. Try again shortly.":"Government EPC search failed."},upstream.status===429?429:502,origin);}
-    const payload=await upstream.json();return json({records:Array.isArray(payload?.data)?payload.data.slice(0,100):[]},200,origin);
-  }catch(error){console.error("Government EPC search request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
+  let body;
+  try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
+  const address = getText(body?.address, 250), postcode = getText(body?.postcode, 20);
+  if (!address || !postcode) return json({ error: "A property address and postcode are required." }, 400, origin);
+  const apiUrl = new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/non-domestic/search");
+  apiUrl.searchParams.set("postcode", postcode);
+  apiUrl.searchParams.set("address", address);
+  apiUrl.searchParams.set("page_size", "100");
+
+  try {
+    const upstream = await fetch(apiUrl, { headers: { "Authorization": `Bearer ${env.UK_EPC_API_BEARER_TOKEN}`, "Accept": "application/json" } });
+    if (upstream.status === 404) return json({ records: [] }, 200, origin);
+    if (!upstream.ok) {
+      const raw = await upstream.text().catch(() => "");
+      const diagnostic = { upstreamStatus: upstream.status, upstreamBody: sanitizeEpcDiagnosticBody(raw, address, postcode) };
+      console.error("Government EPC search failed", diagnostic);
+      return json({
+        error: upstream.status === 429 ? "Government EPC service is busy. Try again shortly." : "Government EPC search failed.",
+        diagnostic
+      }, upstream.status === 429 ? 429 : 502, origin);
+    }
+    const payload = await upstream.json();
+    return json({ records: Array.isArray(payload?.data) ? payload.data.slice(0, 100) : [] }, 200, origin);
+  } catch {
+    const diagnostic = { kind: "network_exception" };
+    console.error("Government EPC search request failed", diagnostic);
+    return json({
+      error: "Government EPC service is temporarily unavailable.",
+      diagnostic
+    }, 502, origin);
+  }
 }
 async function handleEpcCertificate(request, env, origin) {
   if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
