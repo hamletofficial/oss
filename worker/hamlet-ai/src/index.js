@@ -131,7 +131,8 @@ async function handleEpcCertificate(request, env, origin) {
     const payload=await upstream.json(),certificate=payload?.data;if(!certificate||typeof certificate!=="object")return json({error:"Invalid certificate response from Government EPC service."},502,origin);
     const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const returnedAddress=[certificate.address_line_1,certificate.address_line_2,certificate.address_line_3,certificate.address_line_4,certificate.post_town].filter(Boolean).join(" ");
-    if(norm(certificate.postcode)!==norm(postcode)||!norm(returnedAddress)||!(norm(returnedAddress).includes(norm(address))||norm(address).includes(norm(returnedAddress))))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
+    const submittedAddress=address.replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i," ");
+    if(norm(certificate.postcode)!==norm(postcode)||!norm(returnedAddress)||!(norm(returnedAddress).includes(norm(submittedAddress))||norm(submittedAddress).includes(norm(returnedAddress))))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
     return json({certificate},200,origin);
   }catch(error){console.error("Government EPC certificate request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
 }
