@@ -51,6 +51,7 @@
     .address-suggestions[hidden]{display:none}
     .address-suggestion{display:block;width:100%;padding:.7rem .8rem;border:0;border-radius:7px;background:#fff;color:#0f172a;text-align:left;font:inherit;cursor:pointer}
     .address-suggestion:hover,.address-suggestion[aria-selected="true"]{background:#eff6ff;color:#071D4A}
+    #verifyEpcBtn:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.5)}
     .field{display:grid;gap:.38rem}.field.full{grid-column:1/-1}.field label{font-weight:700;font-size:.9rem;color:#173b5d}.field input,.field select,.field textarea{width:100%;padding:.72rem .8rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:#0f172a;font:inherit}.field textarea{min-height:115px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:3px solid rgba(2,132,199,.2);border-color:var(--blue)}
     .photo-help{margin:.15rem 0 0;color:#64748b;font-size:.8rem;line-height:1.45}.photo-preview-grid,.resource-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem;margin:.7rem 0}.photo-preview-grid img,.resource-photo-grid img{width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.required{color:#b91c1c}.form-actions{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-top:1.1rem}.status{margin:0;color:var(--muted)}.status.success{color:var(--green)}.status.error{color:#b91c1c}
     .resource-list{display:grid;gap:.8rem}.property-card{border:1px solid var(--line);border-radius:12px;padding:1rem;background:#fbfdff}.property-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}.property-card h3{margin:0;color:var(--ink);font-size:1rem}.badge{display:inline-flex;padding:.3rem .55rem;border-radius:999px;background:#e8f5ec;color:var(--green);font-size:.75rem;font-weight:800}.property-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin:.8rem 0;color:var(--muted);font-size:.84rem}.property-meta strong{display:block;color:#173b5d;font-size:.78rem;margin-bottom:.15rem}.empty{padding:1rem;border:1px dashed #cbd5e1;border-radius:10px;color:var(--muted)}
@@ -173,7 +174,7 @@
             <div class="field full" style="padding:1rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc">
               <strong style="color:var(--ink)">Government EPC certificate</strong>
               <p class="photo-help" style="margin:.35rem 0 .75rem">Enter the certificate’s 20-digit number. Hamlet will retrieve it from the Government register and verify that its address and postcode match subsection 1.</p>
-              <div class="field full" style="margin-top:.65rem"><label for="epcCertificateLookup">20-digit EPC certificate number</label><input id="epcCertificateLookup" type="text" inputmode="numeric" autocomplete="off" maxlength="20" pattern="[0-9]{20}" placeholder="Enter 20 digits" aria-describedby="epcLookupHelp"><small class="photo-help" id="epcLookupHelp">Numbers only. The certificate will be applied only when its property address and postcode match subsection 1.</small></div>
+              <div class="field full" style="margin-top:.65rem"><label for="epcCertificateLookup">20-digit EPC certificate number</label><input id="epcCertificateLookup" type="text" inputmode="numeric" autocomplete="off" maxlength="20" pattern="[0-9]{20}" placeholder="Enter 20 digits" aria-describedby="epcLookupHelp"><small class="photo-help" id="epcLookupHelp">Numbers only. The certificate will be applied only when its property address and postcode match subsection 1. <span id="epcDigitCount" aria-live="polite">0 of 20 digits entered.</span></small></div>
               <div class="form-actions" style="margin-top:.65rem"><button class="btn btn-primary" id="verifyEpcBtn" type="button" disabled>Verify and apply EPC</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter a 20-digit certificate number.</span></div>
             </div>
             <div class="field"><label for="epcRating">EPC energy rating</label><input id="epcRating" maxlength="8" readonly placeholder="Retrieved from Government EPC register"></div>
@@ -286,10 +287,17 @@
         const expectedAddress=epcNorm(address);
         return Boolean(expectedPostcode&&actualPostcode===expectedPostcode&&expectedAddress&&actualAddress&&(actualAddress.includes(expectedAddress)||expectedAddress.includes(actualAddress)));
       }
-      epcCertificateInput.addEventListener('input',function(){
+      const epcDigitCount=document.getElementById('epcDigitCount');
+      function updateEpcNumberFeedback(){
         epcCertificateInput.value=epcCertificateInput.value.replace(/\D/g,'').slice(0,20);
-        verifyEpcBtn.disabled=epcCertificateInput.value.length!==20;
-      });
+        const count=epcCertificateInput.value.length;
+        verifyEpcBtn.disabled=count!==20;
+        epcDigitCount.textContent=count+' of 20 digits entered.';
+        if(count<20){epcLookupStatus.textContent='Enter all 20 digits before verifying.';epcLookupStatus.className='status';}
+        else{epcLookupStatus.textContent='Certificate number ready to verify against subsection 1.';epcLookupStatus.className='status';}
+      }
+      epcCertificateInput.addEventListener('input',updateEpcNumberFeedback);
+      updateEpcNumberFeedback();
       verifyEpcBtn.addEventListener('click',async function(){
         const certificateNumber=epcCertificateInput.value.trim();
         const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
