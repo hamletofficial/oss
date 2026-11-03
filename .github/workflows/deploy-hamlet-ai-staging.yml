@@ -1,4 +1,4 @@
-name: Deploy Hamlet AI Worker to staging
+name: Deploy Hamlet AI Worker to staging # staging-only
 
 on:
   push:
