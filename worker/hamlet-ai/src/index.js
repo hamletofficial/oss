@@ -116,7 +116,7 @@ async function handleEpcSearch(request, env, origin) {
       apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("page_size","100");
       const upstream=await fetch(apiUrl,{headers});
       if(upstream.status===404)return [];
-      if(!upstream.ok)throw Object.assign(new Error("Government EPC search failed"),{status:upstream.status});
+      if(!upstream.ok)throw Object.assign(new Error("Government EPC search failed"),{status:upstream.status,category});
       const payload=await upstream.json();
       const records=Array.isArray(payload?.data)?payload.data:Array.isArray(payload?.data?.data)?payload.data.data:[];
       return records.slice(0,100).map(record=>({...record,certificateCategory:category}));
@@ -130,9 +130,18 @@ async function handleEpcSearch(request, env, origin) {
     }
     return json({records:records.slice(0,100)},200,origin);
   }catch(error){
-    const status=Number(error?.status)||0;
-    console.error("Government EPC search request failed",{status,message:String(error?.message||error)});
-    return json({error:status===429?"Government EPC service is busy. Try again shortly.":"Government EPC search failed."},status===429?429:502,origin);
+    const status=Number(error?.status)||0,category=String(error?.category||"");
+    console.error("Government EPC search request failed",{status,category});
+    const errorMessage=status===401
+      ?"The Government EPC API rejected its access token. The gateway owner must refresh the API token."
+      :status===403
+        ?"The Government EPC API denied access. Check that the API account permits this certificate category."
+        :status===400
+          ?"The Government EPC API rejected the address search request. Check the address and postcode format."
+          :status===429
+            ?"Government EPC service is busy. Try again shortly."
+            :`Government EPC search returned HTTP ${status||"unknown"}.`;
+    return json({error:errorMessage,upstreamStatus:status||null,certificateCategory:category||null},status===429?429:502,origin);
   }
 }
 async function handleEpcCertificate(request, env, origin) {
@@ -145,7 +154,21 @@ async function handleEpcCertificate(request, env, origin) {
   const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
-    if(!upstream.ok){console.error("Government EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government EPC certificate verification failed."},upstream.status===404?404:502,origin);}
+    if(!upstream.ok){
+      const status=upstream.status;
+      console.error("Government EPC certificate fetch failed",{status});
+      if(status===404)return json({error:"EPC certificate not found.",upstreamStatus:404},404,origin);
+      const errorMessage=status===400
+        ?"The Government EPC API rejected the certificate number format. Enter the complete 20-digit certificate number."
+        :status===401
+          ?"The Government EPC API rejected its access token. The gateway owner must refresh the API token."
+          :status===403
+            ?"The Government EPC API denied access. Check that the API account permits this certificate category."
+            :status===429
+              ?"Government EPC service is busy. Try again shortly."
+              :`The Government EPC API returned HTTP ${status} while verifying the certificate.`;
+      return json({error:errorMessage,upstreamStatus:status},status===429?429:502,origin);
+    }
     const payload=await upstream.json(),certificate=payload?.data;if(!certificate||typeof certificate!=="object")return json({error:"Invalid certificate response from Government EPC service."},502,origin);
     const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const returnedAddress=[certificate.address_line_1||certificate.addressLine1,certificate.address_line_2||certificate.addressLine2,certificate.address_line_3||certificate.addressLine3,certificate.address_line_4||certificate.addressLine4,certificate.post_town||certificate.postTown].filter(Boolean).join(" ");
