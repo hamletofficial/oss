@@ -51,6 +51,9 @@
     .address-suggestions[hidden]{display:none}
     .address-suggestion{display:block;width:100%;padding:.7rem .8rem;border:0;border-radius:7px;background:#fff;color:#0f172a;text-align:left;font:inherit;cursor:pointer}
     .address-suggestion:hover,.address-suggestion[aria-selected="true"]{background:#eff6ff;color:#071D4A}
+    .address-suggestion-group{padding:.5rem .75rem .3rem;color:#475569;font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .address-suggestion .address-suggestion-main{display:block}
+    .address-suggestion .address-suggestion-detail{display:block;margin-top:.22rem;color:#64748b;font-size:.74rem;font-weight:500;line-height:1.35}
     #verifyEpcBtn:disabled{opacity:.48;cursor:not-allowed;filter:saturate(.5)}
     .field{display:grid;gap:.38rem}.field.full{grid-column:1/-1}.field label{font-weight:700;font-size:.9rem;color:#173b5d}.field input,.field select,.field textarea{width:100%;padding:.72rem .8rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:#0f172a;font:inherit}.field textarea{min-height:115px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:3px solid rgba(2,132,199,.2);border-color:var(--blue)}
     .photo-help{margin:.15rem 0 0;color:#64748b;font-size:.8rem;line-height:1.45}.photo-preview-grid,.resource-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem;margin:.7rem 0}.photo-preview-grid img,.resource-photo-grid img{width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.required{color:#b91c1c}.form-actions{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-top:1.1rem}.status{margin:0;color:var(--muted)}.status.success{color:var(--green)}.status.error{color:#b91c1c}
@@ -159,7 +162,7 @@
             <div class="property-details-grid field full">
               <div class="field"><label for="propertyName">Property / building name <span class="required">*</span></label><input id="propertyName" required maxlength="180" autocomplete="organization"></div>
               <div class="field"><label for="propertyType">Property type <span class="required">*</span></label><select id="propertyType" required><option value="">Select type</option><option>Office</option><option>Retail</option><option>Industrial / Warehouse</option><option>Logistics</option><option>Mixed Use</option><option>Development / Land</option><option>Other Commercial</option></select></div>
-              <div class="field address-field full"><label for="address">Address / location <span class="required">*</span></label><input id="address" required maxlength="250" placeholder="Start typing a building, street, town or postcode" autocomplete="street-address" aria-describedby="addressHelp" aria-expanded="false" aria-controls="addressSuggestions"><div id="addressSuggestions" class="address-suggestions" role="listbox" hidden></div><p class="photo-help" id="addressHelp">Start typing to see address suggestions. Select a result to fill the address and postcode automatically, or enter the details manually.</p><p class="status" id="addressLookupStatus" role="status" aria-live="polite"></p></div>
+              <div class="field address-field full"><label for="address">Address / location <span class="required">*</span></label><input id="address" required maxlength="250" placeholder="Start typing a building, street, town or postcode" autocomplete="street-address" aria-describedby="addressHelp" aria-expanded="false" aria-controls="addressSuggestions"><div id="addressSuggestions" class="address-suggestions" role="listbox" hidden></div><p class="photo-help" id="addressHelp">Suggestions are grouped by source: Google Places and non-domestic EPC register records. EPC-backed results include a certificate number. Confirm the correct property before saving.</p><p class="status" id="addressLookupStatus" role="status" aria-live="polite"></p></div>
               <div class="field postcode-field"><label for="postcode">Postcode</label><input id="postcode" maxlength="20" autocomplete="postal-code"></div>
               <div class="field"><label for="availability">Availability <span class="required">*</span></label><select id="availability" required><option value="">Select availability</option><option>Immediately available</option><option>Available within 3 months</option><option>Available within 6 months</option><option>Future availability</option></select></div>
               <div class="field"><label for="size">Approx. floor area</label><input id="size" maxlength="80" placeholder="e.g. 12,500 sq ft"></div>
@@ -216,24 +219,99 @@
 
       function setFormStatus(message,type){formStatus.textContent=message||'';formStatus.className='status'+(type?' '+type:'');}
 
-      // Google Places API (New). Configure window.HAMLET_GOOGLE_MAPS_API_KEY in firebase-config.js.
-      // Manual entry remains available as a fallback.
+      // Combine general Google Places predictions with separately labelled non-domestic EPC records.
+      // Google Places does not reliably identify building use; EPC-group entries have a non-domestic certificate.
       function initAddressAutocomplete(){
         const input=document.getElementById('address'),postcode=document.getElementById('postcode'),status=document.getElementById('addressLookupStatus'),box=document.getElementById('addressSuggestions'),key=window.HAMLET_GOOGLE_MAPS_API_KEY;
         if(!input||!postcode||!status||!box)return;
         let ready=false,seq=0,timer=null,active=-1;
         function close(){box.hidden=true;box.replaceChildren();input.setAttribute('aria-expanded','false');active=-1;}
         function comp(components,type){const c=(components||[]).find(x=>x.types&&x.types.includes(type));return c?String(c.longText||c.shortText||''):'';}
-        async function choose(prediction){const id=++seq;close();status.textContent='Retrieving address details…';try{const place=prediction.toPlace();await place.fetchFields({fields:['formattedAddress','addressComponents','location','id']});if(id!==seq)return;if(!place.formattedAddress){status.textContent='Please enter the address manually.';return;}input.value=place.formattedAddress.slice(0,250);const pc=comp(place.addressComponents,'postal_code');if(pc)postcode.value=pc.slice(0,20);input.dataset.placeId=place.id||'';input.dataset.latitude=place.location?String(place.location.lat()):'';input.dataset.longitude=place.location?String(place.location.lng()):'';status.textContent='Address selected. Please check the address and postcode before saving.';}catch(e){console.warn('Places details unavailable',e);status.textContent='Address details could not be retrieved. Please enter the address manually.';}}
-        function render(items){close();items.forEach(function(p){const b=document.createElement('button');b.type='button';b.className='address-suggestion';b.setAttribute('role','option');b.textContent=p.text?p.text.toString():'Address suggestion';b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>choose(p));box.appendChild(b);});if(items.length){box.hidden=false;input.setAttribute('aria-expanded','true');}}
-        input.addEventListener('input',function(){const value=input.value.trim();++seq;if(timer)clearTimeout(timer);close();if(!ready||value.length<3)return;timer=setTimeout(async function(){const id=++seq;try{const res=await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:value,includedRegionCodes:['gb']});if(id!==seq||input.value.trim()!==value)return;render((res.suggestions||[]).map(x=>x.placePrediction).filter(Boolean));if(!box.hidden)status.textContent='Choose an address suggestion, or continue entering it manually.';}catch(e){console.warn('Places suggestions unavailable',e);status.textContent='Address suggestions are unavailable. You can enter the address manually.';}},250);});
-        input.addEventListener('keydown',function(e){const items=Array.from(box.querySelectorAll('.address-suggestion'));if(e.key==='ArrowDown'&&!box.hidden){e.preventDefault();active=(active+1)%items.length;}else if(e.key==='ArrowUp'&&!box.hidden){e.preventDefault();active=(active-1+items.length)%items.length;}else if(e.key==='Enter'&&!box.hidden&&active>=0&&items[active]){e.preventDefault();items[active].click();}else if(e.key==='Escape')close();items.forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));});
+        function addGroup(label,items,select,details){
+          if(!items.length)return;
+          const heading=document.createElement('div');heading.className='address-suggestion-group';heading.textContent=label;box.appendChild(heading);
+          items.forEach(function(item){
+            const b=document.createElement('button');b.type='button';b.className='address-suggestion';b.setAttribute('role','option');
+            if(details){const main=document.createElement('span');main.className='address-suggestion-main';main.textContent=details(item).main;b.appendChild(main);const detail=document.createElement('span');detail.className='address-suggestion-detail';detail.textContent=details(item).detail;b.appendChild(detail);}
+            else b.textContent=item.text?item.text.toString():'Address suggestion';
+            b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>select(item));box.appendChild(b);
+          });
+        }
+        function render(places,epcRecords){
+          close();
+          addGroup('Google Places',places,choosePlace);
+          addGroup('Non-domestic EPC register',epcRecords,chooseEpcRecord,function(record){
+            const address=epcAddress(record);
+            const meta=[record.current_energy_efficiency_band||record.currentEnergyEfficiencyBand?'Band '+(record.current_energy_efficiency_band||record.currentEnergyEfficiencyBand):'',record.certificate_number||record.certificateNumber?formatEpcNumber(record.certificate_number||record.certificateNumber):''].filter(Boolean).join(' · ');
+            return{main:address+(record.postcode?', '+record.postcode:''),detail:meta||'Non-domestic certificate record'};
+          });
+          if(box.childElementCount){box.hidden=false;input.setAttribute('aria-expanded','true');}
+        }
+        function epcAddress(record){return [record.address_line_1||record.addressLine1,record.address_line_2||record.addressLine2,record.address_line_3||record.addressLine3,record.address_line_4||record.addressLine4,record.post_town||record.postTown].filter(Boolean).join(', ');}
+        function clearAppliedEpc(){
+          ['epcRating','epcCertificateNumber','epcRegistrationDate','epcUprn'].forEach(function(id){const field=document.getElementById(id);if(field)field.value='';});
+          if(typeof epcCertificateInput!=='undefined'){epcCertificateInput.value='';updateEpcNumberFeedback();}
+        }
+        function chooseEpcRecord(record){
+          ++seq;if(timer)clearTimeout(timer);close();
+          const address=epcAddress(record),pc=String(record.postcode||'').trim(),certificate=record.certificate_number||record.certificateNumber||'';
+          if(!address||!pc){status.textContent='The EPC record is missing its address or postcode. Enter the property details manually.';return;}
+          input.value=address.slice(0,250);postcode.value=pc.slice(0,20);
+          delete input.dataset.placeId;delete input.dataset.latitude;delete input.dataset.longitude;
+          clearAppliedEpc();
+          if(certificate&&typeof epcCertificateInput!=='undefined'){epcCertificateInput.value=formatEpcNumber(certificate);updateEpcNumberFeedback();}
+          status.textContent=certificate?'Non-domestic EPC address selected. Verify the certificate in subsection 3.':'Non-domestic EPC address selected. Check the address and postcode before saving.';
+        }
+        async function choosePlace(prediction){
+          const id=++seq;if(timer)clearTimeout(timer);close();status.textContent='Retrieving address details…';
+          try{
+            const place=prediction.toPlace();await place.fetchFields({fields:['formattedAddress','addressComponents','location','id']});
+            if(id!==seq)return;if(!place.formattedAddress){status.textContent='Please enter the address manually.';return;}
+            input.value=place.formattedAddress.slice(0,250);const pc=comp(place.addressComponents,'postal_code');if(pc)postcode.value=pc.slice(0,20);
+            input.dataset.placeId=place.id||'';input.dataset.latitude=place.location?String(place.location.lat()):'';input.dataset.longitude=place.location?String(place.location.lng()):'';
+            clearAppliedEpc();status.textContent='Address selected from Google Places. Check the address and postcode before saving.';
+            if(pc)scheduleSearch(true);
+          }catch(e){console.warn('Places details unavailable',e);status.textContent='Address details could not be retrieved. Please enter the address manually.';}
+        }
+        async function fetchEpcRecords(address,pc){
+          if(!currentUser||!address||!pc)return [];
+          try{
+            const token=await currentUser.getIdToken();
+            const response=await fetch('https://hamlet-ai-gateway-staging.alfred-mayaki.workers.dev/v1/epc-search',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({address,postcode:pc})});
+            if(!response.ok)return [];
+            const payload=await response.json().catch(()=>({}));
+            return Array.isArray(payload.records)?payload.records.filter(record=>epcAddress(record)&&record.postcode):[];
+          }catch(e){console.warn('Non-domestic EPC address suggestions unavailable',e);return [];}
+        }
+        function scheduleSearch(epcOnly){
+          const value=input.value.trim(),pc=postcode.value.trim();++seq;const id=seq;if(timer)clearTimeout(timer);close();
+          if(value.length<3)return;
+          timer=setTimeout(async function(){
+            const placesPromise=!epcOnly&&ready?google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({input:value,includedRegionCodes:['gb']}).then(res=>(res.suggestions||[]).map(x=>x.placePrediction).filter(Boolean)).catch(e=>{console.warn('Places suggestions unavailable',e);return [];}):Promise.resolve([]);
+            const epcPromise=fetchEpcRecords(value,pc);
+            const results=await Promise.all([placesPromise,epcPromise]);
+            if(id!==seq||input.value.trim()!==value||postcode.value.trim()!==pc)return;
+            render(results[0],results[1]);
+            if(!box.hidden)status.textContent='Choose a Google Places result or a record from the non-domestic EPC register.';
+            else if(pc)status.textContent='No address or non-domestic EPC suggestions found. You can enter the details manually.';
+          },300);
+        }
+        input.addEventListener('input',()=>scheduleSearch(false));
+        postcode.addEventListener('input',()=>scheduleSearch(false));
+        input.addEventListener('keydown',function(e){
+          const items=Array.from(box.querySelectorAll('[role="option"]'));
+          if(e.key==='ArrowDown'&&!box.hidden){e.preventDefault();active=(active+1)%items.length;}
+          else if(e.key==='ArrowUp'&&!box.hidden){e.preventDefault();active=(active-1+items.length)%items.length;}
+          else if(e.key==='Enter'&&!box.hidden&&active>=0&&items[active]){e.preventDefault();items[active].click();}
+          else if(e.key==='Escape')close();
+          items.forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));
+        });
         document.addEventListener('click',e=>{if(!e.target.closest('.address-field'))close();});
         if(!key){status.textContent='Address suggestions are not configured yet. You can still enter the address manually.';return;}
-        if(window.google&&google.maps&&google.maps.places&&google.maps.places.AutocompleteSuggestion){ready=true;status.textContent='Address suggestions are ready.';return;}
+        if(window.google&&google.maps&&google.maps.places&&google.maps.places.AutocompleteSuggestion){ready=true;status.textContent='Google Places suggestions are ready. EPC-backed non-domestic addresses appear as a separate group when an address and postcode are available.';return;}
         const script=document.createElement('script');script.id='hamletGooglePlacesScript';script.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(key)+'&libraries=places&v=weekly';script.async=true;
-        script.onload=function(){if(window.google&&google.maps&&google.maps.places&&google.maps.places.AutocompleteSuggestion){ready=true;status.textContent='Address suggestions are ready.';}else status.textContent='Address suggestions could not initialize. Enter the address manually.';};
-        script.onerror=function(){status.textContent='Address suggestions could not load. Enter the address manually.';};document.head.appendChild(script);
+        script.onload=function(){if(window.google&&google.maps&&google.maps.places&&google.maps.places.AutocompleteSuggestion){ready=true;status.textContent='Google Places suggestions are ready. EPC-backed non-domestic addresses appear as a separate group when an address and postcode are available.';}else status.textContent='Google Places suggestions could not initialize. EPC-backed records may still appear once an address and postcode are entered.';};
+        script.onerror=function(){status.textContent='Google Places suggestions could not load. EPC-backed records may still appear once an address and postcode are entered.';};document.head.appendChild(script);
       }
       initAddressAutocomplete();
       function esc(value){return String(value??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]})}
