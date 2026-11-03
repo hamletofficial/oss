@@ -33,4 +33,11 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Bundle Worker without deploying
-        run: npx wrangler deploy --dry-run
+        run: npx wrangler deploy --dry-run --outdir dist
+      - name: Upload staging deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamlet-ai-worker-bundle
+          path: worker/hamlet-ai/dist/
+          if-no-files-found: error
+          retention-days: 3
