@@ -1,0 +1,29 @@
+.vs/ibrgroupintl.github.io.slnx/v18/.wsuo
+*.vsidx
+.vs
+
+# Dependency directories
+node_modules/
+
+# Environment variables (Secrets)
+.env
+.md
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+success.html
+
+# Cloudflare Wrangler local state and generated bundles
+.wrangler/
+**/.wrangler/
+
+# Local Visual Studio state and private university documents
+.vs/
+uni/

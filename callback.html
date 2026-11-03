@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#f4f7f2">
+  <title>Request Call Back — Hamlet</title>
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <style>
+    :root {
+      --bg:#f4f7f2; --text:#17342e; --muted:#53645f; --line:#d4e2da;
+      --brand:#146b59; --brand-2:#43a18a; --card:#fff; --accent:#e9a544;
+      --shadow:0 18px 42px rgba(25,66,53,.11);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      min-height:100vh;font-family:'DM Sans','Segoe UI',Arial,sans-serif;color:var(--text);
+      background:linear-gradient(180deg,rgba(244,247,242,.55),rgba(244,247,242,.82)),url("/index-banner.jpg") center top/cover no-repeat;
+      line-height:1.55;
+    }
+    .container{width:min(920px,calc(100% - 2rem));margin-inline:auto}
+    .site-header{position:sticky;top:0;z-index:100;background:rgba(244,247,242,.88);border-bottom:1px solid rgba(37,89,71,.13);backdrop-filter:blur(14px)}
+    .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:74px}
+    .brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-weight:700}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:700;border:1px solid transparent;cursor:pointer}
+    .btn-ghost{color:#FFF;background:#071D4A;border:1px solid #071D4A;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+    .btn-ghost:hover,.btn-ghost:focus-visible{color:#FFF;background:#071D4A;border-color:#FFF;box-shadow:0 0 0 2px rgba(7,29,74,.22);transform:translateY(-1px)}
+    .btn-ghost:focus-visible{outline:2px solid #071D4A;outline-offset:3px}
+    .btn-primary{color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 10px 22px rgba(20,107,89,.22)}
+    main{padding:54px 0 42px}
+    .card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:30px}
+    .eyebrow{display:inline-block;color:#155644;background:#e1f1e8;border:1px solid #b8dcc8;border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700}
+    h1{margin:14px 0 8px;letter-spacing:-.035em}
+    .intro{margin:0 0 24px;color:var(--muted);max-width:70ch}
+    form{display:grid;gap:18px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    label{font-weight:700;color:#245d4f}
+    label span{font-weight:500;color:var(--muted)}
+    input,select,textarea{
+      width:100%;font:inherit;color:var(--text);background:#fbfdfb;border:1px solid #cdded5;
+      border-radius:10px;padding:12px 13px;outline:none;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(20,107,89,.12)}
+    textarea{min-height:120px;resize:vertical}
+    .hint{font-size:.86rem;color:var(--muted)}
+    .consent{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--muted)}
+    .consent input{width:auto;margin-top:4px}
+    .actions{display:flex;justify-content:flex-end;gap:10px;align-items:center}
+    .status{display:none;padding:12px 14px;border-radius:10px;background:#e7f3ec;border:1px solid #b8dcc8;color:#245d4f;font-weight:600}
+    .status.error{background:#fff4e8;border-color:#efc98d;color:#7a5319}
+    .site-footer{border-top:1px solid #d9e4dd;padding:22px 0 28px;text-align:center;color:var(--muted)}
+    .footer-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .footer-links a{color:#53645f;text-decoration:none}
+    .actions button:disabled{opacity:.65;cursor:not-allowed}
+    @media(max-width:700px){
+      .header-row{min-height:68px}.brand span{font-size:.92rem}
+      .grid{grid-template-columns:1fr}.card{padding:22px}.actions{justify-content:center}
+      .actions .btn{width:100%}
+    }
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  </head>
+<body>
+  <header class="site-header hamlet-404-header" role="banner">
+    <div class="container header-row">
+      <a class="brand" href="/index.html" aria-label="Home">
+        
+        <span>hamlet</span>
+      </a>
+      <a class="btn btn-ghost" href="/index.html">Return to Homepage</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="card" aria-labelledby="callback-title">
+        <span class="eyebrow">Communications &amp; Media</span>
+        <h1 id="callback-title">Request Call Back</h1>
+        <p class="intro">If you are a communications director or senior communications professional and would like to discuss media relations, strategic communications or a potential brief, complete the form below and our team will follow up.</p>
+
+        <form id="callbackForm" novalidate>
+          <div class="grid">
+            <div class="field">
+              <label for="name">Full Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="jobTitle">Job Title</label>
+              <input id="jobTitle" name="jobTitle" type="text" placeholder="e.g. Communications Director" required>
+            </div>
+            <div class="field">
+              <label for="organisation">Organisation</label>
+              <input id="organisation" name="organisation" type="text" autocomplete="organization" required>
+            </div>
+            <div class="field">
+              <label for="sector">Sector</label>
+              <input id="sector" name="sector" type="text" placeholder="e.g. Financial Services" required>
+            </div>
+            <div class="field">
+              <label for="email">Work Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="phone">Telephone</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+            </div>
+            <div class="field">
+              <label for="country">Country</label>
+              <select id="country" name="country" autocomplete="country-name" required>
+                <option value="">Select a country</option>
+                <option value="Afghanistan">Afghanistan</option>
+                <option value="Albania">Albania</option>
+                <option value="Algeria">Algeria</option>
+                <option value="Andorra">Andorra</option>
+                <option value="Angola">Angola</option>
+                <option value="Antigua and Barbuda">Antigua and Barbuda</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Armenia">Armenia</option>
+                <option value="Australia">Australia</option>
+                <option value="Austria">Austria</option>
+                <option value="Azerbaijan">Azerbaijan</option>
+                <option value="Bahamas">Bahamas</option>
+                <option value="Bahrain">Bahrain</option>
+                <option value="Bangladesh">Bangladesh</option>
+                <option value="Barbados">Barbados</option>
+                <option value="Belarus">Belarus</option>
+                <option value="Belgium">Belgium</option>
+                <option value="Belize">Belize</option>
+                <option value="Benin">Benin</option>
+                <option value="Bhutan">Bhutan</option>
+                <option value="Bolivia">Bolivia</option>
+                <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                <option value="Botswana">Botswana</option>
+                <option value="Brazil">Brazil</option>
+                <option value="Brunei">Brunei</option>
+                <option value="Bulgaria">Bulgaria</option>
+                <option value="Burkina Faso">Burkina Faso</option>
+                <option value="Burundi">Burundi</option>
+                <option value="Cabo Verde">Cabo Verde</option>
+                <option value="Cambodia">Cambodia</option>
+                <option value="Cameroon">Cameroon</option>
+                <option value="Canada">Canada</option>
+                <option value="Central African Republic">Central African Republic</option>
+                <option value="Chad">Chad</option>
+                <option value="Chile">Chile</option>
+                <option value="China">China</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Comoros">Comoros</option>
+                <option value="Congo (Republic of the)">Congo (Republic of the)</option>
+                <option value="Costa Rica">Costa Rica</option>
+                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                <option value="Croatia">Croatia</option>
+                <option value="Cuba">Cuba</option>
+                <option value="Cyprus">Cyprus</option>
+                <option value="Czechia">Czechia</option>
+                <option value="Democratic Republic of the Congo">Democratic Republic of the Congo</option>
+                <option value="Denmark">Denmark</option>
+                <option value="Djibouti">Djibouti</option>
+                <option value="Dominica">Dominica</option>
+                <option value="Dominican Republic">Dominican Republic</option>
+                <option value="Ecuador">Ecuador</option>
+                <option value="Egypt">Egypt</option>
+                <option value="El Salvador">El Salvador</option>
+                <option value="Equatorial Guinea">Equatorial Guinea</option>
+                <option value="Eritrea">Eritrea</option>
+                <option value="Estonia">Estonia</option>
+                <option value="Eswatini">Eswatini</option>
+                <option value="Ethiopia">Ethiopia</option>
+                <option value="Fiji">Fiji</option>
+                <option value="Finland">Finland</option>
+                <option value="France">France</option>
+                <option value="Gabon">Gabon</option>
+                <option value="Gambia">Gambia</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Germany">Germany</option>
+                <option value="Ghana">Ghana</option>
+                <option value="Greece">Greece</option>
+                <option value="Grenada">Grenada</option>
+                <option value="Guatemala">Guatemala</option>
+                <option value="Guinea">Guinea</option>
+                <option value="Guinea-Bissau">Guinea-Bissau</option>
+                <option value="Guyana">Guyana</option>
+                <option value="Haiti">Haiti</option>
+                <option value="Honduras">Honduras</option>
+                <option value="Hungary">Hungary</option>
+                <option value="Iceland">Iceland</option>
+                <option value="India">India</option>
+                <option value="Indonesia">Indonesia</option>
+                <option value="Iran">Iran</option>
+                <option value="Iraq">Iraq</option>
+                <option value="Ireland">Ireland</option>
+                <option value="Israel">Israel</option>
+                <option value="Italy">Italy</option>
+                <option value="Jamaica">Jamaica</option>
+                <option value="Japan">Japan</option>
+                <option value="Jordan">Jordan</option>
+                <option value="Kazakhstan">Kazakhstan</option>
+                <option value="Kenya">Kenya</option>
+                <option value="Kiribati">Kiribati</option>
+                <option value="Kuwait">Kuwait</option>
+                <option value="Kyrgyzstan">Kyrgyzstan</option>
+                <option value="Laos">Laos</option>
+                <option value="Latvia">Latvia</option>
+                <option value="Lebanon">Lebanon</option>
+                <option value="Lesotho">Lesotho</option>
+                <option value="Liberia">Liberia</option>
+                <option value="Libya">Libya</option>
+                <option value="Liechtenstein">Liechtenstein</option>
+                <option value="Lithuania">Lithuania</option>
+                <option value="Luxembourg">Luxembourg</option>
+                <option value="Madagascar">Madagascar</option>
+                <option value="Malawi">Malawi</option>
+                <option value="Malaysia">Malaysia</option>
+                <option value="Maldives">Maldives</option>
+                <option value="Mali">Mali</option>
+                <option value="Malta">Malta</option>
+                <option value="Marshall Islands">Marshall Islands</option>
+                <option value="Mauritania">Mauritania</option>
+                <option value="Mauritius">Mauritius</option>
+                <option value="Mexico">Mexico</option>
+                <option value="Micronesia">Micronesia</option>
+                <option value="Moldova">Moldova</option>
+                <option value="Monaco">Monaco</option>
+                <option value="Mongolia">Mongolia</option>
+                <option value="Montenegro">Montenegro</option>
+                <option value="Morocco">Morocco</option>
+                <option value="Mozambique">Mozambique</option>
+                <option value="Myanmar">Myanmar</option>
+                <option value="Namibia">Namibia</option>
+                <option value="Nauru">Nauru</option>
+                <option value="Nepal">Nepal</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="New Zealand">New Zealand</option>
+                <option value="Nicaragua">Nicaragua</option>
+                <option value="Niger">Niger</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="North Korea">North Korea</option>
+                <option value="North Macedonia">North Macedonia</option>
+                <option value="Norway">Norway</option>
+                <option value="Oman">Oman</option>
+                <option value="Pakistan">Pakistan</option>
+                <option value="Palau">Palau</option>
+                <option value="Palestine">Palestine</option>
+                <option value="Panama">Panama</option>
+                <option value="Papua New Guinea">Papua New Guinea</option>
+                <option value="Paraguay">Paraguay</option>
+                <option value="Peru">Peru</option>
+                <option value="Philippines">Philippines</option>
+                <option value="Poland">Poland</option>
+                <option value="Portugal">Portugal</option>
+                <option value="Qatar">Qatar</option>
+                <option value="Romania">Romania</option>
+                <option value="Russia">Russia</option>
+                <option value="Rwanda">Rwanda</option>
+                <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                <option value="Saint Lucia">Saint Lucia</option>
+                <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
+                <option value="Samoa">Samoa</option>
+                <option value="San Marino">San Marino</option>
+                <option value="São Tomé and Príncipe">São Tomé and Príncipe</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Senegal">Senegal</option>
+                <option value="Serbia">Serbia</option>
+                <option value="Seychelles">Seychelles</option>
+                <option value="Sierra Leone">Sierra Leone</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Slovakia">Slovakia</option>
+                <option value="Slovenia">Slovenia</option>
+                <option value="Solomon Islands">Solomon Islands</option>
+                <option value="Somalia">Somalia</option>
+                <option value="South Africa">South Africa</option>
+                <option value="South Korea">South Korea</option>
+                <option value="South Sudan">South Sudan</option>
+                <option value="Spain">Spain</option>
+                <option value="Sri Lanka">Sri Lanka</option>
+                <option value="Sudan">Sudan</option>
+                <option value="Suriname">Suriname</option>
+                <option value="Sweden">Sweden</option>
+                <option value="Switzerland">Switzerland</option>
+                <option value="Syria">Syria</option>
+                <option value="Taiwan">Taiwan</option>
+                <option value="Tajikistan">Tajikistan</option>
+                <option value="Tanzania">Tanzania</option>
+                <option value="Thailand">Thailand</option>
+                <option value="Timor-Leste">Timor-Leste</option>
+                <option value="Togo">Togo</option>
+                <option value="Tonga">Tonga</option>
+                <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+                <option value="Tunisia">Tunisia</option>
+                <option value="Türkiye">Türkiye</option>
+                <option value="Turkmenistan">Turkmenistan</option>
+                <option value="Tuvalu">Tuvalu</option>
+                <option value="Uganda">Uganda</option>
+                <option value="Ukraine">Ukraine</option>
+                <option value="United Arab Emirates">United Arab Emirates</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="United States">United States</option>
+                <option value="Uruguay">Uruguay</option>
+                <option value="Uzbekistan">Uzbekistan</option>
+                <option value="Vanuatu">Vanuatu</option>
+                <option value="Vatican City">Vatican City</option>
+                <option value="Venezuela">Venezuela</option>
+                <option value="Vietnam">Vietnam</option>
+                <option value="Yemen">Yemen</option>
+                <option value="Zambia">Zambia</option>
+                <option value="Zimbabwe">Zimbabwe</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="callbackTime">Preferred Call-Back Time <span>(optional)</span></label>
+              <select id="callbackTime" name="callbackTime">
+                <option value="">No preference</option>
+                <option>Morning (09:00–12:00)</option>
+                <option>Afternoon (12:00–17:00)</option>
+                <option>Early evening (17:00–19:00)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="message">What would you like to discuss? <span>(optional)</span></label>
+            <textarea id="message" name="message" placeholder="Briefly describe the matter you would like to discuss."></textarea>
+          </div>
+
+          <label class="consent" for="consent">
+            <input id="consent" name="consent" type="checkbox" required>
+            <span>I consent to Impact in Business Recruitment Group Limited using the information provided to contact me about this request.</span>
+          </label>
+
+          <div id="formStatus" class="status" role="status" aria-live="polite"></div>
+
+          <div class="actions">
+            <button id="submitBtn" class="btn btn-primary" type="submit">Request Call Back</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/terms.html">Terms</a><span>|</span>
+        <a href="/privacy.html">Privacy</a><span>|</span>
+        <a href="/cookies.html">Cookies</a>
+      </div>
+      <p style="margin:0">© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('load', function () {
+      var form = document.getElementById('callbackForm');
+      var status = document.getElementById('formStatus');
+      var submitBtn = document.getElementById('submitBtn');
+
+      function setStatus(message, isError) {
+        status.className = isError ? 'status error' : 'status';
+        status.textContent = message;
+        status.style.display = 'block';
+      }
+
+      function getFirestore() {
+        if (!window.firebase || !window.firebaseConfig || !window.firebase.firestore) {
+          throw new Error('Firestore is not available. Please reload the page and try again.');
+        }
+        if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+        return firebase.firestore();
+      }
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          setStatus('Please complete the required fields before submitting your request.', true);
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting…';
+        status.style.display = 'none';
+
+        var data = {
+          name: document.getElementById('name').value.trim(),
+          jobTitle: document.getElementById('jobTitle').value.trim(),
+          organisation: document.getElementById('organisation').value.trim(),
+          sector: document.getElementById('sector').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          country: document.getElementById('country').value,
+          callbackTime: document.getElementById('callbackTime').value,
+          message: document.getElementById('message').value.trim(),
+          consent: document.getElementById('consent').checked,
+          submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          source: 'callback.html'
+        };
+
+        try {
+          var db = getFirestore();
+          await db.collection('callbackRequests').add(data);
+          form.reset();
+          setStatus('Thank you. Your call-back request has been submitted successfully.', false);
+          status.scrollIntoView({behavior:'smooth', block:'nearest'});
+        } catch (error) {
+          console.error('Firestore callback submission failed:', error);
+          setStatus('We could not submit your request at this time. Please try again shortly.', true);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Request Call Back';
+        }
+      });
+    });
+  </script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

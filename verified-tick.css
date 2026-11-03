@@ -1,0 +1,3 @@
+/* Shared X-style email-on-file verification tick. Keep badge markup in /verified-tick.js. */
+.email-verified-tick{display:inline-flex;align-items:center;justify-content:center;margin-left:.4rem;width:19px;height:19px;color:#1d9bf0;background:transparent;border:0;flex:0 0 19px;line-height:1;vertical-align:middle}
+.email-verified-tick svg{display:block;width:100%;height:100%}

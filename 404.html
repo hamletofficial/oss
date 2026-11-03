@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1120">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="The page you were looking for could not be found. Find your way back to Hamlet.">
+  <title>404 — Page not found | hamlet</title>
+<link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--surface:#111827;--royal:#071D4A;--blue:#3b82f6;--muted:#a8b7cc;--line:rgba(96,165,250,.24)}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;color:#f8fafc;background:radial-gradient(ellipse at 78% 40%,rgba(29,78,216,.22),transparent 42%),radial-gradient(ellipse at 15% 15%,rgba(37,99,235,.12),transparent 38%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow-x:hidden}
+    a{color:inherit}a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    .topbar{border-bottom:1px solid rgba(148,163,184,.13);background:rgba(7,17,31,.78);backdrop-filter:blur(16px)}
+    .topbar-inner{width:min(1440px,100%);margin:auto;padding:16px clamp(18px,4vw,52px);display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{font-size:clamp(1.5rem,3vw,2rem);font-weight:850;letter-spacing:-.055em;text-decoration:none}
+    .brand span{color:#60a5fa}
+    .top-links{display:flex;align-items:center;gap:clamp(12px,2vw,28px);font-size:.88rem;color:#dbeafe}
+    .top-links a{text-decoration:none;white-space:nowrap}.top-links a:hover{color:#60a5fa}
+    .signin{padding:10px 18px;border-radius:999px;background:#075bea;color:#fff!important;font-weight:750}
+    main{width:min(1440px,100%);margin:0 auto;flex:1;display:flex;align-items:center;padding:clamp(34px,6vw,82px) clamp(18px,4vw,52px)}
+    .layout{width:100%;display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);align-items:center;gap:clamp(28px,4vw,68px)}
+    .copy{position:relative;z-index:1}
+    .eyebrow{display:flex;align-items:center;gap:12px;color:#60a5fa;font-size:.78rem;font-weight:800;letter-spacing:.32em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:28px;height:2px;background:#3b82f6}
+    h1{font-size:clamp(2.65rem,5.6vw,5.4rem);line-height:1.02;letter-spacing:-.065em;margin:22px 0 20px;max-width:760px}
+    h1 span{color:#3b82f6}
+    .intro{max-width:590px;color:#afc2dc;font-size:clamp(1rem,1.4vw,1.2rem);line-height:1.75;margin:0}
+    .rule{width:42px;height:3px;background:#2563eb;border-radius:4px;margin:28px 0}
+    .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:660px}
+    .action{min-height:68px;display:flex;align-items:center;gap:14px;padding:15px 17px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(125deg,rgba(7,29,74,.72),rgba(17,24,39,.94));text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+    .action:hover{transform:translateY(-2px);border-color:rgba(96,165,250,.7);background:linear-gradient(125deg,rgba(29,78,216,.28),rgba(17,24,39,.96))}
+    .action-icon{width:30px;height:30px;display:grid;place-items:center;flex:none;color:#60a5fa}
+    .action-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .action-label{font-weight:700;font-size:.92rem;line-height:1.35}.arrow{margin-left:auto;color:#60a5fa;font-size:1.25rem}
+    .search-wrap{margin-top:28px;max-width:660px}.search-label{display:block;color:#c5d4e7;margin-bottom:10px;font-size:.92rem}
+    .search-form{display:flex;gap:8px;padding:6px;border:1px solid rgba(96,165,250,.3);border-radius:15px;background:rgba(7,17,31,.78)}
+    .search-form input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;padding:12px;font:inherit}
+    .search-form input::placeholder{color:#8094b1}
+    .search-form button{border:0;border-radius:11px;padding:0 22px;min-height:46px;background:#075bea;color:#fff;font:inherit;font-weight:800;cursor:pointer}
+    .search-form button:hover{background:#2563eb}
+    .visual{position:relative;min-width:0}
+    .visual:before{content:"";position:absolute;inset:12% 5%;background:rgba(37,99,235,.25);filter:blur(65px);border-radius:50%}
+    .visual img{position:relative;display:block;width:100%;height:auto;max-height:690px;object-fit:contain;filter:drop-shadow(0 28px 42px rgba(0,0,0,.35));animation:arrive .7s ease-out both}
+    footer{padding:18px clamp(18px,4vw,52px) 24px;color:#8293ab;font-size:.78rem}
+    .footer-inner{width:min(1440px,100%);margin:auto;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid rgba(148,163,184,.12);padding-top:18px}
+    .footer-links{display:flex;gap:18px;flex-wrap:wrap}.footer-links a{color:#9eb0c7;text-decoration:none}.footer-links a:hover{color:#fff}
+    @keyframes arrive{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media(max-width:900px){.top-links a:not(.signin){display:none}.layout{grid-template-columns:1fr;gap:16px}.copy{max-width:760px}.visual{grid-row:1;max-width:600px;width:100%;margin:0 auto -12px}.visual img{max-height:390px}main{padding-top:26px}.eyebrow{font-size:.72rem}h1{max-width:680px}}
+    @media(max-width:540px){.topbar-inner{padding:13px 18px}.layout{gap:12px}.visual img{max-height:270px}.eyebrow{letter-spacing:.22em}h1{font-size:clamp(2.45rem,12vw,3.8rem);margin:17px 0 14px}.intro{font-size:1rem}.rule{margin:22px 0}.actions{grid-template-columns:1fr;gap:9px}.action{min-height:58px}.search-form button{padding:0 15px}.footer-inner{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+  <style id="root-brand-background">body{background:#111827!important}</style>
+</head>
+<body>
+  <header class="topbar hamlet-404-header">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="hamlet home">hamlet<span>.</span></a>
+      <nav class="top-links" aria-label="Main navigation">
+        <a href="/app/public/live.html">Live Properties</a>
+        <a href="/portfolio.html">Portfolio</a>
+        <a href="https://www.ibrecruitment.com/media">Resources</a>
+        <a href="https://support.hamlet-ai.co.uk/">Support</a>
+        <a class="signin" href="/login.html">Sign in</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="layout">
+      <section class="copy" aria-labelledby="error-title">
+        <div class="eyebrow">404 · Page not found</div>
+        <h1 id="error-title">A slight detour.<br>This page <span>isn't here.</span></h1>
+        <p class="intro">The page may have moved, been renamed or no longer exists. No need to lose your bearings — find your way back to Hamlet and keep your deals moving.</p>
+        <div class="rule" aria-hidden="true"></div>
+        <nav class="actions" aria-label="Helpful destinations">
+          <a class="action" href="/">
+            <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h5v-7h4v7h5V9"/></svg></span>
+            <span class="action-label">Go to homepage</span><span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="action" href="/app/public/live.html">
+            <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21v-4h6v4M8 7h2m4 0h2M8 11h2m4 0h2"/></svg></span>
+            <span class="action-label">Browse live properties</span><span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="action" href="/portfolio.html">
+            <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+            <span class="action-label">Explore the portfolio</span><span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="action" href="https://support.hamlet-ai.co.uk/">
+            <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22z"/><path d="M4 5.5V22m4-15h8m-8 4h8"/></svg></span>
+            <span class="action-label">Visit the Support Centre</span><span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </nav>
+        <div class="search-wrap">
+          <label class="search-label" for="site-search">Or search the Hamlet website</label>
+          <form class="search-form" id="site-search-form" role="search">
+            <input id="site-search" name="q" type="search" placeholder="Search Hamlet…" autocomplete="off">
+            <button type="submit">Search</button>
+          </form>
+        </div>
+      </section>
+      <div class="visual">
+        <img src="/assets/images/ipad-backup.png" alt="Hamlet digital workspace for sustainable commercial property professionals" fetchpriority="high">
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-inner">
+      <span>Less fragmentation, more connected deals.</span>
+      <nav class="footer-links" aria-label="Legal links">
+        <a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a><a href="/contact.html">Contact</a>
+      </nav>
+      <span>© 2026 Impact in Business Recruitment</span>
+    </div>
+  </footer>
+  <script>
+    // Reuse Hamlet's existing search page; never search authenticated/member-only pages here.
+    document.getElementById('site-search-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      var input = document.getElementById('site-search');
+      var query = input.value.trim();
+      if (!query) { input.focus(); return; }
+      window.location.href = '/search.html?q=' + encodeURIComponent(query);
+    });
+  </script>
+  <script src="/hamlet-background.js?v=20261024-1"></script>
+</body>
+</html>

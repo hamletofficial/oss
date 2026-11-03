@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <title>Identity Verification | Impact in Business</title>
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css"><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script><script defer src="/firebase-config.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    #page-loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fff;transition:opacity .25s ease,visibility .25s ease}
+    #page-loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .page-loader-spinner{width:34px;height:34px;border:3px solid #e5e7eb;border-top-color:#111827;border-radius:50%;animation:pageLoaderSpin .75s linear infinite}
+    @keyframes pageLoaderSpin{to{transform:rotate(360deg)}}
+  </style>
+  <style>
+    :root{--verify-bg:#fff;--verify-line:#d9dee7;--verify-text:#111827;--verify-muted:#4b5563;--verify-brand:#111827;--verify-brand-2:#374151;--verify-success:#15803d}
+    html,body{margin:0;min-height:100%;background:#fff!important}
+    body.verify-page{min-height:100vh;min-height:100dvh;margin:0;color:var(--verify-text);background:#fff!important;font-family:'DM Sans',Arial,sans-serif}
+    .verify-shell{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:56px 0 48px}
+    .verify-header{max-width:760px;margin:0 auto 22px;text-align:center}
+    .verify-kicker{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border:1px solid #d1d5db;border-radius:999px;background:#f8fafc;color:#111827;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .verify-header h1{margin:15px 0 9px;color:#111827;font-size:clamp(2rem,5vw,3rem);line-height:1.12}
+    .verify-header p{margin:0 auto;max-width:680px;color:#4b5563;font-size:1rem;line-height:1.65}
+    .verify-card{border:1px solid var(--verify-line);border-radius:24px;background:#fff;box-shadow:0 18px 50px rgba(15,23,42,.10);padding:clamp(16px,3vw,28px)}
+    .verify-card-inner{border:1px solid #e5e7eb;border-radius:18px;background:#fff;padding:clamp(14px,2.5vw,22px)}
+    .verify-instructions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .instruction{border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;padding:14px}
+    .instruction strong{display:block;margin-bottom:5px;color:#111827;font-size:.94rem}
+    .instruction span{display:block;color:#4b5563;font-size:.82rem;line-height:1.45}
+    .instruction .instruction-number{display:grid;place-items:center;width:27px;height:27px;min-width:27px;min-height:27px;box-sizing:border-box;margin:0 0 9px;padding:0!important;border-radius:50%;background:#111827;color:#fff;font-family:'DM Sans',Arial,sans-serif;font-size:.78rem;font-weight:800;line-height:1!important;text-align:center;vertical-align:middle}
+    .sdk-frame{min-height:620px;border:1px solid #d9dee7;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.08)}
+    #onfido-mount{min-height:620px;width:100%;background:#fff}
+    .sdk-placeholder{min-height:620px;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#334155;font-size:.94rem}
+    .verify-status{margin:14px 0 0;min-height:1.5em;color:#4b5563;text-align:center;font-size:.88rem}
+    .verify-status.error{color:#fecaca}
+    .verify-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .verify-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:10px;border:1px solid #d1d5db;text-decoration:none;font:700 .9rem 'DM Sans',Arial,sans-serif;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+    .verify-btn:hover{transform:translateY(-1px)}
+    .verify-btn-primary{color:#fff;border-color:#111827;background:#111827;box-shadow:0 8px 20px rgba(15,23,42,.16)}
+    .verify-btn-secondary{color:#111827;background:#fff}
+    .verify-security{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px;color:#4b5563;font-size:.78rem;text-align:center}
+    .verify-security-dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--verify-success);box-shadow:0 0 0 4px rgba(36,211,165,.10)}
+    @media(max-width:760px){.verify-shell{width:min(100% - 20px,1080px);padding:28px 0 30px}.verify-card{padding:10px;border-radius:18px}.verify-card-inner{padding:10px;border-radius:14px}.verify-instructions{grid-template-columns:1fr}.sdk-frame,#onfido-mount,.sdk-placeholder{min-height:560px}}
+  </style>
+</head>
+<body class="verify-page">
+  <div id="page-loader" aria-label="Loading" role="status"><div class="page-loader-spinner"></div></div>
+  <main class="verify-shell">
+    <header class="verify-header">
+      <span class="verify-kicker">Secure identity verification</span>
+      <h1>Verify your identity</h1>
+      <p>Complete the verification below using your identity document and, where requested, a face capture. The verification flow is provided securely by Entrust.</p>
+    </header>
+    <section class="verify-card" aria-labelledby="verification-title">
+      <div class="verify-card-inner">
+        <div class="verify-instructions" aria-label="Verification guidance">
+          <div class="instruction"><span class="instruction-number">1</span><strong>Have your document ready</strong><span>Use a valid identity document and make sure the details are clear and readable.</span></div>
+          <div class="instruction"><span class="instruction-number">2</span><strong>Use good lighting</strong><span>Allow camera access when prompted and avoid glare, shadows or obstructions.</span></div>
+          <div class="instruction"><span class="instruction-number">3</span><strong>Follow each prompt</strong><span>Keep the verification window open until the flow confirms that your submission is complete.</span></div>
+        </div>
+        <div class="sdk-frame"><div id="onfido-mount"><div class="sdk-placeholder">Preparing your secure verification session…</div></div></div>
+        <p id="verify-status" class="verify-status" role="status" aria-live="polite"></p>
+        <div class="verify-actions"><a class="verify-btn verify-btn-secondary" href="/members.html">Back to Members Area</a><button id="retry-verification" class="verify-btn verify-btn-primary" type="button" hidden>Retry verification</button></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    window.addEventListener("load",function(){setTimeout(function(){const loader=document.getElementById("page-loader");if(loader)loader.classList.add("hidden")},150)});
+  </script>
+  <script type="module">
+    import { Onfido } from "https://cdn.jsdelivr.net/npm/onfido-sdk-ui@14.85.0/+esm";
+    const mount=document.getElementById("onfido-mount"),status=document.getElementById("verify-status"),retry=document.getElementById("retry-verification");let onfidoInstance=null;
+    function setStatus(message,isError){status.textContent=message||"";status.classList.toggle("error",Boolean(isError))}
+    function getFirebaseUser(){return new Promise(function(resolve,reject){try{if(!window.firebase||!window.firebaseConfig)throw new Error("Authentication is not available.");if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);const auth=firebase.auth();if(auth.currentUser){resolve(auth.currentUser);return}const unsubscribe=auth.onAuthStateChanged(function(user){unsubscribe();if(user)resolve(user);else reject(new Error("Please sign in before completing identity verification."))})}catch(error){reject(error)}})}
+    async function saveVerification(){const user=await getFirebaseUser();await firebase.firestore().collection("publicProfiles").doc(user.uid).set({onfidoVerified:true,onfidoVerifiedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})}
+    async function startVerification(){retry.hidden=true;setStatus("Preparing your secure verification session…");mount.innerHTML='<div class="sdk-placeholder">Preparing your secure verification session…</div>';try{await getFirebaseUser();const response=await fetch("/api/onfido/session",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({})});if(!response.ok)throw new Error("The verification session could not be created.");const session=await response.json();if(!session.token||!session.workflowRunId)throw new Error("The verification service returned an incomplete session.");mount.innerHTML="";onfidoInstance=Onfido.init({token:session.token,workflowRunId:session.workflowRunId,containerId:"onfido-mount",onComplete:async function(){try{await saveVerification();setStatus("Verification complete. Your member profile is now marked as verified. You can safely leave this page.")}catch(error){console.error("Unable to save Entrust verification status:",error);setStatus("Verification completed, but your member verification status could not be saved. Please sign in again and retry.",true);retry.hidden=false}},onError:function(error){console.error("Entrust verification error:",error);setStatus("The verification flow encountered an error. Please try again.",true);retry.hidden=false},theme:{name:"light"}});setStatus("")}catch(error){console.error("Unable to start Entrust verification:",error);mount.innerHTML='<div class="sdk-placeholder">Secure verification is temporarily unavailable. Please try again.</div>';setStatus(error&&error.message?error.message:"Secure verification is temporarily unavailable.",true);retry.hidden=false}}
+    retry.addEventListener("click",startVerification);startVerification();
+  </script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

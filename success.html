@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="theme-color" content="#07111f">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="Payment confirmation for Hamlet.">
+  <title>Thank You — Hamlet</title>
+  <script>
+	(function () {
+	  var prefix = 'ibr_cookie_consent_v1=';
+	  var hasConsent = document.cookie.split(';').some(function (cookie) {
+		cookie = cookie.trim();
+		return cookie.indexOf(prefix) === 0 && cookie.length > prefix.length;
+	  });
+	  if (hasConsent) document.documentElement.classList.add('has-cookie-consent');
+	})();
+  </script>
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+	:root { --payment-bg:#f4f7f2; --payment-ink:#17342e; --payment-muted:#53645f; --payment-green:#146b59; --payment-light:#43a18a; --payment-line:#d4e2da; --payment-font:'DM Sans','Segoe UI',Arial,sans-serif; }
+	* { box-sizing:border-box; }
+	html,body { min-height:100%; margin:0; }
+	body { min-height:100vh; display:flex; flex-direction:column; color:var(--payment-ink); background:radial-gradient(900px 520px at 88% -10%,rgba(67,161,138,.14),transparent 60%),var(--payment-bg); font-family:var(--payment-font); line-height:1.6; }
+	.payment-container { width:min(1120px,calc(100% - 2rem)); margin-inline:auto; }
+	.payment-header { position:sticky; top:0; z-index:10; border-bottom:1px solid #26384d; background:rgba(7,17,31,.97); backdrop-filter:blur(14px); }
+	.payment-header-row { min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+	.payment-brand { display:inline-flex; align-items:center; gap:11px; color:#fff; font-size:1.35rem; letter-spacing:-.045em; font-weight:800; text-decoration:none; }
+	.payment-nav { display:flex; gap:8px; flex-wrap:wrap; }
+	.payment-nav a,.payment-button { min-height:44px; display:inline-flex; align-items:center; justify-content:center; padding:9px 14px; border:1px solid #c6d8ce; border-radius:11px; color:var(--payment-ink); background:#fff; font:700 .95rem var(--payment-font); text-decoration:none; }
+	.payment-nav a { border-color:#34465c; color:#f8fafc; background:#111f32; }
+	.payment-nav a:hover { background:#20324a; }
+	.payment-nav a[aria-current="page"],.payment-button { color:#fff; border-color:transparent; background:linear-gradient(135deg,var(--payment-green),var(--payment-light)); }
+	main { flex:1; display:grid; place-items:center; padding:clamp(36px,7vw,78px) 0; }
+	.success-card { width:min(760px,100%); padding:clamp(28px,6vw,56px); border:1px solid #d1e2d8; border-radius:24px; background:linear-gradient(145deg,#fff,#edf5ef); box-shadow:0 24px 60px rgba(25,66,53,.11); text-align:center; }
+	.success-mark { width:62px; height:62px; display:grid; place-items:center; margin:0 auto 18px; border-radius:50%; color:#fff; background:linear-gradient(135deg,var(--payment-green),var(--payment-light)); font-size:1.8rem; font-weight:800; }
+	h1 { margin:0 0 12px; font-size:clamp(2rem,5vw,3rem); line-height:1.12; letter-spacing:-.04em; }
+	.success-card p { max-width:58ch; margin:0 auto 22px; color:var(--payment-muted); }
+	.payment-footer { padding:20px 0 28px; border-top:1px solid var(--payment-line); }
+	.cookie-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; padding:12px 14px; border:1px solid var(--payment-line); border-radius:12px; background:#fff; color:var(--payment-muted); }
+	.has-cookie-consent #cookieConsentBar { display:none!important; }
+	.cookie-bar a,.footer-links a { color:var(--payment-green); }
+	.cookie-actions { display:flex; gap:8px; }
+	.cookie-actions button { min-height:40px; padding:8px 12px; border:1px solid #d2dfd7; border-radius:9px; color:var(--payment-ink); background:#f8faf8; font:700 .9rem var(--payment-font); cursor:pointer; }
+	.cookie-actions button:last-child { color:#fff; border-color:transparent; background:var(--payment-green); }
+	.footer-links { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+	.footer-links a { text-decoration:none; }
+	.copyright { margin:0; color:var(--payment-muted); text-align:center; font-size:.9rem; }
+	:where(a,button):focus-visible { outline:3px solid rgba(20,107,89,.55); outline-offset:3px; }
+	@media(max-width:640px) { .payment-header-row { align-items:flex-start; flex-direction:column; padding:12px 0; gap:10px; } .payment-nav { width:100%; } .payment-nav a { flex:1; } .cookie-bar { align-items:stretch; } .cookie-actions button { flex:1; } }
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <style id="root-brand-background">body{background:#111827!important}</style>
+</head>
+<body>
+  <header class="payment-header hamlet-404-header" role="banner">
+	<div class="payment-container payment-header-row">
+	  <a class="payment-brand" href="/" aria-label="Hamlet home">
+		<span>hamlet</span>
+	  </a>
+	  <nav class="payment-nav" aria-label="Primary navigation">
+		<a href="/">Home</a>
+		<a href="/invoice.html">Invoice</a>
+		<a href="/requests.html">Submit a request</a>
+	  </nav>
+	</div>
+  </header>
+  <main>
+	<div class="payment-container">
+	  <section class="success-card" aria-labelledby="successTitle">
+		<div class="success-mark" aria-hidden="true">✓</div>
+		<h1 id="successTitle">Thank you for your payment</h1>
+		<p>If you have just completed Stripe checkout, your payment is being processed. Stripe will send a receipt to the email address used at checkout.</p>
+		<a class="payment-button" href="/">Return to Hamlet</a>
+	  </section>
+	</div>
+  </main>
+  <footer class="payment-footer" role="contentinfo">
+	<div class="payment-container">
+	  <div id="cookieConsentBar" class="cookie-bar">
+		<div>This website uses cookies to improve your experience. <a href="/cookies.html">Cookie Policy</a> <span aria-hidden="true">|</span> <a href="/privacy.html">Privacy Policy</a></div>
+		<div class="cookie-actions"><button id="cookieDeclineBtn" type="button">Decline</button><button id="cookieAcceptBtn" type="button">Accept</button></div>
+	  </div>
+	  <nav class="footer-links" aria-label="Footer">
+		<a href="/terms.html">Terms</a><span aria-hidden="true">|</span><a href="/privacy.html">Privacy</a><span aria-hidden="true">|</span><a href="/cookies.html">Cookies</a>
+	  </nav>
+	  <p class="copyright">© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+	</div>
+  </footer>
+  <script>
+	(function () {
+	  var cookieName = 'ibr_cookie_consent_v1';
+	  function readCookie(name) {
+		var prefix = name + '=';
+		var item = document.cookie.split(';').map(function (part) { return part.trim(); }).find(function (part) { return part.indexOf(prefix) === 0; });
+		if (!item) return null;
+		try { return decodeURIComponent(item.slice(prefix.length)); } catch (error) { return item.slice(prefix.length); }
+	  }
+	  function saveCookie(value) {
+		var expiry = new Date();
+		expiry.setTime(expiry.getTime() + 365 * 24 * 60 * 60 * 1000);
+		document.cookie = cookieName + '=' + encodeURIComponent(value) + ';expires=' + expiry.toUTCString() + ';path=/;SameSite=Lax';
+	  }
+	  var bar = document.getElementById('cookieConsentBar');
+	  if (!bar || readCookie(cookieName)) { if (bar) bar.style.display = 'none'; return; }
+	  document.getElementById('cookieAcceptBtn').addEventListener('click', function () { saveCookie('accepted'); bar.style.display = 'none'; });
+	  document.getElementById('cookieDeclineBtn').addEventListener('click', function () { saveCookie('declined'); bar.style.display = 'none'; });
+	})();
+  </script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="description" content="An introduction to Passivhaus: its origins, building-performance principles and certification for commercial and residential real estate.">
+  <title>Passivhaus | Energy performance in the built environment</title>
+<link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#1f2937;--line:#374151;--text:#f9fafb;--muted:#cbd5e1;--link:#bfdbfe}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:var(--bg)}
+    body{margin:0;background:linear-gradient(145deg,#0b1120,#111827 58%,#0b1120);color:var(--text);font:16px/1.7 "DM Sans","Segoe UI",Arial,sans-serif}
+    a{color:var(--link);text-underline-offset:3px}
+    a:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    .wrap{width:min(1040px,calc(100% - 2rem));margin-inline:auto}
+    .site-head{background:#071d4a;border-bottom:1px solid var(--line)}
+    .head-row{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{color:#fff;text-decoration:none;font-size:1.35rem;font-weight:850;letter-spacing:-.04em}
+    .back{display:inline-flex;align-items:center;justify-content:center;padding:.55rem .8rem;border:1px solid #64748b;border-radius:8px;text-decoration:none;color:#fff;font-weight:700}
+    .site-head{position:sticky;top:0;z-index:1000;isolation:isolate;overflow:visible}
+    .head-row{overflow:visible}
+    .head-row>.site-search{display:block!important;visibility:visible!important;opacity:1!important;position:relative;z-index:10001;flex:1 1 380px;width:auto;max-width:500px;min-width:190px;margin:0}
+    .site-search-form{display:flex!important;visibility:visible!important;align-items:center;gap:.45rem;width:100%;min-height:44px;box-sizing:border-box;padding:.28rem .35rem .28rem .75rem;border:1px solid #8ba9d6;border-radius:11px;background:#0b1b3a!important;box-shadow:inset 0 1px 2px #02061735}
+    .site-search-input{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto;width:100%;min-width:0;min-height:34px;border:0!important;outline:0;background:transparent!important;color:#fff!important;font:inherit;font-size:.88rem}
+    .site-search-input::placeholder{color:#e2e8f0!important;opacity:1}
+    .site-search-submit{display:inline-flex!important;visibility:visible!important;align-items:center;justify-content:center;flex:0 0 auto;min-height:34px;padding:.38rem .65rem;border:0;border-radius:8px;background:#fff!important;color:#071d4a!important;font-size:.8rem;font-weight:800;cursor:pointer}
+    .site-search-icon{display:block!important;width:18px;height:18px;flex:0 0 auto;color:#bfdbfe}
+    .site-search-results{position:absolute;top:calc(100% + .5rem);left:0;right:0;z-index:2147483647;max-height:min(65vh,440px);overflow:auto;padding:.45rem;border:1px solid #48699e;border-radius:12px;background:#111827!important;background-color:#111827!important;background-image:none!important;color:#f8fafc;opacity:1!important;visibility:visible;isolation:isolate;box-shadow:0 16px 36px #020617b8;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .site-search-results[hidden]{display:none!important}
+    .site-search-result{display:block;padding:.65rem .75rem;border-radius:8px;color:#fff;text-decoration:none}
+    .site-search-result:hover,.site-search-result:focus-visible{background:#1f2937;outline:2px solid #93c5fd;outline-offset:-2px}
+    .site-search-result strong{display:block;font-size:.9rem;line-height:1.4;margin:0 0 .55rem;padding:0 0 .48rem;border-bottom:1px solid #334765}
+    .site-search-result small{display:block;margin-top:0;padding-top:0;border-top:0;color:#bfdbfe;font-size:.75rem;line-height:1.5;overflow-wrap:anywhere}
+    .site-search-empty{padding:.75rem;color:#cbd5e1;font-size:.85rem}
+    .site-search-retry{display:inline-flex;align-items:center;justify-content:center;margin:0 .75rem .75rem;padding:.4rem .7rem;border:1px solid #64748b;border-radius:7px;background:#1f2937;color:#fff;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+    @media(max-width:850px){.head-row{flex-wrap:wrap}.head-row>.site-search{flex:1 1 240px;max-width:100%}}
+    @media(max-width:560px){.head-row{align-items:stretch;flex-direction:column;padding:.8rem 0;gap:.75rem}.brand{align-self:flex-start}.head-row>.site-search{display:block!important;width:100%;max-width:none;min-width:0;flex:0 0 auto}.site-search-form{min-height:46px}.site-search-submit{min-height:36px}.back{align-self:flex-start}}
+
+    main{padding:clamp(2rem,6vw,4.5rem) 0}
+    .eyebrow{display:inline-flex;padding:.3rem .65rem;border:1px solid #48618a;border-radius:999px;color:#bfdbfe;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    h1{font-size:clamp(2.3rem,6vw,4.3rem);line-height:1.04;letter-spacing:-.055em;margin:1rem 0}
+    h2{font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.2;letter-spacing:-.035em;margin:0 0 .8rem}
+    h3{font-size:1.05rem;line-height:1.35;margin:.2rem 0 .45rem}
+    p{color:var(--muted);margin:.5rem 0 1rem}
+    .hero{max-width:820px;margin-bottom:2rem}
+    .hero .lead{font-size:clamp(1.05rem,2vw,1.22rem);max-width:72ch}
+    .hero-callout{margin-top:1.25rem;padding:1rem 1.15rem;border:1px solid #35537b;border-left:3px solid #93c5fd;border-radius:10px;background:#101d32;color:#dbeafe}
+    .section{margin:1.2rem 0;padding:clamp(1.15rem,3vw,1.8rem);border:1px solid var(--line);border-radius:16px;background:rgba(17,24,39,.94)}
+    .section-intro{max-width:78ch}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;margin-top:1rem}
+    .principle{padding:1rem;border:1px solid #34445b;border-radius:11px;background:linear-gradient(145deg,#172338,#111827)}
+    .number{display:inline-grid;place-items:center;width:1.8rem;height:1.8rem;margin-bottom:.55rem;border:1px solid #5277a7;border-radius:8px;background:#172e52;color:#dbeafe;font-size:.8rem;font-weight:850}
+    .principle p,.sector p{font-size:.93rem;margin-bottom:0}
+    .sector-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;margin-top:1rem}
+    .sector{padding:1rem;border:1px solid #34445b;border-radius:11px;background:#111d30}
+    .sector-tag{display:inline-block;margin-bottom:.55rem;color:#bfdbfe;font-size:.73rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+    .steps{counter-reset:step;list-style:none;padding:0;margin:1rem 0 0;display:grid;gap:.75rem}
+    .steps li{counter-increment:step;position:relative;padding:.85rem .9rem .85rem 3.2rem;border:1px solid #34445b;border-radius:10px;background:#111d30;color:var(--muted)}
+    .steps li:before{content:counter(step);position:absolute;left:.85rem;top:.8rem;display:grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:7px;background:#1e3a8a;color:#dbeafe;font-weight:850}
+    .note{font-size:.88rem;padding:1rem;border:1px solid #34445b;border-radius:10px;background:#0e192a}
+    .sources{padding-left:1.2rem;color:var(--muted)}
+    .sources li{margin:.45rem 0;overflow-wrap:anywhere}
+    .sources a{font-weight:700}
+    footer{border-top:1px solid var(--line);padding:1.4rem 0;color:var(--muted);font-size:.88rem}
+    @media(max-width:720px){.sector-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.head-row{align-items:flex-start;flex-direction:column;padding:.8rem 0}.back{margin-bottom:.1rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <div class="wrap head-row">
+      <a class="brand" href="/index.html">hamlet<span class="brand-dot" style="color:#bfdbfe">.</span></a>
+      <div class="site-search" role="search">
+        <form class="site-search-form" id="site-search-form" action="/search.html" method="get" autocomplete="off">
+          <svg class="site-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"></circle><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          <input class="site-search-input" id="site-search-input" name="q" type="search" placeholder="Search all pages…" aria-label="Search all Hamlet pages" aria-controls="site-search-results" aria-expanded="false" minlength="2">
+          <button class="site-search-submit" type="submit">Search</button>
+        </form>
+        <div class="site-search-results" id="site-search-results" role="listbox" aria-label="Search suggestions" hidden></div>
+      </div>
+      <a class="back" href="/index.html">Back to Hamlet</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <header class="hero">
+      <span class="eyebrow">Building performance · Real estate</span>
+      <h1>Passivhaus: a fabric-first standard for better buildings</h1>
+      <p class="lead">Passivhaus is a rigorous, performance-based building standard designed to deliver high levels of thermal comfort and indoor air quality with very low energy demand. It applies to more than houses: the same whole-building approach can inform the design and delivery of offices, education buildings and other commercial or public property.</p>
+      <div class="hero-callout"><strong>Why it matters:</strong> Passivhaus connects building design to measurable performance. For property owners, occupiers, developers and investors, certification can provide independently checked evidence that a building was planned and delivered against defined energy and quality criteria.</div>
+    </header>
+
+    <section class="section" aria-labelledby="origins">
+      <h2 id="origins">Origins and development</h2>
+      <p>The Passivhaus concept emerged from research and collaboration in the late 1980s between German building physicist Wolfgang Feist and Swedish researcher Bo Adamson. Their work explored how a building could maintain comfortable indoor conditions while needing very little conventional space heating.</p>
+      <p>A pioneering group of terraced homes was built in Darmstadt-Kranichstein, Germany, around 1990–91. Their monitored performance helped demonstrate that very low heating demand could be achieved in occupied buildings, rather than existing only as a theoretical design ambition.</p>
+      <p>In 1996, Wolfgang Feist founded the independent <a href="https://passivehouse.com/en/home/institute/" target="_blank" rel="noopener noreferrer">Passive House Institute (PHI)</a> in Darmstadt. The Institute developed the technical criteria, planning methods and quality-assurance approach that helped the standard spread internationally. Passivhaus is now used in residential and non-residential projects across a wide range of climates and building types.</p>
+    </section>
+
+    <section class="section" aria-labelledby="premise">
+      <h2 id="premise">The premise: reduce demand before supplying energy</h2>
+      <p class="section-intro">Passivhaus follows a whole-building, fabric-first approach. Instead of relying mainly on large heating or cooling systems to compensate for heat loss, air leakage or overheating, the design reduces those loads at source and then provides controlled ventilation and appropriately sized building services.</p>
+      <div class="grid">
+        <article class="principle"><span class="number">01</span><h3>High-performance insulation</h3><p>A well-insulated thermal envelope slows heat transfer through roofs, walls, floors and other exposed elements, helping internal conditions remain stable.</p></article>
+        <article class="principle"><span class="number">02</span><h3>Continuous airtightness</h3><p>Careful detailing and construction limit uncontrolled air leakage. Airtightness reduces avoidable energy loss and helps ventilation operate as intended.</p></article>
+        <article class="principle"><span class="number">03</span><h3>Thermal-bridge reduction</h3><p>Junctions and connections are designed to minimise local heat loss and cold spots, improving energy performance and reducing condensation risk.</p></article>
+        <article class="principle"><span class="number">04</span><h3>Efficient windows and solar control</h3><p>High-performance glazing, suitable orientation and shading balance useful daylight and solar gains against unwanted heat loss and summer overheating.</p></article>
+        <article class="principle"><span class="number">05</span><h3>Ventilation with heat recovery</h3><p>Mechanical ventilation supplies fresh air and removes stale air. Heat recovery can retain much of the warmth from extracted air without mixing it with incoming fresh air.</p></article>
+        <article class="principle"><span class="number">06</span><h3>Modelling and quality assurance</h3><p>Energy modelling, detailed design, construction checks and testing are used together so that intended performance is supported by evidence, not just specification.</p></article>
+      </div>
+      <p class="note"><strong>Important distinction:</strong> Passivhaus is a performance standard, not a prescribed architectural style or a single construction system. Design solutions differ by climate, use, occupancy, operating hours and building form. The applicable criteria and modelling assumptions must suit the actual project.</p>
+    </section>
+
+    <section class="section" aria-labelledby="sectors">
+      <h2 id="sectors">Applications across real estate</h2>
+      <p class="section-intro">The principles can be applied to a broad range of building types. Non-residential buildings need particular attention to their use patterns, ventilation loads, internal gains, opening hours and process requirements.</p>
+      <div class="sector-grid">
+        <article class="sector"><span class="sector-tag">Commercial</span><h3>Offices and workplaces</h3><p>Stable temperatures, filtered fresh air and reduced heating and cooling demand can support occupant comfort and help manage operational energy costs. Meeting rooms, dense occupancy, IT equipment and long working hours must be modelled realistically.</p></article>
+        <article class="sector"><span class="sector-tag">Industrial & logistics</span><h3>Warehouses and logistics facilities</h3><p>Thermal-envelope quality and controlled air leakage can reduce energy demand in staff areas, offices and suitable conditioned warehouse space. High-volume spaces, frequent loading-bay openings, refrigeration and process loads require careful project-specific analysis.</p></article>
+        <article class="sector"><span class="sector-tag">Residential</span><h3>Homes and apartment buildings</h3><p>Low space-heating demand, fresh air and comfortable internal surface temperatures can benefit houses and multi-unit residential developments. Design must also account for occupant behaviour, hot-water demand and summer comfort.</p></article>
+        <article class="sector"><span class="sector-tag">Public & education</span><h3>Schools and community buildings</h3><p>Ventilation, high occupancy and varied schedules make good planning important. A performance-led approach can support indoor comfort while reducing energy required to condition occupied spaces.</p></article>
+        <article class="sector"><span class="sector-tag">Hospitality & leisure</span><h3>Hotels and leisure buildings</h3><p>Bedrooms, shared areas and other spaces have different operating profiles. Modelling and commissioning need to reflect occupancy, hot water, humidity and any specialist ventilation requirements.</p></article>
+        <article class="sector"><span class="sector-tag">Mixed use</span><h3>Complex and multi-use properties</h3><p>Where different activities share a building, zoning and energy modelling should reflect their separate schedules and loads. The standard's application should be confirmed with a qualified project team and certifier.</p></article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="certification">
+      <h2 id="certification">What certification means</h2>
+      <p>Passivhaus certification is a voluntary, evidence-based quality-assurance process. It is intended to verify that a project meets the relevant published criteria; it is not simply a label for a building with good insulation or a low-energy design claim.</p>
+      <ol class="steps">
+        <li><strong>Set the brief and applicable criteria.</strong> Confirm the building use, climate, boundaries of the assessment and the appropriate version of the Passive House Institute's building criteria.</li>
+        <li><strong>Model the proposed building.</strong> Use the Passive House Planning Package (PHPP) or the applicable approved method to assess energy demand and relevant performance indicators using project-specific assumptions.</li>
+        <li><strong>Develop and document the design.</strong> Record the thermal envelope, windows, junctions, ventilation strategy, systems and component data needed to substantiate the model.</li>
+        <li><strong>Manage construction quality.</strong> Resolve design details, verify critical materials and workmanship, and complete required testing, including airtightness testing and ventilation checks where applicable.</li>
+        <li><strong>Submit evidence for independent review.</strong> A qualified certifier reviews calculations, drawings, product information, test results and construction documentation against the relevant criteria.</li>
+        <li><strong>Address findings and complete certification.</strong> Any gaps must be resolved before certification can be granted. Keep the certificate and supporting records with the property's technical and asset-management documentation.</li>
+      </ol>
+      <p class="note">Exact performance limits, evidence requirements and procedures depend on the applicable criteria version and building type. Always consult the current official criteria and engage an experienced Passivhaus designer or certifier early in the project.</p>
+    </section>
+
+    <section class="section" aria-labelledby="value">
+      <h2 id="value">Relevance to commercial property owners and investors</h2>
+      <p>For owners, developers, occupiers and asset managers, Passivhaus can provide a disciplined framework for considering building performance over the life of an asset.</p>
+      <ul>
+        <li><strong>Operational energy:</strong> reducing demand can lower exposure to energy-price volatility, although actual bills depend on occupancy, tariffs, controls and operational practice.</li>
+        <li><strong>Occupant experience:</strong> thermal comfort, fresh air and attention to overheating can support a better indoor environment.</li>
+        <li><strong>Asset evidence:</strong> certification and its supporting documentation can help due diligence teams assess stated design and construction performance.</li>
+        <li><strong>Design and delivery discipline:</strong> modelling and verification bring energy targets into the design, procurement and construction process.</li>
+        <li><strong>Carbon strategy:</strong> reducing energy demand can contribute to operational emissions goals, while whole-life carbon, electricity sources, refrigerants and other impacts still need separate assessment.</li>
+      </ul>
+      <p>Certification does not guarantee a particular rent, valuation, occupancy rate or financial return. Outcomes depend on location, market conditions, construction and maintenance costs, tenant requirements and how the building is operated. For logistics and other specialist property, assess process energy separately from the building's regulated or modelled energy demand.</p>
+    </section>
+
+    <section class="section" aria-labelledby="resources">
+      <h2 id="resources">Further reading and official guidance</h2>
+      <p>Use primary technical sources when specifying a project or assessing a certification claim.</p>
+      <ul class="sources">
+        <li><a href="https://passivehouse.com/en/home/institute/" target="_blank" rel="noopener noreferrer">Passive House Institute — Institute and history</a>: background on the independent research institute and its work.</li>
+        <li><a href="https://passivehouse.com/en/home/building-certification/" target="_blank" rel="noopener noreferrer">Passive House Institute — Building certification and criteria</a>: official building criteria and certification information.</li>
+        <li><a href="https://www.passivhaustrust.org.uk/what_is_passivhaus.php" target="_blank" rel="noopener noreferrer">Passivhaus Trust — What is Passivhaus?</a>: UK-focused overview of principles, evidence and implementation.</li>
+        <li><a href="https://passipedia.org/" target="_blank" rel="noopener noreferrer">Passipedia</a>: technical knowledge base on the Passive House concept and building performance.</li>
+      </ul>
+    </section>
+  </main>
+  <footer><div class="wrap">© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a> · hamlet</div></footer>
+  <script>
+    (() => {
+      const placeSuggestions = () => {
+        const input = document.getElementById('site-search-input');
+        const panel = document.getElementById('site-search-results');
+        if (!input || !panel) return;
+        if (panel.parentElement !== document.body) document.body.appendChild(panel);
+        const form = input.closest('.site-search-form');
+        if (!form) return;
+        const rect = form.getBoundingClientRect();
+        panel.style.left = rect.left + 'px';
+        panel.style.top = (rect.bottom + 8) + 'px';
+        panel.style.width = rect.width + 'px';
+        panel.style.right = 'auto';
+      };
+      document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('site-search-input');
+        const panel = document.getElementById('site-search-results');
+        if (!input || !panel) return;
+        placeSuggestions();
+        input.addEventListener('input', placeSuggestions);
+        input.addEventListener('focus', placeSuggestions);
+        window.addEventListener('resize', placeSuggestions, {passive:true});
+        window.addEventListener('scroll', placeSuggestions, {passive:true, capture:true});
+        if (window.ResizeObserver) new ResizeObserver(placeSuggestions).observe(input.closest('.site-search-form'));
+      }, {once:true});
+    })();
+  </script>
+  <script src="/site-search.js?v=20261025-1" defer></script>
+  <script src="/hamlet-background.js?v=20261021-2"></script>
+</body>
+</html>

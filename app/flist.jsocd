@@ -1,0 +1,111 @@
+{
+  "status": "success",
+  "result": [
+    {
+      "platform": "gcfv1",
+      "id": "adminMessageWebhook",
+      "project": "wale-491803",
+      "region": "us-central1",
+      "httpsTrigger": {},
+      "entryPoint": "adminMessageWebhook",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-wale-491803.cloudfunctions.net/adminMessageWebhook",
+      "securityLevel": "SECURE_ALWAYS",
+      "ingressSettings": "ALLOW_ALL",
+      "labels": {
+        "firebase-functions-hash": "87ed369c6e93b5dbd2d62618e45365784c0e8641",
+        "deployment-tool": "cli-firebase"
+      },
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"wale-491803\",\"databaseURL\":\"https://wale-491803-default-rtdb.firebaseio.com\",\"storageBucket\":\"wale-491803.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "wale-491803",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/wale-491803/locations/us-central1/functions/adminMessageWebhook"
+      },
+      "secretEnvironmentVariables": [
+        {
+          "key": "FUNCTIONS_CONFIG_EXPORT",
+          "projectId": "916707769747",
+          "secret": "FUNCTIONS_CONFIG_EXPORT",
+          "version": "4"
+        }
+      ],
+      "sourceUploadUrl": "https://storage.googleapis.com/uploads-730803098609.us-central1.cloudfunctions.appspot.com/40ef1339-f12a-4538-9f80-75fda8d58980.zip",
+      "serviceAccount": "wale-491803@appspot.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "timeoutSeconds": 60,
+      "codebase": "default",
+      "hash": "87ed369c6e93b5dbd2d62618e45365784c0e8641",
+      "state": "FAILED"
+    },
+    {
+      "platform": "gcfv1",
+      "id": "getPostsCsv",
+      "project": "wale-491803",
+      "region": "us-central1",
+      "callableTrigger": {},
+      "entryPoint": "getPostsCsv",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-wale-491803.cloudfunctions.net/getPostsCsv",
+      "securityLevel": "SECURE_ALWAYS",
+      "ingressSettings": "ALLOW_ALL",
+      "labels": {
+        "deployment-tool": "cli-firebase",
+        "deployment-callable": "true",
+        "firebase-functions-hash": "f8a00ea8f3cf26058626d75b231fa739e944913e"
+      },
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"wale-491803\",\"databaseURL\":\"https://wale-491803-default-rtdb.firebaseio.com\",\"storageBucket\":\"wale-491803.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "wale-491803",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/wale-491803/locations/us-central1/functions/getPostsCsv"
+      },
+      "sourceUploadUrl": "https://storage.googleapis.com/uploads-730803098609.us-central1.cloudfunctions.appspot.com/40ef1339-f12a-4538-9f80-75fda8d58980.zip",
+      "serviceAccount": "wale-491803@appspot.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "timeoutSeconds": 60,
+      "codebase": "default",
+      "hash": "f8a00ea8f3cf26058626d75b231fa739e944913e",
+      "state": "FAILED"
+    },
+    {
+      "platform": "gcfv1",
+      "id": "notifyMessageRecipient",
+      "project": "wale-491803",
+      "region": "us-central1",
+      "eventTrigger": {
+        "eventType": "providers/cloud.firestore/eventTypes/document.create",
+        "eventFilters": {
+          "resource": "projects/wale-491803/databases/(default)/documents/messages/{messageId}"
+        },
+        "retry": false
+      },
+      "entryPoint": "notifyMessageRecipient",
+      "runtime": "nodejs22",
+      "maxInstances": 3000,
+      "ingressSettings": "ALLOW_ALL",
+      "labels": {
+        "deployment-tool": "cli-firebase",
+        "firebase-functions-hash": "87ed369c6e93b5dbd2d62618e45365784c0e8641"
+      },
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"wale-491803\",\"databaseURL\":\"https://wale-491803-default-rtdb.firebaseio.com\",\"storageBucket\":\"wale-491803.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "wale-491803",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/wale-491803/locations/us-central1/functions/notifyMessageRecipient"
+      },
+      "secretEnvironmentVariables": [
+        {
+          "key": "FUNCTIONS_CONFIG_EXPORT",
+          "projectId": "916707769747",
+          "secret": "FUNCTIONS_CONFIG_EXPORT",
+          "version": "4"
+        }
+      ],
+      "sourceUploadUrl": "https://storage.googleapis.com/uploads-730803098609.us-central1.cloudfunctions.appspot.com/40ef1339-f12a-4538-9f80-75fda8d58980.zip",
+      "serviceAccount": "wale-491803@appspot.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "timeoutSeconds": 60,
+      "codebase": "default",
+      "hash": "87ed369c6e93b5dbd2d62618e45365784c0e8641",
+      "state": "FAILED"
+    }
+  ]
+}

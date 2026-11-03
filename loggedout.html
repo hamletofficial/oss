@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0284c7">
+  <title>Signed Out — Hamlet</title>
+  <link rel="stylesheet" href="/resource-centre.css">
+  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <style>
+    .loggedout-wrap {
+      min-height: 78vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .loggedout-card {
+      width: 100%;
+      max-width: 760px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 2rem;
+      box-shadow: 0 12px 28px rgba(2, 6, 23, 0.18);
+    }
+    .loggedout-actions {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .social-icons {
+      margin: 16px 0 8px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+    }
+    .social-icons a {
+      color: var(--muted);
+      text-decoration: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .social-icons a:hover,
+    .social-icons a:focus {
+      color: #fff;
+      background: #092a4b;
+      border-color: #092a4b;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  </head>
+<body>
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <span class="site-title" style="color:lightgrey">Premium</span>
+        </div>
+        <nav class="user-menu" aria-label="Primary navigation">
+          <a class="btn btn-outline" href="/invoice.html">Invoice &amp; Payments</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="loggedout-wrap" role="main">
+      <section class="loggedout-card" aria-live="polite">
+        <h1>Thank you for visiting</h1>
+        <p>You have been signed out successfully.</p>
+        <div class="loggedout-actions">
+          <a class="btn btn-primary" href="/login.html">Sign In Again</a>
+          <a class="btn btn-outline" href="/index.html">Go to Homepage</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="resource-footer" role="contentinfo">
+      <div class="container" style="text-align:center">
+        <div class="social-icons" aria-label="Social links">
+          <a href="https://www.github.com/ibrgroupintl" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
+          <a href="https://www.linkedin.com/company/ibrgroupintl" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+          <a href="https://www.instagram.com/ibrblogs" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        </div>
+        <p style="margin:0;color:var(--muted)">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script defer src="/page-transition.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" defer></script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+type User @table {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Post @table {
+  id: ID!
+  title: String!
+  content: String!
+  author: User! @relation(field: "authorId")
+  authorId: ID!
+}

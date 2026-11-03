@@ -1,0 +1,137 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Commercial property photographs are publicly readable because the
+    // matching listings are public on /portfolio.html. Uploads remain owner-scoped.
+    match /commercialPropertyImages/{userId}/{propertyId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size > 0
+        && request.resource.size <= 8 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp']
+        && request.resource.name.matches('.*\\.(jpg|jpeg|png|webp)$')
+        && request.resource.metadata.ownerUid == request.auth.uid
+        && request.resource.metadata.propertyId == propertyId;
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Residential listing photos: owners upload into their own property folder; published portfolio photos are publicly readable.
+    // Residential listing photos: owners upload into their own property folder; published portfolio photos are publicly readable.
+    // Residential listing photos: owners upload into their own property folder; published portfolio photos are publicly readable.
+    match /residentialPropertyImages/{userId}/{propertyId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size > 0
+        && request.resource.size <= 8 * 1024 * 1024
+        && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp']
+        && request.resource.name.matches('.*\\.(jpg|jpeg|png|webp)$')
+        && request.resource.metadata.ownerUid == request.auth.uid
+        && request.resource.metadata.propertyId == propertyId;
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Message files are accessible only to authenticated participants in the corresponding Firestore directMessages record.
+    match /messageAttachments/{messageId}/{fileId}/{fileName} {
+      function messageDoc() {
+        return firestore.get(/databases/(default)/documents/directMessages/$(messageId));
+      }
+      function isParticipant() {
+        return request.auth != null
+          && messageDoc().data.participants is list
+          && request.auth.uid in messageDoc().data.participants;
+      }
+      allow read: if isParticipant();
+      allow create: if request.auth != null
+        && messageDoc().data.senderUid == request.auth.uid
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-word.document.macroEnabled.12',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel.sheet.macroEnabled.12',
+          'application/vnd.ms-excel.template.macroEnabled.12',
+          'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+          'text/csv',
+          'application/csv',
+          'application/rtf',
+          'text/rtf'
+        ]
+        && request.resource.name.matches('.*\\.(pdf|doc|docx|docm|dot|dotx|dotm|xls|xlsx|xlsm|xlsb|xlt|xltx|xltm|csv|rtf)$');
+      allow update: if false;
+      allow delete: if request.auth != null
+        && messageDoc().data.senderUid == request.auth.uid;
+    }
+
+    // Broker social feed attachments: image files and PDFs only, uploaded by the
+    // owner of the post. Files are readable only by authenticated community members.
+    match /brokerPostAttachments/{userId}/{postId}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 10 * 1024 * 1024
+        && !request.resource.name.matches('.*\\.(doc|docx|docm|dot|dotx|dotm|xls|xlsx|xlsm|xlsb|xlt|xltx|xltm|csv|rtf)$')
+        && (
+          (
+            request.resource.contentType == 'application/pdf'
+            && request.resource.name.matches('.*\\.pdf$')
+          )
+          ||
+          (
+            request.resource.contentType.matches('image/.*')
+            && request.resource.name.matches('.*\\.[A-Za-z0-9]{2,8}$')
+          )
+        );
+      allow update: if false;
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+
+    // Hamlet transaction documents are restricted to the owning broker and to
+    // a transaction document they own. Download access remains authenticated.
+    match /hamletDocuments/{userId}/{dealId}/{documentId}/{fileName} {
+      function ownedDeal() {
+        return firestore.get(/databases/(default)/documents/hamletDeals/$(dealId)).data.uid == userId;
+      }
+      allow read: if request.auth != null
+        && request.auth.uid == userId
+        && ownedDeal();
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && ownedDeal()
+        && request.resource.size > 0
+        && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/csv',
+          'text/plain',
+          'image/png',
+          'image/jpeg',
+          'image/webp'
+        ]
+        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)$');
+      allow update: if false;
+      allow delete: if request.auth != null
+        && request.auth.uid == userId
+        && ownedDeal();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

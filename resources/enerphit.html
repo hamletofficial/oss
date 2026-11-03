@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="description" content="A guide to EnerPHit certification, energy-efficient retrofits and complementary building standards for commercial and residential real estate.">
+  <title>EnerPHit | Retrofit certification and energy standards</title>
+<link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#1f2937;--line:#374151;--text:#f9fafb;--muted:#cbd5e1;--link:#bfdbfe}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:var(--bg)}
+    body{margin:0;background:linear-gradient(145deg,#0b1120,#111827 58%,#0b1120);color:var(--text);font:16px/1.7 "DM Sans","Segoe UI",Arial,sans-serif}
+    a{color:var(--link);text-underline-offset:3px}
+    a:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    .wrap{width:min(1040px,calc(100% - 2rem));margin-inline:auto}
+    .site-head{background:#071d4a;border-bottom:1px solid var(--line)}
+    .head-row{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{color:#fff;text-decoration:none;font-size:1.35rem;font-weight:850;letter-spacing:-.04em}
+    .back{display:inline-flex;align-items:center;justify-content:center;padding:.55rem .8rem;border:1px solid #64748b;border-radius:8px;text-decoration:none;color:#fff;font-weight:700}
+    .site-head{position:sticky;top:0;z-index:1000;isolation:isolate;overflow:visible}
+    .head-row{overflow:visible}
+    .head-row>.site-search{display:block!important;visibility:visible!important;opacity:1!important;position:relative;z-index:10001;flex:1 1 380px;width:auto;max-width:500px;min-width:190px;margin:0}
+    .site-search-form{display:flex!important;visibility:visible!important;align-items:center;gap:.45rem;width:100%;min-height:44px;box-sizing:border-box;padding:.28rem .35rem .28rem .75rem;border:1px solid #8ba9d6;border-radius:11px;background:#0b1b3a!important;box-shadow:inset 0 1px 2px #02061735}
+    .site-search-input{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto;width:100%;min-width:0;min-height:34px;border:0!important;outline:0;background:transparent!important;color:#fff!important;font:inherit;font-size:.88rem}
+    .site-search-input::placeholder{color:#e2e8f0!important;opacity:1}
+    .site-search-submit{display:inline-flex!important;visibility:visible!important;align-items:center;justify-content:center;flex:0 0 auto;min-height:34px;padding:.38rem .65rem;border:0;border-radius:8px;background:#fff!important;color:#071d4a!important;font-size:.8rem;font-weight:800;cursor:pointer}
+    .site-search-icon{display:block!important;width:18px;height:18px;flex:0 0 auto;color:#bfdbfe}
+    .site-search-results{position:absolute;top:calc(100% + .5rem);left:0;right:0;z-index:2147483647;max-height:min(65vh,440px);overflow:auto;padding:.45rem;border:1px solid #48699e;border-radius:12px;background:#111827!important;background-color:#111827!important;background-image:none!important;color:#f8fafc;opacity:1!important;visibility:visible;isolation:isolate;box-shadow:0 16px 36px #020617b8;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .site-search-results[hidden]{display:none!important}
+    .site-search-result{display:block;padding:.65rem .75rem;border-radius:8px;color:#fff;text-decoration:none}
+    .site-search-result:hover,.site-search-result:focus-visible{background:#1f2937;outline:2px solid #93c5fd;outline-offset:-2px}
+    .site-search-result strong{display:block;font-size:.9rem;line-height:1.4;margin:0 0 .55rem;padding:0 0 .48rem;border-bottom:1px solid #334765}
+    .site-search-result small{display:block;margin-top:0;padding-top:0;border-top:0;color:#bfdbfe;font-size:.75rem;line-height:1.5;overflow-wrap:anywhere}
+    .site-search-empty{padding:.75rem;color:#cbd5e1;font-size:.85rem}
+    .site-search-retry{display:inline-flex;align-items:center;justify-content:center;margin:0 .75rem .75rem;padding:.4rem .7rem;border:1px solid #64748b;border-radius:7px;background:#1f2937;color:#fff;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+    @media(max-width:850px){.head-row{flex-wrap:wrap}.head-row>.site-search{flex:1 1 240px;max-width:100%}}
+    @media(max-width:560px){.head-row{align-items:stretch;flex-direction:column;padding:.8rem 0;gap:.75rem}.brand{align-self:flex-start}.head-row>.site-search{display:block!important;width:100%;max-width:none;min-width:0;flex:0 0 auto}.site-search-form{min-height:46px}.site-search-submit{min-height:36px}.back{align-self:flex-start}}
+
+    main{padding:clamp(2rem,6vw,4.5rem) 0}
+    .eyebrow{display:inline-flex;padding:.3rem .65rem;border:1px solid #48618a;border-radius:999px;color:#bfdbfe;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    h1{font-size:clamp(2.3rem,6vw,4.3rem);line-height:1.04;letter-spacing:-.055em;margin:1rem 0}
+    h2{font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.2;letter-spacing:-.035em;margin:0 0 .8rem}
+    h3{font-size:1.05rem;line-height:1.35;margin:.2rem 0 .45rem}
+    p{color:var(--muted);margin:.5rem 0 1rem}
+    .hero{max-width:820px;margin-bottom:2rem}
+    .hero .lead{font-size:clamp(1.05rem,2vw,1.22rem);max-width:72ch}
+    .hero-callout{margin-top:1.25rem;padding:1rem 1.15rem;border:1px solid #35537b;border-left:3px solid #93c5fd;border-radius:10px;background:#101d32;color:#dbeafe}
+    .section{margin:1.2rem 0;padding:clamp(1.15rem,3vw,1.8rem);border:1px solid var(--line);border-radius:16px;background:rgba(17,24,39,.94)}
+    .section-intro{max-width:78ch}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;margin-top:1rem}
+    .principle{padding:1rem;border:1px solid #34445b;border-radius:11px;background:linear-gradient(145deg,#172338,#111827)}
+    .number{display:inline-grid;place-items:center;width:1.8rem;height:1.8rem;margin-bottom:.55rem;border:1px solid #5277a7;border-radius:8px;background:#172e52;color:#dbeafe;font-size:.8rem;font-weight:850}
+    .principle p,.sector p{font-size:.93rem;margin-bottom:0}
+    .sector-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;margin-top:1rem}
+    .sector{padding:1rem;border:1px solid #34445b;border-radius:11px;background:#111d30}
+    .sector-tag{display:inline-block;margin-bottom:.55rem;color:#bfdbfe;font-size:.73rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+    .steps{counter-reset:step;list-style:none;padding:0;margin:1rem 0 0;display:grid;gap:.75rem}
+    .steps li{counter-increment:step;position:relative;padding:.85rem .9rem .85rem 3.2rem;border:1px solid #34445b;border-radius:10px;background:#111d30;color:var(--muted)}
+    .steps li:before{content:counter(step);position:absolute;left:.85rem;top:.8rem;display:grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:7px;background:#1e3a8a;color:#dbeafe;font-weight:850}
+    .note{font-size:.88rem;padding:1rem;border:1px solid #34445b;border-radius:10px;background:#0e192a}
+    .sources{padding-left:1.2rem;color:var(--muted)}
+    .sources li{margin:.45rem 0;overflow-wrap:anywhere}
+    .sources a{font-weight:700}
+    footer{border-top:1px solid var(--line);padding:1.4rem 0;color:var(--muted);font-size:.88rem}
+    @media(max-width:720px){.sector-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.head-row{align-items:flex-start;flex-direction:column;padding:.8rem 0}.back{margin-bottom:.1rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <div class="wrap head-row">
+      <a class="brand" href="/index.html">hamlet<span class="brand-dot" style="color:#bfdbfe">.</span></a>
+      <div class="site-search" role="search">
+        <form class="site-search-form" id="site-search-form" action="/search.html" method="get" autocomplete="off">
+          <svg class="site-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"></circle><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          <input class="site-search-input" id="site-search-input" name="q" type="search" placeholder="Search all pages…" aria-label="Search all Hamlet pages" aria-controls="site-search-results" aria-expanded="false" minlength="2">
+          <button class="site-search-submit" type="submit">Search</button>
+        </form>
+        <div class="site-search-results" id="site-search-results" role="listbox" aria-label="Search suggestions" hidden></div>
+      </div>
+      <a class="back" href="/index.html">Back to Hamlet</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <header class="hero">
+      <span class="eyebrow">Retrofit · Building performance · Real estate</span>
+      <h1>EnerPHit: rigorous energy performance for existing buildings</h1>
+      <p class="lead">EnerPHit is the Passive House Institute’s certification standard for energy-efficient retrofits of existing buildings. It recognises that upgrading an established building can be constrained by its structure, geometry, heritage features, occupants and construction history—yet can still achieve a substantial improvement in energy demand, comfort and building quality.</p>
+      <div class="hero-callout"><strong>Why it matters:</strong> For office landlords, logistics operators, housing providers and asset managers, an evidence-led retrofit can reduce operational energy demand while preserving useful building stock. EnerPHit provides a defined route to independent assessment rather than relying on unverified efficiency claims.</div>
+    </header>
+    <section class="section" aria-labelledby="origins">
+      <h2 id="origins">Background and purpose</h2>
+      <p>The Passive House Institute (PHI), established by Wolfgang Feist in Darmstadt in 1996, developed the EnerPHit standard to address the practical challenges of improving existing buildings. Whereas the Passivhaus standard is frequently associated with new construction, EnerPHit applies Passive House building-physics principles to deep refurbishment.</p>
+      <p>Its premise is to improve the thermal envelope, airtightness, ventilation and building services as far as reasonably achievable, with performance verified through modelling, construction evidence and testing. It is not a generic label for any renovation that reduces energy bills.</p>
+      <p>Certification can be pursued for suitable residential and non-residential buildings. The current PHI criteria, building use and climate determine the applicable thresholds and verification requirements.</p>
+    </section>
+    <section class="section" aria-labelledby="principles">
+      <h2 id="principles">Core principles of a high-performance retrofit</h2>
+      <p class="section-intro">Successful refurbishment starts with understanding the existing fabric, its defects and its operating conditions. Measures should be coordinated so that improvements in one area do not create moisture, ventilation or overheating problems elsewhere.</p>
+      <div class="grid">
+        <article class="principle"><span class="number">01</span><h3>Assess the existing building</h3><p>Survey construction details, defects, thermal bridges, damp, air leakage, ventilation and plant before specifying works. Use measured information where practicable.</p></article>
+        <article class="principle"><span class="number">02</span><h3>Upgrade the thermal envelope</h3><p>Improve walls, roofs, floors and glazing with attention to junctions, heritage constraints, fire safety and moisture risk.</p></article>
+        <article class="principle"><span class="number">03</span><h3>Improve airtightness</h3><p>Develop a continuous airtight layer and test it. Controlled ventilation becomes particularly important as uncontrolled leakage is reduced.</p></article>
+        <article class="principle"><span class="number">04</span><h3>Provide effective ventilation</h3><p>Design fresh-air supply and extract for actual occupancy and use. Heat recovery can reduce heating demand where suitable.</p></article>
+        <article class="principle"><span class="number">05</span><h3>Manage summer comfort</h3><p>Consider shading, glazing, internal gains, ventilation and future climate conditions so that winter improvements do not increase overheating risk.</p></article>
+        <article class="principle"><span class="number">06</span><h3>Coordinate services and controls</h3><p>Right-size heating and cooling systems after demand reduction; commission equipment, controls and ventilation for the intended use.</p></article>
+      </div>
+      <p class="note"><strong>Retrofit sequencing:</strong> In occupied buildings, works may be staged around leases, business continuity or household needs. PHI provides a recognised pathway for step-by-step projects through a documented retrofit plan, subject to its specific requirements.</p>
+    </section>
+    <section class="section" aria-labelledby="certification">
+      <h2 id="certification">EnerPHit certification and verification</h2>
+      <p>EnerPHit certification is an independent assessment against PHI criteria for existing buildings. Depending on the applicable criteria, a project may follow an <strong>energy-demand method</strong> or a <strong>building-component method</strong>. The former evaluates specified energy-performance targets; the latter focuses on qualifying building components and associated requirements when demand targets are not the appropriate route. Neither route removes the need for project documentation and quality assurance.</p>
+      <ol class="steps">
+        <li><strong>Confirm eligibility and scope.</strong> Engage a qualified certifier early; establish the building boundary, use, climate, constraints and current criteria version.</li>
+        <li><strong>Survey and model.</strong> Record existing conditions and model proposed improvements using the Passive House Planning Package (PHPP) and the applicable EnerPHit method.</li>
+        <li><strong>Prepare the retrofit strategy.</strong> Coordinate insulation, windows, thermal bridges, airtightness, ventilation, heating and cooling. Address moisture and overheating risks.</li>
+        <li><strong>Document construction.</strong> Retain drawings, product specifications, photographs of concealed details and evidence of changes made on site.</li>
+        <li><strong>Test and commission.</strong> Undertake required airtightness tests and building-services checks, including ventilation commissioning as applicable.</li>
+        <li><strong>Submit for independent review.</strong> The certifier checks the completed model and evidence, requests corrections where necessary and determines whether the project meets the standard.</li>
+      </ol>
+      <p class="note"><strong>Verification is not the same as a predicted bill saving.</strong> Certification assesses compliance with defined technical criteria; actual energy consumption also depends on weather, occupant behaviour, equipment, operating hours and maintenance. Check the certificate, scope, date and certifying body rather than relying solely on marketing language.</p>
+    </section>
+    <section class="section" aria-labelledby="sectors">
+      <h2 id="sectors">Retrofitting the built environment</h2>
+      <p class="section-intro">The best measures differ between asset classes. The following examples show how a performance-led approach may translate into property decisions.</p>
+      <div class="sector-grid">
+        <article class="sector"><span class="sector-tag">Offices</span><h3>Commercial workplaces</h3><p>Envelope and glazing improvements can reduce heating and cooling loads, while ventilation and controls must reflect meeting-room density, equipment gains, changing occupancy and tenant fit-outs.</p></article>
+        <article class="sector"><span class="sector-tag">Industrial & logistics</span><h3>Warehouses and distribution</h3><p>Conditioned areas, loading doors, dock operations and high-volume spaces create distinct challenges. Refrigeration and process loads may dominate consumption and require separate assessment.</p></article>
+        <article class="sector"><span class="sector-tag">Residential</span><h3>Houses and apartment blocks</h3><p>Coordinated insulation, ventilation and window upgrades can improve comfort and reduce heating demand. Resident disruption, damp risks, tenure and common services shape delivery.</p></article>
+        <article class="sector"><span class="sector-tag">Public estate</span><h3>Schools and civic buildings</h3><p>Seasonal schedules, high occupancy and procurement constraints require careful phasing, ventilation design and commissioning.</p></article>
+        <article class="sector"><span class="sector-tag">Hospitality</span><h3>Hotels and mixed-use assets</h3><p>Continuous operation, hot-water demand and varying space uses mean that zoning and system design are central to a credible retrofit.</p></article>
+        <article class="sector"><span class="sector-tag">Heritage</span><h3>Constrained and historic buildings</h3><p>Protected façades and traditional fabric may limit external insulation or window replacement. Specialist conservation and moisture-risk expertise are essential.</p></article>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="alternatives">
+      <h2 id="alternatives">Other energy-efficiency standards and assessment frameworks</h2>
+      <p>EnerPHit is one of several ways to evaluate buildings. The frameworks below answer different questions: some certify a design or retrofit, others rate measured energy use, benchmark emissions or assess wider sustainability. They are <strong>not interchangeable certifications</strong>.</p>
+      <div class="grid">
+        <article class="principle"><h3>Passivhaus</h3><p>PHI’s performance-based standard, commonly applied to new buildings, emphasises very low energy demand, comfort and verified design and construction quality. <a href="/resources/passivhaus.html">Read Hamlet’s Passivhaus guide</a>.</p></article>
+        <article class="principle"><h3>BREEAM</h3><p>A broader sustainability assessment methodology covering categories such as energy, health, materials and management. An overall BREEAM rating is not equivalent to EnerPHit energy certification.</p></article>
+        <article class="principle"><h3>LEED</h3><p>A widely used green-building rating system that assesses multiple sustainability dimensions. Its energy credits and whole-building rating should be interpreted within the relevant scheme and version.</p></article>
+        <article class="principle"><h3>NABERS and NABERS UK</h3><p>Operational-performance rating approaches based on measured energy use and relevant adjustments. NABERS UK focuses on office energy performance, with scope and rating rules defined by its programme.</p></article>
+        <article class="principle"><h3>Energy Performance Certificates (EPCs)</h3><p>Regulatory energy ratings used in the UK and other jurisdictions under differing national methods. EPCs are not proof of EnerPHit certification and may differ from actual metered performance.</p></article>
+        <article class="principle"><h3>ISO 50001</h3><p>An international standard for organisational energy-management systems and continuous improvement. It certifies management processes rather than a particular building’s thermal-envelope performance.</p></article>
+      </div>
+      <p class="note"><strong>Selection principle:</strong> Choose the framework that fits the decision. A landlord may need regulatory compliance evidence, a measured operational rating and a fabric-performance certification for different purposes. Confirm the jurisdiction, scheme version, assessor credentials and scope before comparing assets.</p>
+    </section>
+    <section class="section" aria-labelledby="business">
+      <h2 id="business">Implications for owners, investors and occupiers</h2>
+      <p>Deep retrofits can reduce energy demand and improve comfort, but their business case depends on capital expenditure, operational disruption, remaining asset life, local regulations and occupier needs.</p>
+      <ul>
+        <li><strong>Due diligence:</strong> review baseline condition, modelled performance, certification evidence, test results and metered energy data separately.</li>
+        <li><strong>Whole-life carbon:</strong> assess embodied emissions from new materials alongside operational energy and carbon savings; replacement is not always preferable to refurbishment.</li>
+        <li><strong>Letting and operations:</strong> consider lease responsibilities, tenant equipment, metering boundaries and post-occupancy commissioning.</li>
+        <li><strong>Risk management:</strong> plan for moisture, fire safety, overheating, indoor air quality, maintenance access and future adaptation.</li>
+        <li><strong>Claims and valuation:</strong> avoid assuming that any certification guarantees rent premiums, higher valuations or specific savings.</li>
+      </ul>
+    </section>
+    <section class="section" aria-labelledby="resources">
+      <h2 id="resources">Official guidance and further reading</h2>
+      <ul class="sources">
+        <li><a href="https://passivehouse.com/" target="_blank" rel="noopener noreferrer">Passive House Institute</a> — primary source for EnerPHit building criteria, certification guidance and PHPP.</li>
+        <li><a href="https://www.passivhaustrust.org.uk/" target="_blank" rel="noopener noreferrer">Passivhaus Trust</a> — UK-focused technical guidance, training and project resources.</li>
+        <li><a href="https://bregroup.com/products/breeam" target="_blank" rel="noopener noreferrer">BREEAM</a> — sustainability assessment methodology.</li>
+        <li><a href="https://www.usgbc.org/leed" target="_blank" rel="noopener noreferrer">LEED</a> — green-building rating system.</li>
+        <li><a href="https://www.nabers.gov.au/" target="_blank" rel="noopener noreferrer">NABERS</a> — measured operational building ratings.</li>
+        <li><a href="https://www.iso.org/iso-50001-energy-management.html" target="_blank" rel="noopener noreferrer">ISO 50001</a> — energy-management systems standard.</li>
+      </ul>
+      <p class="note">This page is an educational overview, not a substitute for the latest certification criteria, building regulations or project-specific engineering advice.</p>
+    </section>
+  </main>
+  <footer><div class="wrap">© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a> · hamlet</div></footer>
+  <script>
+    (() => {
+      const placeSuggestions = () => {
+        const input = document.getElementById('site-search-input');
+        const panel = document.getElementById('site-search-results');
+        if (!input || !panel) return;
+        if (panel.parentElement !== document.body) document.body.appendChild(panel);
+        const form = input.closest('.site-search-form');
+        if (!form) return;
+        const rect = form.getBoundingClientRect();
+        panel.style.left = rect.left + 'px';
+        panel.style.top = (rect.bottom + 8) + 'px';
+        panel.style.width = rect.width + 'px';
+        panel.style.right = 'auto';
+      };
+      document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('site-search-input');
+        const panel = document.getElementById('site-search-results');
+        if (!input || !panel) return;
+        placeSuggestions();
+        input.addEventListener('input', placeSuggestions);
+        input.addEventListener('focus', placeSuggestions);
+        window.addEventListener('resize', placeSuggestions, {passive:true});
+        window.addEventListener('scroll', placeSuggestions, {passive:true, capture:true});
+        if (window.ResizeObserver) new ResizeObserver(placeSuggestions).observe(input.closest('.site-search-form'));
+      }, {once:true});
+    })();
+  </script>
+  <script src="/site-search.js?v=20261025-1" defer></script>
+  <script src="/hamlet-background.js?v=20261021-2"></script>
+</body>
+</html>

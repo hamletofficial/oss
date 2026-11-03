@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="description" content="Search pages and content across the Hamlet website.">
+  <title>Search  | hamlet</title>
+<link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <style>
+    :root{color-scheme:dark}
+    body{margin:0;background:#0b1120;color:#f8fafc;font-family:"DM Sans","Segoe UI",Arial,sans-serif;line-height:1.6}
+    .search-header{background:#071d4a;border-bottom:1px solid #334b70}
+    .search-header-inner{max-width:1120px;margin:auto;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .search-brand{color:#fff;font-size:1.35rem;font-weight:850;letter-spacing:-.04em;text-decoration:none}
+    .search-brand span{color:#bfdbfe;font-size:.78rem;letter-spacing:0}
+    .search-home{color:#fff;text-decoration:none;font-weight:700;font-size:.9rem}
+    .search-main{width:min(960px,calc(100% - 2rem));margin:clamp(2rem,6vw,4.5rem) auto 4rem}
+    .search-hero{position:relative;overflow:visible;padding:clamp(1.25rem,4vw,2.25rem);border:1px solid #263b5b;border-radius:22px;background:radial-gradient(ellipse at 100% 0%,#16336a66 0,transparent 45%),linear-gradient(145deg,#111827,#0d1628 78%);box-shadow:0 22px 55px #02061755}
+    .search-hero:before{content:"";position:absolute;top:0;left:1.5rem;right:1.5rem;height:2px;background:linear-gradient(90deg,transparent,#60a5fa,transparent);opacity:.8}
+    .search-hero>*{position:relative}
+    .search-description{max-width:650px;margin:.8rem 0 1.5rem;color:#cbd5e1}
+    .search-prompt{display:flex;align-items:center;gap:.5rem;margin-top:.8rem;color:#94a3b8;font-size:.8rem}
+    .search-prompt-dot{width:6px;height:6px;border-radius:50%;background:#60a5fa;box-shadow:0 0 12px #60a5fa}
+    .search-results-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.5rem}
+    .search-results-heading h2{margin:0;color:#f8fafc;font-size:1.05rem;letter-spacing:-.02em}
+    .search-results-heading p{margin:0;color:#94a3b8;font-size:.8rem}
+    .search-eyebrow{margin:0 0 .4rem;color:#bfdbfe;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:0;color:#fff;font-size:clamp(2rem,5vw,3rem);letter-spacing:-.045em;line-height:1.1}
+    .search-description{margin:.8rem 0 1.5rem;color:#cbd5e1}
+    .site-search{position:relative;z-index:20;width:100%;max-width:720px}
+    .site-search-form{display:flex;align-items:center;gap:.65rem;padding:.45rem .45rem .45rem 1rem;border:1px solid #45618d;border-radius:14px;background:#080f1d;box-shadow:inset 0 1px 0 #ffffff08}
+    .site-search-form:focus-within{border-color:#bfdbfe;box-shadow:0 0 0 3px #bfdbfe24}
+    .site-search-icon{width:20px;height:20px;flex:0 0 auto;color:#bfdbfe}
+    .site-search-input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:inherit}
+    .site-search-input::placeholder{color:#cbd5e1}
+    .site-search-submit{min-height:44px;padding:.6rem 1.1rem;border:1px solid #93c5fd;border-radius:10px;background:#dbeafe;color:#071d4a;font-weight:850;cursor:pointer;transition:transform .15s ease,background .15s ease}
+    .site-search-submit:hover{background:#fff;transform:translateY(-1px)}
+    .site-search-submit:focus-visible,.advanced-reset:focus-visible{outline:2px solid #bfdbfe;outline-offset:3px}
+    .site-search-results{position:absolute;top:calc(100% + .5rem);left:0;right:0;z-index:5;max-height:60vh;overflow:auto;padding:.35rem;border:1px solid #344b70;border-radius:12px;background:#111827;box-shadow:0 18px 40px #020617a8}
+    .site-search-results[hidden]{display:none}
+    .site-search-result{display:block;padding:.65rem .75rem;border-radius:8px;color:#fff;text-decoration:none}
+    .site-search-result:hover,.site-search-result:focus-visible{background:#1f2937;outline:2px solid #93c5fd;outline-offset:-2px}
+    .site-search-result strong,.site-search-result small{display:block}
+    .site-search-result small{color:#bfdbfe;font-size:.75rem}
+    .site-search-empty{padding:.75rem;color:#cbd5e1}
+    .advanced-search{max-width:720px;margin-top:.8rem;border:1px solid #334155;border-radius:12px;background:#111827}
+    .advanced-search summary{padding:.8rem 1rem;color:#bfdbfe;font-weight:800;cursor:pointer}
+    .advanced-search[open] summary{border-bottom:1px solid #334155}
+    .advanced-search-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;padding:1rem}
+    .advanced-field{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+    .advanced-field label,.advanced-field legend{color:#e2e8f0;font-size:.85rem;font-weight:700}
+    .advanced-field select{width:100%;min-height:42px;padding:.55rem .65rem;border:1px solid #475569;border-radius:8px;background:#0b1120;color:#fff;font:inherit}
+    .advanced-field select:focus-visible,.advanced-field input:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+    .advanced-check{grid-column:1/-1;display:flex;align-items:center;gap:.6rem;color:#cbd5e1;font-size:.9rem}
+    .advanced-check input{width:17px;height:17px;accent-color:#93c5fd}
+    .advanced-actions{display:flex;justify-content:flex-end;gap:.6rem;grid-column:1/-1}
+    .advanced-reset{padding:.55rem .8rem;border:1px solid #475569;border-radius:8px;background:transparent;color:#e2e8f0;font-weight:700;cursor:pointer}
+    .search-count{margin:0;color:#cbd5e1;font-size:.9rem}
+    .search-page-result{display:block;margin:.7rem 0;padding:1.1rem 1.2rem;border:1px solid #263449;border-radius:14px;background:linear-gradient(135deg,#111827,#0f1726);color:#fff;text-decoration:none;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+    .search-page-result:hover,.search-page-result:focus-visible{transform:translateY(-1px)}
+    .search-page-result:hover,.search-page-result:focus-visible{border-color:#60a5fa;background:#172033;outline:2px solid #93c5fd;outline-offset:2px}
+    .search-page-result-title,.search-page-result-path,.search-page-result-excerpt{display:block}
+    .search-page-result-title{font-weight:800;font-size:1.02rem}
+    .search-page-result-path{margin:.12rem 0 .4rem;color:#bfdbfe;font-size:.78rem;overflow-wrap:anywhere}
+    .search-page-result-excerpt{color:#cbd5e1;font-size:.9rem;line-height:1.55}
+    .search-page-empty{padding:1rem;border:1px solid #334155;border-radius:12px;color:#cbd5e1}
+    @media(max-width:560px){.search-header-inner{padding:.9rem 1rem}.search-main{width:calc(100% - 1.25rem);margin-top:2rem}.site-search-form{gap:.35rem;padding-left:.65rem}.site-search-submit{padding:.45rem .65rem}.advanced-search-fields{grid-template-columns:1fr}.advanced-check,.advanced-actions{grid-column:1}}
+  </style>
+  </head>
+<body>
+  <header class="search-header hamlet-404-header">
+    <div class="search-header-inner">
+      <a class="search-brand" href="/index.html" aria-label="hamlet home">hamlet<span class="brand-dot" style="color:#bfdbfe">.</span></a>
+      <a class="search-home" href="/index.html">Back to homepage</a>
+    </div>
+  </header>
+  <main class="search-main">
+    <section class="search-hero" aria-labelledby="search-page-query">
+      <p class="search-eyebrow">Hamlet intelligence</p>
+      <h1 id="search-page-query">Find what you need, faster.</h1>
+      <p class="search-description">Explore Hamlet pages, broker resources and product guidance from one focused search.</p>
+      <div class="site-search" role="search">
+      <form class="site-search-form" id="site-search-form" action="/search.html" method="get" autocomplete="off">
+        <svg class="site-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"></circle><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        <input class="site-search-input" id="site-search-input" name="q" type="search" placeholder="Try ‘sustainable offices in London’" aria-label="Search all Hamlet pages" aria-controls="site-search-results" aria-expanded="false" minlength="2">
+        <button class="site-search-submit" type="submit">Search</button>
+      </form>
+      <div class="site-search-results" id="site-search-results" role="listbox" aria-label="Search suggestions" hidden></div>
+      </div>
+      <div class="search-prompt"><span class="search-prompt-dot" aria-hidden="true"></span> Search titles, page content and URLs · refine results with advanced options</div>
+    </section>
+    <details class="advanced-search" id="advanced-search">
+      <summary>Advanced search options</summary>
+      <div class="advanced-search-fields">
+        <div class="advanced-field">
+          <label for="search-in">Search within</label>
+          <select id="search-in" name="in">
+            <option value="all">All page content</option>
+            <option value="title">Page titles only</option>
+            <option value="content">Visible page text</option>
+            <option value="path">Page URL / path</option>
+          </select>
+        </div>
+        <div class="advanced-field">
+          <label for="search-area">Website area</label>
+          <select id="search-area" name="area">
+            <option value="all">All areas</option>
+            <option value="main">Main website</option>
+            <option value="workspace">Hamlet workspace / app</option>
+            <option value="support">Support and documentation</option>
+          </select>
+        </div>
+        <div class="advanced-field">
+          <label for="search-sort">Sort results by</label>
+          <select id="search-sort" name="sort">
+            <option value="relevance">Relevance (best match)</option>
+            <option value="title">Page title (A–Z)</option>
+          </select>
+        </div>
+        <label class="advanced-check"><input id="search-exact" type="checkbox" name="exact" value="1"> Match the exact phrase</label>
+        <div class="advanced-actions">
+          <button class="advanced-reset" id="search-reset" type="button">Reset options</button>
+          <button class="site-search-submit" id="advanced-apply" type="button">Apply options</button>
+        </div>
+      </div>
+    </details>
+    <div class="search-results-heading"><h2>Search results</h2><p>Relevant pages across Hamlet</p></div>
+    <p class="search-count" id="search-page-count" aria-live="polite">Preparing search…</p>
+    <section id="search-page-results" aria-label="Search results"></section>
+  </main>
+  <script src="/site-search.js?v=20261025-json-1" defer></script>
+</body>
+</html>

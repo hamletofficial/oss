@@ -1,0 +1,11 @@
+{
+    "mail": {
+        "smtp_port": "465",
+        "smtp_from": "admin@mac.ibrecruitment.com",
+        "smtp_secure": "false",
+        "smtp_pass": "8bcffb56fe4e0012b7cb7ea2f4d79ea2-d488af3b-4893b5a2",
+        "smtp_host": "smtp.eu.mailgun.org",
+        "smtp_user": "admin@mac.ibrecruitment.com"
+    }
+}
+

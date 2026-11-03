@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8" />
+  <meta name="theme-color" content="#0284c7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="robots" content="index, follow" />
+  <title>Insights Archive — Hamlet</title>
+  <link rel="stylesheet" href="/resource-centre.css" />
+  <link rel="stylesheet" href="/index.css" />
+  <link rel="stylesheet" href="/mobile-compat.css" />
+  <link rel="stylesheet" href="/page-transition.css" />
+  <style>
+    :root { --muted: #475569; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #0f172a; background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%); }
+    .page-wrapper { background:#fff; max-width:1920px; min-height:100vh; margin:0 auto; box-shadow:0 0 20px rgba(0,0,0,.1); }
+    .sidebar-menu-shell { display:none; position:fixed; top:88px; left:24px; width:220px; background:#fff; border:1px solid #dbe3ee; border-radius:12px; box-shadow:0 10px 24px rgba(2,6,23,.12); padding:10px 0; z-index:950; }
+    .sidebar-menu-link { display:block; padding:11px 14px; margin:2px 8px; border-radius:8px; color:#092a4b; text-decoration:none; font-size:.95rem; font-weight:600; transition:background-color .2s ease,color .2s ease,transform .2s ease; }
+    .sidebar-menu-link:hover,.sidebar-menu-link:focus { background:#092a4b; color:#fff; transform:translateX(3px); }
+    body.has-sidebar #protected-content { margin-left:260px; }
+    .insights-shell { display: none; max-width: 900px; margin: 2rem auto 3rem; padding: 0 1rem; }
+    .auth-shell { max-width: 760px; margin: 2rem auto; padding: 2rem; border-radius: 16px; border: 1px solid #dbe3ee; background: linear-gradient(145deg, #fff 0%, #f6fbff 100%); text-align: center; box-shadow: 0 8px 24px rgba(2, 6, 23, .08) }
+    .insight-card { background: #f8f9fa; border-radius: 8px; margin-bottom: 18px; padding: 20px; box-shadow: 0 2px 8px rgba(2,6,23,0.06); }
+    .insight-card h2 { margin-top: 0; font-size: 1.15rem; color: #0284c7; }
+    .insight-card .insight-meta { color: var(--muted); font-size: .92rem; margin-bottom: .5rem; }
+    .insight-card .insight-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: .85rem 0 .95rem; }
+    .insight-card .insight-tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: #e8edf7; color: #092a4b; font-size: .82rem; font-weight: 700; letter-spacing: .01em; }
+    .insight-card .insight-tag.priority { background: #dbeafe; color: #0f3d63; }
+    .insight-card .insight-snippet { color: #334155; font-size: .97rem; margin-bottom: 1rem; }
+    .insight-card .insight-link { display: inline-block; background: #0284c7; color: #fff; border-radius: 6px; padding: 7px 16px; text-decoration: none; font-weight: 600; font-size: .97rem; transition: background .18s; }
+    .insight-card .insight-link:hover { background: #0369a1; }
+    .insights-divider { border: 0; border-top: 2px solid #cbd5e1; margin: 1.5rem 0 1.25rem; opacity: 1; }
+    .insights-status { color: var(--muted); text-align: center; margin: 1.5rem 0; font-size: 1.08rem; }
+    @media (max-width: 900px) {
+      .resource-nav, .site-header {
+        background: #071D4A !important;
+        border-bottom: 1px solid #071D4A !important;
+        backdrop-filter: none !important;
+      }
+      .sidebar-menu-shell { position:static; width:100%; max-width:900px; margin:12px auto; }
+      body.has-sidebar #protected-content { margin-left:0; }
+    }
+  </style>
+
+    <style>
+      .mail-header-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:9px; text-decoration:none; font-size:1.15rem; transition:background-color .2s ease, transform .2s ease; }
+      .mail-header-icon:hover, .mail-header-icon:focus-visible { background:rgba(255,255,255,.14); transform:translateY(-1px); }
+    
+/* Shared responsive Hamlet header fix (mobile) */
+@media(max-width:760px){
+  .resource-nav.hamlet-404-header>.container.container-nav{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;width:100%;min-width:0;box-sizing:border-box;gap:10px;padding:11px 14px;margin:0 auto}
+  .resource-nav.hamlet-404-header>.container.container-nav>.logo{flex:0 0 100%;width:100%;min-width:0}
+  .resource-nav.hamlet-404-header>.container.container-nav>.user-menu,.resource-nav.hamlet-404-header>.container.container-nav>.topbar-actions{flex:0 1 100%;width:100%;max-width:100%;min-width:0;margin-left:0!important;justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;box-sizing:border-box;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .resource-nav.hamlet-404-header .site-title{white-space:nowrap}
+  .resource-nav.hamlet-404-header .user-menu>a,.resource-nav.hamlet-404-header .user-menu>button,.resource-nav.hamlet-404-header .topbar-actions>.btn{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:.8rem;line-height:1.15}
+  .resource-nav.hamlet-404-header .auth-profile-chip,.resource-nav.hamlet-404-header .profile{flex:0 0 auto;min-width:0;max-width:40vw}
+  .resource-nav.hamlet-404-header .auth-profile-name,.resource-nav.hamlet-404-header [data-auth-name]{display:inline-block;max-width:28vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{width:32px;height:32px;flex:0 0 auto}
+}
+@media(max-width:380px){.resource-nav.hamlet-404-header>.container.container-nav{padding-inline:10px}.resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{display:none}}
+</style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-4">
+  </head>
+<body class="auth-pending">
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a>
+        </div>
+        <div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <div class="auth-profile-chip" data-auth-profile>
+            <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+            <span class="auth-profile-name" data-auth-name></span>
+          </div>
+          
+          <a class="btn btn-outline nav-login" href="/login.html" id="signInLink">Sign In</a>
+          <button class="btn btn-outline" id="signOutBtn" style="display:none">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    <nav id="topNavMenu" aria-hidden="true" hidden></nav>
+    <script>
+      function updateSidebarVisibility() {
+        var sidebar = document.getElementById('topNavMenu');
+        if (document.body.classList.contains('has-sidebar')) {
+          sidebar.style.display = 'block';
+        } else {
+          sidebar.style.display = 'none';
+        }
+      }
+      document.addEventListener('DOMContentLoaded', updateSidebarVisibility);
+      var observer = new MutationObserver(updateSidebarVisibility);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    <section id="loginSection" class="auth-shell">
+      <h1 style="margin:0;color:#092a4b">Insights Archive</h1>
+      <p style="margin:.75rem 0 1.25rem;color:var(--muted)">Sign in to access the insights archive.</p>
+      <a class="btn btn-primary" href="/login.html">Go to Sign In</a>
+    </section>
+    <main id="insightsShell" class="insights-shell" role="main">
+      <section class="insights-synopsis" aria-labelledby="insightsSynopsisHeading">
+        <h1 id="insightsSynopsisHeading" style="margin:0 0 .7rem;color:#092a4b;font-size:1.3rem;font-weight:400">About the Substack Posts</h1>
+        <p style="margin:0 0 .8rem;color:#334155;font-size:.98rem;line-height:1.7;font-weight:400">The Substack posts presented in this Insights Archive are intended to provide members with a continuing source of commentary, analysis and informed professional perspective on subjects relevant to business, recruitment, labour markets, HRM, leadership, energy, infrastructure, real estate, ESG and related economic and sector developments. They are designed to add context to current issues, explain developments and trends, and provide longer-form observations that may be useful to professionals, researchers, recruiters and business decision-makers.</p>
+        <p style="margin:0 0 .8rem;color:#334155;font-size:.98rem;line-height:1.7;font-weight:400">Posts can include original commentary, research-informed discussion, interpretation of current events, sector perspectives and practical analysis. The purpose of the feed is therefore broader than a conventional news stream: it is a curated route into longer-form material that readers can use to understand an issue, consider its implications and, where appropriate, follow the underlying discussion in greater depth.</p>
+        <p style="margin:0 0 .8rem;color:#334155;font-size:.98rem;line-height:1.7;font-weight:400">New publications are delivered automatically from the IB Substack publication through its RSS feed. The system checks the publication regularly, adds new posts to the authenticated <em>Insights Archive</em> and records the post information needed for the feed, including its title, publication date, author, source, tags and a short synopsis. Where configured, newly ingested posts can also be relayed by email to eligible members who have not unsubscribed from member communications. The feed is therefore an access point and index rather than a duplicate copy of the full Substack article: selecting <strong>Read More</strong> takes you to the original publication.</p>
+        <p style="margin:0;color:#334155;font-size:.98rem;line-height:1.7;font-weight:400">Outside this Insights Archive, the posts can be read directly on the IB Substack publication at <a href="https://blogs.ibrecruitment.com" target="_blank" rel="noopener noreferrer">blogs.ibrecruitment.com</a>. Individual entries in this archive also link directly to their original Substack pages, while the publication itself provides the wider archive and any available subscription options.</p>
+      </section>
+      <hr class="insights-divider" aria-hidden="true">
+      <section class="panel">
+        <div class="panel-head">
+                  </div>
+        <div class="panel-body">
+
+          <div id="insightsList"></div>
+          <p id="insightsStatus" class="insights-status">Loading insights...</p>
+        </div>
+      </section>
+    </main>
+    <footer class="resource-footer" role="contentinfo">
+      <div class="container" style="text-align:center">
+        <div style="margin-bottom:4px;color:var(--muted);font-size:0.95rem;">v1.04.04</div>
+        <p style="margin:0;color:var(--muted)">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script defer src="/mobile-compat.js"></script>
+  <script defer src="/page-transition.js"></script>
+  <script>
+    window.addEventListener('load', function () {
+      if (!window.firebase || !window.firebaseConfig) return;
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+      } catch (e) {
+        console.error('Firebase initialisation failed:', e);
+        document.getElementById('insightsStatus').textContent = 'Unable to initialise the insights archive.';
+        return;
+      }
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const loginSection = document.getElementById('loginSection');
+      const insightsShell = document.getElementById('insightsShell');
+      const signOutBtn = document.getElementById('signOutBtn');
+      const signInLink = document.getElementById('signInLink');
+      const insightsList = document.getElementById('insightsList');
+      const insightsStatus = document.getElementById('insightsStatus');
+      const substackSection = document.getElementById('substackSection');
+      const substackList = document.getElementById('substackList');
+      const substackStatus = document.getElementById('substackStatus');
+
+      function renderSubstack(posts) {
+        if (!posts.length) {
+          substackList.innerHTML = '<div class="muted">No Substack posts found.</div>';
+          substackStatus.textContent = '0 Substack posts.';
+          return;
+        }
+        substackList.innerHTML = posts.map(post => {
+          let meta = '';
+          if (post.date) meta += post.date;
+          if (post.author) {
+            if (meta) meta += ' · ';
+            meta += `<a href="https://substack.com/@${encodeURIComponent(post.author)}" target="_blank" rel="noopener noreferrer">${post.author}</a>`;
+          }
+          if (post.source) {
+            if (meta) meta += ' · ';
+            meta += post.source;
+          }
+          return `<div class="insight-card">
+            <h2>${post.title || 'Untitled'}</h2>
+            <div class="insight-meta">${meta}</div>
+            <div class="insight-tags">${(post.tags || []).map(tag => `<span class="insight-tag${['ESG','Energy','Real Estate'].includes(tag) ? ' priority' : ''}">${tag}</span>`).join('')}</div>
+            <div class="insight-snippet">${post.snippet || ''}</div>
+            <a href="${post.link || '#'}" target="_blank" rel="noopener noreferrer" class="insight-link">Read More</a>
+          </div>`;
+        }).join('');
+        substackStatus.textContent = posts.length + ' Substack post' + (posts.length === 1 ? '' : 's') + '.';
+      }
+
+      function loadSubstack() {
+        if (!window.SUBSTACK_API) {
+          substackSection.style.display = 'none';
+          return;
+        }
+        substackSection.style.display = 'block';
+        substackStatus.textContent = 'Loading Substack posts...';
+        fetch(window.SUBSTACK_API)
+          .then(r => r.json())
+          .then(data => {
+            let posts = Array.isArray(data) ? data : (data.posts || []);
+            posts = posts.filter(p => (p.source && p.source.toLowerCase().includes('substack')) || (p.link && p.link.includes('substack.com')));
+            posts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderSubstack(posts);
+          })
+          .catch(() => {
+            substackList.innerHTML = '';
+            substackStatus.textContent = 'Failed to load Substack posts.';
+          });
+      }
+
+      function showSignedOut() {
+        loginSection.style.display = 'block';
+        insightsShell.style.display = 'none';
+        signOutBtn.style.display = 'none';
+        signInLink.style.display = 'inline-flex';
+        document.body.classList.remove('auth-pending', 'has-sidebar');
+      }
+      function showSignedIn(user) {
+        loginSection.style.display = 'none';
+        insightsShell.style.display = 'block';
+        signOutBtn.style.display = 'inline-flex';
+        signInLink.style.display = 'none';
+        document.body.classList.remove('auth-pending');
+        document.body.classList.add('has-sidebar');
+        loadInsights();
+      }
+      function renderInsights(insights) {
+        if (!insights.length) {
+          insightsList.innerHTML = '<div class="muted">No insights found.</div>';
+          insightsStatus.textContent = '0 insights.';
+          return;
+        }
+        insightsList.innerHTML = insights.map(insight => {
+          let meta = '';
+          if (insight.date) meta += insight.date;
+          if (insight.author) {
+            if (meta) meta += ' · ';
+            meta += `<a href="https://substack.com/@${encodeURIComponent(insight.author)}" target="_blank" rel="noopener noreferrer">${insight.author}</a>`;
+          }
+          if (insight.source) {
+            if (meta) meta += ' · ';
+            meta += insight.source;
+          }
+          return `<div class="insight-card">
+            <h2>🔔 ${insight.title || 'Untitled'}</h2>
+            <div class="insight-meta">${meta}</div>
+            <div class="insight-tags">${(insight.tags || []).map(tag => `<span class="insight-tag${['ESG','Energy','Real Estate'].includes(tag) ? ' priority' : ''}">${tag}</span>`).join('')}</div>
+            <div class="insight-snippet">${insight.snippet || ''}</div>
+            <a href="${insight.link || '#'}" target="_blank" rel="noopener noreferrer" class="insight-link">Read More</a>
+          </div>`;
+        }).join('');
+        insightsStatus.textContent = insights.length + ' insight' + (insights.length === 1 ? '' : 's') + '.';
+      }
+      function loadInsights() {
+        insightsStatus.textContent = 'Loading insights...';
+        db.collection('insightsFeed').orderBy('timestamp', 'desc').limit(25).get()
+          .then(snap => {
+            const insights = [];
+            snap.forEach(doc => {
+              const d = doc.data() || {};
+              insights.push({
+                title: d.title || 'Untitled',
+                link: d.link || '#',
+                date: d.date || '',
+                tags: Array.isArray(d.tags) ? d.tags : [],
+                snippet: d.snippet || '',
+                source: d.source || '',
+                timestamp: d.timestamp || 0
+              });
+            });
+            insights.sort((a, b) => {
+              if (b.timestamp !== a.timestamp) return b.timestamp - a.timestamp;
+              const priority = ['ESG','Energy','Real Estate'];
+              const aPriority = a.tags && a.tags.findIndex(t => priority.includes(t)) !== -1 ? priority.indexOf(a.tags.find(t => priority.includes(t))) : 99;
+              const bPriority = b.tags && b.tags.findIndex(t => priority.includes(t)) !== -1 ? priority.indexOf(b.tags.find(t => priority.includes(t))) : 99;
+              return aPriority - bPriority;
+            });
+            renderInsights(insights);
+          })
+          .catch((err) => {
+            console.error('Insights Firestore query failed:', err);
+            insightsList.innerHTML = '';
+            if (err && err.code === 'permission-denied') {
+              insightsStatus.textContent = 'Your session is not authorised to view the insights archive. Please sign out and sign in again.';
+            } else {
+              insightsStatus.textContent = 'Failed to load insights. Please try again shortly.';
+            }
+          });
+      }
+      auth.onAuthStateChanged(function (user) {
+        if (!user) { showSignedOut(); return; }
+        showSignedIn(user);
+      });
+      if (signOutBtn) signOutBtn.addEventListener('click', function () { auth.signOut(); });
+    });
+  </script>
+  <script src="/hamlet-workspace.js?v=20261016-1"></script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

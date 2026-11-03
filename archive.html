@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Brief Archive | Hamlet</title>
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <link rel="stylesheet" href="/legal-pages.css">
+  <style>
+    :root{--navy:#07111f;--ink:#092a4b;--muted:#60748a;--line:#dbe3ee;--surface:#fff;--soft:#f5f8fc;--accent:#0a66c2}
+    *{box-sizing:border-box}
+    html{min-width:320px}
+    body{margin:0;min-height:100vh;background:var(--soft);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .archive-topbar{background:#fff;color:var(--ink);position:relative!important;z-index:10001!important;isolation:isolate}
+    .archive-topbar-inner{min-height:72px;width:100%;max-width:1200px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .archive-brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:-.035em;font-size:1.125rem}.archive-brand .brand-by-ibr{color:#93c5fd;font-size:.72em;font-weight:700;letter-spacing:0;margin-left:.3em}
+    .archive-user-area{display:flex;align-items:center;gap:10px;min-width:0}
+    .archive-user-profile{display:flex;align-items:center;gap:8px;max-width:240px;padding:6px 10px;border:1px solid #374151;border-radius:999px;background:#111827;color:#f9fafb}
+    .archive-user-profile img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid #4b5563}
+    .archive-user-profile span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem;font-weight:600}
+    .archive-signout,.archive-menu-toggle{appearance:none;cursor:pointer;color:var(--ink);background:#fff;border:1px solid #cbd8e6;font:inherit;font-weight:650}
+    .archive-signout{min-height:40px;padding:8px 14px;border-radius:8px}
+    .archive-signout:hover,.archive-menu-toggle:hover{background:#f2f7fb}
+    .archive-menu-toggle{display:none;width:42px;height:40px;border-radius:9px;font-size:1.2rem;line-height:1}
+    .archive-top-nav{position:fixed;top:88px;left:24px;width:220px;padding:10px 0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 24px rgba(2,6,23,.12);z-index:950}
+    .archive-top-nav-inner{display:block}
+    .archive-top-nav a{display:block;margin:2px 8px;padding:11px 14px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:.95rem;font-weight:650;transition:background .15s,color .15s,transform .15s}
+    .archive-top-nav a:hover,.archive-top-nav a:focus-visible{background:var(--ink);color:#fff;transform:translateX(3px);outline:none}
+    .archive-main{width:calc(100% - 260px);max-width:1200px;margin:0 0 0 260px;padding:28px 24px 72px}
+    .archive-hero{margin:0 0 24px;color:#fff}
+    .archive-hero h1{margin:0 0 8px;font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.1;letter-spacing:-.03em;color:var(--ink)}
+    .archive-hero h2,.archive-hero h3{color:#fff}
+    .archive-hero p{margin:0;max-width:700px;color:#59636e;line-height:1.6}
+    .archive-signin-card{max-width:560px;margin:28px auto;padding:30px;background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:18px;box-shadow:0 12px 34px rgba(2,6,23,.12)}
+    .archive-signin-card h2{margin:0 0 8px;color:#fff;font-size:1.45rem}
+    .archive-signin-card p{margin:0 0 20px;color:#cbd5e1;line-height:1.55}
+    .archive-signin-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .archive-signin-actions button{min-height:46px;padding:10px 12px;border:1px solid #4b5563;border-radius:10px;background:#1f2937;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+    .archive-signin-actions button:hover{background:#374151}
+    .archive-signin-actions button:disabled{opacity:.6;cursor:wait}
+    #archiveSignInError{margin-top:14px;color:#fecaca;font-size:.9rem;line-height:1.45}
+    .archive-auth-hidden{display:none!important}
+    .archive-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}
+    .archive-count{color:var(--accent);font-weight:800;white-space:nowrap}
+    .archive-controls{display:flex;align-items:center;gap:12px;min-width:0}
+    .archive-search{width:420px;max-width:100%;min-height:42px;padding:10px 13px;border:1px solid #cbd8e6;border-radius:10px;background:#fff;color:var(--ink);font:inherit;outline:none}
+    .archive-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,102,194,.14)}
+    .archive-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .archive-actions a,.archive-actions button{appearance:none;border:1px solid #cbd8e6;background:#fff;color:var(--ink);border-radius:10px;padding:10px 15px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
+    .archive-actions a:hover,.archive-actions button:hover{background:#f2f7fb}
+    #deleteBtn:disabled{opacity:.55;cursor:not-allowed}
+    #deleteBtn:not(:disabled){border-color:#e0a6a6;color:#8f1d1d}
+    .archive-status{padding:16px 18px;margin-bottom:18px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted)}
+    .archive-status.error{border-color:#f0b8b8;background:#fff8f8;color:#9b1c1c}
+    .loading{opacity:.7}
+    .brief-list{display:grid;gap:18px}
+    .brief-card{overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 26px rgba(2,6,23,.07)}
+    .brief-card-head{display:flex;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fff,#f7fbff)}
+    .brief-card-head h2,.brief-card-head h3{margin:0 0 5px;color:var(--ink);font-size:1.15rem;line-height:1.35}
+    .brief-meta{margin:0;color:var(--muted);font-size:.86rem;line-height:1.45}
+    .brief-ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.76rem;color:#526a82;text-align:right;word-break:break-all}
+    .brief-select{display:flex;align-items:center;gap:8px;margin-top:10px;color:#526a82;font-size:.82rem;font-weight:700}
+    .brief-select input{width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
+    .field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .field{padding:16px 22px;border-bottom:1px solid #edf1f5;min-width:0}
+    .field:nth-child(odd){border-right:1px solid #edf1f5}
+    .field.full{grid-column:1/-1;border-right:0}
+    .field-label{display:block;margin-bottom:6px;color:#657b91;font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .field-value{margin:0;color:#173b5d;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+    .empty{text-align:center;padding:44px 22px;background:#fff;border:1px solid var(--line);border-radius:18px;color:var(--muted)}
+    .brief-card.search-hidden{display:none}
+    .archive-footer{margin-left:260px;padding:22px 24px 28px;text-align:center;color:var(--muted)}
+    .archive-footer-links{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+    .archive-footer a{color:#536b80;text-decoration:none}
+    .archive-footer a:hover{color:var(--accent);text-decoration:underline}
+    .archive-footer p{margin:0}
+    @media(max-width:700px){
+      body{background:var(--soft);overflow-x:hidden}
+      .archive-topbar-inner{min-height:60px;padding:8px 14px;gap:10px}
+      .archive-brand{font-size:.92rem}
+      .archive-user-area{flex:1;justify-content:flex-end}
+      .archive-user-profile{min-width:0;max-width:none;flex:1;padding:5px 8px}
+      .archive-user-profile span{font-size:.82rem}
+      .archive-signout{min-height:38px;padding:7px 10px;font-size:.82rem}
+      .archive-menu-toggle{display:block;flex:0 0 42px}
+      .archive-top-nav{position:static;width:100%;margin:0;padding:8px 14px 12px;border:0;border-top:1px solid var(--line);border-radius:0;background:#fff;box-shadow:0 10px 24px rgba(2,6,23,.08)}
+      .archive-top-nav-inner{display:none}
+      .archive-top-nav.open .archive-top-nav-inner{display:grid;grid-template-columns:1fr;gap:3px}
+      .archive-top-nav a{margin:0;padding:11px 10px;color:var(--ink)}
+      .archive-top-nav a:hover,.archive-top-nav a:focus-visible{background:rgba(255,255,255,.09);color:#fff;transform:none}
+      .archive-main{width:100%;max-width:none;margin:0;padding:20px 14px 36px}
+      .archive-hero{margin-bottom:20px}
+      .archive-hero h1{font-size:clamp(1.7rem,8vw,2.1rem)}
+      .archive-hero p{font-size:.92rem;line-height:1.5}
+      .archive-toolbar{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:16px}
+      .archive-count{padding:0 2px;font-size:.95rem}
+      .archive-controls{display:flex;flex-direction:column;align-items:stretch;gap:10px;width:100%}
+      .archive-search{width:100%;max-width:none;min-height:46px;font-size:.92rem}
+      .archive-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+      .archive-actions a,.archive-actions button{width:100%;min-width:0;min-height:44px;padding:9px 7px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;line-height:1.2;font-size:.82rem;border-radius:9px}
+      .archive-actions #printBtn{position:relative;z-index:2;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      .archive-status{margin-bottom:14px;padding:13px 14px;border-radius:12px;font-size:.88rem;line-height:1.45}
+      .brief-list{gap:14px}
+      .brief-card{border-radius:14px;box-shadow:0 5px 18px rgba(2,6,23,.06)}
+      .brief-card-head{display:block;padding:15px}
+      .brief-card-head h2{font-size:1.05rem;line-height:1.35;margin-bottom:6px}
+      .brief-meta{font-size:.8rem}
+      .brief-ref{margin-top:10px;padding-top:10px;border-top:1px solid #edf1f5;text-align:left;font-size:.7rem;line-height:1.45}
+      .brief-select{margin:9px 0 2px;min-height:34px}
+      .brief-select input{width:19px;height:19px}
+      .field-grid{grid-template-columns:1fr}
+      .field,.field.full{grid-column:auto;border-right:0;padding:13px 15px}
+      .field-label{margin-bottom:5px;font-size:.68rem}
+      .field-value{font-size:.9rem;line-height:1.5}
+      .empty{padding:34px 16px;border-radius:14px;line-height:1.5}
+      .archive-footer{margin:0;padding:18px 14px 26px;font-size:.8rem;line-height:1.5}
+      .archive-footer-links{gap:8px;margin-bottom:8px}
+    }
+    @media print{
+      .archive-topbar,.archive-top-nav,.archive-actions,.archive-search,.archive-status,.archive-signout,.archive-menu-toggle{display:none!important}
+      body{background:#fff!important}
+      .archive-main{width:100%;max-width:none;margin:0;padding:0}
+      .archive-hero{color:#000}
+      .archive-hero h1,.archive-hero h2,.archive-hero h3{color:#000}
+      .archive-hero p{color:#333}
+      .brief-card{box-shadow:none;break-inside:avoid}
+    }
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    /* Remove the legacy Edit Profile / Payments / Insights menu on the archive page. */
+    .archive-top-nav,.archive-menu-toggle{display:none!important}
+    .archive-main,.archive-footer{width:100%;max-width:1200px;margin-left:auto;margin-right:auto}
+
+
+    
+    .archive-status,.empty,.brief-card {
+      background:#111827 !important;
+      border-color:#374151 !important;
+      color:#e5e7eb !important;
+    }
+    .brief-card-head {
+      background:linear-gradient(135deg,#111827,#1f2937) !important;
+      border-bottom-color:#374151 !important;
+    }
+    .brief-card-head h2,.brief-card-head h3,.field-value { color:#f3f4f6 !important; }
+    .brief-meta,.brief-ref,.brief-select,.field-label { color:#cbd5e1 !important; }
+    .field,.field:nth-child(odd) { border-bottom-color:#374151 !important; border-right-color:#374151 !important; }
+    .archive-search,.archive-actions a,.archive-actions button,.archive-signout,.archive-menu-toggle {
+      background:#111827 !important; color:#f9fafb !important; border:1px solid #4b5563 !important;
+    }
+    .archive-search::placeholder { color:#9ca3af !important; }
+    .archive-search:focus { border-color:#60a5fa !important; box-shadow:0 0 0 3px rgba(96,165,250,.18) !important; }
+    .archive-actions a:hover,.archive-actions button:hover,.archive-signout:hover,.archive-menu-toggle:hover {
+      background:#1f2937 !important; border-color:#6b7280 !important;
+    }
+    #deleteBtn:not(:disabled) { border-color:#ef4444 !important; color:#fca5a5 !important; }
+    .archive-status.error { background:#2b151a !important; border-color:#7f1d1d !important; color:#fecaca !important; }
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-2">
+  <style>
+    /* Keep the archive identity/header pane visually above the shared workspace menu. */
+    body > header.archive-topbar { position: relative !important; z-index: 10001 !important; }
+    body > nav.hamlet-primary-nav { position: relative !important; z-index: 10 !important; }
+  </style>
+  </head>
+<body>
+  <header class="archive-topbar hamlet-404-header" role="banner">
+    <div class="archive-topbar-inner">
+      <a class="archive-brand" href="/index.html" aria-label="hamlet home">hamlet </a>
+      <div class="archive-user-area">
+        <div class="archive-user-profile auth-profile-chip" data-auth-profile aria-label="Signed-in user">
+          <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+          <span class="auth-profile-name" data-auth-name></span>
+        </div>
+        <button type="button" class="archive-signout" id="signOutBtn">Sign Out</button>
+        <button type="button" class="archive-menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="topNavMenu" aria-label="Open navigation menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <nav id="topNavMenu" aria-hidden="true" hidden></nav>
+
+  <main class="archive-main" role="main">
+    <section class="archive-hero" aria-labelledby="archive-title">
+      <h1 id="archive-title">Brief Archive</h1>
+      <p>Submitted briefs, recalled from the secure communications archive for the signed-in account.</p>
+    </section>
+
+    <section class="archive-signin-card" id="archiveSignInCard" aria-labelledby="archiveSignInTitle">
+      <h2 id="archiveSignInTitle">Sign in to continue</h2>
+      <p>Your Brief Archive is private to your account. Sign in below to securely view and manage your submitted briefs.</p>
+      <div class="archive-signin-actions">
+        <button type="button" data-archive-provider="google">Continue with Google</button>
+        <button type="button" data-archive-provider="facebook">Continue with Facebook</button>
+        <button type="button" data-archive-provider="linkedin">Continue with LinkedIn</button>
+        <button type="button" data-archive-provider="twitter">Continue with X</button>
+      </div>
+      <div id="archiveSignInError" role="alert" aria-live="polite"></div>
+    </section>
+    <div class="archive-toolbar">
+      <span class="archive-count" id="archiveCount">Loading archive…</span>
+      <div class="archive-controls">
+        <input class="archive-search" id="archiveSearch" type="search" placeholder="Search archive…" aria-label="Search all displayed archive text">
+        <div class="archive-actions">
+          <button type="button" id="deleteBtn" disabled>Delete Selected</button>
+          <a href="mailto:support@mail.hamlet-ai.co.uk">Follow Up Enquiry</a>
+          <a href="/invoice">Pay Invoice</a>
+          <button type="button" id="refreshBtn">Refresh</button>
+          <a href="/requests">Create New</a>
+          <button type="button" id="printBtn">Print</button>
+          <button type="button" id="shareBtn" disabled>Share via E-mail</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="archive-status loading" id="archiveStatus" role="status">Checking your sign-in…</div>
+    <section class="brief-list" id="briefList" aria-live="polite"></section>
+  </main>
+
+  <footer class="archive-footer" role="contentinfo">
+    <p>v1.04.04</p>
+    <div class="archive-footer-links">
+      <a href="/terms">Terms</a>
+      <span aria-hidden="true">|</span>
+      <a href="/privacy">Privacy</a>
+      <span aria-hidden="true">|</span>
+      <a href="/cookies">Cookies</a>
+    </div>
+    <p>© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+  </footer>
+
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+  <script defer src="/firebase-config.js"></script><script defer src="/profile-service.js?v=20261010-2"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script>
+    (function () {
+      "use strict";
+      var auth, archiveList = document.getElementById("briefList");
+      var statusEl = document.getElementById("archiveStatus");
+      var countEl = document.getElementById("archiveCount");
+      var refreshBtn = document.getElementById("refreshBtn");
+      var deleteBtn = document.getElementById("deleteBtn");
+      var shareBtn = document.getElementById("shareBtn");
+      var searchInput = document.getElementById("archiveSearch");
+      var signOutBtn = document.getElementById("signOutBtn");
+      var signInCard = document.getElementById("archiveSignInCard");
+      var signInError = document.getElementById("archiveSignInError");
+      var privateArchiveElements = [document.querySelector(".archive-user-profile"), signOutBtn, document.querySelector(".archive-toolbar"), statusEl, archiveList];
+      function setArchiveAccess(allowed) {
+        if (signInCard) signInCard.classList.toggle("archive-auth-hidden", !!allowed);
+        privateArchiveElements.forEach(function(element) {
+          if (element) element.classList.toggle("archive-auth-hidden", !allowed);
+        });
+        if (!allowed) {
+          archiveList.replaceChildren();
+          countEl.textContent = "";
+          showStatus("Sign in to access your private archive.", false);
+        }
+      }
+      function signInFromArchive(providerName) {
+        if (!auth) { if (signInError) signInError.textContent = "Authentication is still loading. Please try again."; return; }
+        var provider;
+        if (providerName === "google") {
+          provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({prompt:"select_account"});
+        } else if (providerName === "facebook") {
+          provider = new firebase.auth.FacebookAuthProvider();
+        } else if (providerName === "linkedin") {
+          // LinkedIn's OAuth code exchange is handled by the main sign-in page.
+          window.location.assign("/login.html?next=%2Farchive.html");
+          return;
+        } else if (providerName === "twitter") {
+          provider = new firebase.auth.TwitterAuthProvider();
+        } else return;
+
+        var buttons = signInCard.querySelectorAll("button");
+        buttons.forEach(function(button) { button.disabled = true; });
+        if (signInError) signInError.textContent = "";
+        auth.signInWithPopup(provider).catch(function(error) {
+          var code = error && error.code;
+          console.error("Archive sign-in failed:", error);
+          // Popup sign-in is commonly blocked or unsupported in mobile Safari.
+          // Fall back to a full-page redirect for those specific browser errors.
+          if (code === "auth/popup-blocked" ||
+              code === "auth/operation-not-supported-in-this-environment" ||
+              code === "auth/web-storage-unsupported") {
+            return auth.signInWithRedirect(provider).catch(function(redirectError) {
+              console.error("Archive redirect sign-in failed:", redirectError);
+              if (signInError) signInError.textContent = (redirectError && redirectError.message) || "Sign-in could not be started. Please try again.";
+            });
+          }
+          if (signInError) signInError.textContent = code === "auth/multi-factor-auth-required"
+            ? "This account requires two-factor authentication. Please use the main sign-in page to complete verification."
+            : ((error && error.message) || "Sign-in failed. Please try again.");
+        }).finally(function() {
+          buttons.forEach(function(button) { button.disabled = false; });
+        });
+      }
+      if (signInCard) signInCard.querySelectorAll("[data-archive-provider]").forEach(function(button) {
+        button.addEventListener("click", function() { signInFromArchive(button.getAttribute("data-archive-provider")); });
+      });
+
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+      }
+      function formatDate(value) {
+        if (!value) return "Date unavailable";
+        var date = new Date(value);
+        return isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString("en-GB",{day:"2-digit",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      }
+      function field(label,value,full) {
+        var display = value === null || value === undefined || value === "" ? "Not provided" : value;
+        return '<div class="field' + (full ? ' full' : '') + '"><span class="field-label">' + escapeHtml(label) + '</span><p class="field-value">' + escapeHtml(display) + '</p></div>';
+      }
+      function updateDeleteState() {
+        var selected = archiveList.querySelectorAll(".brief-checkbox:checked");
+        deleteBtn.disabled = selected.length === 0;
+        shareBtn.disabled = selected.length !== 1;
+      }
+      function renderBriefs(briefs) {
+        if (!briefs.length) {
+          countEl.textContent = "0 briefs";
+          archiveList.innerHTML = '<div class="empty"><strong>No briefs submitted yet.</strong><br>Your completed media briefs will appear here after submission.</div>';
+          return;
+        }
+        countEl.textContent = briefs.length + (briefs.length === 1 ? " brief" : " briefs");
+        archiveList.innerHTML = briefs.map(function (brief) {
+          return '<article class="brief-card" data-brief-id="' + escapeHtml(brief.id || '') + '">' +
+            '<header class="brief-card-head"><div><h2>' + escapeHtml(brief.headline || "Untitled brief") + '</h2><label class="brief-select"><input type="checkbox" class="brief-checkbox" value="' + escapeHtml(brief.id || '') + '"> Select brief</label><p class="brief-meta">' + escapeHtml(brief.announcementType || "Media brief") + ' · Submitted ' + escapeHtml(formatDate(brief.createdAt)) + '</p></div><div class="brief-ref">Reference<br>' + escapeHtml(brief.id || "Unavailable") + '</div></header>' +
+            '<div class="field-grid">' +
+              field("Company Name",brief.companyName) + field("Press Officer",brief.pressOfficer) + field("Officer Email",brief.officerEmail) + field("Destination Email",brief.destinationEmail) + field("Phone Number",brief.phoneNumber) + field("Press Release URL",brief.pressReleaseUrl) + field("Headline",brief.headline) + field("Announcement Type",brief.announcementType) + field("Embargo Date",brief.embargoDate) + field("Summary",brief.summary,true) + field("Notes",brief.notes,true) +
+            '</div></article>';
+        }).join("");
+        archiveList.querySelectorAll(".brief-checkbox").forEach(function(box){ box.addEventListener("change",updateDeleteState); });
+        updateDeleteState();
+        applySearch();
+      }
+      function showStatus(message,error) {
+        statusEl.textContent = message;
+        statusEl.classList.toggle("error",!!error);
+        statusEl.classList.toggle("loading",false);
+      }
+      function applySearch() {
+        var query = (searchInput.value || "").trim().toLowerCase();
+        var cards = archiveList.querySelectorAll(".brief-card");
+        var visible = 0;
+        cards.forEach(function(card) {
+          var match = !query || card.textContent.toLowerCase().indexOf(query) !== -1;
+          card.classList.toggle("search-hidden",!match);
+          if (match) visible++;
+        });
+        if (cards.length && query) {
+          countEl.textContent = visible + " of " + cards.length + (cards.length === 1 ? " brief" : " briefs");
+        } else if (cards.length) {
+          countEl.textContent = cards.length + (cards.length === 1 ? " brief" : " briefs");
+        }
+      }
+      async function deleteSelected() {
+        var selected = Array.from(archiveList.querySelectorAll(".brief-checkbox:checked")).map(function(box){ return box.value; }).filter(Boolean);
+        if (!selected.length) return;
+        if (!window.confirm(selected.length === 1 ? "Delete the selected brief permanently?" : "Delete the selected " + selected.length + " briefs permanently?")) return;
+        deleteBtn.disabled = true;
+        refreshBtn.disabled = true;
+        showStatus("Deleting selected brief(s)…",false);
+        try {
+          var callable = firebase.app().functions("us-central1").httpsCallable("deletePressCommunications");
+          var result = await callable({ids:selected});
+          var deleted = result.data && result.data.deleted ? result.data.deleted : selected.length;
+          selected.forEach(function(id){
+            var card = Array.from(archiveList.querySelectorAll(".brief-card")).find(function(item){ return item.getAttribute("data-brief-id") === id; });
+            if (card) card.remove();
+          });
+          updateDeleteState();
+          applySearch();
+          var remaining = archiveList.querySelectorAll(".brief-card").length;
+          countEl.textContent = remaining + (remaining === 1 ? " brief" : " briefs");
+          showStatus(deleted + (deleted === 1 ? " brief was" : " briefs were") + " permanently deleted.",false);
+          if (!remaining) archiveList.innerHTML = '<div class="empty"><strong>No briefs submitted yet.</strong><br>Your completed media briefs will appear here after submission.</div>';
+        } catch (error) {
+          console.error("Brief deletion failed:",error);
+          showStatus(error && error.message ? error.message : "The selected brief(s) could not be deleted.",true);
+          updateDeleteState();
+        } finally {
+          refreshBtn.disabled = false;
+        }
+      }
+      async function loadArchive() {
+        var user = auth && auth.currentUser;
+        if (!user) return;
+        refreshBtn.disabled = true;
+        showStatus("Loading your submitted briefs…",false);
+        try {
+          var callable = firebase.app().functions("us-central1").httpsCallable("getPressCommunications");
+          var result = await callable({});
+          var briefs = result.data && Array.isArray(result.data.briefs) ? result.data.briefs : [];
+          renderBriefs(briefs);
+
+          // Prefer the name saved in Edit Profile; use the authentication
+          // name only when no saved first or last name is available.
+          var archiveName = user.displayName || user.email || "your account";
+          try {
+            var profileResult = window.ibrProfileService
+              ? await window.ibrProfileService.getProfile(user.uid)
+              : await firebase.firestore().collection("publicProfiles").doc(user.uid).get().then(function (snapshot) {
+                  return { exists: snapshot.exists, data: snapshot.exists ? (snapshot.data() || {}) : {} };
+                });
+            var profileData = profileResult.data || {};
+            var savedName = [profileData.firstName, profileData.lastName]
+              .filter(function(value) { return typeof value === "string" && value.trim(); })
+              .map(function(value) { return value.trim(); })
+              .join(" ");
+            if (savedName) archiveName = savedName;
+          } catch (profileError) {
+            console.warn("Unable to load the saved archive display name:", profileError);
+          }
+          showStatus("Archive loaded for " + archiveName + ".",false);
+        } catch (error) {
+          console.error("Brief archive failed:",error);
+          countEl.textContent = "Archive unavailable";
+          archiveList.innerHTML = "";
+          showStatus(error && error.message ? error.message : "The archive could not be loaded. Please try again.",true);
+        } finally {
+          refreshBtn.disabled = false;
+        }
+      }
+      function init() {
+        try {
+          if (!window.firebase || !window.firebaseConfig) throw new Error("Firebase could not be initialized.");
+          if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+          auth = firebase.auth();
+          // Consume provider redirect results when popup sign-in falls back to a full-page redirect.
+          auth.getRedirectResult().catch(function(error) {
+            if (!error || error.code === "auth/no-auth-event") return;
+            console.error("Archive redirect result failed:", error);
+            if (signInError) signInError.textContent = (error && error.message) || "Sign-in could not be completed. Please try again.";
+          });
+          auth.onAuthStateChanged(function(user) {
+            setArchiveAccess(!!user);
+            if (user) {
+              loadArchive();
+            } else {
+              showStatus("Sign in to access your private archive.", false);
+            }
+          }, function(error) {
+            console.error("Archive authentication state failed:", error);
+            showStatus("We could not verify your sign-in. Please reload the archive and try again.", true);
+          });
+        } catch (error) {
+          console.error("Archive authentication initialization failed:", error);
+          showStatus(error && error.message ? error.message : "Unable to initialize authentication. Please reload the page.", true);
+        }
+      }
+      refreshBtn.addEventListener("click",loadArchive);
+      deleteBtn.addEventListener("click",deleteSelected);
+      searchInput.addEventListener("input",applySearch);
+      document.getElementById("printBtn").addEventListener("click",function(event){ event.preventDefault(); event.stopPropagation(); window.setTimeout(function(){ window.print(); },0); });
+      shareBtn.addEventListener("click",function(){
+        var selected = archiveList.querySelectorAll(".brief-checkbox:checked");
+        if (selected.length !== 1) {
+          showStatus("Select exactly one brief to share by e-mail.",true);
+          updateDeleteState();
+          return;
+        }
+        var card = selected[0].closest(".brief-card");
+        if (!card) return;
+        var subject = "Communications Brief: Impact in Business Recruitment";
+        var body = card.innerText.replace(/^\s*Select brief\s*/m,"").trim();
+        var mailto = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+        window.location.href = mailto;
+      });
+      signOutBtn.addEventListener("click",async function(){
+        signOutBtn.disabled = true;
+        signOutBtn.textContent = "Signing Out…";
+        try {
+          if (!auth) throw new Error("Authentication is not ready. Please try again.");
+          // Remove private archive content before ending the session so it cannot
+          // remain visible if the browser restores this page from its back-forward cache.
+          archiveList.replaceChildren();
+          countEl.textContent = "";
+          showStatus("Signing out securely…",false);
+          await auth.signOut();
+          if (auth.currentUser) throw new Error("Your session could not be cleared. Please try again.");
+          setArchiveAccess(false);
+          signOutBtn.disabled = false;
+          signOutBtn.textContent = "Sign Out";
+        } catch (error) {
+          console.error("Sign out failed:",error);
+          signOutBtn.disabled = false;
+          signOutBtn.textContent = "Sign Out";
+          showStatus(error && error.message ? error.message : "Unable to sign out. Please try again.",true);
+        }
+      });
+
+      // Safari and other browsers may restore a previous page from the
+      // back-forward cache without rerunning the normal authentication setup.
+      // Recheck the session when that happens and never leave cached briefs visible.
+      window.addEventListener("pageshow",function(event){
+        if (!event.persisted) return;
+        if (!auth || !auth.currentUser) {
+          setArchiveAccess(false);
+        } else {
+          setArchiveAccess(true);
+          loadArchive();
+        }
+      });
+      var menuToggle = document.getElementById("menuToggle"), topNavMenu = document.getElementById("topNavMenu");
+      menuToggle.addEventListener("click",function(){
+        var open = topNavMenu.classList.toggle("open");
+        menuToggle.setAttribute("aria-expanded",open?"true":"false");
+        menuToggle.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");
+      });
+      topNavMenu.querySelectorAll("a").forEach(function(link){
+        link.addEventListener("click",function(){
+          topNavMenu.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded","false");
+          menuToggle.setAttribute("aria-label","Open navigation menu");
+        });
+      });
+      window.addEventListener("load",init);
+    })();
+  </script>
+  <script defer src="/page-transition.js"></script>
+  <script src="/hamlet-workspace.js?v=20261013-11"></script>
+  <script src="/hamlet-background.js?v=20261015-1"></script>
+</body>
+</html>

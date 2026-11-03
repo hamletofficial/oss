@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#071D4A">
+<title>My Property Resources — Hamlet</title>
+<link rel="stylesheet" href="/resource-centre.css">
+<link rel="stylesheet" href="/index.css?v=20261015-5">
+<link rel="stylesheet" href="/mobile-compat.css"><link rel="stylesheet" href="/page-transition.css">
+<style>
+:root{--navy:#071D4A;--blue:#0284c7;--ink:#092a4b;--muted:#475569;--line:#dbe3ee;--green:#15803d;--red:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Open Sans',Arial,sans-serif;color:#0f172a;background-image:linear-gradient(rgba(255,255,255,.4),rgba(255,255,255,.4)),url('/assets/images/grade-ii-listed-london.jfif');background-size:cover;background-position:center;background-attachment:fixed;background-repeat:no-repeat}
+.page-wrapper{background:#fff;max-width:1920px;min-height:100vh;margin:0 auto;box-shadow:0 0 20px rgba(0,0,0,.1);display:flex;flex-direction:column}
+.resource-shell{display:none;max-width:1180px;width:100%;margin:2rem auto 4rem;padding:0 1rem;flex:1}
+.auth-shell{max-width:760px;margin:3rem auto;padding:2rem;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#fff,#f6fbff);text-align:center;box-shadow:0 8px 24px rgba(2,6,23,.08)}
+.auth-shell h1{margin:0 0 .6rem;color:var(--ink)}.auth-shell p{color:var(--muted);line-height:1.55}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem}.topbar-actions{display:flex;align-items:center;gap:.6rem}.profile{display:flex;align-items:center;gap:.65rem;color:#fff}.profile img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.hero{padding:1.7rem;border-radius:16px;background:linear-gradient(135deg,#071D4A 0%,#123d8f 100%);color:#fff;box-shadow:0 10px 26px rgba(11,42,111,.18)}
+.hero h1{margin:0 0 .55rem;font-size:1.65rem}.hero p{margin:0;max-width:850px;line-height:1.55;color:#e7eefc}
+.hero-pills{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0 0;padding:0;list-style:none}.hero-pills li{padding:.4rem .7rem;border:1px solid rgba(255,255,255,.3);border-radius:999px;font-size:.8rem;font-weight:700}
+.panel{border:1px solid var(--line);border-radius:14px;background:#fff;padding:1.4rem;box-shadow:0 6px 20px rgba(2,6,23,.06);margin-top:1rem}
+.panel h2{margin:0 0 .35rem;color:var(--ink);font-size:1.2rem}.panel-intro{margin:0 0 1rem;color:var(--muted)}
+.notice{padding:.9rem 1rem;border-left:4px solid var(--blue);background:#f3f9fd;color:#28506c;border-radius:8px;margin-bottom:1rem;font-size:.88rem;line-height:1.5}
+.resource-list{display:grid;gap:.8rem}.property-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin:.8rem 0}.property-photo-grid img{display:block;width:100%;height:110px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}.property-card{border:1px solid var(--line);border-radius:12px;padding:1rem;background:#fbfdff}
+.property-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}.property-card h3{margin:0;color:var(--ink);font-size:1rem}
+.badge{display:inline-flex;padding:.3rem .55rem;border-radius:999px;background:#e8f5ec;color:var(--green);font-size:.75rem;font-weight:800}
+.resource-tools{display:grid;grid-template-columns:minmax(220px,2fr) repeat(3,minmax(130px,1fr));gap:.8rem;padding:1rem;margin:1rem 0 1.1rem;border:1px solid var(--line);border-radius:12px;background:#f8fafc}
+.resource-tool{display:flex;flex-direction:column;gap:.4rem;color:#334155;font-size:.76rem;font-weight:800}
+.resource-tool input,.resource-tool select{width:100%;min-width:0;padding:.68rem .72rem;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;font:inherit;font-weight:500}
+.resource-tool input:focus,.resource-tool select:focus{outline:2px solid #2563eb;outline-offset:1px}
+.resource-tool-actions{grid-column:1/-1;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;color:var(--muted);font-size:.82rem}
+.resource-tool-actions input,.resource-tool-actions select{min-width:145px;max-width:220px;padding:.62rem .7rem;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;font:inherit;font-size:.8rem}
+.resource-tool-actions #propertyResultCount{margin-right:auto}
+.property-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin:.8rem 0;color:var(--muted);font-size:.84rem}
+.property-meta strong{display:block;color:#173b5d;font-size:.78rem;margin-bottom:.15rem}.property-description{color:#475569;font-size:.88rem;line-height:1.5;white-space:pre-wrap}
+.card-actions{display:flex;justify-content:flex-end;gap:.6rem;flex-wrap:wrap;margin-top:1rem;padding-top:.85rem;border-top:1px solid #edf1f6}
+.delete-btn{cursor:pointer;border:1px solid #fecaca;border-radius:8px;background:#fff;color:var(--red);font:inherit;font-weight:700;padding:.58rem .85rem}.delete-btn:hover{background:#fff1f2}
+.empty{padding:1rem;border:1px dashed #cbd5e1;border-radius:10px;color:var(--muted)}
+.status{margin:.8rem 0 0;color:var(--muted)}.status.success{color:var(--green)}.status.error{color:var(--red)}
+.resource-footer{border-top:1px solid var(--line);padding:22px 1rem 30px;text-align:center;color:var(--muted);font-size:.82rem}.resource-footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-bottom:8px}.resource-footer a{color:var(--muted);text-decoration:none}.resource-footer a:hover{color:var(--blue);text-decoration:underline}
+@media(max-width:800px){.topbar{align-items:flex-start;flex-direction:column}.topbar-actions{width:100%;flex-wrap:wrap}.resource-tools{grid-template-columns:1fr 1fr}.resource-tool:first-child{grid-column:1/-1}.property-meta{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.resource-shell{padding:0 .65rem}.hero,.panel{padding:1.1rem}.resource-tools{grid-template-columns:1fr;padding:.75rem}.resource-tool:first-child{grid-column:auto}.resource-tool-actions{align-items:stretch;flex-direction:column}.resource-tool-actions .btn{width:100%;text-align:center}.property-meta{grid-template-columns:1fr}.property-head{flex-direction:column}}
+/* Dark transparent header override */
+.resource-nav{background:rgba(15,43,110,.88)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+</style>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-4">
+  <link rel="stylesheet" href="/app-page-transition.css">
+  <link rel="stylesheet" href="/theme.css?v=20261029-2">
+</head>
+<body>
+<div class="page-wrapper">
+<header class="resource-nav hamlet-404-header" role="banner">
+<div class="container container-nav topbar">
+<div class="logo"><a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a></div>
+<div class="topbar-actions">
+<div class="profile" id="profileChip" data-auth-profile hidden><img id="profilePhoto" data-auth-photo src="/160.jpg" alt="Profile photo"><span id="profileName" data-auth-name></span></div>
+<a class="btn btn-outline" href="/app/hamlet/">Deal Pipeline</a>
+<a class="btn btn-outline" href="/app/public/live.html">Live Listings</a>
+<a class="btn btn-outline" href="/directory.html">Directory</a>
+<a class="btn btn-outline" href="/messages.html">Mailbox</a>
+<button class="btn btn-outline" id="authActionBtn" type="button">Sign In</button>
+</div>
+</div>
+</header>
+
+<section class="auth-shell" id="authPanel" hidden>
+<h1>Member sign-in required</h1>
+<p>Your property resources are securely associated with your authenticated member account. Sign in to review and remove resources you no longer want retained.</p>
+<a class="btn btn-primary" href="/login.html?next=%2Fapp%2Fpublic%2Fresources.html">Continue to Sign In</a>
+</section>
+
+<main class="resource-shell" id="resourceShell">
+<section class="hero">
+<h1>My Property Resources</h1>
+<p>Keep your commercial property listings up to date and in your control. Review the properties associated with your member account and remove any listing that was submitted in error, has been let or sold, or is no longer available. Removing a listing will also take it out of the Live Listings feed.</p>
+<ul class="hero-pills"><li>Owner-managed</li><li>Account-secured</li><li>Removes from Live Listings</li></ul>
+</section>
+
+<section class="panel">
+<h2>Resource Management</h2>
+<p class="panel-intro">Only resources owned by your authenticated account are displayed here.</p>
+<div class="notice"><strong>Important:</strong> Deletion is permanent. Once a property resource is removed, it will no longer be available through <strong>Live Listings</strong> or your property workspace. Use this page to correct accidental or erroneous submissions.</div>
+<div class="resource-tools" role="search" aria-label="Filter your property resources">
+<label class="resource-tool"><span>Search properties</span><input id="propertySearch" type="search" placeholder="Name, location, postcode or details…" autocomplete="off"></label>
+<label class="resource-tool"><span>Property type</span><select id="propertyTypeFilter"><option value="">All types</option></select></label>
+<label class="resource-tool"><span>Status</span><select id="propertyStatusFilter"><option value="">All statuses</option></select></label>
+<label class="resource-tool"><span>Sort by</span><select id="propertySort"><option value="newest">Recently added</option><option value="oldest">Oldest first</option><option value="name">Property name A–Z</option><option value="location">Location A–Z</option></select></label>
+<div class="resource-tool-actions"><span id="propertyResultCount" aria-live="polite">Preparing properties…</span><input id="savedPropertySearchName" type="text" maxlength="60" placeholder="Name current filters" aria-label="Name this saved property search"><button class="btn btn-outline" type="button" id="savePropertySearchBtn">Save search</button><select id="savedPropertySearchSelect" aria-label="Saved property searches on this device"><option value="">Saved searches on this device</option></select><button class="btn btn-outline" type="button" id="applyPropertySearchBtn">Apply saved</button><button class="btn btn-outline" type="button" id="deletePropertySearchBtn">Delete saved</button><button class="btn btn-outline" type="button" id="exportPropertiesBtn">Export CSV</button><button class="btn btn-outline" type="button" id="clearPropertyFilters">Clear filters</button></div>
+</div>
+<div class="resource-list" id="resourceList"><div class="empty">Loading your property resources…</div></div>
+<p class="status" id="resourceStatus" role="status" aria-live="polite"></p>
+</section>
+</main>
+
+<footer class="resource-footer" role="contentinfo">
+<div style="margin-bottom:4px">v1.04.04</div>
+<div class="resource-footer-links"><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a></div>
+<div>&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</div>
+</footer>
+</div>
+
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/header-profile.js?v=20261020-1"></script>
+<script defer src="/page-transition.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+const authPanel=document.getElementById('authPanel'),resourceShell=document.getElementById('resourceShell'),resourceList=document.getElementById('resourceList'),resourceStatus=document.getElementById('resourceStatus'),authActionBtn=document.getElementById('authActionBtn'),profileChip=document.getElementById('profileChip'),profileName=document.getElementById('profileName'),profilePhoto=document.getElementById('profilePhoto');
+let auth=null,db=null,currentUser=null,allResources=[];
+function esc(v){return String(v??'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]})}
+function showOut(){currentUser=null;authPanel.hidden=false;resourceShell.style.display='none';authActionBtn.textContent='Sign In';authActionBtn.onclick=function(){location.href='/login.html?next=%2Fapp%2Fpublic%2Fresources.html'};profileChip.hidden=true}
+function showIn(u){currentUser=u;authPanel.hidden=true;resourceShell.style.display='block';authActionBtn.textContent='Sign Out';authActionBtn.onclick=async function(){authActionBtn.disabled=true;try{await auth.signOut()}finally{authActionBtn.disabled=false}};profileChip.hidden=false;loadResources()}
+function resourceDate(record){const value=record.createdAt;try{if(value&&typeof value.toMillis==='function')return value.toMillis();if(value&&typeof value.toDate==='function')return value.toDate().getTime();const parsed=Date.parse(value||'');return Number.isFinite(parsed)?parsed:0}catch(e){return 0}}
+function populatePropertyFilters(){
+const typeSelect=document.getElementById('propertyTypeFilter'),statusSelect=document.getElementById('propertyStatusFilter');
+const selectedType=typeSelect.value,selectedStatus=statusSelect.value;
+const types=[...new Set(allResources.map(x=>String(x.data.propertyType||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+const statuses=[...new Set(allResources.map(x=>String(x.data.status||'Active').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+typeSelect.innerHTML='<option value="">All types</option>'+types.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
+statusSelect.innerHTML='<option value="">All statuses</option>'+statuses.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
+if(types.includes(selectedType))typeSelect.value=selectedType;if(statuses.includes(selectedStatus))statusSelect.value=selectedStatus;
+}
+function renderResources(docs){
+allResources=(docs||[]).map(function(d){return{id:d.id,data:d.data()||{}}});
+populatePropertyFilters();
+const query=document.getElementById('propertySearch').value.trim().toLowerCase(),type=document.getElementById('propertyTypeFilter').value,status=document.getElementById('propertyStatusFilter').value,sort=document.getElementById('propertySort').value;
+let filtered=allResources.filter(function(item){const p=item.data;const searchable=[p.propertyName,p.propertyType,p.address,p.postcode,p.availability,p.size,p.description,p.status,p.askingRent,p.sustainabilityStandard,p.sustainabilityStatus,p.certificationClass,p.certificateReference,p.certifier,p.sustainabilityNotes].join(' ').toLowerCase();return(!query||searchable.includes(query))&&(!type||String(p.propertyType||'').trim()===type)&&(!status||String(p.status||'Active').trim()===status)});
+filtered.sort(function(a,b){const pa=a.data,pb=b.data;if(sort==='oldest')return resourceDate(pa)-resourceDate(pb);if(sort==='name')return String(pa.propertyName||'').localeCompare(String(pb.propertyName||''));if(sort==='location')return String(pa.address||'').localeCompare(String(pb.address||''));return resourceDate(pb)-resourceDate(pa)});
+document.getElementById('propertyResultCount').textContent=filtered.length+' of '+allResources.length+' propert'+(allResources.length===1?'y':'ies');
+if(!allResources.length){resourceList.innerHTML='<div class="empty">You have no commercial property resources to manage yet. Add a property from the members’ property workspace to get started.</div>';return}
+if(!filtered.length){resourceList.innerHTML='<div class="empty">No properties match these filters. Clear one or more filters to see your resources.</div>';return}
+resourceList.innerHTML='';
+filtered.forEach(function(item){
+const p=item.data,card=document.createElement('article');card.className='property-card';card.id='property-'+item.id;card.dataset.propertyId=item.id;
+card.innerHTML='<div class="property-head"><h3>'+esc(p.propertyName||'Commercial Property')+'</h3><span class="badge">'+esc(p.status||'Active')+'</span></div>'+
+(Array.isArray(p.photoUrls)&&p.photoUrls.length?'<div class="property-photo-grid">'+p.photoUrls.slice(0,6).map(function(url,i){return /^https:\/\//i.test(url)?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(url)+'" alt="'+esc(p.propertyName||'Property')+' photo '+(i+1)+'" loading="lazy"></a>':''}).join('')+'</div>':'')+
+'<div class="property-meta"><div><strong>Type</strong>'+esc(p.propertyType||'—')+'</div><div><strong>Location</strong>'+esc(p.address||'—')+(p.postcode?' · '+esc(p.postcode):'')+'</div><div><strong>Availability</strong>'+esc(p.availability||'—')+'</div><div><strong>Size</strong>'+esc(p.size||'—')+'</div></div>'+
+'<div class="property-description">'+esc(p.description||'No description provided.')+'</div>'+
+(p.sustainabilityStandard?'<div class="property-description" style="margin-top:.7rem;padding:.7rem;border:1px solid #b8d7c3;border-radius:9px;background:#f0fdf4;color:#14532d"><strong>Sustainability credentials:</strong> '+esc(p.sustainabilityStandard)+' · '+esc(p.sustainabilityStatus||'Not certified')+(p.certificationClass?' · '+esc(p.certificationClass):'')+(p.certificateReference?' · Ref '+esc(p.certificateReference):'')+(p.certifier?' · '+esc(p.certifier):'')+(p.certificateUrl&&/^(https?:\/\/)/i.test(p.certificateUrl)?' · <a href="'+esc(p.certificateUrl)+'" target="_blank" rel="noopener noreferrer">View evidence ↗</a>':'')+'</div>':'')+
+(p.askingRent?'<div class="property-description" style="margin-top:.65rem"><strong>Asking rent / lease terms:</strong> '+esc(p.askingRent)+'</div>':'')+
+'<div class="card-actions"><a class="btn btn-primary" href="/app/hamlet/?fromProperty=1&amp;propertyName='+encodeURIComponent(p.propertyName||'Commercial Property')+'&amp;propertyLocation='+encodeURIComponent([p.address,p.postcode].filter(Boolean).join(', '))+'&amp;propertyType='+encodeURIComponent(p.propertyType||'')+'&amp;propertySize='+encodeURIComponent(p.size||'')+'&amp;propertyUrl='+encodeURIComponent(p.propertyUrl||'')+'&amp;propertyResourceId='+encodeURIComponent(item.id)+'">Create Deal ↗</a><a class="btn btn-outline" href="/app/public/live.html?q='+encodeURIComponent(p.propertyName||'')+'">Find in Live Listings</a><button class="delete-btn" type="button" data-id="'+esc(item.id)+'">Delete Resource</button></div>';
+resourceList.appendChild(card);
+});
+resourceList.querySelectorAll('.delete-btn').forEach(function(btn){btn.addEventListener('click',function(){deleteResource(btn.dataset.id,btn)})});
+}
+async function loadResources(){
+resourceStatus.textContent='Loading…';resourceStatus.className='status';
+try{
+const s=await db.collection('commercialProperties').where('ownerUid','==',currentUser.uid).get();
+const docs=Array.from(s.docs).sort(function(a,b){const at=a.data().createdAt?.toMillis?.()||0,bt=b.data().createdAt?.toMillis?.()||0;return bt-at});
+// Preserve existing listings by migrating only a whitelisted public projection.
+// Never copy ownerEmail or any other private account metadata to publicProperties.
+const publicKeys=['ownerUid','ownerName','propertyName','propertyType','address','postcode','availability','size','askingRent','contactName','contactEmail','propertyUrl','status','description','sustainabilityStandard','sustainabilityStatus','certificationClass','certificateReference','certifier','certificationDate','certificateUrl','sustainabilityNotes','photoUrls','createdAt'];
+try {
+ const pending=[];
+ for(const doc of docs){
+  const source=doc.data()||{},publicRef=db.collection('publicProperties').doc(doc.id);
+  const publicSnap=await publicRef.get();
+  if(publicSnap.exists)continue;
+  const projection={};publicKeys.forEach(function(key){if(Object.prototype.hasOwnProperty.call(source,key))projection[key]=source[key]});
+  projection.ownerUid=currentUser.uid;projection.photoUrls=Array.isArray(source.photoUrls)?source.photoUrls.slice(0,6):[];projection.createdAt=source.createdAt||firebase.firestore.FieldValue.serverTimestamp();projection.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
+  pending.push({ref:publicRef,data:projection});
+ }
+ for(let i=0;i<pending.length;i+=400){const batch=db.batch();pending.slice(i,i+400).forEach(function(item){batch.set(item.ref,item.data)});await batch.commit();}
+} catch(migrationError) { console.warn('Legacy property projection migration could not complete; retaining the owner resource view.',migrationError); }
+renderResources(docs);
+resourceStatus.textContent=docs.length?docs.length+' resource'+(docs.length===1?'':'s')+' available.':'No property resources found.';
+}catch(e){console.error(e);resourceList.innerHTML='<div class="empty">Your property resources could not be loaded. Please refresh and try again.</div>';resourceStatus.textContent='There was a problem reading your property resources.';resourceStatus.className='status error'}
+}
+async function deleteResource(id,button){
+if(!currentUser)return;
+const card=button.closest('.property-card'),name=card?.querySelector('h3')?.textContent||'this property resource';
+if(!window.confirm('Delete "'+name+'"? This action is permanent and will remove the resource from Firestore and the Live Listings feed.'))return;
+button.disabled=true;resourceStatus.textContent='Deleting resource…';resourceStatus.className='status';
+try{
+const ref=db.collection('commercialProperties').doc(id);
+const snap=await ref.get();
+if(!snap.exists)throw new Error('Resource no longer exists');
+if(snap.data().ownerUid!==currentUser.uid)throw new Error('You are not authorised to delete this resource');
+const publicRef=db.collection('publicProperties').doc(id),publicSnap=await publicRef.get(),batch=db.batch();batch.delete(ref);if(publicSnap.exists)batch.delete(publicRef);await batch.commit();
+resourceStatus.textContent='Resource deleted successfully. It has been removed from Firestore and will no longer appear in Live Listings.';resourceStatus.className='status success';
+await loadResources();
+}catch(e){console.error(e);button.disabled=false;resourceStatus.textContent='The resource could not be deleted. Please refresh and try again.';resourceStatus.className='status error'}
+}
+const savedSearchStorageKey='hamlet-property-saved-searches-v1';
+function savedPropertySearches(){try{const value=JSON.parse(localStorage.getItem(savedSearchStorageKey)||'[]');return Array.isArray(value)?value.filter(x=>x&&typeof x.name==='string'):[]}catch(e){return[]}}
+function refreshSavedPropertySearches(){const select=document.getElementById('savedPropertySearchSelect'),current=select.value,items=savedPropertySearches();select.innerHTML='<option value="">Saved searches on this device</option>'+items.map(function(item){return '<option value="'+esc(item.name)+'">'+esc(item.name)+'</option>'}).join('');if(items.some(x=>x.name===current))select.value=current}
+function saveCurrentPropertySearch(){const name=document.getElementById('savedPropertySearchName').value.trim();if(!name){resourceStatus.textContent='Enter a name before saving this search.';resourceStatus.className='status error';document.getElementById('savedPropertySearchName').focus();return}const items=savedPropertySearches(),record={name:name,query:document.getElementById('propertySearch').value,type:document.getElementById('propertyTypeFilter').value,status:document.getElementById('propertyStatusFilter').value,sort:document.getElementById('propertySort').value};const index=items.findIndex(x=>x.name.toLowerCase()===name.toLowerCase());if(index>=0)items[index]=record;else items.push(record);try{localStorage.setItem(savedSearchStorageKey,JSON.stringify(items));refreshSavedPropertySearches();document.getElementById('savedPropertySearchSelect').value=name;resourceStatus.textContent='Saved search “'+name+'” on this device.';resourceStatus.className='status success'}catch(e){resourceStatus.textContent='This browser could not save the search. Check its local storage settings.';resourceStatus.className='status error'}}
+function applySavedPropertySearch(){const name=document.getElementById('savedPropertySearchSelect').value,record=savedPropertySearches().find(x=>x.name===name);if(!record){resourceStatus.textContent='Choose a saved search first.';resourceStatus.className='status';return}document.getElementById('propertySearch').value=record.query||'';document.getElementById('propertyTypeFilter').value=record.type||'';document.getElementById('propertyStatusFilter').value=record.status||'';document.getElementById('propertySort').value=record.sort||'newest';redrawPropertyResources();resourceStatus.textContent='Applied saved search “'+record.name+'”.';resourceStatus.className='status success'}
+function deleteSavedPropertySearch(){const name=document.getElementById('savedPropertySearchSelect').value;if(!name){resourceStatus.textContent='Choose a saved search to delete.';resourceStatus.className='status';return}try{localStorage.setItem(savedSearchStorageKey,JSON.stringify(savedPropertySearches().filter(x=>x.name!==name)));refreshSavedPropertySearches();resourceStatus.textContent='Deleted saved search “'+name+'” from this device.';resourceStatus.className='status success'}catch(e){resourceStatus.textContent='The saved search could not be deleted.';resourceStatus.className='status error'}}
+function redrawPropertyResources(){renderResources(allResources.map(function(item){return{id:item.id,data:function(){return item.data;}};}));}
+refreshSavedPropertySearches();
+document.getElementById('savePropertySearchBtn').addEventListener('click',saveCurrentPropertySearch);
+document.getElementById('applyPropertySearchBtn').addEventListener('click',applySavedPropertySearch);
+document.getElementById('deletePropertySearchBtn').addEventListener('click',deleteSavedPropertySearch);
+document.getElementById('propertySearch').addEventListener('input',redrawPropertyResources);
+document.getElementById('propertyTypeFilter').addEventListener('change',redrawPropertyResources);
+document.getElementById('propertyStatusFilter').addEventListener('change',redrawPropertyResources);
+document.getElementById('propertySort').addEventListener('change',redrawPropertyResources);
+document.getElementById('clearPropertyFilters').addEventListener('click',function(){document.getElementById('propertySearch').value='';document.getElementById('propertyTypeFilter').value='';document.getElementById('propertyStatusFilter').value='';document.getElementById('propertySort').value='newest';redrawPropertyResources();document.getElementById('propertySearch').focus()});
+document.getElementById('exportPropertiesBtn').addEventListener('click',function(){
+if(!allResources.length){resourceStatus.textContent='There are no property records to export.';return}
+const columns=[['Property name','propertyName'],['Type','propertyType'],['Status','status'],['Address','address'],['Postcode','postcode'],['Availability','availability'],['Size','size'],['Asking rent / lease terms','askingRent'],['Description','description'],['Created at','createdAt']];
+const quote=function(value){let v=value;if(v&&typeof v.toDate==='function')v=v.toDate().toISOString();else if(v&&typeof v.toMillis==='function')v=new Date(v.toMillis()).toISOString();return '"'+String(v??'').replace(/"/g,'""')+'"'};
+const csv=[columns.map(function(c){return quote(c[0])}).join(','),...allResources.map(function(item){return columns.map(function(c){return quote(item.data[c[1]])}).join(',')})].join('\r\n');
+const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8;'})),link=document.createElement('a');link.href=url;link.download='hamlet-property-resources-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);resourceStatus.textContent='Exported '+allResources.length+' property records to CSV.';
+});
+try{if(!window.firebase||!window.firebaseConfig)throw Error('Firebase configuration unavailable');if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.onAuthStateChanged(function(u){u?showIn(u):showOut()})}catch(e){console.error(e);showOut()}
+});
+</script>
+  <script src="/hamlet-workspace.js?v=20261013-11"></script>
+  <script src="/app-page-transition.js" defer></script>
+</body>
+</html>

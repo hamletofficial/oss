@@ -1,0 +1,409 @@
+/* Hamlet shared workspace navigation and universal search */
+.hamlet-primary-nav{position:relative;z-index:20;display:flex;align-items:center;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:9px clamp(12px,2.4vw,30px);border-bottom:1px solid #263750;background:#0b1220;color:#e5e7eb}
+.hamlet-primary-nav .hamlet-nav-link{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;min-height:38px;padding:8px 11px;border:1px solid transparent;border-radius:9px;color:#cbd5e1;text-decoration:none;font:700 12px/1.2 'DM Sans','Open Sans',Arial,sans-serif;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease}
+.hamlet-primary-nav .hamlet-nav-link:hover,.hamlet-primary-nav .hamlet-nav-link:focus-visible{background:#17263c;border-color:#354b68;color:#fff}
+.hamlet-primary-nav .hamlet-nav-link[aria-current=page]{background:#1d4ed8;border-color:#3b82f6;color:#fff}
+.hamlet-global-search{display:inline-flex;align-items:center;justify-content:center;gap:9px;flex:0 0 auto;margin-left:auto;min-height:38px;padding:7px 11px;border:1px solid #475569;border-radius:9px;background:#111827;color:#f8fafc;font:700 12px 'DM Sans','Open Sans',Arial,sans-serif;white-space:nowrap;cursor:pointer}
+.hamlet-global-search:hover,.hamlet-global-search:focus-visible{background:#1e293b;border-color:#93c5fd;outline:2px solid transparent}
+.hamlet-global-search kbd{font:600 10px ui-monospace,SFMono-Regular,Consolas,monospace;padding:2px 5px;border:1px solid #475569;border-radius:5px;color:#cbd5e1}
+.workspace-nav .hamlet-global-search{margin-left:auto}
+.hamlet-search-overlay[hidden]{display:none!important}
+.hamlet-search-overlay{position:fixed!important;inset:0!important;z-index:100000!important;display:flex;align-items:flex-start;justify-content:center;padding:12vh 16px 24px;background:rgba(3,8,18,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.hamlet-search-dialog{width:min(640px,100%);max-height:min(76vh,700px);overflow:auto;border:1px solid #334155;border-radius:18px;background:#0f172a;color:#f8fafc;box-shadow:0 28px 90px #0008}
+.hamlet-search-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px 12px}
+.hamlet-search-heading strong{font:800 16px/1.3 'DM Sans','Open Sans',Arial,sans-serif;letter-spacing:-.2px}
+.hamlet-search-close{border:1px solid #475569;border-radius:8px;background:#172033;color:#e2e8f0;width:34px;height:34px;font-size:20px;cursor:pointer}
+.hamlet-search-form{display:flex;gap:9px;padding:0 20px 17px}
+.hamlet-search-input{flex:1;min-width:0;width:100%;min-height:48px;padding:12px 14px;border:1px solid #475569;border-radius:10px;outline:none;background:#111d30;color:#f8fafc;font:500 15px 'DM Sans','Open Sans',Arial,sans-serif}
+.hamlet-search-input:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #3b82f633}
+.hamlet-search-route{flex:0 1 185px;min-width:145px;min-height:48px;padding:10px;border:1px solid #475569;border-radius:10px;background:#111d30;color:#e2e8f0;font:600 12px 'DM Sans','Open Sans',Arial,sans-serif}
+.hamlet-search-route:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+.hamlet-search-status{margin:0 20px 14px;padding:10px 12px;border:1px solid #7c5a27;border-radius:9px;background:#332714;color:#fde68a;font-size:12px;line-height:1.5}
+.hamlet-search-status[hidden]{display:none!important}
+.hamlet-search-submit{min-height:48px;padding:10px 15px;border:1px solid #3b82f6;border-radius:10px;background:#1d4ed8;color:white;font:700 13px 'DM Sans','Open Sans',Arial,sans-serif;cursor:pointer}
+.hamlet-search-caption{padding:0 20px 10px;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.1px;font-weight:800}
+.hamlet-search-destinations{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 20px}
+.hamlet-search-destination{display:flex;flex-direction:column;gap:5px;min-width:0;padding:13px;border:1px solid #263750;border-radius:11px;background:#111b2d;color:#f8fafc;text-decoration:none}
+.hamlet-search-destination:hover,.hamlet-search-destination:focus-visible,.hamlet-search-destination.is-selected{border-color:#60a5fa;background:#16253b;outline:2px solid transparent}
+.hamlet-search-destination.is-selected{box-shadow:inset 3px 0 0 #60a5fa}
+.hamlet-search-destination strong{font-size:13px}
+.hamlet-search-destination span{font-size:11px;color:#94a3b8;line-height:1.45}
+.hamlet-search-hint{padding:0 20px 16px;color:#64748b;font-size:11px}
+.hamlet-related-link{color:#93c5fd;font-weight:700;text-decoration:none}
+.hamlet-related-link:hover,.hamlet-related-link:focus-visible{text-decoration:underline;color:#bfdbfe}
+.hamlet-related-contact{overflow-wrap:anywhere}
+@media(max-width:760px){.hamlet-primary-nav{padding:8px 12px;gap:4px}.hamlet-primary-nav .hamlet-nav-link{padding:8px 10px}.hamlet-primary-nav .hamlet-global-search{margin-left:0}.hamlet-search-overlay{padding:5vh 10px 16px}.hamlet-search-form{flex-wrap:wrap;padding:0 14px 14px}.hamlet-search-input{flex-basis:100%}.hamlet-search-route{flex:1 1 60%;min-width:0}.hamlet-search-submit{flex:0 0 auto}.hamlet-search-heading,.hamlet-search-caption{padding-left:14px;padding-right:14px}.hamlet-search-status{margin-left:14px;margin-right:14px}.hamlet-search-destinations{grid-template-columns:1fr;padding-left:14px;padding-right:14px}.hamlet-search-dialog{max-height:90vh}}
+@media(prefers-reduced-motion:reduce){.hamlet-primary-nav .hamlet-nav-link{transition:none}}
+
+/* Keep the shared navigation available while page-level authentication checks are pending. */
+html.hamlet-auth-pending .hamlet-primary-nav,
+html.hamlet-auth-pending nav.workspace-nav,
+body.auth-pending .hamlet-primary-nav,
+body.auth-pending nav.workspace-nav {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 100001 !important;
+}
+
+
+/* Shared dark sign-in cards across Hamlet menu destinations. */
+.auth-shell,
+.signed-out-shell {
+  max-width: 560px;
+  margin: 28px auto;
+  padding: 30px;
+  border: 1px solid #374151 !important;
+  border-radius: 18px;
+  background: #111827 !important;
+  color: #f9fafb !important;
+  text-align: center;
+  box-shadow: 0 12px 34px rgba(2, 6, 23, .12);
+}
+.auth-shell h1,
+.signed-out-shell h1,
+.auth-shell h2,
+.signed-out-shell h2 {
+  color: #fff !important;
+}
+.auth-shell p,
+.signed-out-shell p {
+  color: #cbd5e1 !important;
+  line-height: 1.55;
+}
+.auth-shell a.btn.btn-primary,
+.signed-out-shell a.btn.btn-primary {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 18px;
+  border: 1px solid #4b5563 !important;
+  border-radius: 10px;
+  background: #111827 !important;
+  color: #f9fafb !important;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none !important;
+  box-shadow: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.auth-shell a.btn.btn-primary:hover,
+.auth-shell a.btn.btn-primary:focus-visible,
+.signed-out-shell a.btn.btn-primary:hover,
+.signed-out-shell a.btn.btn-primary:focus-visible {
+  background: #1f2937 !important;
+  border-color: #6b7280 !important;
+  color: #fff !important;
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .auth-shell,
+  .signed-out-shell {
+    margin: 20px 14px;
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+}
+
+
+/* Dark sign-in cards for Contacts & Directory, Messages and Social Feed. */
+.login-card,
+.directory-auth-prompt {
+  max-width: 560px;
+  margin: 28px auto;
+  padding: 30px;
+  border: 1px solid #374151 !important;
+  border-radius: 18px;
+  background: #111827 !important;
+  color: #f9fafb !important;
+  text-align: center;
+  box-shadow: 0 12px 34px rgba(2, 6, 23, .12);
+}
+.login-card h1, .login-card h2, .login-card h3,
+.directory-auth-prompt h1, .directory-auth-prompt h2, .directory-auth-prompt h3 {
+  color: #fff !important;
+}
+.login-card p,
+.directory-auth-prompt p {
+  color: #cbd5e1 !important;
+  line-height: 1.55;
+}
+.login-card a.btn.btn-primary,
+.directory-auth-prompt a.btn.btn-primary {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 18px;
+  border: 1px solid #4b5563 !important;
+  border-radius: 10px;
+  background: #111827 !important;
+  color: #f9fafb !important;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none !important;
+  box-shadow: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.login-card a.btn.btn-primary:hover,
+.login-card a.btn.btn-primary:focus-visible,
+.directory-auth-prompt a.btn.btn-primary:hover,
+.directory-auth-prompt a.btn.btn-primary:focus-visible {
+  background: #1f2937 !important;
+  border-color: #6b7280 !important;
+  color: #fff !important;
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .login-card,
+  .directory-auth-prompt {
+    margin: 20px 14px;
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+}
+
+
+/* Override legacy light card rules on these pages regardless of local stylesheet order. */
+body .signed-out-shell,
+body .login-card,
+body .directory-auth-prompt {
+  border-color: #374151 !important;
+  background: #111827 !important;
+  color: #f9fafb !important;
+  box-shadow: 0 12px 34px rgba(2, 6, 23, .12) !important;
+}
+body .signed-out-shell h1,
+body .login-card h1,
+body .login-card h2,
+body .login-card h3,
+body .directory-auth-prompt h1,
+body .directory-auth-prompt h2,
+body .directory-auth-prompt h3 { color: #fff !important; }
+body .signed-out-shell p,
+body .login-card p,
+body .directory-auth-prompt p { color: #cbd5e1 !important; }
+body .signed-out-shell a.btn.btn-primary,
+body .login-card a.btn.btn-primary,
+body .directory-auth-prompt a.btn.btn-primary {
+  background: #111827 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+body .signed-out-shell a.btn.btn-primary:hover,
+body .signed-out-shell a.btn.btn-primary:focus-visible,
+body .login-card a.btn.btn-primary:hover,
+body .login-card a.btn.btn-primary:focus-visible,
+body .directory-auth-prompt a.btn.btn-primary:hover,
+body .directory-auth-prompt a.btn.btn-primary:focus-visible {
+  background: #1f2937 !important;
+  border-color: #6b7280 !important;
+  color: #fff !important;
+}
+
+
+/* Canonical Hamlet header treatment, aligned with /index.html. */
+.resource-nav,
+header.resource-nav,
+.site-header,
+.about-header,
+.team-header,
+.payment-header,
+.pricing-header {
+  background: #071d4a !important;
+  color: #f8fafc;
+}
+.resource-nav .site-title {
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+.resource-nav .logo a.site-title:hover,
+.resource-nav .logo a.site-title:focus-visible {
+  color: #fff !important;
+  text-decoration: none;
+}
+.site-header .brand,
+.about-header .about-brand,
+.team-header .team-brand,
+.payment-header .payment-brand,
+.pricing-header .pricing-brand {
+  color: #fff;
+}
+/* Compact dropdowns keep related account and billing links grouped. */
+.hamlet-nav-group{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
+.hamlet-nav-group>summary{list-style:none;cursor:pointer}
+.hamlet-nav-group>summary::-webkit-details-marker{display:none}
+.hamlet-nav-group[open]>summary{background:#17263c;border-color:#354b68;color:#fff}
+.hamlet-nav-child{display:flex!important;align-items:center;min-height:36px;padding:9px 12px!important;border-radius:7px;color:#cbd5e1;text-decoration:none;white-space:nowrap;font:700 12px/1.25 'DM Sans','Open Sans',Arial,sans-serif}
+.hamlet-nav-child:hover,.hamlet-nav-child:focus-visible,.hamlet-nav-child[aria-current=page]{background:#1d4ed8;color:#fff;outline:2px solid transparent}
+.hamlet-primary-nav .hamlet-nav-group[open]{z-index:30}
+.hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child{position:absolute;left:0;top:100%;min-width:100%;background:#0f172a;border:1px solid #334155;box-shadow:0 12px 24px #0005}
+.hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child+.hamlet-nav-child{top:calc(100% + 37px)}
+.workspace-nav-group{flex-wrap:wrap}
+.workspace-nav-group .hamlet-nav-child{margin-left:12px}
+@media(max-width:760px){.hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child{position:static;box-shadow:none;display:flex;width:100%}.hamlet-primary-nav .hamlet-nav-group[open]{align-items:stretch;flex-wrap:wrap}}
+
+/* Navigation visibility and Hamlet sky-blue menu identity. */
+.hamlet-primary-nav .hamlet-nav-link,
+.hamlet-primary-nav a.hamlet-nav-link,
+nav.workspace-nav .workspace-nav-link,
+.hamlet-nav-group>summary,
+.hamlet-primary-nav .hamlet-nav-child,
+nav.workspace-nav .hamlet-nav-child {
+  color: #7dd3fc !important;
+}
+.hamlet-primary-nav .hamlet-nav-link:hover,
+.hamlet-primary-nav .hamlet-nav-link:focus-visible,
+.hamlet-primary-nav .hamlet-nav-link[aria-current="page"],
+nav.workspace-nav .workspace-nav-link:hover,
+nav.workspace-nav .workspace-nav-link:focus-visible,
+nav.workspace-nav .workspace-nav-link[aria-current="page"],
+.hamlet-nav-group[open]>summary {
+  color: #bae6fd !important;
+  background: #0c2948 !important;
+  border-color: #38bdf8 !important;
+}
+.hamlet-nav-group[open] {
+  z-index: 1005 !important;
+}
+.hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child {
+  top: auto !important;
+  bottom: 100% !important;
+  left: 0;
+  z-index: 1006;
+  color: #7dd3fc !important;
+  background: #071d4a !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+}
+.hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child+.hamlet-nav-child {
+  top: auto !important;
+  bottom: calc(100% + 37px) !important;
+}
+.workspace-nav-group .hamlet-nav-child {
+  color: #7dd3fc !important;
+  background: #071d4a !important;
+  border: 1px solid #1e4970;
+}
+.workspace-nav-group .hamlet-nav-child:hover,
+.workspace-nav-group .hamlet-nav-child:focus-visible,
+.workspace-nav-group .hamlet-nav-child[aria-current="page"] {
+  color: #bae6fd !important;
+  background: #0c2948 !important;
+}
+.sidebar-menu-shell {
+  background: #071d4a !important;
+  border-color: #1e4970 !important;
+}
+.sidebar-menu-shell .sidebar-menu-link {
+  color: #7dd3fc !important;
+}
+.sidebar-menu-shell .sidebar-menu-link:hover,
+.sidebar-menu-shell .sidebar-menu-link:focus-visible {
+  color: #bae6fd !important;
+  background: #0c2948 !important;
+}
+@media(max-width:760px) {
+  .hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child {
+    position: static !important;
+    bottom: auto !important;
+    width: 100%;
+  }
+  .hamlet-primary-nav .hamlet-nav-group[open]>.hamlet-nav-child+.hamlet-nav-child {
+    bottom: auto !important;
+  }
+}
+
+/* Enforce one consistent sky-blue text colour across every Hamlet menu item,
+   regardless of authentication state, current page, hover or focus. */
+.hamlet-primary-nav .hamlet-nav-link,
+.hamlet-primary-nav a.hamlet-nav-link,
+.hamlet-primary-nav .hamlet-nav-child,
+.hamlet-primary-nav .hamlet-nav-group > summary,
+nav.workspace-nav .workspace-nav-link,
+nav.workspace-nav .hamlet-nav-child,
+.sidebar-menu-shell .sidebar-menu-link {
+  color: #7dd3fc !important;
+}
+.hamlet-primary-nav .hamlet-nav-link:hover,
+.hamlet-primary-nav .hamlet-nav-link:focus-visible,
+.hamlet-primary-nav .hamlet-nav-link[aria-current="page"],
+.hamlet-primary-nav .hamlet-nav-group[open] > summary,
+.hamlet-primary-nav .hamlet-nav-child:hover,
+.hamlet-primary-nav .hamlet-nav-child:focus-visible,
+.hamlet-primary-nav .hamlet-nav-child[aria-current="page"],
+nav.workspace-nav .workspace-nav-link:hover,
+nav.workspace-nav .workspace-nav-link:focus-visible,
+nav.workspace-nav .workspace-nav-link[aria-current="page"],
+.sidebar-menu-shell .sidebar-menu-link:hover,
+.sidebar-menu-shell .sidebar-menu-link:focus-visible {
+  color: #7dd3fc !important;
+}
+
+/* Search sits on a dedicated row below the menu and stays right-aligned. */
+.hamlet-global-search-row{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  margin:6px 0 12px;
+}
+.hamlet-global-search-row .hamlet-global-search{
+  flex:0 0 auto;
+  margin-left:auto;
+}
+
+/* Root-level repository links are white; preserve the established colours for /app/ destinations. */
+.sidebar-menu-shell .sidebar-menu-link[href^="/"]:not([href^="/app/"]),
+.hamlet-primary-nav .hamlet-nav-link[href^="/"]:not([href^="/app/"]),
+.hamlet-primary-nav .hamlet-nav-child[href^="/"]:not([href^="/app/"]),
+nav.workspace-nav .workspace-nav-link[href^="/"]:not([href^="/app/"]),
+nav.workspace-nav .hamlet-nav-child[href^="/"]:not([href^="/app/"]) {
+  color: #FFF !important;
+}
+.sidebar-menu-shell .sidebar-menu-link[href^="/"]:not([href^="/app/"]):hover,
+.sidebar-menu-shell .sidebar-menu-link[href^="/"]:not([href^="/app/"]):focus-visible,
+.sidebar-menu-shell .sidebar-menu-link[href^="/"]:not([href^="/app/"])[aria-current="page"],
+.hamlet-primary-nav .hamlet-nav-link[href^="/"]:not([href^="/app/"]):hover,
+.hamlet-primary-nav .hamlet-nav-link[href^="/"]:not([href^="/app/"]):focus-visible,
+.hamlet-primary-nav .hamlet-nav-link[href^="/"]:not([href^="/app/"])[aria-current="page"],
+.hamlet-primary-nav .hamlet-nav-child[href^="/"]:not([href^="/app/"]):hover,
+.hamlet-primary-nav .hamlet-nav-child[href^="/"]:not([href^="/app/"]):focus-visible,
+.hamlet-primary-nav .hamlet-nav-child[href^="/"]:not([href^="/app/"])[aria-current="page"],
+nav.workspace-nav .workspace-nav-link[href^="/"]:not([href^="/app/"]):hover,
+nav.workspace-nav .workspace-nav-link[href^="/"]:not([href^="/app/"]):focus-visible,
+nav.workspace-nav .workspace-nav-link[href^="/"]:not([href^="/app/"])[aria-current="page"] {
+  color: #FFF !important;
+}
+
+
+/* UX housekeeping — consistent touch targets, visible keyboard focus, and predictable horizontal navigation. */
+.hamlet-primary-nav .hamlet-nav-link,
+.hamlet-primary-nav .hamlet-nav-group > summary,
+nav.workspace-nav .workspace-nav-link {
+  min-height: 44px;
+}
+.hamlet-primary-nav .hamlet-nav-link:focus-visible,
+.hamlet-primary-nav .hamlet-nav-group > summary:focus-visible,
+.hamlet-primary-nav .hamlet-nav-child:focus-visible,
+nav.workspace-nav .workspace-nav-link:focus-visible,
+nav.workspace-nav .hamlet-nav-child:focus-visible {
+  outline: 2px solid #93c5fd !important;
+  outline-offset: 2px;
+}
+.hamlet-primary-nav,
+nav.workspace-nav {
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.hamlet-primary-nav > .hamlet-nav-link,
+nav.workspace-nav > .workspace-nav-link {
+  scroll-snap-align: start;
+}

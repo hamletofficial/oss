@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="description" content="Download Hamlet for Windows and find installation, verification and troubleshooting guidance.">
+  <title>Hamlet for Windows | Download and installation</title>
+<link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <style>
+    :root{color-scheme:dark;--bg:#111827;--panel:#1f2937;--line:#374151;--text:#f9fafb;--muted:#cbd5e1;--link:#bfdbfe}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "DM Sans","Segoe UI",Arial,sans-serif}
+    a{color:var(--link);text-underline-offset:3px}.wrap{width:min(900px,calc(100% - 2rem));margin:auto}
+    header{background:#071d4a;border-bottom:1px solid var(--line)}.head{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}.brand{font-size:1.35rem;font-weight:800;letter-spacing:-.04em;color:white;text-decoration:none}.back{padding:.55rem .8rem;border:1px solid #64748b;border-radius:8px;text-decoration:none}
+    main{padding:clamp(2rem,6vw,4rem) 0}.eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#bfdbfe}
+    h1{font-size:clamp(2.2rem,6vw,3.7rem);line-height:1.08;letter-spacing:-.05em;margin:.6rem 0 1rem}h2{font-size:1.3rem;margin:0 0 .7rem}p,li{color:var(--muted)}
+    .panel{margin:1.3rem 0;padding:1.25rem;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.notice{border-left:3px solid #93c5fd}
+    .button{display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1rem;border-radius:9px;background:#f9fafb;color:#111827;text-decoration:none;font-weight:800;margin:.25rem .35rem .25rem 0}.button.secondary{background:transparent;color:#f9fafb;border:1px solid #64748b}
+    ol{padding-left:1.4rem}li{padding:.2rem 0}code{overflow-wrap:anywhere;color:#fff}
+    .github-update-bar{--ticker-accent:#67e8f9;position:relative;isolation:isolate;z-index:1;display:flex;align-items:center;justify-content:center;text-align:center;gap:.7rem;min-height:54px;padding:.65rem 1rem;overflow:hidden;color:#f8fbff;border-bottom:1px solid rgba(147,197,253,.55);background:linear-gradient(112deg,#071d4a 0%,#123b7a 28%,#075985 52%,#172554 76%,#071d4a 100%);background-size:240% 240%;animation:hamletTickerGradient 16s ease-in-out infinite;font-size:.86rem;line-height:1.4;flex-wrap:wrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 5px 18px rgba(2,6,23,.18)}
+    .github-update-bar:before{content:"";position:absolute;inset:-60% auto -60% -35%;width:28%;z-index:-1;pointer-events:none;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),rgba(103,232,249,.2),transparent);animation:hamletTickerSheen 9s ease-in-out infinite}
+    .github-update-bar:after{content:"";position:absolute;inset:auto 0 0;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#60a5fa 18%,#67e8f9 50%,#a5b4fc 82%,transparent);background-size:200% 100%;animation:hamletTickerLine 7s linear infinite}
+    .github-update-label{position:relative;display:inline-flex;align-items:center;gap:.55rem;flex:0 0 auto;font-weight:850;letter-spacing:.015em;white-space:nowrap;color:#fff}
+    .github-update-label:before{content:"";width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#67e8f9;box-shadow:0 0 0 3px rgba(103,232,249,.14),0 0 12px rgba(103,232,249,.8);animation:hamletTickerPulse 2.4s ease-in-out infinite}
+    .github-update-viewport{position:relative;min-width:0;max-width:min(700px,100%);flex:1 1 320px;overflow:hidden;text-align:left}
+    .github-update-slide{display:flex;align-items:center;gap:.55rem;min-width:0;opacity:1;transform:translate3d(0,0,0);transition:opacity .32s ease,transform .42s cubic-bezier(.2,.75,.25,1);text-shadow:0 1px 1px rgba(0,0,0,.18)}
+    .github-update-slide.is-leaving{opacity:0;transform:translate3d(0,8px,0)}
+    .github-update-message{min-width:0;overflow-wrap:anywhere;color:#fff;font-weight:650}
+    .github-update-time{flex:0 0 auto;color:#dbeafe;font-size:.78rem;white-space:nowrap}
+    .github-update-link{flex:0 0 auto;color:#fff;font-weight:800;white-space:nowrap;text-decoration:none;border-bottom:1px solid rgba(191,219,254,.65);transition:color .2s ease,border-color .2s ease,transform .2s ease}
+    .github-update-link:hover{color:#a5f3fc;border-color:#a5f3fc;transform:translateY(-1px)}
+    .github-update-count{flex:0 0 auto;color:#dbeafe;font-size:.76rem;font-variant-numeric:tabular-nums;white-space:nowrap;padding:.18rem .48rem;border:1px solid rgba(191,219,254,.3);border-radius:999px;background:rgba(7,17,40,.28)}
+    @keyframes hamletTickerGradient{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    @keyframes hamletTickerSheen{0%,12%{left:-35%;opacity:0}22%{opacity:1}48%,100%{left:115%;opacity:0}}
+    @keyframes hamletTickerLine{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    @keyframes hamletTickerPulse{0%,100%{opacity:1;box-shadow:0 0 0 3px rgba(103,232,249,.14),0 0 12px rgba(103,232,249,.8)}50%{opacity:.72;box-shadow:0 0 0 5px rgba(103,232,249,.08),0 0 6px rgba(103,232,249,.45)}}
+    @media(max-width:620px){.github-update-bar{align-items:flex-start;justify-content:flex-start;gap:.35rem .6rem;padding:.7rem .85rem}.github-update-label{white-space:normal}.github-update-viewport{flex-basis:100%;max-width:100%}.github-update-slide{flex-wrap:wrap;row-gap:.35rem}.github-update-time{font-size:.75rem}.github-update-count{margin-left:auto}}
+    @media(prefers-reduced-motion:reduce){.github-update-bar,.github-update-bar:before,.github-update-bar:after,.github-update-label:before{animation:none}.github-update-slide,.github-update-link{transition:none}}
+    .hero{max-width:760px;margin-bottom:1.6rem}
+    .hero-copy{font-size:1.08rem;max-width:680px}
+    .release-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:1rem;align-items:stretch}
+    .latest-card{border:1px solid #60a5fa;background:linear-gradient(145deg,#172554,#1f2937 75%);padding:clamp(1.25rem,3vw,2rem);border-radius:18px;position:relative;overflow:hidden}
+    .latest-card:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-90px;top:-105px;background:rgba(96,165,250,.12);pointer-events:none}
+    .release-hero-art{display:block;width:calc(100% + clamp(2.5rem,6vw,4rem));height:auto;aspect-ratio:16/9;object-fit:cover;margin:calc(-1 * clamp(1.25rem,3vw,2rem)) calc(-1 * clamp(1.25rem,3vw,2rem)) 1.25rem;border-bottom:1px solid rgba(147,197,253,.35);max-width:none}
+    .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .65rem;border:1px solid #60a5fa;border-radius:999px;color:#dbeafe;font-size:.76rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .latest-card h2{font-size:1.55rem;margin:.9rem 0 .35rem}.version-meta{font-size:.9rem;color:#cbd5e1;margin:.3rem 0 1rem}
+    .release-stats{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0;color:#cbd5e1;font-size:.84rem}
+    .release-stats span{border:1px solid #475569;border-radius:8px;padding:.35rem .55rem}
+    .side-card{padding:1.3rem;border-radius:18px;border:1px solid var(--line);background:#111827;display:flex;flex-direction:column;justify-content:space-between}
+    .side-card h2{font-size:1.1rem}.side-card p{font-size:.92rem}\n    .side-card > .button{align-self:flex-start;max-width:100%;margin:.5rem 0 0;text-align:center;white-space:normal}
+    .archive-panel{padding:0;overflow:hidden}
+    .archive-head{padding:1.25rem 1.3rem;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .archive-head h2{margin:0}.archive-head p{margin:.35rem 0 0;font-size:.9rem}
+    .archive-tools{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .archive-search{background:#111827;color:var(--text);border:1px solid #4b5563;border-radius:8px;padding:.6rem .75rem;min-width:190px;font:inherit}
+    .release-list{display:flex;flex-direction:column}
+    .release-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;padding:1.1rem 1.3rem;border-bottom:1px solid #374151}
+    .release-row:last-child{border-bottom:0}.release-row:hover{background:rgba(255,255,255,.025)}
+    .release-name{font-size:1rem;font-weight:800;color:#f9fafb;margin:0 0 .2rem;overflow-wrap:anywhere}
+    .release-detail{font-size:.84rem;color:#cbd5e1;margin:0;overflow-wrap:anywhere}
+    .release-actions{display:flex;gap:.45rem;flex-wrap:wrap;justify-content:flex-end}
+    .mini-button{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:.55rem .7rem;border:1px solid #64748b;text-decoration:none;color:#f9fafb;font-weight:750;font-size:.85rem;white-space:nowrap}
+    .mini-button.primary{background:#f9fafb;color:#111827;border-color:#f9fafb}
+    .release-row.latest{background:rgba(37,99,235,.08)}
+    .empty-state{padding:1.2rem;color:var(--muted);text-align:center}
+    .archive-note{font-size:.87rem}
+    .safety-note{display:flex;gap:.8rem;align-items:flex-start}
+    .safety-mark{flex:0 0 auto;width:2rem;height:2rem;border-radius:9px;display:grid;place-items:center;background:#1e3a8a;color:#dbeafe;font-weight:900}
+    @media(max-width:720px){.release-layout{grid-template-columns:1fr}.release-row{grid-template-columns:1fr}.release-actions{justify-content:flex-start}.archive-head{align-items:stretch}.archive-tools{width:100%}.archive-search{flex:1;min-width:0;width:100%}}
+    footer{border-top:1px solid var(--line);padding:1.5rem 0;color:var(--muted);font-size:.9rem}
+    @media(max-width:620px){.github-update-bar{align-items:flex-start;justify-content:flex-start;gap:.25rem .55rem}.github-update-label{white-space:normal}.github-update-viewport{flex-basis:100%;max-width:100%}.github-update-slide{flex-wrap:wrap}.github-update-time{font-size:.75rem}}
+    @media(max-width:520px){.head{align-items:center;justify-content:space-between;flex-direction:row;flex-wrap:nowrap;gap:.6rem;padding:.8rem 0}.brand{flex:0 0 auto}.back{flex:0 0 auto;white-space:nowrap;padding:.45rem .6rem;font-size:.9rem;margin:0}.panel{padding:1rem}}
+    @media(prefers-reduced-motion:reduce){.github-update-slide{transition:none}}
+
+    /* Mobile header, activity banner and release badge refinements */
+    .latest-card > .pill{
+      color:#071d4a;
+      background:linear-gradient(135deg,#e0f2fe 0%,#93c5fd 48%,#67e8f9 100%);
+      border:1px solid #e0f2fe;
+      box-shadow:0 0 0 3px rgba(96,165,250,.18),0 0 22px rgba(103,232,249,.32),inset 0 1px 0 rgba(255,255,255,.85);
+      text-shadow:0 1px 0 rgba(255,255,255,.35);
+    }
+    @media(max-width:620px){
+      header .head{min-height:0;display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;padding:.8rem 0}
+      header .brand{font-size:1.25rem;line-height:1.2}
+      header .back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;max-width:100%;padding:.55rem .75rem;white-space:normal;text-align:center;line-height:1.25;overflow-wrap:anywhere}
+      .github-update-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;justify-content:stretch;gap:.45rem .65rem;padding:.75rem .9rem;min-height:0}
+      .github-update-label{grid-column:1/-1;white-space:normal}
+      .github-update-viewport{grid-column:1/-1;min-width:0;width:100%;max-width:100%;flex:none}
+      .github-update-slide{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .5rem;min-width:0}
+      .github-update-message{flex:1 1 100%;overflow-wrap:anywhere}
+      .github-update-time{font-size:.74rem;white-space:normal}
+      .github-update-count{grid-column:1;justify-self:start}
+      .github-update-bar > .github-update-link{grid-column:2;justify-self:end}
+    }
+    @media(max-width:380px){
+      header .head{gap:.55rem}
+      header .brand{font-size:1.15rem}
+      header .back{font-size:.84rem;padding:.5rem .6rem}
+      .github-update-bar{padding:.7rem .75rem}
+    }
+
+  </style>
+  <style id="root-brand-background">body{background:#111827!important}</style>
+</head>
+<body>
+  <header><div class="wrap head"><a class="brand" href="/index.html">hamlet<span class="brand-dot" style="color:#bfdbfe">.</span></a><a class="back" href="/index.html">Back to Hamlet</a></div></header>
+  <aside class="github-update-bar" aria-label="Latest repository commits">
+    <span class="github-update-label">Latest GitHub commits</span>
+    <div class="github-update-viewport" aria-live="polite" aria-atomic="true">
+      <div id="github-update-slide" class="github-update-slide">
+        <span id="github-update-message" class="github-update-message">Loading recent repository activity…</span>
+      </div>
+    </div>
+    <span id="github-update-count" class="github-update-count" aria-hidden="true"></span>
+    <a class="github-update-link" href="https://github.com/hamletofficial/oss/commits/main/" target="_blank" rel="noopener noreferrer">All commits</a>
+  </aside>
+  <main class="wrap">
+    <div class="hero">
+      <span class="eyebrow">Hamlet desktop · Windows 10 and 11</span>
+      <h1>Hamlet for Windows</h1>
+      <p class="hero-copy">Your desktop workspace, one reliable installer. Download the latest build, verify its checksum, or browse earlier releases in the official archive.</p>
+    </div>
+
+    <div class="release-layout">
+      <section class="latest-card" aria-labelledby="latest-title">
+        <img class="release-hero-art" src="/release-download-hero.svg" alt="Download-themed illustration with a software package, downward arrow and verification check on a dark navy and royal-blue gradient" width="1600" height="900" fetchpriority="high">
+        <span class="pill">Latest stable release</span>
+        <h2 id="latest-title">Hamlet v1.04.04</h2>
+        <p class="version-meta">Installer <code>hamlet-Setup-1.4.4.exe</code> · Published 29 October 2026</p>
+        <p>Recommended for new installations. Download the installer from Hamlet’s dedicated Cloudflare R2 distribution domain and verify the SHA-256 checksum before running it.</p>
+        <div class="release-stats">
+          <span>Windows 10 / 11</span>
+          <span>~97.2 MiB installer</span>
+          <span>SHA-256 available</span>
+        </div>
+        <p class="archive-note"><strong>Compatibility:</strong> This installer supports 64-bit Windows (x64) only. It is not compatible with 32-bit (x86) Windows.</p>
+        <a class="button" href="https://github.com/hamletofficial/oss/releases/download/v1.04.04/hamlet-Setup-1.4.4.exe">Download latest .exe</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/download/v1.04.04/SHA256SUMS.txt">SHA-256 checksum</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/tag/v1.04.04">Release notes</a>
+      </section>
+      <aside class="side-card">
+        <div>
+          <h2>Prefer an earlier version?</h2>
+          <p>The archive below links to installers attached to published GitHub releases. Older builds may not include the latest fixes and should generally be used only for compatibility or troubleshooting.</p>
+        </div>
+        <a class="button secondary" href="/download.html#release-archive">Browse download archive</a>
+      </aside>
+    </div>
+
+    <section class="panel archive-panel" id="release-archive" aria-labelledby="archive-title">
+      <div class="archive-head">
+        <div>
+          <h2 id="archive-title">Download archive</h2>
+          <p>Published Windows installers, newest first. Release assets are served from the official Hamlet GitHub repository. Verify each installer against its matching SHA-256 checksum.</p>
+        </div>
+        <div class="archive-tools">
+          <label for="release-search" style="position:absolute;left:-9999px">Search releases</label>
+          <input id="release-search" class="archive-search" type="search" placeholder="Search versions…" autocomplete="off">
+          <a class="mini-button" href="https://github.com/hamletofficial/oss/releases">All GitHub releases ↗</a>
+        </div>
+      </div>
+      <div id="release-list" class="release-list" aria-live="polite">
+        <div class="empty-state">Loading published installer archive…</div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="install-title">
+      <h2 id="install-title">Install and verify</h2>
+      <ol>
+        <li>Download the installer and the matching <code>SHA256SUMS.txt</code> file from the same release.</li>
+        <li>In PowerShell, run <code>Get-FileHash .\hamlet-Setup-1.4.4.exe -Algorithm SHA256</code> in the folder containing the latest installer. If using an older version, replace the filename with that version’s exact installer name.</li>
+        <li>Compare the computed hash with the entry for the same filename in <code>SHA256SUMS.txt</code>. The values must match exactly.</li>
+        <li>If the checksum does not match, do not run the installer. Delete it and download it again from the official GitHub release.</li>
+        <li>Review Windows security or publisher prompts before proceeding. Do not bypass a warning if you cannot establish that the file is authentic.</li>
+      </ol>
+    </section>
+
+    <section class="panel safety-note" aria-labelledby="security-title">
+      <div class="safety-mark" aria-hidden="true">i</div>
+      <div>
+        <h2 id="security-title">Security and update guidance</h2>
+        <p class="archive-note">SHA-256 verification checks file integrity; it does not independently prove publisher identity. The Hamlet installer is not yet code-signed, and secure automatic updates remain planned. Check the release notes and checksum for the exact version before installing.</p>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="help-title">
+      <h2 id="help-title">Need help?</h2>
+      <p>Visit the Hamlet Support Centre for assistance with installation, sign-in or desktop behaviour.</p>
+      <a class="button secondary" href="https://support.hamlet-ai.co.uk/">Open Support Centre</a>
+    </section>
+    <section class="panel" aria-labelledby="ios-coming-soon-title" style="display:flex;align-items:center;gap:1rem;border-color:#365b91;background:linear-gradient(120deg,#111827 0%,#172554 65%,#071d4a 100%)">
+      <div aria-hidden="true" style="display:grid;place-items:center;flex:0 0 auto;width:64px;height:64px;border:1px solid #64748b;border-radius:14px;background:#0b1120;color:#f9fafb">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="36" height="42" fill="currentColor" focusable="false">
+          <path d="M318.7 268.7c-.2-36.7 16.4-64.3 50-84.6-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.4 141.3 0 187.9 0 282.8c0 28 5.1 56.9 15.3 86.7 13.6 37.5 62.6 129.4 113.7 127.9 25.2-.6 43-17.9 75.9-17.9 31.9 0 48.4 17.9 76.5 17.9 51.5-.7 95.8-84.2 108.7-121.8-69-32.5-71.4-95-71.4-106.9zM262.5 104.5C289.9 72 287.4 42.4 286.6 32c-24.2 1.4-52.2 16.5-68.1 35.1-17.5 19.8-27.8 44.3-25.6 72 26.2 2 50.2-11.4 69.6-34.6z"/>
+        </svg>
+      </div>
+      <div style="min-width:0">
+        <span class="eyebrow">In development</span>
+        <h2 id="ios-coming-soon-title" style="margin:.3rem 0 .35rem">Coming soon: Hamlet for iOS 27.0.02</h2>
+        <p style="margin:0">We’re working towards bringing Hamlet to Apple’s iOS platform. Further availability details will be announced when ready.</p>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap">© 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a> · hamlet</div></footer>
+  <script>
+    (() => {
+      const listEl = document.getElementById('release-list');
+      const searchEl = document.getElementById('release-search');
+      const commitsSlide = document.getElementById('github-update-slide');
+      const commitsMessage = document.getElementById('github-update-message');
+      const commitsCount = document.getElementById('github-update-count');
+      const commitsApi = 'https://api.github.com/repos/hamletofficial/oss/commits?per_page=3';
+      const releasesApi = 'https://api.github.com/repos/hamletofficial/oss/releases?per_page=100';
+      let releases = [];
+      let commits = [];
+      let activeCommit = 0;
+      let rotationTimer = null;
+      let refreshTimer = null;
+
+      const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+
+      function formatDate(value) {
+        if (!value) return 'Date unavailable';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+          ? 'Date unavailable'
+          : date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      function relativeTime(value) {
+        const date = new Date(value);
+        if (!value || Number.isNaN(date.getTime())) return 'Date unavailable';
+        const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+        if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+        return formatDate(value);
+      }
+
+      function renderCommit(index, animate = true) {
+        if (!commits.length) return;
+        activeCommit = (index + commits.length) % commits.length;
+        const commit = commits[activeCommit];
+        const message = String(commit.commit?.message || 'Repository update').split('\n')[0];
+        const author = commit.commit?.author?.name || commit.author?.login || 'Contributor';
+        const when = commit.commit?.author?.date || commit.commit?.committer?.date;
+        const markup = '<span class="github-update-message">' + esc(message) + '</span>' +
+          '<span class="github-update-time">' + esc(author) + ' · ' + esc(relativeTime(when)) + '</span>' +
+          '<a class="github-update-link" href="' + esc(commit.html_url) + '" target="_blank" rel="noopener noreferrer">View commit</a>';
+        const apply = () => {
+          commitsSlide.innerHTML = markup;
+          commitsCount.textContent = (activeCommit + 1) + ' / ' + commits.length;
+          commitsSlide.classList.remove('is-leaving');
+        };
+        if (!animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          apply();
+          return;
+        }
+        commitsSlide.classList.add('is-leaving');
+        window.setTimeout(apply, 280);
+      }
+
+      function startRotation() {
+        if (rotationTimer) window.clearInterval(rotationTimer);
+        if (commits.length > 1) {
+          rotationTimer = window.setInterval(() => renderCommit(activeCommit + 1), 5000);
+        }
+      }
+
+      async function loadCommits() {
+        try {
+          const response = await fetch(commitsApi, {
+            headers: { Accept: 'application/vnd.github+json' },
+            cache: 'no-store'
+          });
+          if (!response.ok) throw new Error('GitHub API returned ' + response.status);
+          const data = await response.json();
+          if (!Array.isArray(data) || !data.length) throw new Error('No commits returned');
+          commits = data.slice(0, 3);
+          activeCommit = 0;
+          renderCommit(0, false);
+          startRotation();
+        } catch (error) {
+          if (!commits.length) {
+            commitsSlide.innerHTML = '<span id="github-update-message" class="github-update-message">Recent commits are temporarily unavailable.</span>';
+            commitsCount.textContent = '';
+          }
+        }
+      }
+
+      function formatSize(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return '';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MiB';
+      }
+
+      function renderArchive() {
+        const query = (searchEl.value || '').trim().toLowerCase();
+        const matches = releases.filter(release => {
+          const installer = (release.assets || []).find(asset => /^hamlet-Setup-.*\.exe$/i.test(asset.name));
+          return installer && [
+            release.name, release.tag_name, installer.name, release.published_at
+          ].some(value => String(value || '').toLowerCase().includes(query));
+        });
+
+        if (!matches.length) {
+          listEl.innerHTML = '<div class="empty-state">No published installer matches that search. Try a version number, or view all GitHub releases.</div>';
+          return;
+        }
+
+        listEl.innerHTML = matches.map((release, index) => {
+          const installer = (release.assets || []).find(asset => /^hamlet-Setup-.*\.exe$/i.test(asset.name));
+          const checksum = (release.assets || []).find(asset => asset.name === 'SHA256SUMS.txt');
+          const latest = index === 0 && !query;
+          const label = release.name || ('Hamlet ' + release.tag_name);
+          const tag = String(release.tag_name || '').toLowerCase();
+          const r2Release = {
+            'v1.04.02': 'v1.04.02',
+            'v1.04.0.2': 'v1.04.02',
+            'v1.04.04': 'v1.04.04',
+            'v1.04': 'v1.04'
+          }[tag] || null;
+          const installerUrl = r2Release
+            ? 'https://downloads.hamlet-ai.co.uk/' + r2Release + '/' + installer.name
+            : installer.browser_download_url;
+          const checksumUrl = r2Release && checksum
+            ? 'https://downloads.hamlet-ai.co.uk/' + r2Release + '/SHA256SUMS.txt'
+            : (checksum ? checksum.browser_download_url : '');
+          const details = [formatDate(release.published_at), installer.name, formatSize(installer.size)]
+            .filter(Boolean).join(' · ');
+          return '<article class="release-row' + (latest ? ' latest' : '') + '">' +
+            '<div><p class="release-name">' + esc(label) +
+            (latest ? ' <span class="pill" style="margin-left:.35rem;vertical-align:middle">Latest</span>' : '') +
+            '</p><p class="release-detail">' + esc(details) + '</p></div>' +
+            '<div class="release-actions">' +
+            '<a class="mini-button primary" href="' + esc(installerUrl) + '" rel="noopener noreferrer">Download .exe</a>' +
+            (checksumUrl ? '<a class="mini-button" href="' + esc(checksumUrl) + '" rel="noopener noreferrer">SHA-256</a>' : '') +
+            '<a class="mini-button" href="' + esc(release.html_url) + '" rel="noopener noreferrer">Release details ↗</a>' +
+            '</div></article>';
+        }).join('');
+      }
+
+      async function loadArchive() {
+        try {
+          const response = await fetch(releasesApi, {
+            headers: { Accept: 'application/vnd.github+json' },
+            cache: 'no-store'
+          });
+          if (!response.ok) throw new Error('GitHub API returned ' + response.status);
+          const data = await response.json();
+          releases = (Array.isArray(data) ? data : [])
+            .filter(release => !release.draft && Array.isArray(release.assets) &&
+              release.assets.some(asset => /^hamlet-Setup-.*\.exe$/i.test(asset.name)))
+            .sort((a, b) => new Date(b.published_at || 0) - new Date(a.published_at || 0));
+          renderArchive();
+        } catch (error) {
+          listEl.innerHTML = '<div class="empty-state">The installer archive could not be loaded from GitHub right now. You can still browse the <a href="https://github.com/hamletofficial/oss/releases">official GitHub Releases page</a>.</div>';
+        }
+      }
+
+      searchEl.addEventListener('input', renderArchive);
+      loadArchive();
+      loadCommits();
+      refreshTimer = window.setInterval(loadCommits, 5 * 60 * 1000);
+      window.addEventListener('pagehide', () => {
+        if (rotationTimer) window.clearInterval(rotationTimer);
+        if (refreshTimer) window.clearInterval(refreshTimer);
+      }, { once: true });
+    })();
+  </script>
+</body>
+</html>

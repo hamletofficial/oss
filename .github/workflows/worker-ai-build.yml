@@ -1,0 +1,43 @@
+name: Validate Hamlet AI Worker
+
+on:
+  pull_request:
+    paths:
+      - "worker/hamlet-ai/**"
+      - ".github/workflows/worker-ai-build.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "worker/hamlet-ai/**"
+      - ".github/workflows/worker-ai-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker/hamlet-ai
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: worker/hamlet-ai/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Bundle Worker without deploying
+        run: npx wrangler deploy --dry-run --outdir dist
+      - name: Upload staging deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamlet-ai-worker-bundle
+          path: worker/hamlet-ai/dist/
+          if-no-files-found: error
+          retention-days: 3

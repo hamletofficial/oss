@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="index, follow">
+  <title>Members Area — Hamlet</title>
+  <link rel="stylesheet" href="/resource-centre.css">
+  <link rel="stylesheet" href="/index.css?v=20261015-5">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <style>
+    :root { --muted: #475569; }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #111827; }
+    body { position: relative; isolation: isolate; min-height: 100vh; margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #0f172a; background: transparent; }
+    /* Vincent Garreau particles.js background: animated network on a deep royal-blue canvas. */
+    /* Semi-transparent royal-blue overlay: 40% opacity = 60% transparency. */
+    /* Keep the animated particles above page content, including the footer, without intercepting clicks. */
+    #particles-js { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; overflow: hidden; pointer-events: none; background: transparent; }
+    #particles-js canvas { display: block; width: 100%; height: 100%; }
+    .page-wrapper { position: relative; z-index: 2; background: transparent; max-width: 1920px; min-height: 100vh; margin: 0 auto; box-shadow: none; }
+    .resource-footer { background: rgba(7, 29, 74, .94) !important; color: #fff !important; opacity: 1 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    .resource-footer p, .resource-footer div { color: #e2e8f0 !important; }
+    .resource-footer .footer-links a { color: #cbd5e1 !important; }
+    .auth-shell { max-width: 760px; margin: 2rem auto; padding: 2rem; border-radius: 16px; border: 1px solid #dbe3ee; background: linear-gradient(145deg, #fff 0%, #f6fbff 100%); text-align: center; box-shadow: 0 8px 24px rgba(2, 6, 23, .08) }
+    .members-shell { display: none; max-width: 900px; margin: 2rem auto 3rem; padding: 0 1rem }
+    /* Match member-page typography to the compact navigation menu. Keep the brand size unchanged. */
+    #membersShell { font-size: .95rem; }
+    #membersShell h1 { font-size: 1rem !important; }
+    #membersShell .member-guide-card h2 { font-size: .95rem; }
+    #membersShell .btn,
+    #membersShell .guide-action { font-size: .88rem !important; }
+    #membersShell .create-brief-footer .btn { font-size: .88rem !important; }
+    .resource-nav .btn { font-size: .88rem !important; }
+    .resource-nav .site-title { color: #FFFFFF !important; }
+    .members-welcome { margin-bottom: 1rem; }
+    .welcome-lead { font-size: 1.02rem; color: #173b5d; }
+    .security-note { display: flex; gap: .85rem; align-items: flex-start; margin-top: 1.15rem; padding: 1rem 1.1rem; border: 4px solid #FFFFFF; border-radius: 12px; background: #f5fbff; color: #173b5d; text-align: left; }
+    .security-icon { flex: 0 0 auto; font-size: 1.15rem; line-height: 1.35; }
+    .security-note strong { color: #092a4b; }
+    .security-note p { margin: .3rem 0 0; color: var(--muted); line-height: 1.5; }
+    .member-guides { display: grid; gap: 1rem; }
+    .member-guide-card { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: 1rem; padding: 1.35rem; background: #fff; border: 1px solid #dbe3ee; border-radius: 12px; box-shadow: 0 6px 20px rgba(2, 6, 23, .06); text-align: left; }
+    .member-directory-card { border: 2px solid #16a34a; }
+    .guide-number { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 999px; background: #f5f9ff; color: #0284c7; font-weight: 800; }
+    .member-guide-card h2 { margin: .1rem 0 .45rem; color: #092a4b; font-size: 1.08rem; }
+    .member-guide-card p { margin: 0 0 .8rem; color: var(--muted); line-height: 1.5; }
+    .member-guide-card a { color: #0284c7; font-weight: 700; }
+    .member-guide-card ol { margin: .75rem 0 1rem 1.2rem; padding: 0; color: var(--muted); line-height: 1.55; }
+    .member-guide-card li { margin-bottom: .35rem; padding-left: .2rem; }
+    .guide-action { margin-top: .2rem; text-decoration: none; opacity: 1 !important; }
+    .guide-action.btn-primary { color: #fff !important; background: #0284c7 !important; border-color: #0284c7 !important; }
+    .guide-action.btn-outline { color: #0284c7 !important; background: #fff !important; border-color: #0284c7 !important; }
+    .guide-action:hover, .guide-action:focus-visible { opacity: 1 !important; }
+    @media (max-width: 600px) {
+      .member-guide-card { grid-template-columns: 1fr; gap: .7rem; padding: 1.1rem; }
+      .guide-number { width: 2.2rem; height: 2.2rem; }
+      .security-note { padding: .9rem; }
+    }
+    .member-commercial-links { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid #dbe3ee; text-align: center; }
+    .member-commercial-links h3 { margin: 0 0 .8rem; color: #000; font-size: .95rem; font-weight: 700; text-align: center; }
+    .member-commercial-links ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .65rem; }
+    .member-commercial-links li { margin: 0; }
+    .member-commercial-links a { display: inline-flex; align-items: center; text-decoration: none; }
+    .verify-corner-btn { position: fixed; left: 22px; bottom: 22px; z-index: 1000; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 44px; padding: .7rem 1rem; border: 1px solid #0284c7; border-radius: 10px; background: #0284c7; color: #fff !important; text-decoration: none; font-weight: 700; font-size: .9rem; box-shadow: 0 8px 20px rgba(2, 132, 199, .22); transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+    .verify-corner-btn:hover, .verify-corner-btn:focus-visible { background: #0369a1; border-color: #0369a1; color: #fff !important; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(2, 132, 199, .28); }
+    @media (max-width: 600px) { .verify-corner-btn { left: 14px; bottom: 14px; min-height: 42px; padding: .65rem .85rem; font-size: .84rem; } }
+    /* Hamlet shortcut: subdued dark-mode treatment to match the directory palette. */
+    body .verify-corner-btn {
+      background: #172338 !important;
+      border-color: #334155 !important;
+      color: #cbd5e1 !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .22) !important;
+    }
+    body .verify-corner-btn:hover,
+    body .verify-corner-btn:focus-visible {
+      background: #1e293b !important;
+      border-color: #64748b !important;
+      color: #f1f5f9 !important;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .3) !important;
+    }
+    .sidebar-menu-shell { display: none; position: fixed; top: 88px; left: 24px; width: 220px; background: #ffffff; border: 1px solid #dbe3ee; border-radius: 12px; box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12); padding: 10px 0; z-index: 950; }
+    .sidebar-menu-link { display: block; padding: 11px 14px; margin: 2px 8px; border-radius: 8px; color: #092a4b; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+    .sidebar-menu-link:hover, .sidebar-menu-link:focus { background: #092a4b; color: #ffffff; transform: translateX(3px); }
+    .mail-header-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:9px; text-decoration:none; font-size:1.15rem; transition:background-color .2s ease, transform .2s ease; }
+    .mail-header-icon:hover, .mail-header-icon:focus-visible { background:rgba(255,255,255,.14); transform:translateY(-1px); }
+    body.has-sidebar #protected-content { margin-left: 260px; }
+    @media (max-width: 980px) { .sidebar-menu-shell { position: static; width: 100%; max-width: 900px; margin: 12px auto; } body.has-sidebar #protected-content { margin-left: 0; } }
+    @media (max-width: 900px) {
+      .resource-nav, .site-header {
+        background: #0B2A6F !important;
+        border-bottom: 1px solid #0B2A6F !important;
+        backdrop-filter: none !important;
+      }
+    }
+
+    /* UX housekeeping: align member guidance surfaces with Hamlet's dark workspace. */
+    :root { color-scheme: dark; --muted: #cbd5e1; }
+    html { background: #0b1120; }
+    body { color: #f3f4f6; }
+    .auth-shell,
+    .member-guide-card {
+      background: #111827;
+      color: #f3f4f6;
+      border-color: #374151;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+    }
+    .auth-shell h1,
+    .member-guide-card h2,
+    .member-commercial-links h3 { color: #f3f4f6; }
+    .welcome-lead,
+    .member-guide-card p,
+    .member-guide-card ol { color: #cbd5e1; }
+    .security-note {
+      background: #172338;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    .security-note strong { color: #f3f4f6; }
+    .security-note p { color: #cbd5e1; }
+    .guide-number { background: #1f2937; color: #93c5fd; }
+    .member-guide-card a { color: #93c5fd; }
+    .guide-action.btn-outline {
+      color: #bfdbfe !important;
+      background: #172338 !important;
+      border-color: #64748b !important;
+    }
+    .member-commercial-links { border-top-color: #374151; }
+    .member-directory-card { border-color: #16a34a; }
+    .sidebar-menu-shell { background: #111827; border-color: #374151; }
+    .sidebar-menu-link { color: #e5e7eb; }
+    .sidebar-menu-link:hover,
+    .sidebar-menu-link:focus-visible { background: #1f2937; color: #fff; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 3px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <style id="members-particles-background-fix">
+    /* Shared dark-mode rules filled page wrappers with an opaque surface.
+       Keep those wrappers transparent so the particles canvas remains visible.
+       Card surfaces (.members-welcome, .member-guide-card, .security-note) are untouched. */
+    /* Let the particles canvas show through the welcome panel and site footer. */
+    #membersShell > .panel.members-welcome,
+    #membersShell > .panel.members-welcome > .panel-head,
+    #membersShell > .panel.members-welcome > .panel-body,
+    .page-wrapper > .resource-footer {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
+    #membersShell > .panel.members-welcome {
+      border-color: transparent !important;
+    }
+    .page-wrapper > .resource-footer {
+      /* 0% background opacity: retain footer text and links while exposing particles.js behind them. */
+      background: rgba(17, 24, 39, 0) !important;
+      background-color: rgba(17, 24, 39, 0) !important;
+      border-top-color: transparent !important;
+    }
+
+    html[data-appearance="dark"] .page-wrapper,
+    html[data-appearance="dark"] #membersShell,
+    html[data-appearance="dark"] main#membersShell,
+    html[data-appearance="dark"] #membersShell > .member-guides,
+    html[data-appearance="dark"] #membersShell > .member-commercial-links {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+  </style>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-3">
+
+<style id="hamlet-members-dark-surface-ux">
+/* Keep the members area aligned with Hamlet's dark workspace without obscuring particles.js. */
+#membersShell > .panel.members-welcome,
+#membersShell .member-guide-card {
+  background: #111827 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
+}
+#membersShell .members-welcome .panel-head,
+#membersShell .members-welcome .panel-body {
+  background: transparent !important;
+  color: #f3f4f6 !important;
+}
+#membersShell .members-welcome h1,
+#membersShell .member-guide-card h2,
+#membersShell .member-commercial-links h3 {
+  color: #f3f4f6 !important;
+}
+#membersShell .welcome-lead,
+#membersShell .members-welcome .muted,
+#membersShell .member-guide-card p,
+#membersShell .member-guide-card ol {
+  color: #cbd5e1 !important;
+}
+#membersShell .member-guide-card a { color: #93c5fd !important; }
+#membersShell .guide-number {
+  background: #172338 !important;
+  color: #bfdbfe !important;
+  border: 1px solid #334155;
+}
+#membersShell .security-note {
+  background: #172338 !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+#membersShell .security-note strong,
+#membersShell .security-note p { color: #e2e8f0 !important; }
+#membersShell .member-commercial-links { border-top-color: #374151 !important; }
+
+/* Shared responsive Hamlet header fix (mobile) */
+@media(max-width:760px){
+  .resource-nav.hamlet-404-header>.container.container-nav{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;width:100%;min-width:0;box-sizing:border-box;gap:10px;padding:11px 14px;margin:0 auto}
+  .resource-nav.hamlet-404-header>.container.container-nav>.logo{flex:0 0 100%;width:100%;min-width:0}
+  .resource-nav.hamlet-404-header>.container.container-nav>.user-menu,.resource-nav.hamlet-404-header>.container.container-nav>.topbar-actions{flex:0 1 100%;width:100%;max-width:100%;min-width:0;margin-left:0!important;justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;box-sizing:border-box;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .resource-nav.hamlet-404-header .site-title{white-space:nowrap}
+  .resource-nav.hamlet-404-header .user-menu>a,.resource-nav.hamlet-404-header .user-menu>button,.resource-nav.hamlet-404-header .topbar-actions>.btn{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:.8rem;line-height:1.15}
+  .resource-nav.hamlet-404-header .auth-profile-chip,.resource-nav.hamlet-404-header .profile{flex:0 0 auto;min-width:0;max-width:40vw}
+  .resource-nav.hamlet-404-header .auth-profile-name,.resource-nav.hamlet-404-header [data-auth-name]{display:inline-block;max-width:28vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{width:32px;height:32px;flex:0 0 auto}
+}
+@media(max-width:380px){.resource-nav.hamlet-404-header>.container.container-nav{padding-inline:10px}.resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{display:none}}
+</style>
+  </head>
+<body class="auth-pending">
+  <div id="particles-js" aria-hidden="true"></div>
+  <script>
+    (function () {
+      try {
+        if (!sessionStorage.getItem('ibr_auth_transition')) return;
+      } catch (error) { return; }
+      document.documentElement.classList.add('auth-arriving');
+      var overlay = document.createElement('div');
+      overlay.className = 'page-transition-overlay active';
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.innerHTML = '<div class="page-transition-card" role="status" aria-live="polite"><span class="page-transition-spinner" aria-hidden="true"></span><span class="page-transition-label">Opening Members Area…</span></div>';
+      document.body.appendChild(overlay);
+    })();
+  </script>
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a>
+        </div>
+        <div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <div class="auth-profile-chip" data-auth-profile>
+            <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+            <span class="auth-profile-name" data-auth-name></span>
+          </div>
+          <a class="btn btn-outline nav-login" href="/login.html?next=%2Fmembers.html" id="signInLink">Sign In</a>
+          <button class="btn btn-outline" id="signOutBtn" style="display:none">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    <nav id="topNavMenu" aria-hidden="true" hidden></nav>
+    <script>
+      function updateSidebarVisibility() {
+        var sidebar = document.getElementById('topNavMenu');
+        if (document.body.classList.contains('has-sidebar')) {
+          sidebar.style.display = 'block';
+        } else {
+          sidebar.style.display = 'none';
+        }
+      }
+      document.addEventListener('DOMContentLoaded', updateSidebarVisibility);
+      var observer = new MutationObserver(updateSidebarVisibility);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    <section id="loginSection" class="auth-shell">
+      <h1 style="margin:0;color:#092a4b">Members Area</h1>
+      <p style="margin:.75rem 0 1.25rem;color:var(--muted)">Sign in to access the members area.</p>
+      <a class="btn btn-primary" href="/login.html?next=%2Fmembers.html">Go to Sign In</a>
+    </section>
+    <main id="membersShell" class="members-shell" role="main">
+      <section class="panel members-welcome">
+        <div class="panel-head">
+          <h1 style="margin:0;color:#092a4b;font-size:1.3rem">Welcome to the Members Area</h1>
+        </div>
+        <div class="panel-body">
+          <p class="welcome-lead">Hello, <span id="memberName">Member</span> ⭐ — welcome to your secure hamlet members area.</p>
+          <p class="muted">Your account is authenticated through Firebase, so only a signed-in member can access this area and the member services linked from it. The members area is secure and safe to use for managing your account and communications briefs.</p>
+          <div class="security-note" role="note">
+            <span class="security-icon" aria-hidden="true">🔒</span>
+            <div>
+              <strong>Security without the extra hurdle</strong>
+              <p>Two-factor authentication (2FA) is an optional additional layer of protection. You do <strong>not</strong> need to upgrade to 2FA to use the Members Area, send a brief, or manage your submissions. If you want to review or change your security and account preferences, you can use <a href="/settings.html">Account Settings</a>.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="member-guides" aria-label="Members Area guide">
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">1</div>
+          <div>
+            <h2>Send a brief to Communications</h2>
+            <p>Use <a href="/requests.html">Media Relations / Requests</a> to send a concise brief to our communications team.</p>
+            <ol>
+              <li>Open <a href="/requests.html">requests</a> from the button below or the Members navigation.</li>
+              <li>Enter the organisation and press-officer contact details.</li>
+              <li>Add the headline, announcement type, press-release link, summary, and any useful notes such as audience, spokesperson availability or holding lines.</li>
+              <li>Review the information and select <strong>Send Brief</strong>. Your submission is saved for the communications desk to review and follow up.</li>
+            </ol>
+            <a class="btn btn-primary guide-action" href="/requests.html">📨 Send a Communications Brief</a>
+          </div>
+        </article>
+
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">2</div>
+          <div>
+            <h2>Manage your submissions</h2>
+            <p>Use the <a href="/archive.html">Brief Archive</a> to manage briefs submitted from your authenticated account.</p>
+            <ol>
+              <li>Open <a href="/archive.html">archive</a> to view your submitted briefs.</li>
+              <li>Use <strong>Search archive</strong> to find a particular submission.</li>
+              <li>Select one or more briefs if you need to delete them, then choose <strong>Delete Selected</strong>.</li>
+              <li>Use <strong>Refresh</strong> to reload your archive, <strong>Create New</strong> to start another brief, or <strong>Print</strong> when you need a record.</li>
+            </ol>
+            <a class="btn btn-outline guide-action" href="/archive.html">🗂️ Manage My Submissions</a>
+          </div>
+        </article>
+
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">3</div>
+          <div>
+            <h2>Keep your member account up to date</h2>
+            <p class="muted">Complete your <a href="/editprofile.html">profile</a> if you want to receive communications from Premium, explore the <a href="/insights.html">Insights Archive</a>, and use <a href="/settings.html">Account Settings</a> to manage your preferences.</p>
+          </div>
+        </article>
+
+        <article class="member-guide-card member-directory-card">
+          <div class="guide-number" aria-hidden="true">4</div>
+          <div>
+            <h2>Discover the Members Directory</h2>
+            <p>Our <a href="/directory.html">Members Directory</a> is a convenient way to discover and connect with other members of the IBR community. It provides a useful member-facing view of participating professionals, helping you identify people and organisations you may wish to engage with while making your membership more connected and valuable.</p>
+            <p>Take a moment to explore the directory and see who is part of the wider community. You may find a useful professional connection, a relevant contact or an opportunity to broaden your network.</p>
+            <a class="btn btn-primary guide-action" href="/directory.html">📇 Explore the Members Directory</a>
+          </div>
+        </article>
+
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">5</div>
+          <div>
+            <h2>Insights Feed subscriptions and payments</h2>
+            <p>The <strong>Stripe payment gateway</strong> in the side menu is intended for subscriptions to the <a href="/insights.html">Insights Feed</a>. Choose the plan that best suits your membership:</p>
+            <ol>
+              <li><strong>£8.99 per month</strong> — Monthly subscription.</li>
+              <li><strong>£69.99 per year</strong> — Annual subscription, offering better value than paying monthly.</li>
+              <li><strong>£149.99 per year</strong> — Annual Premium membership subscription.</li>
+            </ol>
+            <p>You can also purchase a subscription directly through our Stripe publication.</p>
+            <a class="btn btn-outline guide-action" href="/insights.html">💡 Explore the Insights Feed</a>
+          </div>
+        </article>
+
+        <article class="member-guide-card member-social-feed-card">
+          <div class="guide-number" aria-hidden="true">6</div>
+          <div>
+            <h2>Connect with the community on the Social Feed</h2>
+            <p>The <a href="/posts.html">Social Feed</a> gives brokers a dedicated place to share professional updates and ideas beyond their property listings. Use it to start conversations, exchange perspectives, share relevant images or documents, and engage with other members of the IBR community.</p>
+            <ol>
+              <li>Visit <a href="/editprofile.html">Edit Profile</a> first to keep your name, profile photo and professional details current, so other members can recognise you and understand your professional background.</li>
+              <li>Open the <a href="/posts.html">Social Feed</a> to publish a short post, add supporting media where appropriate, and join discussions through replies and likes.</li>
+              <li>Use <a href="/settings.html">Account Settings</a> to review your account and security preferences. Profile information helps present your professional identity; account settings are for managing your account preferences.</li>
+              <li>Keep posts professional and relevant to the broker community. The feed complements Listings rather than replacing them: use listings for property opportunities and the Social Feed for wider updates and discussion.</li>
+            </ol>
+            <p><strong>Free at the point of use:</strong> there is no charge to use the Social Feed itself. You can share and engage with the community without paying a feed-access fee.</p>
+            <a class="btn btn-primary guide-action" href="/posts.html">📱 Open the Social Feed</a>
+          </div>
+        </article>
+
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">7</div>
+          <div>
+            <h2>A welcome note from the Founder</h2>
+            <p>Welcome to the Impact in Business Recruitment Group members area. I am delighted to welcome you to a secure space designed to make your engagement with our team straightforward, professional and productive.</p>
+            <p>Whether you are submitting a communications brief, managing your profile, exploring the directory or connecting via the social feed, this area is here to support you. Thank you for being part of the community.</p>
+            <p>If you have any questions or need assistance, please do not hesitate to reach out via the contact options available.</p>
+            <p>Best regards,<br>Alfred Anate Bodurin Mayaki<br>Founder</p>
+          </div>
+        </article>
+
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">8</div>
+          <div>
+            <h2>Hamlet improvements — 13 October 2026</h2>
+            <p>Today’s updates have focused on making Hamlet more coherent, easier to navigate and visually consistent across the platform. The legacy navigation has been removed where it duplicated the main menu, reducing clutter and confusion, while the intended top navigation has been retained. The Hamlet title placement has been refined to align with the established header layout, including a correction to the title width on the Archive page, and the outdated duplicate titles have been targeted for removal.</p>
+            <p>The animated network background seen in the Members Area has been extended as the shared visual treatment for eligible HTML pages, while excluding both index pages and everything in <code>/app/public/</code>. Work has also addressed background opacity so page surfaces do not unnecessarily obscure the effect. The Members Area has received small usability refinements, including removing the calendar emoji from the “Open Hamlet Deal Pipeline” button. The repository’s favicon has also been standardised around <code>/assets/images/favicon.ico</code> across relevant site locations.</p>
+            <p>Together, these changes strengthen Hamlet’s visual identity, simplify navigation and bring the interface closer to a consistent, connected deal-workspace experience.</p>
+          </div>
+        </article>
+        <article class="member-guide-card">
+          <div class="guide-number" aria-hidden="true">9</div>
+          <div>
+            <h2>Hamlet release notes — Windows v1.04 and platform updates (17 October 2026)</h2>
+            <p><strong>Hamlet for Windows v1.04.04 is the current stable release.</strong> The installer is <code>hamlet-Setup-1.4.2.exe</code> (approximately 89.2 MiB). The official Cloudflare R2 release also provides a matching SHA-256 checksum file so you can verify the download before running it. Release packaging checks the installer build and filename and calculates the checksum.</p>
+            <p><strong>Property features and safeguards:</strong> residential property listings and residential resource management have been added. Public views show published listings, while Firestore rules restrict access to published records and authorised owners. Residential listings are tracked in the super-administrator dashboard, and listings show the saved publisher name and profile photo. The residential pages' profile headers have been aligned with the site's saved-profile behaviour, alongside form-spacing and back-button contrast improvements.</p>
+            <p><strong>Navigation and consistency:</strong> the Pricing and Support buttons have been removed from the shared navigation to reduce horizontal overflow, and the separate Pricing button has been removed from the Sector Coverage page header. The Pricing page itself and the external <a href="https://support.hamlet-ai.co.uk/">Hamlet Support Centre</a> remain available at their existing destinations. Recent work has also covered member/profile presentation, favicon consistency, legal-page updates and product documentation.</p>
+            <p><strong>Download and support:</strong> visit <a href="/download.html">Hamlet for Windows downloads</a> for the official v1.04.04 installer, checksum and installation guidance. For assistance, visit the <a href="https://support.hamlet-ai.co.uk/">Hamlet Support Centre</a>.</p>
+          </div>
+        </article>
+        <article class="member-guide-card member-rankings-card">
+          <div class="guide-number" aria-hidden="true">10</div>
+          <div>
+            <h2>Broker Rankings — recognise achievement and inspire progress</h2>
+            <p>Hamlet is introducing <a href="/rankings.html">Broker Rankings</a> to celebrate professional achievement and encourage healthy competition across the broker community. The rankings are designed to recognise brokers' results by comparing their average completed deal value, using qualifying closed deals recorded in Hamlet.</p>
+            <p>By making performance easier to see, the feature aims to motivate members to build strong pipelines, progress opportunities through to completion and learn from the success of their peers. It is intended to reward achievement through visibility and recognition, while giving brokers an additional reason to keep their deal records accurate and up to date.</p>
+            <p>Rankings are one measure of deal performance, not a complete assessment of a broker's value or professionalism. Results depend on qualifying completed deals recorded in Hamlet, and the public rankings are intended for brokers whose profiles are public. The feature does not promise a cash prize or other material reward.</p>
+            <a class="btn btn-primary guide-action" href="/rankings.html">🏆 Explore Broker Rankings</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="member-commercial-links" aria-label="Additional member links">
+        <h3>Additional resources</h3>
+        <ul>
+          <li><a class="btn btn-outline guide-action" href="/posts.html">📱 Social Feed</a></li>
+          <li><a class="btn btn-outline guide-action" href="/app/public/resources.html">🏢 Live Properties</a></li>
+          <li><a class="btn btn-outline guide-action" href="/ibfees.html">✅ Listing Policy</a></li>
+        </ul>
+      </section>
+      <div class="create-brief-footer" style="display:flex;justify-content:center;margin:2rem 0 1rem;padding:1.25rem 0 0;border-top:1px solid #dbe3ee;">
+        <a class="btn btn-primary guide-action" href="/requests.html" aria-label="Create New Brief" style="display:inline-flex;align-items:center;justify-content:center;gap:.55rem;min-height:48px;padding:.8rem 1.4rem;border-radius:10px;font-size:1rem;font-weight:700;text-align:center;box-shadow:0 6px 18px rgba(2,132,199,.18);">📝 Draft New Brief</a>
+      </div>
+      <a class="verify-corner-btn" href="/rankings.html" aria-label="Open Broker Rankings">Open Broker Rankings</a>
+    </main>
+    <footer class="resource-footer" role="contentinfo">
+      <div class="container" style="text-align:center">
+        <div style="margin-bottom:4px;color:var(--muted);font-size:0.95rem;">v1.04.04</div>
+        <nav class="footer-links" aria-label="Legal" style="margin:8px 0 6px; font-size:0.88rem; font-weight:400;">
+          <a href="/terms.html" style="color:#64748b; text-decoration:none; margin:0 8px;">Terms</a>
+          <a href="/privacy.html" style="color:#64748b; text-decoration:none; margin:0 8px;">Privacy</a>
+          <a href="/cookies.html" style="color:#64748b; text-decoration:none; margin:0 8px;">Cookies</a>
+        </nav>
+        <p style="margin:0;color:var(--muted)">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script><script defer src="/profile-service.js?v=20261010-2"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script defer src="/mobile-compat.js"></script>
+  <script defer src="/page-transition.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    (function () {
+      function initMembersParticles() {
+        if (typeof window.particlesJS !== 'function') return;
+        window.particlesJS('particles-js', {
+          particles: {
+            number: { value: 62, density: { enable: true, value_area: 950 } },
+            color: { value: '#dbeafe' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.42, random: true, anim: { enable: false } },
+            size: { value: 2.4, random: true, anim: { enable: false } },
+            line_linked: { enable: true, distance: 145, color: '#93c5fd', opacity: 0.24, width: 1 },
+            move: { enable: true, speed: 1.25, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+          },
+          interactivity: {
+            detect_on: 'canvas',
+            events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: false }, resize: true },
+            modes: { grab: { distance: 125, line_linked: { opacity: 0.35 } } }
+          },
+          retina_detect: true
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMembersParticles, { once: true });
+      } else {
+        initMembersParticles();
+      }
+    })();
+  </script>
+  <script>
+    (function () {
+      'use strict';
+
+      function showSignedOut() {
+        document.body.classList.remove('auth-pending', 'has-sidebar');
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('membersShell').style.display = 'none';
+        document.getElementById('signInLink').style.display = 'inline-flex';
+        document.getElementById('signOutBtn').style.display = 'none';
+        var name = document.getElementById('memberName');
+        if (name) name.textContent = 'Member';
+        try { sessionStorage.removeItem('ibr_auth_transition'); } catch (error) {}
+      }
+
+      function showSignedIn(user) {
+        document.body.classList.remove('auth-pending');
+        document.body.classList.add('has-sidebar');
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('membersShell').style.display = 'block';
+        document.getElementById('signInLink').style.display = 'none';
+        document.getElementById('signOutBtn').style.display = 'inline-flex';
+
+        var name = document.getElementById('memberName');
+        if (name) name.textContent = user.displayName || user.email || 'Member';
+
+        // Prefer the saved Firestore name when available, without blocking access.
+        if (window.firebase && firebase.firestore) {
+          firebase.firestore().collection('publicProfiles').doc(user.uid).get()
+            .then(function (snapshot) {
+              if (!snapshot.exists || !name) return;
+              var data = snapshot.data() || {};
+              var first = String(data.Firstname || data.firstName || data.firstname || '').trim();
+              var last = String(data.Lastname || data.lastName || data.lastname || '').trim();
+              var savedName = (first + ' ' + last).trim() || data.displayName || data.name;
+              if (savedName) name.textContent = savedName;
+            })
+            .catch(function (error) {
+              console.warn('Could not load the saved member name:', error);
+            });
+        }
+        try { sessionStorage.removeItem('ibr_auth_transition'); } catch (error) {}
+      }
+
+      function initialiseMembersAuth() {
+        if (!window.firebase || !window.firebase.auth || !window.firebaseConfig) {
+          showSignedOut();
+          console.error('Members Area authentication could not initialise: Firebase SDK or configuration is unavailable.');
+          return;
+        }
+
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+          var auth = firebase.auth();
+          document.getElementById('signOutBtn').addEventListener('click', function () {
+            auth.signOut().then(function () {
+              window.location.replace('/login.html?next=%2Fmembers.html');
+            }).catch(function (error) {
+              console.error('Sign out failed:', error);
+              window.alert('Unable to sign out. Please try again.');
+            });
+          });
+
+          auth.onAuthStateChanged(function (user) {
+            if (user) showSignedIn(user);
+            else showSignedOut();
+          }, function (error) {
+            showSignedOut();
+            console.error('Members Area authentication state error:', error);
+          });
+        } catch (error) {
+          showSignedOut();
+          console.error('Members Area authentication setup failed:', error);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialiseMembersAuth, { once: true });
+      } else {
+        initialiseMembersAuth();
+      }
+    })();
+  </script>
+  <script src="/hamlet-workspace.js?v=20261016-3"></script>
+  <script src="/hamlet-background.js?v=20261015-1"></script>
+</body>
+</html>

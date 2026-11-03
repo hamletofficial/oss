@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-appearance="dark">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071D4A">
+  <meta name="description" content="View an individual Hamlet member’s public commercial property portfolio, with listing photographs and sustainability information.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Member Property Portfolio | hamlet">
+  <meta property="og:description" content="View commercial and residential properties published by an individual Hamlet member. Listing details are supplied by members.">
+  <meta property="og:url" content="https://www.hamlet-ai.co.uk/portfolio.html">
+  <link rel="canonical" href="https://www.hamlet-ai.co.uk/portfolio.html">
+<link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <title>Member Property Portfolio | hamlet</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--surface:#111827;--raised:#1f2937;--line:#374151;--text:#f9fafb;--muted:#cbd5e1;--blue:#071d4a;--link:#bfdbfe}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:transparent}
+    body{position:relative;isolation:isolate;margin:0;min-height:100vh;background:transparent;color:var(--text);font-family:"DM Sans","Segoe UI",Arial,sans-serif;line-height:1.6}
+    .page-wrapper{position:relative;z-index:1}
+    a{color:#bfdbfe;text-underline-offset:3px}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    .page-wrapper{min-height:100vh;display:flex;flex-direction:column;background:transparent}
+    .site-header{position:sticky;top:0;z-index:20;background:#071d4a;border-bottom:1px solid #374151}
+    .header-row{width:min(1180px,calc(100% - 2rem));min-height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{font-size:1.4rem;font-weight:800;letter-spacing:-.04em;text-decoration:none;color:#fff}
+    .header-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
+    .button{display:inline-flex;align-items:center;justify-content:center;padding:.62rem .9rem;border:1px solid #64748b;border-radius:9px;background:#111827;color:#fff;text-decoration:none;font-weight:700;font-size:.9rem}
+    .button:hover{background:#1f2937;border-color:#bfdbfe}
+    .header-actions .button{border-radius:9px;overflow:hidden;background-clip:padding-box;-webkit-background-clip:padding-box}
+    main{width:min(1180px,calc(100% - 2rem));margin:2rem auto 3rem;flex:1}
+    .hero{padding:clamp(1.25rem,3vw,2.2rem);border:1px solid #294477;border-radius:18px;background:linear-gradient(135deg,#071d4a 0%,#123d8f 58%,#111827 100%);box-shadow:0 18px 45px rgba(0,0,0,.25)}
+    .eyebrow{margin:0 0 .4rem;color:#bfdbfe;text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:800}
+    h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.15;letter-spacing:-.035em;margin:0 0 .7rem}
+    .hero p{max-width:850px;margin:0;color:#e5edff}
+    .hero-points{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.2rem}
+    .hero-points span{border:1px solid #7186b4;background:rgba(2,6,23,.25);border-radius:999px;padding:.36rem .68rem;color:#fff;font-size:.8rem;font-weight:700}
+    .toolbar{margin:1.15rem 0;padding:1rem;border:1px solid var(--line);border-radius:14px;background:rgba(17,24,39,.9);display:grid;grid-template-columns:minmax(0,1.7fr) repeat(2,minmax(150px,1fr)) auto;gap:.7rem;align-items:end}
+    .field{display:flex;flex-direction:column;gap:.35rem;color:#e5e7eb;font-size:.78rem;font-weight:700}
+    input,select{width:100%;min-width:0;padding:.72rem .78rem;border:1px solid #4b5563;border-radius:9px;background:#0b1120;color:#fff;font:inherit;font-size:.9rem}
+    input::placeholder{color:#9ca3af}
+    .count{grid-column:1/-1;color:#cbd5e1;font-size:.84rem;margin-top:.1rem}
+    .list{display:grid;gap:1rem}
+    .property-card{overflow:hidden;border:1px solid #374151;border-radius:16px;background:rgba(17,24,39,.96);box-shadow:0 10px 28px rgba(0,0,0,.18)}
+    .property-top{padding:1.1rem 1.2rem;background:linear-gradient(100deg,rgba(7,29,74,.92),rgba(31,41,55,.85));display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+    .property-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.65rem;padding:1rem 1.2rem 0}.property-photo-grid a{display:block;overflow:hidden;border-radius:10px;border:1px solid #374151}.property-photo-grid img{display:block;width:100%;height:155px;object-fit:cover;transition:transform .18s ease}.property-photo-grid a:hover img{transform:scale(1.025)}
+    .property-top h2{margin:0;font-size:1.2rem;line-height:1.35;color:#fff}
+    .status-badge{flex:0 0 auto;display:inline-flex;border:1px solid #64748b;border-radius:999px;padding:.25rem .55rem;font-size:.73rem;font-weight:800;color:#e5e7eb}
+    .sustainability{padding:1rem 1.2rem;background:linear-gradient(115deg,#123c35,#12305a 90%);border-top:1px solid #2e786a;border-bottom:1px solid #2e786a}
+    .sustainability-label{display:flex;align-items:center;gap:.45rem;margin:0 0 .45rem;color:#a7f3d0;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;font-weight:900}
+    .sustainability h3{margin:0 0 .4rem;color:#fff;font-size:clamp(1.15rem,2.5vw,1.65rem);line-height:1.3}
+    .credential-status{display:inline-flex;align-items:center;border-radius:7px;padding:.27rem .55rem;background:rgba(2,6,23,.38);border:1px solid rgba(255,255,255,.25);font-size:.8rem;font-weight:800;color:#fff}
+    .credential-details{display:flex;gap:.5rem 1rem;flex-wrap:wrap;margin-top:.65rem;color:#e2e8f0;font-size:.83rem}
+    .credential-details span strong{color:#fff}
+    .credential-note{margin:.6rem 0 0;color:#d1fae5;font-size:.87rem;white-space:pre-wrap;overflow-wrap:anywhere}
+
+    /* Responsive property imagery, metadata and evidence notes for narrow screens. */
+    .property-photo-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));}
+    .property-photo-grid img{width:100%;height:clamp(120px,18vw,175px);object-fit:cover;}
+    .credential-disclaimer{margin:.75rem 0 0;padding:.65rem .75rem;border:1px solid #475569;border-radius:9px;background:rgba(11,17,32,.55);color:#cbd5e1;font-size:.8rem;line-height:1.5;}
+    .credential-disclaimer strong{color:#f8fafc;}
+    @media(max-width:800px){.meta-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.property-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:520px){.property-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;padding: .75rem .75rem 0;}.property-photo-grid img{height:120px;}.property-body{padding:.9rem;}.meta-grid{gap:.5rem;}.meta-item{padding:.6rem;}.property-top{padding:.9rem;}.credential-disclaimer{font-size:.78rem;}}
+    .listing-disclaimer{margin:1rem 0 0;padding:.9rem 1rem;border:1px solid #374151;border-left:3px solid #93c5fd;border-radius:10px;background:rgba(17,24,39,.82);color:#cbd5e1;font-size:.86rem}
+    .listing-disclaimer strong{color:#fff}
+    .property-body{padding:1.1rem 1.2rem 1.2rem}
+    .meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.85rem}
+    .meta-item{min-width:0;padding:.7rem .75rem;border:1px solid #374151;border-radius:10px;background:#0b1120}
+    .meta-item strong{display:block;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;font-size:.68rem;margin-bottom:.18rem}
+    .meta-item span{display:block;color:#f9fafb;font-size:.9rem;overflow-wrap:anywhere}
+    .description{margin:1rem 0 0;color:#d1d5db;white-space:pre-wrap;overflow-wrap:anywhere}
+    .description-label{display:block;color:#fff;font-weight:800;margin-bottom:.25rem}
+    .contact-strip{display:flex;align-items:center;gap:.55rem 1rem;flex-wrap:wrap;margin-top:1rem;padding-top:.85rem;border-top:1px solid #374151;color:#d1d5db;font-size:.87rem}
+    .contact-strip strong{color:#fff}
+    .property-actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1rem}
+    .property-actions a{display:inline-flex;align-items:center;justify-content:center;border:1px solid #64748b;border-radius:8px;padding:.52rem .72rem;color:#fff;background:#1f2937;text-decoration:none;font-size:.84rem;font-weight:700}
+    .property-actions a:hover{border-color:#93c5fd;background:#26364b}
+    .empty{padding:1.4rem;border:1px dashed #4b5563;border-radius:12px;color:#cbd5e1;background:rgba(17,24,39,.8)}
+    .footer{padding:1.5rem 1rem 2rem;text-align:center;color:#9ca3af;font-size:.82rem;border-top:1px solid #273449}
+    .footer-links{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem}
+    .footer a{color:#cbd5e1;text-decoration:none}.footer a:hover{text-decoration:underline}
+    @media(max-width:850px){.toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.header-row{width:calc(100% - 1.2rem);min-height:62px}.brand{font-size:1.25rem}.header-actions{gap:.4rem}.button{padding:.52rem .65rem;font-size:.82rem}main{width:calc(100% - 1.2rem);margin-top:1rem}.toolbar{grid-template-columns:1fr}.property-top{flex-direction:column;gap:.55rem}.meta-grid{grid-template-columns:1fr}.property-body,.property-top,.sustainability{padding:1rem}.count{grid-column:auto}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  
+/* hamlet-accessibility-pass: keyboard focus, touch targets and motion preferences */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid #60a5fa!important;outline-offset:3px!important;scroll-margin-block:6rem}
+button:disabled,[role="button"][aria-disabled="true"]{cursor:not-allowed;opacity:.7}
+.property-actions a,.toolbar button,.toolbar select,.toolbar input{min-height:42px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* UX housekeeping: keyboard focus, touch targets and resilient narrow-screen filtering. */
+.toolbar input:focus-visible,
+.toolbar select:focus-visible,
+.property-actions a:focus-visible,
+.header-actions a:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+.toolbar input,
+.toolbar select,
+.property-actions a,
+.header-actions a {
+  min-height: 44px;
+}
+.count {
+  line-height: 1.55;
+}
+.property-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+.property-actions a {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+#portfolioList[aria-busy="true"] .empty {
+  line-height: 1.6;
+}
+@media(max-width:520px) {
+  .toolbar { gap: .8rem; }
+  .toolbar .field { min-width: 0; }
+  .count { padding-top: .25rem; }
+  .property-actions a { width: 100%; justify-content: center; text-align: center; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .property-photo-grid img { transition: none !important; }
+}
+
+</style>
+  </head>
+<body>
+<div class="page-wrapper">
+  <header class="site-header hamlet-404-header">
+    <div class="header-row">
+      <a class="brand" href="/index.html" aria-label="hamlet home">hamlet</a>
+      <nav class="header-actions" aria-label="Main navigation">
+        <a class="button" href="/login.html?next=%2Fportfolio.html" id="portfolioSignIn">Sign In</a>
+        <button class="button" type="button" id="portfolioSignOut" style="display:none">Sign Out</button>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="pageTitle">
+      <p class="eyebrow" id="portfolioEyebrow">Member’s public portfolio</p>
+      <h1 id="pageTitle">Member Property Portfolio</h1>
+      <p id="portfolioIntro">Each Hamlet member has an individual public portfolio. Open a broker’s portfolio from one of their listings or use the member’s shared portfolio link. This page displays only properties belonging to the UID in the link, without requiring visitors to sign in.</p>
+      <div class="hero-points"><span>One member · one portfolio</span><span>Public view · no sign-in required</span><span>Energy efficiency · Passivhaus · EnerPHit</span></div>
+    </section>
+    <p class="listing-disclaimer"><strong>Due diligence:</strong> Listings and sustainability details are supplied by members and may change. A stated standard or “Certified” status is not independently validated by this public page. Confirm current availability, title, lease terms, energy-performance documentation and certification directly with the relevant broker or issuing body before making a decision.</p>
+    <section class="toolbar" id="portfolioToolbar" aria-label="Search and filter this member’s portfolio">
+      <label class="field">Search properties<input id="search" type="search" placeholder="Name, location, credentials, terms…" autocomplete="off"></label>
+      <label class="field">Property type<select id="typeFilter"><option value="">All types</option></select></label>
+      <label class="field">Availability<select id="availabilityFilter"><option value="">All availability</option></select></label>
+      <label class="field">Sort by<select id="sort"><option value="newest">Recently added</option><option value="name">Property name A–Z</option><option value="location">Location A–Z</option><option value="sustainability">Sustainability credentials first</option></select></label>
+      <div class="count" id="count" role="status" aria-live="polite">Loading current submissions…</div>
+    </section>
+    <section id="portfolioList" class="list" aria-label="This member’s public commercial property listings" aria-live="polite" aria-busy="true"><div class="empty">Loading portfolio…</div></section>
+  </main>
+  <footer class="footer">
+    <div class="footer-links"><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a><a href="/contact.html">Contact</a></div>
+    <div>hamlet is operated by <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>.</div>
+  </footer>
+</div>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/page-transition.js"></script>
+
+<script>
+(function(){
+  'use strict';
+  window.addEventListener('load', function(){
+    var signIn=document.getElementById('portfolioSignIn');
+    var signOut=document.getElementById('portfolioSignOut');
+    if(!signIn||!signOut)return;
+    var next=window.location.pathname+window.location.search+window.location.hash;
+    signIn.href='/login.html?next='+encodeURIComponent(next);
+    signOut.style.display='none';
+    if(!window.firebase||!window.firebase.auth||!window.firebaseConfig){
+      console.error('Portfolio authentication unavailable: Firebase SDK or configuration is missing.');
+      return;
+    }
+    try{
+      if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+      var auth=firebase.auth();
+      auth.onAuthStateChanged(function(user){
+        signIn.style.display=user?'none':'inline-flex';
+        signOut.style.display=user?'inline-flex':'none';
+      },function(error){
+        console.error('Portfolio authentication state could not be determined:',error);
+        signIn.style.display='inline-flex';
+        signOut.style.display='none';
+      });
+      signOut.addEventListener('click',async function(){
+        signOut.disabled=true;
+        try{
+          await auth.signOut();
+        }catch(error){
+          console.error('Portfolio sign-out failed:',error);
+          window.alert('Unable to sign out right now. Please try again.');
+        }finally{
+          signOut.disabled=false;
+        }
+      });
+    }catch(error){
+      console.error('Portfolio authentication initialisation failed:',error);
+    }
+  },{once:true});
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var list=document.getElementById('portfolioList');
+  var search=document.getElementById('search');
+  var typeFilter=document.getElementById('typeFilter');
+  var availabilityFilter=document.getElementById('availabilityFilter');
+  var sort=document.getElementById('sort');
+  var count=document.getElementById('count');
+  var records=[];
+  var portfolioUid="";
+
+  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(ch){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];});}
+  function dateMillis(value){try{if(value&&typeof value.toMillis==='function')return value.toMillis();if(value&&typeof value.toDate==='function')return value.toDate().getTime();var n=new Date(value||0).getTime();return Number.isFinite(n)?n:0;}catch(e){return 0;}}
+  function dateText(value){var ms=dateMillis(value);return ms?new Date(ms).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'Not provided';}
+  function safeUrl(value){if(typeof value!=='string')return '';try{var u=new URL(value);return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';}catch(e){return '';}}
+  function validEmail(value){return typeof value==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())?value.trim():'';}
+  function sustainabilityRank(p){var standard=String(p.sustainabilityStandard||'').toLowerCase(),status=String(p.sustainabilityStatus||'').toLowerCase();var certified=status==='certified';var named=standard.indexOf('passivhaus')>=0||standard.indexOf('enerphit')>=0;return (certified?4:0)+(named?2:0)+(standard?1:0);}
+  function credentialMarkup(p){
+    var standard=String(p.sustainabilityStandard||'').trim();
+    var status=String(p.sustainabilityStatus||'Not provided').trim();
+    var certificate=safeUrl(p.certificateUrl);
+    var content=standard?esc(standard):'Sustainability information not supplied';
+    var details=[];
+    if(p.certificationClass)details.push('<span><strong>Class / method:</strong> '+esc(p.certificationClass)+'</span>');
+    if(p.certificateReference)details.push('<span><strong>Certificate reference:</strong> '+esc(p.certificateReference)+'</span>');
+    if(p.certifier)details.push('<span><strong>Certifier:</strong> '+esc(p.certifier)+'</span>');
+    if(p.certificationDate)details.push('<span><strong>Certification date:</strong> '+esc(p.certificationDate)+'</span>');
+    if(certificate)details.push('<span><a href="'+esc(certificate)+'" target="_blank" rel="noopener noreferrer">View certificate / evidence ↗</a></span>');
+    return '<section class="sustainability" aria-label="Sustainability credentials"><p class="sustainability-label">✦ Energy efficiency &amp; sustainability</p><h3>'+content+'</h3><span class="credential-status">'+esc(status)+'</span>'+(details.length?'<div class="credential-details">'+details.join('')+'</div>':'')+(p.sustainabilityNotes?'<p class="credential-note">'+esc(p.sustainabilityNotes)+'</p>':'')+'<p class="credential-disclaimer"><strong>Evidence note:</strong> Listing details and sustainability claims are supplied by the member. Displayed information is not independently verified by hamlet; check linked certificate evidence and issuer details before relying on a claim.</p></section>';
+  }
+  function renderCard(item){
+    var p=item.data||{};
+    if(p._category==='residential'){
+      var resUrl=safeUrl(p.propertyUrl),resLoc=[p.address,p.postcode].filter(Boolean).join(' · ')||'Not provided';
+      var resFields=[['Property type',p.propertyType],['Location',resLoc],['Bedrooms',p.bedrooms==null?'Not provided':p.bedrooms],['Asking price',p.askingPrice],['Tenure',p.tenure],['Availability',p.availability],['Date submitted',dateText(p.createdAt)]];
+      var resMeta=resFields.map(function(field){return '<div class="meta-item"><strong>'+esc(field[0])+'</strong><span>'+esc(field[1]||'Not provided')+'</span></div>';}).join('');
+      var residentialPhotos=Array.isArray(p.photoUrls)?p.photoUrls.filter(function(url){return !!safeUrl(url)}).slice(0,6):[];
+      var residentialPhotoMarkup=residentialPhotos.length?'<div class="property-photo-grid" aria-label="Residential property photographs">'+residentialPhotos.map(function(url,i){return '<a href="'+esc(safeUrl(url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(url))+'" alt="'+esc(p.propertyName||'Residential property')+' photo '+(i+1)+'" loading="lazy"></a>';}).join('')+'</div>':'';
+      return '<article class="property-card"><header class="property-top"><h2>'+esc(p.propertyName||'Residential property')+'</h2><span class="status-badge">'+esc(p.status||'Published')+'</span></header>'+residentialPhotoMarkup+'<div class="property-body"><div class="meta-grid">'+resMeta+'</div>'+(p.description?'<p class="description"><span class="description-label">Property description</span>'+esc(p.description)+'</p>':'')+(resUrl?'<div class="property-actions"><a href="'+esc(resUrl)+'" target="_blank" rel="noopener noreferrer">Property details ↗</a></div>':'')+'</div></article>';
+    }
+    var external=safeUrl(p.propertyUrl);
+    var email=validEmail(p.contactEmail);
+    var location=[p.address,p.postcode].filter(Boolean).join(' · ')||'Not provided';
+    var fields=[['Property type',p.propertyType],['Location',location],['Availability',p.availability],['Size',p.size],['Asking rent / lease terms',p.askingRent],['Listing status',p.status||'Active'],['Date submitted',dateText(p.createdAt)]];
+    var meta=fields.map(function(field){return '<div class="meta-item"><strong>'+esc(field[0])+'</strong><span>'+esc(field[1]||'Not provided')+'</span></div>';}).join('');
+    var actions='';
+    if(p.certificateUrl&&safeUrl(p.certificateUrl))actions+='<a href="'+esc(safeUrl(p.certificateUrl))+'" target="_blank" rel="noopener noreferrer">Certificate evidence ↗</a>';
+    if(external)actions+='<a href="'+esc(external)+'" target="_blank" rel="noopener noreferrer">External property listing ↗</a>';
+    if(email)actions+='<a href="mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Commercial property enquiry: '+(p.propertyName||'property listing'))+'">Email broker</a>';
+    var photos=Array.isArray(p.photoUrls)?p.photoUrls.filter(function(url){return !!safeUrl(url)}).slice(0,6):[];
+    var photoMarkup=photos.length?'<div class="property-photo-grid" aria-label="Property photographs">'+photos.map(function(url,i){return '<a href="'+esc(safeUrl(url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(url))+'" alt="'+esc(p.propertyName||'Commercial property')+' photo '+(i+1)+'" loading="lazy"></a>';}).join('')+'</div>':'';
+    return '<article class="property-card"><header class="property-top"><h2>'+esc(p.propertyName||'Commercial property')+'</h2><span class="status-badge">'+esc(p.status||'Active')+'</span></header>'+photoMarkup+credentialMarkup(p)+'<div class="property-body"><div class="meta-grid">'+meta+'</div>'+(p.description?'<p class="description"><span class="description-label">Property description</span>'+esc(p.description)+'</p>':'')+((p.contactName||email)?'<div class="contact-strip"><strong>Broker contact</strong>'+(p.contactName?'<span>'+esc(p.contactName)+'</span>':'')+(email?'<a href="mailto:'+encodeURIComponent(email)+'">'+esc(email)+'</a>':'')+'</div>':'')+(actions?'<div class="property-actions">'+actions+'</div>':'')+'</div></article>';
+  }
+  function populateFilters(){
+    var types=[...new Set(records.map(function(x){return (x.data._category==='residential'?'Residential · ':'')+String(x.data.propertyType||'').trim();}).filter(Boolean))].sort();
+    var availabilities=[...new Set(records.map(function(x){return String(x.data.availability||'').trim();}).filter(Boolean))].sort();
+    typeFilter.innerHTML='<option value="">All types</option>'+types.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join('');
+    availabilityFilter.innerHTML='<option value="">All availability</option>'+availabilities.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join('');
+  }
+  function applyFilters(){
+    list.setAttribute('aria-busy','false');
+    var query=search.value.trim().toLocaleLowerCase(),type=typeFilter.value,availability=availabilityFilter.value;
+    var matches=records.filter(function(item){var p=item.data||{};var blob=[p.propertyName,p.propertyType,p.address,p.postcode,p.availability,p.size,p.bedrooms,p.askingPrice,p.tenure,p.description,p.status,p.askingRent,p.contactName,p.contactEmail,p.sustainabilityStandard,p.sustainabilityStatus,p.certificationClass,p.certificateReference,p.certifier,p.certificationDate,p.sustainabilityNotes].join(' ').toLocaleLowerCase();return(!query||blob.includes(query))&&(!type||((item.data._category==='residential'?'Residential · ':'')+String(p.propertyType||'').trim())===type)&&(!availability||String(p.availability||'').trim()===availability);});
+    matches.sort(function(a,b){if(sort.value==='name')return String(a.data.propertyName||'').localeCompare(String(b.data.propertyName||''));if(sort.value==='location')return String(a.data.address||'').localeCompare(String(b.data.address||''));if(sort.value==='sustainability')return sustainabilityRank(b.data)-sustainabilityRank(a.data)||dateMillis(b.data.createdAt)-dateMillis(a.data.createdAt);return dateMillis(b.data.createdAt)-dateMillis(a.data.createdAt);});
+    list.innerHTML=matches.length?matches.map(renderCard).join(''):(records.length?'<div class="empty">No properties match these filters.</div>':'<div class="empty">This member has not published any property listings yet.</div>');
+    count.textContent='Showing '+matches.length+' of '+records.length+' properties';
+  }
+  search.addEventListener('input',applyFilters);typeFilter.addEventListener('change',applyFilters);availabilityFilter.addEventListener('change',applyFilters);sort.addEventListener('change',applyFilters);
+  function showError(){
+    list.setAttribute('aria-busy','false');
+    list.innerHTML='<div class="empty">This member’s public portfolio could not be loaded. Please check the portfolio link and try again later.</div>';
+    count.textContent='Portfolio unavailable';
+  }
+  function init(){
+    var params=new URLSearchParams(window.location.search);
+    portfolioUid=(params.get('uid')||'').trim();
+    var requestedUsername=(params.get('username')||'').trim().toLowerCase();
+    if(requestedUsername&&!/^[a-z0-9_]{3,20}$/.test(requestedUsername)){showError();return;}
+    if((!portfolioUid&&!requestedUsername)||portfolioUid.length>128){
+      document.getElementById('pageTitle').textContent='Portfolio link required';
+      document.getElementById('portfolioIntro').textContent='Each Hamlet member has an individual public portfolio. Open a broker’s portfolio from one of their listings or ask them to share their portfolio link.';
+      document.getElementById('portfolioToolbar').hidden=true;
+      list.innerHTML='<div class="empty">No member username was provided. Open a broker’s public portfolio link or ask them to share it.</div>';
+      count.textContent='Member portfolio not specified';
+      return;
+    }
+    try{
+      if(!window.firebase||!window.firebaseConfig)throw new Error('Firebase configuration unavailable');
+      if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+      var db=firebase.firestore();
+      var resolveOwner=requestedUsername?db.collection('usernames').doc(requestedUsername).get().then(function(snap){if(!snap.exists)throw new Error('Username not found');return String((snap.data()||{}).uid||'');}):Promise.resolve(portfolioUid);
+      resolveOwner.then(function(resolvedUid){
+        portfolioUid=resolvedUid;
+        if(!portfolioUid)throw new Error('Portfolio owner could not be resolved');
+        var publicUrl=window.location.origin+window.location.pathname+(requestedUsername?'?username='+encodeURIComponent(requestedUsername):'?uid='+encodeURIComponent(portfolioUid));
+        var canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=publicUrl;
+        var ogUrl=document.querySelector('meta[property="og:url"]');if(ogUrl)ogUrl.content=publicUrl;
+        return Promise.all([db.collection('publicProperties').where('ownerUid','==',portfolioUid).get(),db.collection('publicResidentialProperties').where('ownerUid','==',portfolioUid).get()]);
+      }).then(function(snapshots){
+        records=snapshots[0].docs.map(function(doc){return{id:'commercial-'+doc.id,data:Object.assign({},doc.data()||{},{_category:'commercial'})};}).concat(snapshots[1].docs.map(function(doc){return{id:'residential-'+doc.id,data:Object.assign({},doc.data()||{},{_category:'residential'})};}));
+        records.sort(function(a,b){return dateMillis(b.data.createdAt)-dateMillis(a.data.createdAt);});
+        var ownerName=records.map(function(item){return String(item.data.ownerName||'').trim();}).find(Boolean);
+        if(ownerName){document.getElementById('pageTitle').textContent=ownerName+' — Property Portfolio';document.title=ownerName+' — Property Portfolio | hamlet';}
+        document.getElementById('portfolioIntro').textContent='Public commercial and residential listings published by this Hamlet member. Private drafts and other members’ submissions are not shown.';
+        populateFilters();applyFilters();
+      }).catch(function(error){console.error('Member portfolio read failed:',error);showError();});
+    }catch(error){console.error('Portfolio initialisation failed:',error);showError();}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex, follow">
+  <title>Member Directory — Hamlet</title>
+  <link rel="stylesheet" href="/resource-centre.css">
+  <link rel="stylesheet" href="/index.css?v=20261015-5">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <link rel="stylesheet" href="/verified-tick.css">
+  <style>
+    :root { --muted: #475569; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #0f172a; background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%); }
+    .page-wrapper { background: #fff; max-width: 1920px; min-height: 100vh; margin: 0 auto; box-shadow: 0 0 20px rgba(0, 0, 0, .1) }
+    .directory-shell { max-width: 1100px; margin: 1rem auto 3rem; padding: 0 1rem; }
+    .directory-header { align-items: flex-start; }
+    .directory-header > div:first-child { flex: 1 1 320px; min-width: 0; }
+    .directory-title { display: block; position: relative; line-height: 1.2; margin: 0 0 .65rem; overflow-wrap: anywhere; }
+    .directory-intro { display: block; position: relative; clear: both; margin: 0; line-height: 1.55; }
+    .directory-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 2rem; gap: 1.5rem; }
+    .directory-title { color: #092a4b; font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
+    .directory-search { flex: 1 1 320px; max-width: 340px; display: flex; align-items: center; background: #f8fafc; border-radius: 8px; border: 1px solid #dbe3ee; padding: 0.5rem 1rem; }
+    .directory-search input { border: none; background: transparent; font-size: 1rem; width: 100%; outline: none; color: #0f172a; padding: 0.5rem 0; }
+    .directory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .profile-card { background: #fff; background-clip: padding-box; border: 1px solid #dbe3ee; border-radius: 18px; overflow: hidden; isolation: isolate; box-shadow: 0 8px 32px rgba(2,6,23,.10); padding: 2rem 1.5rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; transition: box-shadow 0.2s, transform 0.2s; position: relative; min-height: 340px; }
+    .profile-card:hover { box-shadow: 0 16px 40px rgba(2,6,23,.16); transform: translateY(-2px); }
+    .profile-card img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 2.5px solid #0284c7; background: #f8fafc; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(2,132,199,0.08); }
+    .profile-card .name { font-weight: 700; color: #0284c7; font-size: 1.18rem; margin-bottom: 0.25rem; text-align: center; text-decoration: none; letter-spacing: -0.5px; display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+    .onfido-verified-tag { display:inline-flex; align-items:center; justify-content:center; margin:0 0 .65rem; padding:4px 9px; border-radius:999px; background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; font-size:.76rem; font-weight:800; letter-spacing:.01em; }
+    .onfido-unverified-tag { display:inline-flex; align-items:center; justify-content:center; margin:0 0 .65rem; padding:4px 9px; border-radius:999px; background:transparent; color:#64748b; border:1px solid #94a3b8; font-size:.76rem; font-weight:800; letter-spacing:.01em; }
+    .profile-card .bio { color: #475569; font-size: 1.01rem; margin-bottom: 0.7rem; text-align: center; min-height: 2.5em; max-width: 90%; line-height: 1.5; }
+    .presence-method-row { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin:0 0 .7rem; }
+    .presence-method-row .online-status { margin:0; }
+    .signin-method-tag { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; flex:0 0 18px; }
+    .presence-method-row .signin-method-icon { display:block; width:15px !important; height:15px !important; min-width:15px; max-width:15px; object-fit:contain; border:0; border-radius:0; margin:0; padding:0; box-shadow:none; background:transparent; flex:0 0 15px; }
+    .online-status { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0.7rem; color: #16a34a; font-size: 0.9rem; font-weight: 700; }
+    .message-member-btn{display:inline-flex;align-items:center;justify-content:center;margin-top:auto;width:42px;height:42px;border:1px solid #0284c7;border-radius:10px;background:#fff;color:#0284c7;text-decoration:none;font-size:1.15rem;transition:background-color .2s,color .2s,transform .2s}.message-member-btn:hover,.message-member-btn:focus-visible{background:#0284c7;color:#fff;transform:translateY(-1px)}
+    .online-status-dot { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: inline-block; box-shadow: 0 0 0 2px rgba(34,197,94,.12); }
+    .online-status.offline-status { color: #6b7280; }
+    .online-status.offline-status .online-status-dot { background: #9ca3af; box-shadow: 0 0 0 2px rgba(156,163,175,.16); }
+    .directory-status { color: var(--muted); text-align: center; margin: 1.5rem 0; font-size: 1.08rem; }
+    .directory-loading{display:flex;align-items:center;justify-content:center;gap:12px;padding:1rem 1.25rem;color:#475569;font-weight:600}.directory-loading-mark{display:flex;align-items:center;gap:4px;height:22px}.directory-loading-mark span{display:block;width:6px;height:6px;border-radius:50%;background:#0284c7;animation:directoryLoadingBounce .9s ease-in-out infinite}.directory-loading-mark span:nth-child(2){animation-delay:.14s}.directory-loading-mark span:nth-child(3){animation-delay:.28s}@keyframes directoryLoadingBounce{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-6px);opacity:1}}@media(prefers-reduced-motion:reduce){.directory-loading-mark span{animation:none;opacity:.8}}
+    .directory-auth-prompt { display:none; max-width:460px; margin:3rem auto; padding:2rem 1.5rem; border:1px solid #dbe3ee; border-radius:16px; background:#fff; box-shadow:0 8px 28px rgba(2,6,23,.08); text-align:center; }
+    .directory-auth-prompt h2 { margin:0 0 .5rem; color:#092a4b; font-size:1.35rem; }
+    .directory-auth-prompt p { margin:0 0 1.25rem; color:var(--muted); line-height:1.5; }
+
+    /* Unauthenticated sign-in prompt: self-contained dark styling that overrides shared button defaults. */
+    .directory-auth-prompt {
+      width: min(100% - 2rem, 460px);
+      margin: clamp(2rem, 7vh, 4rem) auto;
+      padding: clamp(1.5rem, 4vw, 2.25rem);
+      background: #111827 !important;
+      color: #e5e7eb !important;
+      border: 1px solid #374151 !important;
+      border-radius: 16px;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .32) !important;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+    .directory-auth-prompt h2 {
+      margin: 0 0 .65rem;
+      color: #f9fafb !important;
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      line-height: 1.3;
+    }
+    .directory-auth-prompt p {
+      margin: 0 auto 1.35rem;
+      max-width: 34ch;
+      color: #d1d5db !important;
+      font-size: .98rem;
+      line-height: 1.65;
+    }
+    .directory-auth-prompt a.btn,
+    .directory-auth-prompt a.btn.btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 132px;
+      padding: .7rem 1.2rem;
+      border: 1px solid #2563eb !important;
+      border-radius: 9px;
+      background: #1d4ed8 !important;
+      color: #fff !important;
+      font: inherit;
+      font-weight: 750;
+      line-height: 1.2;
+      text-decoration: none !important;
+      box-shadow: none;
+      transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .directory-auth-prompt a.btn:hover,
+    .directory-auth-prompt a.btn:focus-visible,
+    .directory-auth-prompt a.btn.btn-primary:hover,
+    .directory-auth-prompt a.btn.btn-primary:focus-visible {
+      background: #1e40af !important;
+      border-color: #60a5fa !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+      outline: 2px solid #93c5fd;
+      outline-offset: 3px;
+    }
+    .directory-auth-prompt a.btn:focus:not(:focus-visible) {
+      outline: none;
+    }
+    @media (max-width: 480px) {
+      .directory-auth-prompt {
+        width: calc(100% - 2rem);
+        margin: 1.5rem auto 2rem;
+        padding: 1.4rem 1.1rem;
+      }
+    }
+    /* Hamlet shortcut: subdued dark-mode treatment to match the directory palette. */
+    body .verify-corner-btn {
+      background: #172338 !important;
+      border-color: #334155 !important;
+      color: #cbd5e1 !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .22) !important;
+    }
+    body .verify-corner-btn:hover,
+    body .verify-corner-btn:focus-visible {
+      background: #1e293b !important;
+      border-color: #64748b !important;
+      color: #f1f5f9 !important;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .3) !important;
+    }
+    .sidebar-menu-shell {
+      display: none;
+      position: fixed;
+      top: 88px;
+      left: 24px;
+      width: 220px;
+      background: #ffffff;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12);
+      padding: 10px 0;
+      z-index: 950;
+    }
+    .sidebar-menu-link {
+      display: block;
+      padding: 11px 14px;
+      margin: 2px 8px;
+      border-radius: 8px;
+      color: #092a4b;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+    .sidebar-menu-link:hover,
+    .sidebar-menu-link:focus {
+      background: #092a4b;
+      color: #ffffff;
+      transform: translateX(3px);
+    }
+    .sidebar-menu-icon {
+      display: inline-block;
+      width: 1.25em;
+      min-width: 1.25em;
+      text-align: center;
+      margin-right: 0.65em;
+      font-size: 1.15em;
+      vertical-align: middle;
+      opacity: 0.88;
+    }
+    @media (max-width: 980px) {
+      .sidebar-menu-shell {
+        position: static;
+        width: 100%;
+        max-width: 900px;
+        margin: 12px auto;
+      }
+      body.has-sidebar #protected-content {
+        margin-left: 0;
+      }
+    }
+    @media (max-width: 900px) {
+      .resource-nav, .site-header {
+        background: #071D4A !important;
+        border-bottom: 1px solid #071D4A !important;
+        backdrop-filter: none !important;
+      }
+    }
+  
+    .directory-intro{margin:-1.25rem 0 1.4rem;color:#475569;line-height:1.55}
+    /* Keep the intro in normal flow beneath the H1; override legacy negative margin. */
+    .directory-header > div:first-child .directory-title { display:block; margin:0 0 .65rem; line-height:1.2; }
+    .directory-header > div:first-child .directory-intro { display:block; position:static; clear:both; margin:0; line-height:1.55; }
+    .directory-controls{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:.8rem;padding:1rem;margin:0 0 1rem;border:1px solid #dbe3ee;border-radius:14px;background:#f8fbff}
+    .directory-field{display:flex;flex-direction:column;gap:.35rem;color:#334155;font-size:.84rem;font-weight:700;min-width:0}
+    .directory-field select{width:100%;min-height:42px;border:1px solid #cbd5e1;border-radius:8px;padding:.55rem .65rem;background:#fff;color:#0f172a;font:inherit;font-weight:500}
+    .directory-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin:0 0 1.1rem}
+    .directory-toolbar-actions,.directory-view-actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+    .directory-tool-btn{min-height:38px;padding:.5rem .8rem;border:1px solid #cbd5e1;border-radius:8px;color:#123657;background:#fff;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer}
+    .directory-tool-btn:hover,.directory-tool-btn:focus-visible{border-color:#0284c7;color:#0369a1}
+    .directory-tool-btn[aria-pressed="true"]{background:#092a4b;border-color:#092a4b;color:#fff}
+    .directory-tool-btn:disabled{opacity:.55;cursor:wait}
+    .directory-summary{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;margin:.8rem 0 1rem;color:#475569;font-size:.92rem}
+    .directory-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:0 0 1.25rem}
+    .directory-stat{border:1px solid #dbe3ee;border-radius:12px;background:#fff;padding:.85rem 1rem}
+    .directory-stat strong{display:block;color:#092a4b;font-size:1.35rem;line-height:1.3}
+    .directory-stat span{color:#64748b;font-size:.82rem}
+    .directory-grid{align-items:stretch}
+    .profile-card{min-width:0;padding:1.35rem 1.25rem 1.15rem;min-height:340px;transform:none;overflow:hidden;background-clip:padding-box}
+    .profile-card:hover{transform:translateY(-2px)}
+    .member-person{display:flex;flex-direction:column;align-items:center;width:100%}
+    .profile-card img{flex:0 0 auto}
+    .profile-card .name{overflow-wrap:anywhere}.member-username{display:block;margin:-.05rem 0 .55rem;color:#7dd3fc;font-size:.84rem;font-weight:700;letter-spacing:.015em;overflow-wrap:anywhere;text-align:center}.directory-grid.list-view .member-username{text-align:left}
+    .member-tags{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.4rem;margin:.2rem 0 .65rem}
+    .member-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:4px 8px;border:1px solid #cbd5e1;color:#475569;background:#f8fafc;font-size:.72rem;line-height:1.25;font-weight:800}
+    .member-badge.identity-verified{color:#166534;background:#f0fdf4;border-color:#bbf7d0}
+    .member-badge.identity-unverified-link{cursor:pointer;text-decoration:none;color:inherit}
+    .member-badge.identity-unverified-link:hover,.member-badge.identity-unverified-link:focus-visible{border-color:#94a3b8;outline:2px solid #64748b;outline-offset:2px}
+    .verify-corner-btn { position: fixed; left: 22px; bottom: 22px; z-index: 1000; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 44px; padding: .7rem 1rem; border: 1px solid #0284c7; border-radius: 10px; background: #0284c7; color: #fff !important; text-decoration: none; font-weight: 700; font-size: .9rem; box-shadow: 0 8px 20px rgba(2, 132, 199, .22); transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+    .verify-corner-btn:hover, .verify-corner-btn:focus-visible { background: #0369a1; border-color: #0369a1; color: #fff !important; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(2, 132, 199, .28); }
+    @media (max-width: 600px) { .verify-corner-btn { left: 14px; bottom: 14px; min-height: 42px; padding: .65rem .85rem; font-size: .84rem; } }
+    .member-badge.email-listed{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}
+    .profile-card .bio{white-space:pre-wrap;overflow-wrap:anywhere}
+    .profile-card .bio a{color:#0369a1;text-decoration:underline;overflow-wrap:anywhere}
+    .profile-card .bio-empty{color:#64748b;font-style:italic}
+    .member-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.55rem;width:100%;margin-top:auto;padding-top:.9rem}
+    .member-action{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:40px;padding:.55rem .8rem;border:1px solid #0284c7;border-radius:9px;background:#fff;color:#0369a1;text-decoration:none;text-align:center;font-size:.86rem;font-weight:800}
+    .member-action.primary{background:#0284c7;color:#fff}
+    .member-action:hover,.member-action:focus-visible{background:#0369a1;border-color:#0369a1;color:#fff}
+    .directory-empty{display:none;border:1px dashed #cbd5e1;border-radius:14px;padding:2rem 1.2rem;text-align:center;color:#475569;background:#f8fafc}
+    .directory-empty strong{display:block;color:#092a4b;margin-bottom:.35rem}
+    .directory-grid.list-view{display:flex;flex-direction:column;gap:.8rem}
+    .directory-grid.list-view .profile-card{min-height:0;flex-direction:row;align-items:flex-start;gap:1rem;padding:1rem;text-align:left}
+    .directory-grid.list-view .member-person{flex-direction:row;align-items:flex-start;gap:1rem;width:100%}
+    .directory-grid.list-view .profile-card img{width:72px;height:72px;margin:0}
+    .directory-grid.list-view .member-main{display:flex;flex:1;flex-direction:column;align-items:flex-start;min-width:0}
+    .directory-grid.list-view .profile-card .name{justify-content:flex-start;text-align:left;margin:.1rem 0 .4rem}
+    .directory-grid.list-view .member-tags{justify-content:flex-start;margin:0 0 .4rem}
+    .directory-grid.list-view .online-status{margin-bottom:.4rem}
+    .directory-grid.list-view .profile-card .bio{text-align:left;max-width:100%;min-height:0;margin-bottom:.4rem}
+    .directory-grid.list-view .member-actions{flex:0 0 auto;width:auto;margin-top:0;padding-top:0;align-self:center}
+    .directory-grid.list-view .member-action{white-space:nowrap}
+    .directory-status{font-size:.98rem}
+    @media(max-width:850px){.directory-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){
+      .directory-shell{margin-top:1.25rem}.directory-title{font-size:1.65rem}
+      .directory-header{gap:.9rem;margin-bottom:1rem}.directory-search{max-width:none;flex-basis:100%}
+      .directory-controls{grid-template-columns:1fr 1fr;padding:.8rem;gap:.7rem}
+      .directory-stats{gap:.5rem}.directory-stat{padding:.7rem .65rem}
+      .directory-stat strong{font-size:1.15rem}.directory-stat span{font-size:.74rem}
+      .directory-grid{gap:1rem}.directory-grid.list-view .profile-card{flex-wrap:wrap}
+      .directory-grid.list-view .member-actions{width:100%;justify-content:flex-start;padding-left:0}
+    }
+    @media(max-width:380px){.directory-controls{grid-template-columns:1fr}}
+
+    .directory-pagination{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin:1.2rem 0 2rem;padding:.8rem;border:1px solid #dbe3ee;border-radius:12px;background:#f8fbff;color:#475569;font-size:.88rem}
+    .directory-pagination-group{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+    .directory-pagination select{min-height:36px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;padding:.35rem .5rem;color:#0f172a;font:inherit}
+    .directory-pagination .directory-tool-btn{min-height:36px;padding:.4rem .65rem}
+
+    /* Production dark theme: consistent dark surfaces, heading spacing and control contrast. */
+    body { color:#e5e7eb; background:#111827; }
+    .page-wrapper { background:#111827; box-shadow:0 0 24px rgba(0,0,0,.35); }
+    .directory-title { color:#f8fafc; padding:.15rem 0; }
+    .directory-header > div:first-child { text-align:center; }
+    .directory-intro,.directory-summary,.directory-pagination { color:#cbd5e1; }
+    .directory-search,.directory-controls,.directory-pagination { background:#111827; border-color:#334155; }
+    .directory-search input { color:#f8fafc; }
+    .directory-search input::placeholder { color:#94a3b8; }
+    .directory-field { color:#cbd5e1; }
+    .directory-field select,.directory-pagination select { background:#111827; color:#e5e7eb; border-color:#475569; }
+    .profile-card,.directory-stat,.directory-auth-prompt { background:#111827; color:#e5e7eb; border-color:#374151; box-shadow:0 8px 28px rgba(0,0,0,.28); }
+    .profile-card:hover { box-shadow:0 14px 34px rgba(0,0,0,.4); }
+    .profile-card .name { color:#7dd3fc; }
+    .profile-card .bio,.profile-card .bio-empty { color:#cbd5e1; }
+    .profile-card .bio a { color:#7dd3fc; }
+    .directory-stat strong,.directory-empty strong,.directory-auth-prompt h2 { color:#f8fafc; }
+    .directory-stat span,.directory-auth-prompt p { color:#94a3b8; }
+    .directory-empty { color:#cbd5e1; background:#111827; border-color:#475569; }
+    .member-badge { background:#1e293b; color:#cbd5e1; border-color:#475569; }
+    .member-badge.identity-verified { background:#123524; color:#bbf7d0; border-color:#166534; }
+    .member-badge.email-listed { background:#172554; color:#bfdbfe; border-color:#1d4ed8; }
+    .member-action,.message-member-btn { background:#172338; color:#7dd3fc; border-color:#0369a1; }
+    .member-action.primary { background:#075985; color:#fff; border-color:#0369a1; }
+    .member-action:hover,.member-action:focus-visible,.message-member-btn:hover,.message-member-btn:focus-visible { background:#0369a1; color:#fff; border-color:#0284c7; }
+    .directory-tool-btn { background:#172338; color:#e2e8f0; border-color:#475569; }
+    .directory-tool-btn:hover,.directory-tool-btn:focus-visible { background:#1e3a5f; color:#f8fafc; border-color:#38bdf8; }
+    .directory-tool-btn[aria-pressed="true"] { background:#075985; border-color:#0284c7; color:#fff; }
+    .directory-tool-btn:disabled { color:#94a3b8; }
+    .directory-loading { color:#cbd5e1; }
+    .directory-loading-mark span { background:#38bdf8; }
+    .online-status.offline-status { color:#9ca3af; }
+    .sidebar-menu-shell { background:#0f1b2d; border-color:#334155; box-shadow:0 10px 24px rgba(0,0,0,.35); }
+    .sidebar-menu-link { color:#e2e8f0; }
+    .sidebar-menu-link:hover,.sidebar-menu-link:focus { background:#1d4ed8; color:#fff; }
+    .directory-title,.directory-stat strong { padding-left:0; padding-right:0; }
+
+
+    /* Directory dark-mode contrast: search placeholder and linked names in grid cards. */
+    html[data-appearance="dark"] .directory-search {
+      background:#111827 !important; border-color:#475569 !important;
+    }
+    html[data-appearance="dark"] #directorySearchInput {
+      background:transparent !important; color:#f8fafc !important; caret-color:#f8fafc;
+    }
+    html[data-appearance="dark"] #directorySearchInput::placeholder {
+      color:#cbd5e1 !important; opacity:1 !important;
+    }
+    html[data-appearance="dark"] .directory-grid .profile-card .name,
+    html[data-appearance="dark"] .directory-grid .profile-card a.name,
+    html[data-appearance="dark"] .directory-grid .profile-card .name:visited {
+      color:#7dd3fc !important; background:transparent !important; background-color:transparent !important;
+      text-decoration-color:#7dd3fc !important;
+    }
+    html[data-appearance="dark"] .directory-grid .profile-card .name:hover,
+    html[data-appearance="dark"] .directory-grid .profile-card .name:focus-visible {
+      color:#bae6fd !important; background:transparent !important; background-color:transparent !important;
+    }
+    html[data-appearance="dark"] .directory-grid .profile-card a:not(.member-action):not(.message-member-btn) {
+      background:transparent !important; background-color:transparent !important;
+    }
+
+    /* Keep legal links understated, but clearly legible against the dark footer. */
+    .resource-footer .footer-links a,
+    .resource-footer a[href*="terms.html"],
+    .resource-footer a[href*="cookies.html"],
+    .resource-footer a[href*="privacy.html"] {
+      color: #64748b;
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+    html[data-appearance="dark"] .resource-footer .footer-links a,
+    html[data-appearance="dark"] .resource-footer a[href*="terms.html"],
+    html[data-appearance="dark"] .resource-footer a[href*="cookies.html"],
+    html[data-appearance="dark"] .resource-footer a[href*="privacy.html"] {
+      color: #94a3b8 !important;
+    }
+    html[data-appearance="dark"] .resource-footer .footer-links a:hover,
+    html[data-appearance="dark"] .resource-footer .footer-links a:focus-visible,
+    html[data-appearance="dark"] .resource-footer a[href*="terms.html"]:hover,
+    html[data-appearance="dark"] .resource-footer a[href*="cookies.html"]:hover,
+    html[data-appearance="dark"] .resource-footer a[href*="privacy.html"]:hover {
+      color: #cbd5e1 !important;
+      text-decoration: underline;
+    }
+
+  
+    /* Align the directory heading and its supporting copy with the content column. */
+    .directory-header { justify-content: flex-start; }
+    .directory-header > div:first-child { text-align: left !important; margin-left: 0 !important; padding-left: 0 !important; }
+    .directory-header .directory-title,
+    .directory-header .directory-intro { text-align: left !important; margin-left: 0 !important; }
+
+/* Shared responsive Hamlet header fix (mobile) */
+@media(max-width:760px){
+  .resource-nav.hamlet-404-header>.container.container-nav{
+    display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;
+    width:100%;min-width:0;box-sizing:border-box;gap:10px;
+    padding:11px 14px;margin:0 auto
+  }
+  .resource-nav.hamlet-404-header>.container.container-nav>.logo{flex:0 0 100%;width:100%;min-width:0}
+  .resource-nav.hamlet-404-header>.container.container-nav>.user-menu,
+  .resource-nav.hamlet-404-header>.container.container-nav>.topbar-actions{
+    flex:0 1 100%;width:100%;max-width:100%;min-width:0;margin-left:0!important;
+    justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:8px;
+    overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;box-sizing:border-box;
+    scrollbar-width:thin;-webkit-overflow-scrolling:touch
+  }
+  .resource-nav.hamlet-404-header .site-title{white-space:nowrap}
+  .resource-nav.hamlet-404-header .user-menu>a,.resource-nav.hamlet-404-header .user-menu>button,
+  .resource-nav.hamlet-404-header .topbar-actions>.btn{
+    flex:0 0 auto;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:.8rem;line-height:1.15
+  }
+  .resource-nav.hamlet-404-header .auth-profile-chip,.resource-nav.hamlet-404-header .profile{flex:0 0 auto;min-width:0;max-width:40vw}
+  .resource-nav.hamlet-404-header .auth-profile-name,.resource-nav.hamlet-404-header [data-auth-name]{
+    display:inline-block;max-width:28vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  }
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{width:32px;height:32px;flex:0 0 auto}
+}
+@media(max-width:380px){
+  .resource-nav.hamlet-404-header>.container.container-nav{padding-inline:10px}
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{display:none}
+}
+</style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-3">
+  </head>
+<body class="auth-pending">
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a>
+        </div>
+        <div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <div class="auth-profile-chip" data-auth-profile>
+            <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+            <span class="auth-profile-name" data-auth-name></span>
+          </div>
+          <a class="btn btn-outline nav-login" href="/login.html" id="signInLink">Sign In</a>
+          
+          <button class="btn btn-outline" id="signOutBtn" style="display:none">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    <nav id="topNavMenu" aria-hidden="true" hidden></nav>
+    <script>
+      function updateSidebarVisibility() {
+        var sidebar = document.getElementById('topNavMenu');
+        if (document.body.classList.contains('has-sidebar')) {
+          sidebar.style.display = 'block';
+        } else {
+          sidebar.style.display = 'none';
+        }
+      }
+      document.addEventListener('DOMContentLoaded', updateSidebarVisibility);
+      var observer = new MutationObserver(updateSidebarVisibility);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    <main class="directory-shell" role="main">
+      <div class="directory-header">
+        <div>
+          <h1 class="directory-title">Member Directory</h1>
+          <p class="directory-intro">Discover members, check identity-verification status, and start a conversation.</p>
+        </div>
+        <form class="directory-search" id="directorySearchForm" role="search">
+          <input id="directorySearchInput" type="search" placeholder="Search names or bios…" aria-label="Search members by name or bio" autocomplete="off">
+        </form>
+      </div>
+      <section class="directory-controls" aria-label="Directory filters">
+        <label class="directory-field" for="directorySort">Sort members
+          <select id="directorySort">
+            <option value="activity">Recently active</option>
+            <option value="firstName">First name A–Z</option>
+            <option value="lastName">Surname A–Z</option>
+            <option value="lastNameDesc">Surname Z–A</option>
+            <option value="verified">Verified identity first</option>
+          </select>
+        </label>
+        <label class="directory-field" for="directoryPresence">Availability
+          <select id="directoryPresence">
+            <option value="all">All members</option>
+            <option value="online">Online now</option>
+          </select>
+        </label>
+        <label class="directory-field" for="directoryIdentity">Identity check
+          <select id="directoryIdentity">
+            <option value="all">Any status</option>
+            <option value="verified">Verified</option>
+            <option value="unverified">Unverified</option>
+          </select>
+        </label>
+        <label class="directory-field" for="directoryEmail">Email address
+          <select id="directoryEmail">
+            <option value="all">Any status</option>
+            <option value="listed">Address on file</option>
+            <option value="missing">No address on file</option>
+          </select>
+        </label>
+      </section>
+      <div class="directory-toolbar">
+        <div class="directory-toolbar-actions">
+          <button class="directory-tool-btn" type="button" id="clearDirectoryFilters">Clear filters</button>
+          <button class="directory-tool-btn" type="button" id="refreshDirectory">↻ Refresh</button>
+          <button class="directory-tool-btn" type="button" id="reportDirectory" aria-label="Report an issue with the member directory" title="Report an issue with the member directory">⚑ Report</button>
+        </div>
+        <div class="directory-view-actions" role="group" aria-label="Directory layout">
+          <button class="directory-tool-btn" type="button" id="gridViewBtn" aria-pressed="false">▦ Grid</button>
+          <button class="directory-tool-btn" type="button" id="listViewBtn" aria-pressed="true">☷ List</button>
+        </div>
+      </div>
+      <section class="directory-stats" aria-label="Directory statistics">
+        <div class="directory-stat"><strong id="totalMembersCount">—</strong><span>Public profiles</span></div>
+        <div class="directory-stat"><strong id="onlineMembersCount">—</strong><span>Online now</span></div>
+        <div class="directory-stat"><strong id="verifiedMembersCount">—</strong><span>Identity verified</span></div>
+      </section>
+      <div id="directorySummary" class="directory-summary" aria-live="polite"></div>
+      <div id="directoryStatus" class="directory-status" role="status" aria-live="polite"><div class="directory-loading"><span class="directory-loading-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>Loading directory</span></div></div>
+      <div id="directoryAuthPrompt" class="directory-auth-prompt" role="region" aria-label="Sign in required">
+        <h2>Sign in to continue</h2>
+        <p>You need to be signed in to view the member directory.</p>
+        <a class="btn btn-primary" href="/login.html">Sign In</a>
+      </div>
+      <div id="directoryGrid" class="directory-grid" style="display:none"></div>
+      <div id="directoryEmpty" class="directory-empty" role="status" aria-live="polite">
+        <strong>No members found</strong>
+        Try a different search or remove one or more filters.
+      </div>
+      <div id="directoryPagination" class="directory-pagination" style="display:none" aria-label="Directory pagination">
+        <div class="directory-pagination-group">
+          <label for="directoryPageSize">Show</label>
+          <select id="directoryPageSize" aria-label="Members per page">
+            <option value="12" selected>12</option>
+            <option value="24">24</option>
+            <option value="48">48</option>
+          </select>
+          <span>per page</span>
+        </div>
+        <div class="directory-pagination-group">
+          <button class="directory-tool-btn" type="button" id="directoryFirstPage">« First</button>
+          <button class="directory-tool-btn" type="button" id="directoryPreviousPage">Previous</button>
+          <span id="directoryPageIndicator" aria-live="polite">Page 1 of 1</span>
+          <button class="directory-tool-btn" type="button" id="directoryNextPage">Next</button>
+          <button class="directory-tool-btn" type="button" id="directoryLastPage">Last »</button>
+        </div>
+      </div>
+    </main>
+    <footer class="resource-footer" role="contentinfo">
+      <div class="container" style="text-align:center">
+        <div style="margin-bottom:4px;color:var(--muted);font-size:0.95rem;">v1.04.04</div><div style="margin-bottom:4px;color:var(--muted);font-size:0.9rem;"><a href="https://uk.ibrecruitment.com/terms.html">Terms</a> | <a href="https://uk.ibrecruitment.com/cookies.html">Cookies</a> | <a href="https://uk.ibrecruitment.com/privacy.html">Privacy</a></div>
+        <p style="margin:0;color:var(--muted)">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script><script defer src="/profile-service.js?v=20261010-2"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script defer src="/mobile-compat.js"></script>
+  <script defer src="/page-transition.js"></script>
+  <script src="/verified-tick.js"></script>
+  <script>
+    window.addEventListener('load', function () {
+      const status = document.getElementById('directoryStatus');
+      const authPrompt = document.getElementById('directoryAuthPrompt');
+      const grid = document.getElementById('directoryGrid');
+      const emptyState = document.getElementById('directoryEmpty');
+      const summary = document.getElementById('directorySummary');
+      const searchInput = document.getElementById('directorySearchInput');
+      const sortSelect = document.getElementById('directorySort');
+      const presenceSelect = document.getElementById('directoryPresence');
+      const identitySelect = document.getElementById('directoryIdentity');
+      const emailSelect = document.getElementById('directoryEmail');
+      const clearButton = document.getElementById('clearDirectoryFilters');
+      const refreshButton = document.getElementById('refreshDirectory');
+      const reportButton = document.getElementById('reportDirectory');
+      const gridButton = document.getElementById('gridViewBtn');
+      const listButton = document.getElementById('listViewBtn');
+      const signOutBtn = document.getElementById('signOutBtn');
+      const signInLink = document.getElementById('signInLink');
+      const mailboxLink = document.getElementById('mailboxLink');
+      const totalCount = document.getElementById('totalMembersCount');
+      const onlineCount = document.getElementById('onlineMembersCount');
+      const verifiedCount = document.getElementById('verifiedMembersCount');
+      const pagination = document.getElementById('directoryPagination');
+      const pageSizeSelect = document.getElementById('directoryPageSize');
+      const pageIndicator = document.getElementById('directoryPageIndicator');
+      const firstPageButton = document.getElementById('directoryFirstPage');
+      const previousPageButton = document.getElementById('directoryPreviousPage');
+      const nextPageButton = document.getElementById('directoryNextPage');
+      const lastPageButton = document.getElementById('directoryLastPage');
+      const signedInOnlyControls = [
+        document.querySelector('.directory-search'),
+        document.querySelector('.directory-controls'),
+        document.querySelector('.directory-toolbar'),
+        document.querySelector('.directory-stats'),
+        summary,
+        pagination,
+        document.querySelector('.verify-corner-btn')
+      ];
+      function setSignedInControlsVisible(visible) {
+        signedInOnlyControls.forEach(function (node) {
+          if (node) node.style.display = visible ? '' : 'none';
+        });
+      }
+      setSignedInControlsVisible(false);
+      const DEFAULT_PUBLIC_IMAGE = '/assets/images/dark-hamlet.png';
+      let db = null;
+      let allMembers = [];
+      let pinnedMember = null;
+      let currentUid = '';
+      let currentView = 'list';
+      let currentPage = 1;
+      let loading = false;
+
+      function validEmail(value) { return IBRVerifiedTick.isValidEmail(String(value || '')); }
+      function nameOf(data) {
+        const first = String(data.firstName || '').trim();
+        const last = String(data.lastName || '').trim();
+        return (first + ' ' + last).trim() || 'Member';
+      }
+      function dateOf(value) {
+        if (!value) return null;
+        if (typeof value.toDate === 'function') {
+          const date = value.toDate();
+          return isNaN(date.getTime()) ? null : date;
+        }
+        if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      function imageSource(value) {
+        if (typeof value !== 'string' || !value || value.length > 2500000) return DEFAULT_PUBLIC_IMAGE;
+        if (/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-z0-9+/=\s]+$/i.test(value)) return value;
+        if (value.charAt(0) === '/' && value.charAt(1) !== '/' && !value.includes('\\')) return value;
+        return DEFAULT_PUBLIC_IMAGE;
+      }
+      function makeElement(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined && text !== null) node.textContent = String(text);
+        return node;
+      }
+      function appendBio(container, value) {
+        const bio = String(value || '').trim();
+        if (!bio) {
+          container.textContent = 'This member has not added a bio yet.';
+          container.classList.add('bio-empty');
+          return;
+        }
+        const urlPattern = /(https?:\/\/[^\s]+)/gi;
+        let lastIndex = 0;
+        let match;
+        while ((match = urlPattern.exec(bio)) !== null) {
+          container.appendChild(document.createTextNode(bio.slice(lastIndex, match.index)));
+          let rawUrl = match[0];
+          let suffix = '';
+          while (/[),.!?;:]$/.test(rawUrl)) {
+            suffix = rawUrl.slice(-1) + suffix;
+            rawUrl = rawUrl.slice(0, -1);
+          }
+          try {
+            const parsed = new URL(rawUrl);
+            if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+              const link = makeElement('a', '', rawUrl);
+              link.href = parsed.href;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              container.appendChild(link);
+            } else container.appendChild(document.createTextNode(rawUrl));
+          } catch (error) {
+            container.appendChild(document.createTextNode(rawUrl));
+          }
+          if (suffix) container.appendChild(document.createTextNode(suffix));
+          lastIndex = match.index + match[0].length;
+        }
+        container.appendChild(document.createTextNode(bio.slice(lastIndex)));
+      }
+      function lastActiveDate(data) { return dateOf(data.lastLogin || data['Last Login']); }
+      function isOnline(data) {
+        const lastLogin = lastActiveDate(data);
+        if (data.incognito === true || !lastLogin) return false;
+        const age = Date.now() - lastLogin.getTime();
+        return age >= 0 && age <= 60 * 60 * 1000;
+      }
+      function showSignedOut() {
+        setSignedInControlsVisible(false);
+        status.textContent = '';
+        status.style.display = 'none';
+        authPrompt.style.display = 'block';
+        grid.style.display = 'none';
+        emptyState.style.display = 'none';
+        summary.textContent = '';
+        signOutBtn.style.display = 'none';
+        if (mailboxLink) mailboxLink.style.display = 'none';
+        signInLink.style.display = 'inline-flex';
+        document.body.classList.remove('auth-pending', 'has-sidebar');
+      }
+      function buildCard(member) {
+        const data = member.data;
+        const name = nameOf(data);
+        const identityVerified = data.onfidoVerified === true;
+        const emailListed = validEmail(data.email);
+        const online = isOnline(data);
+        const card = makeElement('article', 'profile-card');
+        card.dataset.uid = member.uid;
+        const username = typeof data.username === 'string' && /^[a-z0-9_]{3,20}$/i.test(data.username.trim()) ? data.username.trim().toLowerCase() : '';
+        card.dataset.search = (name + ' ' + (username ? '@' + username + ' ' + username : '') + ' ' + String(data.bio || '')).toLocaleLowerCase();
+        card.dataset.firstName = String(data.firstName || '').trim().toLocaleLowerCase();
+        card.dataset.lastName = String(data.lastName || '').trim().toLocaleLowerCase();
+        card.dataset.online = String(online);
+        card.dataset.identityVerified = String(identityVerified);
+        card.dataset.emailListed = String(emailListed);
+        const person = makeElement('div', 'member-person');
+        const avatar = makeElement('img');
+        avatar.src = imageSource(data.imageDataUrl);
+        avatar.alt = name + ' profile photo';
+        avatar.loading = 'lazy';
+        avatar.decoding = 'async';
+        avatar.onerror = function () { avatar.onerror = null; avatar.src = DEFAULT_PUBLIC_IMAGE; };
+        person.appendChild(avatar);
+        const main = makeElement('div', 'member-main');
+        const nameRow = makeElement('a', 'name', name);
+        nameRow.href = data.username ? '/profile.html?username=' + encodeURIComponent(data.username) : '/profile.html?uid=' + encodeURIComponent(member.uid);
+        nameRow.style.textDecoration = 'none';
+        nameRow.setAttribute('aria-label', 'View profile for ' + name);
+        if (emailListed) {
+          const emailTick = IBRVerifiedTick.create(data.email);
+          if (emailTick) nameRow.appendChild(emailTick);
+        }
+        main.appendChild(nameRow);
+        if (username) main.appendChild(makeElement('div', 'member-username', '@' + username));
+        const tags = makeElement('div', 'member-tags');
+        const identity = makeElement(identityVerified ? 'span' : 'a', 'member-badge' + (identityVerified ? ' identity-verified' : ' identity-unverified-link'),
+          identityVerified ? 'Identity verified' : 'Identity unverified');
+        identity.setAttribute('aria-label', identityVerified ? 'Identity verification completed' : 'Identity not verified');
+        if (!identityVerified) {
+          identity.href = '/onfido/oauth/verify.html';
+          identity.style.textDecoration = 'none';
+          identity.style.color = 'inherit';
+        }
+        tags.appendChild(identity);
+        if (emailListed) tags.appendChild(makeElement('span', 'member-badge email-listed', 'Email on file'));
+        main.appendChild(tags);
+        const presenceMethodRow = makeElement('div', 'presence-method-row');
+        const presenceTag = makeElement('div', 'online-status' + (online ? '' : ' offline-status'));
+        presenceTag.setAttribute('aria-label', online ? 'Online now' : 'Offline');
+        presenceTag.appendChild(makeElement('span', 'online-status-dot'));
+        presenceTag.appendChild(document.createTextNode(online ? 'Online now' : 'Offline'));
+        presenceMethodRow.appendChild(presenceTag);
+        const signInMethod = String(data.signInMethod || '').trim();
+        main.appendChild(presenceMethodRow);
+        const bio = makeElement('div', 'bio');
+        appendBio(bio, data.bio);
+        main.appendChild(bio);
+        person.appendChild(main);
+        card.appendChild(person);
+        const actions = makeElement('div', 'member-actions');
+        const action = makeElement('a', 'member-action primary', member.uid === currentUid ? 'Edit profile' : '✉ Message');
+        action.href = member.uid === currentUid ? '/editprofile.html' : '/messages.html?to=' + encodeURIComponent(member.uid);
+        action.setAttribute('aria-label', member.uid === currentUid ? 'Edit your profile' : 'Send a direct message to ' + name);
+        actions.appendChild(action);
+        card.appendChild(actions);
+        return card;
+      }
+      function updateStatistics() {
+        totalCount.textContent = String(allMembers.length);
+        onlineCount.textContent = String(allMembers.filter(function (m) { return isOnline(m.data); }).length);
+        verifiedCount.textContent = String(allMembers.filter(function (m) { return m.data.onfidoVerified === true; }).length);
+      }
+      function renderDirectory() {
+        const query = String(searchInput.value || '').trim().toLocaleLowerCase();
+        const presence = presenceSelect.value;
+        const identity = identitySelect.value;
+        const email = emailSelect.value;
+        // Keep the authenticated member pinned independently of the active filters and sort order.
+        const ownMember = pinnedMember || allMembers.find(function (member) {
+          return member.uid === currentUid;
+        }) || null;
+        let filtered = allMembers.filter(function (member) {
+          if (member.uid === currentUid) return false;
+          const data = member.data;
+          const searchable = (nameOf(data) + ' ' + String(data.bio || '')).toLocaleLowerCase();
+          if (query && !searchable.includes(query)) return false;
+          if (presence === 'online' && !isOnline(data)) return false;
+          const verified = data.onfidoVerified === true;
+          if (identity === 'verified' && !verified) return false;
+          if (identity === 'unverified' && verified) return false;
+          const hasEmail = validEmail(data.email);
+          if (email === 'listed' && !hasEmail) return false;
+          if (email === 'missing' && hasEmail) return false;
+          return true;
+        });
+        function alpha(a, b, keyA, keyB) {
+          const first = String(a.data[keyA] || '').trim().localeCompare(String(b.data[keyA] || '').trim(), undefined, { sensitivity: 'base' });
+          return first || String(a.data[keyB] || '').trim().localeCompare(String(b.data[keyB] || '').trim(), undefined, { sensitivity: 'base' });
+        }
+        const sort = sortSelect.value;
+        if (sort === 'firstName') filtered.sort(function (a, b) { return alpha(a, b, 'firstName', 'lastName'); });
+        else if (sort === 'lastName') filtered.sort(function (a, b) { return alpha(a, b, 'lastName', 'firstName'); });
+        else if (sort === 'lastNameDesc') filtered.sort(function (a, b) { return -alpha(a, b, 'lastName', 'firstName'); });
+        else if (sort === 'verified') filtered.sort(function (a, b) {
+          return Number(b.data.onfidoVerified === true) - Number(a.data.onfidoVerified === true) ||
+            alpha(a, b, 'lastName', 'firstName');
+        });
+        else filtered.sort(function (a, b) {
+          return (lastActiveDate(b.data) ? lastActiveDate(b.data).getTime() : 0) -
+            (lastActiveDate(a.data) ? lastActiveDate(a.data).getTime() : 0) ||
+            alpha(a, b, 'lastName', 'firstName');
+        });
+        const pageSize = Math.max(1, Number(pageSizeSelect.value) || 12);
+        const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+        currentPage = Math.min(Math.max(1, currentPage), pageCount);
+        const startIndex = (currentPage - 1) * pageSize;
+        const pageMembers = filtered.slice(startIndex, startIndex + pageSize);
+        const visibleMembers = ownMember ? [ownMember].concat(pageMembers) : pageMembers;
+        grid.replaceChildren();
+        grid.classList.toggle('list-view', currentView === 'list');
+        visibleMembers.forEach(function (member) { grid.appendChild(buildCard(member)); });
+        grid.style.display = visibleMembers.length ? (currentView === 'list' ? 'flex' : 'grid') : 'none';
+        emptyState.style.display = filtered.length ? 'none' : 'block';
+        pagination.style.display = filtered.length > pageSize ? 'flex' : 'none';
+        pageIndicator.textContent = 'Page ' + currentPage + ' of ' + pageCount;
+        firstPageButton.disabled = previousPageButton.disabled = currentPage <= 1;
+        nextPageButton.disabled = lastPageButton.disabled = currentPage >= pageCount;
+        const rangeStart = filtered.length ? startIndex + 1 : 0;
+        const rangeEnd = Math.min(startIndex + pageSize, filtered.length);
+        summary.textContent = (ownMember ? 'Your profile is pinned first · ' : '') +
+          'Showing ' + rangeStart + '–' + rangeEnd + ' of ' + filtered.length +
+          ' matching member' + (filtered.length === 1 ? '' : 's') + ' (' + allMembers.length + ' public total)' +
+          (query ? ' · Search: “' + String(searchInput.value).trim() + '”' : '');
+        const otherPublicMembers = allMembers.filter(function (member) {
+          return member.uid !== currentUid;
+        });
+        if (!otherPublicMembers.length && !ownMember) {
+          emptyState.querySelector('strong').textContent = 'No public profiles yet';
+          emptyState.lastChild.textContent = ' Members who save their profile in Edit Profile will appear here.';
+        } else if (!otherPublicMembers.length) {
+          emptyState.querySelector('strong').textContent = 'No other public profiles yet';
+          emptyState.lastChild.textContent = ' Your profile remains pinned first. Other members will appear here when they save a public profile.';
+        } else {
+          emptyState.querySelector('strong').textContent = 'No other members match these filters';
+          emptyState.lastChild.textContent = ' Try a different search or remove one or more filters.';
+        }
+      }
+      function setView(view) {
+        currentView = view;
+        gridButton.setAttribute('aria-pressed', String(view === 'grid'));
+        listButton.setAttribute('aria-pressed', String(view === 'list'));
+        renderDirectory();
+      }
+      async function loadDirectory(user, forceRefresh) {
+        if (loading) return;
+        loading = true;
+        refreshButton.disabled = true;
+        refreshButton.textContent = 'Refreshing…';
+        status.style.display = 'block';
+        status.innerHTML = '<div class="directory-loading"><span class="directory-loading-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>' + (forceRefresh ? 'Refreshing directory' : 'Loading directory') + '</span></div>';
+        emptyState.style.display = 'none';
+        grid.style.display = 'none';
+        try {
+          try {
+            if (window.ibrProfileService) {
+              allMembers = await window.ibrProfileService.listPublicProfiles();
+            } else {
+              const snapshot = await db.collection('publicProfiles').where('isPublic', '==', true).get();
+              allMembers = snapshot.docs.map(function (doc) {
+                return { uid: doc.id, data: doc.data() || {} };
+              });
+            }
+          } catch (firstError) {
+            if (!firstError || firstError.code !== 'permission-denied') throw firstError;
+            await user.getIdToken(true);
+            if (window.ibrProfileService) {
+              allMembers = await window.ibrProfileService.listPublicProfiles();
+            } else {
+              const snapshot = await db.collection('publicProfiles').where('isPublic', '==', true).get();
+              allMembers = snapshot.docs.map(function (doc) {
+                return { uid: doc.id, data: doc.data() || {} };
+              });
+            }
+          }
+          allMembers = allMembers.filter(function (member) {
+            return member.data.isPublic === true && !!member.uid;
+          });
+          // Prefer the public directory entry; if the signed-in member's profile is not public,
+          // try loading their own document so their card can still be pinned for their session.
+          pinnedMember = allMembers.find(function (member) { return member.uid === user.uid; }) || null;
+          if (!pinnedMember && user.uid) {
+            try {
+              const ownProfileResult = window.ibrProfileService
+                ? await window.ibrProfileService.getProfile(user.uid)
+                : await db.collection('publicProfiles').doc(user.uid).get().then(function (snapshot) {
+                    return { exists: snapshot.exists, data: snapshot.exists ? (snapshot.data() || {}) : {} };
+                  });
+              if (ownProfileResult.exists) {
+                pinnedMember = { uid: user.uid, data: ownProfileResult.data || {} };
+              }
+            } catch (ownProfileError) {
+              // A missing/privately protected own profile must not prevent the public directory loading.
+            }
+          }
+          updateStatistics();
+          status.textContent = '';
+          status.style.display = 'none';
+          renderDirectory();
+        } catch (error) {
+          console.error('Member directory Firestore query failed:', error);
+          status.style.display = 'block';
+          status.textContent = error && error.code === 'permission-denied'
+            ? 'Your session is not authorised to view the member directory. Please sign out and sign in again. If the problem continues, check the Firestore rules for publicProfiles.'
+            : 'Failed to load directory. Check your connection and try again.';
+          grid.style.display = 'none';
+          summary.textContent = '';
+          allMembers = [];
+          pinnedMember = null;
+          updateStatistics();
+        } finally {
+          loading = false;
+          refreshButton.disabled = false;
+          refreshButton.textContent = '↻ Refresh';
+        }
+      }
+      if (!window.firebase || !window.firebaseConfig) {
+        status.textContent = 'Unable to initialise the directory. Please refresh the page.';
+        return;
+      }
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+      } catch (error) {
+        console.error('Firebase initialisation failed:', error);
+        status.textContent = 'Unable to initialise the directory. Please refresh the page.';
+        return;
+      }
+      const auth = firebase.auth();
+      db = firebase.firestore();
+      document.getElementById('directorySearchForm').addEventListener('submit', function (event) { event.preventDefault(); });
+      function resetToFirstPageAndRender() { currentPage = 1; renderDirectory(); }
+      searchInput.addEventListener('input', resetToFirstPageAndRender);
+      sortSelect.addEventListener('change', resetToFirstPageAndRender);
+      presenceSelect.addEventListener('change', resetToFirstPageAndRender);
+      identitySelect.addEventListener('change', resetToFirstPageAndRender);
+      emailSelect.addEventListener('change', resetToFirstPageAndRender);
+      pageSizeSelect.addEventListener('change', resetToFirstPageAndRender);
+      firstPageButton.addEventListener('click', function () { currentPage = 1; renderDirectory(); });
+      previousPageButton.addEventListener('click', function () { currentPage = Math.max(1, currentPage - 1); renderDirectory(); });
+      nextPageButton.addEventListener('click', function () { currentPage += 1; renderDirectory(); });
+      lastPageButton.addEventListener('click', function () {
+        const count = Math.max(1, Math.ceil(allMembers.length / (Number(pageSizeSelect.value) || 12)));
+        currentPage = count;
+        renderDirectory();
+      });
+      clearButton.addEventListener('click', function () {
+        searchInput.value = '';
+        sortSelect.value = 'activity';
+        presenceSelect.value = 'all';
+        identitySelect.value = 'all';
+        emailSelect.value = 'all';
+        pageSizeSelect.value = '12';
+        currentPage = 1;
+        renderDirectory();
+        searchInput.focus();
+      });
+      refreshButton.addEventListener('click', function () {
+        if (auth.currentUser) loadDirectory(auth.currentUser, true);
+      });
+      reportButton.addEventListener('click', function () {
+        const subject = encodeURIComponent('Member Directory Report');
+        const body = encodeURIComponent('Please describe the issue you encountered in the Member Directory below.\n\nPage: ' + window.location.href + '\nBrowser: ' + navigator.userAgent + '\n\nDetails:\n');
+        window.location.href = 'mailto:support@mail.hamlet-ai.co.uk?subject=' + subject + '&body=' + body;
+      });
+      gridButton.addEventListener('click', function () { setView('grid'); });
+      listButton.addEventListener('click', function () { setView('list'); });
+      if (signOutBtn) signOutBtn.addEventListener('click', function () { auth.signOut(); });
+      auth.onAuthStateChanged(async function (user) {
+        if (!user) {
+          allMembers = [];
+          pinnedMember = null;
+          currentUid = '';
+          updateStatistics();
+          showSignedOut();
+          return;
+        }
+        currentUid = user.uid;
+        authPrompt.style.display = 'none';
+        setSignedInControlsVisible(true);
+        signOutBtn.style.display = 'inline-flex';
+        if (mailboxLink) mailboxLink.style.display = 'inline-flex';
+        signInLink.style.display = 'none';
+        document.body.classList.remove('auth-pending');
+        document.body.classList.add('has-sidebar');
+        await loadDirectory(user, false);
+      });
+    });
+  </script>
+  <script src="/hamlet-workspace.js?v=20261013-11"></script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body>
+</html>

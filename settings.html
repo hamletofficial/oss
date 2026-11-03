@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex, follow">
+  <title>Account Settings — Hamlet</title>
+  <link rel="stylesheet" href="/resource-centre.css">
+  <link rel="stylesheet" href="/index.css?v=20261015-5">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <style>
+    :root { --muted: #475569; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Open Sans', Arial, sans-serif; color: #0f172a; background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%); }
+    .page-wrapper { background: #fff; max-width: 1920px; min-height: 100vh; margin: 0 auto; box-shadow: 0 0 20px rgba(0, 0, 0, .1) }
+    .auth-shell { max-width: 560px; margin: 28px auto; padding: 30px; border-radius: 18px; border: 1px solid #374151; background: #111827; color: #f9fafb; text-align: center; box-shadow: 0 12px 34px rgba(2, 6, 23, .12) }
+    .auth-shell h1 { color: #fff !important; font-size: clamp(1.45rem, 4vw, 1.8rem); letter-spacing: -.02em; }
+    .auth-shell p { color: #cbd5e1 !important; line-height: 1.55; }
+    .auth-shell a.btn.btn-primary { display: inline-flex !important; align-items: center; justify-content: center; min-height: 46px; padding: 10px 18px; border: 1px solid #4b5563 !important; border-radius: 10px; background: #111827 !important; color: #f9fafb !important; font: inherit; font-weight: 700; text-decoration: none !important; box-shadow: none; transition: background .15s ease, border-color .15s ease; }
+    .auth-shell a.btn.btn-primary:hover, .auth-shell a.btn.btn-primary:focus-visible { background: #1f2937 !important; border-color: #6b7280 !important; color: #fff !important; outline: 2px solid #93c5fd; outline-offset: 2px; }
+    @media (max-width: 600px) { .auth-shell { margin: 20px 14px; padding: 24px 18px; border-radius: 16px; } }
+    .settings-shell { display: none; max-width: 900px; margin: 2rem auto 3rem; padding: 0 1rem }
+    .settings-card { margin: 2rem auto; max-width: 520px; background: #fff; border: 1px solid #dbe3ee; border-radius: 12px; box-shadow: 0 6px 20px rgba(2, 6, 23, .06); padding: 1.25rem; text-align: left; }
+    .settings-row { display: grid; grid-template-columns: 120px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eef2f7; }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-label { color: var(--muted); font-weight: 600; }
+    .settings-value { color: #0f2f4f; word-break: break-word; }
+.status-note { margin-top: .75rem; color: var(--muted) }
+    .security-mfa-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .mfa-panel { margin-top:1rem; padding:1rem; border:1px solid #dbe3ee; border-radius:10px; background:#f8fbff; }
+    .mfa-qr-wrap { display:flex; justify-content:center; margin:1rem 0; }
+    .mfa-qr-wrap canvas { max-width:220px; height:auto; border:8px solid #fff; box-shadow:0 3px 12px rgba(2,6,23,.12); }
+    .mfa-secret-label, .mfa-code-label { display:block; margin:.75rem 0 .35rem; color:#0f2f4f; font-weight:600; }
+    .mfa-secret, .mfa-code { width:100%; padding:.7rem .75rem; border:1px solid #cbd5e1; border-radius:8px; font:inherit; background:#fff; }
+    .mfa-code { max-width:220px; letter-spacing:.25em; text-align:center; }
+    .mfa-actions { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+    .sidebar-menu-shell { display: none; position: fixed; top: 88px; left: 24px; width: 220px; background: #ffffff; border: 1px solid #dbe3ee; border-radius: 12px; box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12); padding: 10px 0; z-index: 950; }
+    .sidebar-menu-link { display: block; padding: 11px 14px; margin: 2px 8px; border-radius: 8px; color: #092a4b; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+    .sidebar-menu-link:hover, .sidebar-menu-link:focus { background: #092a4b; color: #ffffff; transform: translateX(3px); }
+    body.has-sidebar #protected-content { margin-left: 260px; }
+    @media (max-width: 980px) { .sidebar-menu-shell { position: static; width: 100%; max-width: 900px; margin: 12px auto; } body.has-sidebar #protected-content { margin-left: 0; } }
+    @media (max-width: 900px) {
+      .resource-nav, .site-header {
+        background: #071D4A !important;
+        border-bottom: 1px solid #071D4A !important;
+        backdrop-filter: none !important;
+      }
+    }
+  </style>
+
+    <style>
+      .mail-header-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:9px; text-decoration:none; font-size:1.15rem; transition:background-color .2s ease, transform .2s ease; }
+      .mail-header-icon:hover, .mail-header-icon:focus-visible { background:rgba(255,255,255,.14); transform:translateY(-1px); }
+    
+    /* Dark-mode contrast fixes for file chooser and security/privacy section headings. */
+    html[data-appearance="dark"] #settingsProfilePhotoInput,
+    html[data-appearance="dark"] input[type="file"] {
+      color:#f3f4f6 !important;
+      background:#1f2937 !important;
+      border:1px solid #64748b !important;
+      border-radius:8px;
+      padding:.45rem;
+    }
+    html[data-appearance="dark"] input[type="file"]::file-selector-button {
+      background:#1d4ed8 !important; color:#fff !important; border:1px solid #3b82f6 !important;
+      border-radius:6px; padding:.45rem .75rem; margin-right:.75rem; cursor:pointer;
+    }
+    html[data-appearance="dark"] #securitySettingsHeading ~ .security-mfa-row > div > div:first-child,
+    html[data-appearance="dark"] .security-mfa-row > div > div:first-child,
+    html[data-appearance="dark"] #privacySettingsHeading ~ div > div > div:first-child {
+      color:#f3f4f6 !important;
+    }
+    html[data-appearance="dark"] #securitySettingsHeading ~ .security-mfa-row > div > div:first-child,
+    html[data-appearance="dark"] #privacySettingsHeading + div > div > div:first-child {
+      color:#f3f4f6 !important;
+    }
+
+  </style>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261016-2">
+  <style id="root-brand-background">body{background:#111827!important}
+/* Shared responsive Hamlet header fix (mobile) */
+@media(max-width:760px){
+  .resource-nav.hamlet-404-header>.container.container-nav{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;width:100%;min-width:0;box-sizing:border-box;gap:10px;padding:11px 14px;margin:0 auto}
+  .resource-nav.hamlet-404-header>.container.container-nav>.logo{flex:0 0 100%;width:100%;min-width:0}
+  .resource-nav.hamlet-404-header>.container.container-nav>.user-menu,.resource-nav.hamlet-404-header>.container.container-nav>.topbar-actions{flex:0 1 100%;width:100%;max-width:100%;min-width:0;margin-left:0!important;justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;box-sizing:border-box;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .resource-nav.hamlet-404-header .site-title{white-space:nowrap}
+  .resource-nav.hamlet-404-header .user-menu>a,.resource-nav.hamlet-404-header .user-menu>button,.resource-nav.hamlet-404-header .topbar-actions>.btn{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:.8rem;line-height:1.15}
+  .resource-nav.hamlet-404-header .auth-profile-chip,.resource-nav.hamlet-404-header .profile{flex:0 0 auto;min-width:0;max-width:40vw}
+  .resource-nav.hamlet-404-header .auth-profile-name,.resource-nav.hamlet-404-header [data-auth-name]{display:inline-block;max-width:28vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{width:32px;height:32px;flex:0 0 auto}
+}
+@media(max-width:380px){.resource-nav.hamlet-404-header>.container.container-nav{padding-inline:10px}.resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{display:none}}
+</style>
+</head>
+<body class="auth-pending">
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a>
+        </div>
+        <div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <div class="auth-profile-chip" data-auth-profile>
+            <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+            <span class="auth-profile-name" data-auth-name></span>
+          </div>
+          
+          <a class="btn btn-outline nav-login" href="/login.html" id="signInLink">Sign In</a>
+          <button class="btn btn-outline" id="signOutBtn" style="display:none">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    <nav id="topNavMenu" aria-hidden="true" hidden></nav>
+    <script>
+      function updateSidebarVisibility() {
+        var sidebar = document.getElementById('topNavMenu');
+        if (document.body.classList.contains('has-sidebar')) {
+          sidebar.style.display = 'block';
+        } else {
+          sidebar.style.display = 'none';
+        }
+      }
+      document.addEventListener('DOMContentLoaded', updateSidebarVisibility);
+      var observer = new MutationObserver(updateSidebarVisibility);
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    </script>
+    <section id="loginSection" class="auth-shell">
+      <h1 style="margin:0;color:#092a4b">Account Settings</h1>
+      <p style="margin:.75rem 0 1.25rem;color:var(--muted)">Sign in to access your account settings.</p>
+      <a class="btn btn-primary" href="/login.html">Go to Sign In</a>
+    </section>
+    <main id="settingsShell" class="settings-shell" role="main">
+      <section class="settings-card">
+        <h2 style="margin-top:0">Account Details</h2>
+        <div class="settings-row">
+          <div class="settings-label">Name</div>
+          <div class="settings-value" id="settingsUserName">-</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">Email</div>
+          <div class="settings-value" id="settingsUserEmail">-</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">User ID</div>
+          <div class="settings-value" id="settingsUserId">-</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">Date Joined</div>
+          <div class="settings-value" id="settingsDateJoined">-</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">Last Login</div>
+          <div class="settings-value" id="settingsLastLogin">-</div>
+        </div>
+      </section>
+      <section class="settings-card" aria-labelledby="profilePhotoHeading">
+        <h2 id="profilePhotoHeading" style="margin-top:0">Profile Photo</h2>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem">
+          <img id="settingsProfilePhotoPreview" src="/assets/images/dark-hamlet.png" alt="Current profile photo" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0">
+          <div style="flex:1;min-width:220px">
+            <label for="settingsProfilePhotoInput" style="display:block;font-weight:600;color:#092a4b;margin-bottom:.4rem">Adjust profile photo</label>
+            <input id="settingsProfilePhotoInput" type="file" accept="image/*" style="max-width:100%;display:block;margin-bottom:.5rem">
+            <p style="font-size:.85rem;color:#64748b;margin:.35rem 0">Choose an image up to 500 KB. The preview updates before you save.</p>
+          </div>
+        </div>
+        <button id="settingsSaveProfilePhoto" class="btn btn-primary" type="button" disabled>Save Profile Photo</button>
+        <span id="settingsPhotoStatus" class="status-note" role="status" aria-live="polite" style="display:block;margin-top:.45rem"></span>
+      </section>
+      <section class="settings-card" aria-labelledby="securitySettingsHeading">
+        <h2 id="securitySettingsHeading" style="margin-top:0">Security</h2>
+        <div class="security-mfa-row">
+          <div>
+            <div style="font-weight:700;color:#0f2f4f;">Two-factor authentication</div>
+            <div id="mfaStatus" class="status-note" style="margin-top:.25rem;">Checking your security settings…</div>
+          </div>
+          <button class="btn btn-outline" id="mfaSetupBtn" type="button">Set Up 2FA</button>
+        </div>
+        <div id="mfaPanel" class="mfa-panel" hidden>
+          <div id="mfaStep1">
+            <h3 style="margin:0 0 .5rem;color:#092a4b;">Authenticator app</h3>
+            <p class="status-note">Use an authenticator app such as Google Authenticator, Microsoft Authenticator, or Authy. Scan the QR code, then enter the six-digit code generated by the app.</p>
+            <div class="mfa-qr-wrap"><canvas id="mfaQr" width="220" height="220" aria-label="Two-factor authentication QR code"></canvas></div>
+            <label class="mfa-secret-label" for="mfaSecret">If you cannot scan the QR code, enter this setup key manually</label>
+            <input id="mfaSecret" class="mfa-secret" type="text" readonly autocomplete="off">
+            <label class="mfa-code-label" for="mfaCode">Verification code</label>
+            <input id="mfaCode" class="mfa-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
+            <div class="mfa-actions">
+              <button class="btn btn-primary" id="mfaVerifyBtn" type="button">Verify &amp; Enable</button>
+              <button class="btn btn-outline" id="mfaCancelBtn" type="button">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div id="mfaMessage" class="status-note" role="status" aria-live="polite"></div>
+      </section>
+      <section class="settings-card" aria-labelledby="privacySettingsHeading">
+        <h2 id="privacySettingsHeading" style="margin-top:0">Privacy</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;color:#0f2f4f;">Go Incognito</div>
+            <div class="status-note" style="margin-top:.25rem;">Hide your “Online Now” status from the Member Directory.</div>
+          </div>
+          <button class="btn btn-outline" id="incognitoBtn" type="button" aria-pressed="false">Go Incognito</button>
+        </div>
+        <div id="incognitoStatus" class="status-note" role="status" aria-live="polite"></div>
+        <div style="height:1px;background:#eef2f7;margin:1rem 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;color:#0f2f4f;">Public Profile</div>
+            <div class="status-note" style="margin-top:.25rem;">Choose whether your profile appears to other members in the Member Directory.</div>
+          </div>
+          <button class="btn btn-outline" id="profileVisibilityBtn" type="button" aria-pressed="false">Make Profile Public</button>
+        </div>
+        <div id="profileVisibilityStatus" class="status-note" role="status" aria-live="polite"></div>
+      </section>
+      <div style="margin:1.25rem auto 0;max-width:520px;text-align:right;font-weight:700;">
+        <div>Danger Zone</div>
+      </div>
+      <div style="margin:.5rem auto 0;max-width:520px;text-align:right;">
+        <button class="btn btn-outline" id="deleteAccountBtn" style="border:1px solid #ef4444;outline:2px solid #ef4444;outline-offset:2px;color:#ef4444">Delete Your Account</button>
+      </div>
+    </main>
+    <footer class="resource-footer" role="contentinfo">
+      <div class="container" style="text-align:center">
+        <div style="margin-bottom:4px;color:var(--muted);font-size:0.95rem;">v1.04.04</div>
+        <p style="margin:0;color:var(--muted)">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script type="module" src="/totp-mfa.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script defer src="/profile-service.js?v=20261010-2"></script>
+  <script defer src="/mobile-compat.js"></script>
+  <script defer src="/page-transition.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Start as soon as the DOM and deferred Firebase scripts are ready; do not
+      // wait for every image, stylesheet, or other resource to finish loading.
+      if (!window.firebase || !window.firebaseConfig) {
+        const loginSection = document.getElementById('loginSection');
+        const message = loginSection && loginSection.querySelector('p');
+        if (message) message.textContent = 'Account settings could not be initialised. Please refresh the page or contact Support if the problem persists.';
+        document.body.classList.remove('auth-pending');
+        return;
+      }
+      try { firebase.initializeApp(window.firebaseConfig); } catch (e) {}
+      const auth = firebase.auth();
+      const loginSection = document.getElementById('loginSection');
+      const settingsShell = document.getElementById('settingsShell');
+      const signOutBtn = document.getElementById('signOutBtn');
+      const signInLink = document.getElementById('signInLink');
+      const settingsUserName = document.getElementById('settingsUserName');
+      const settingsUserEmail = document.getElementById('settingsUserEmail');
+      const settingsUserId = document.getElementById('settingsUserId');
+      const settingsDateJoined = document.getElementById('settingsDateJoined');
+      const settingsLastLogin = document.getElementById('settingsLastLogin');
+      const settingsPhotoInput = document.getElementById('settingsProfilePhotoInput');
+      const settingsPhotoPreview = document.getElementById('settingsProfilePhotoPreview');
+      const settingsSavePhoto = document.getElementById('settingsSaveProfilePhoto');
+      const settingsPhotoStatus = document.getElementById('settingsPhotoStatus');
+      let pendingSettingsPhotoDataUrl = '';
+      function setSettingsPhotoStatus(message, isError) {
+        settingsPhotoStatus.textContent = message;
+        settingsPhotoStatus.style.color = isError ? '#b91c1c' : '#166534';
+      }
+      settingsPhotoInput.addEventListener('change', function () {
+        const file = settingsPhotoInput.files && settingsPhotoInput.files[0];
+        pendingSettingsPhotoDataUrl = '';
+        settingsSavePhoto.disabled = true;
+        if (!file) { setSettingsPhotoStatus('', false); return; }
+        if (!file.type || !file.type.startsWith('image/')) {
+          settingsPhotoInput.value = '';
+          setSettingsPhotoStatus('Please choose an image file.', true);
+          return;
+        }
+        if (file.size > 500 * 1024) {
+          settingsPhotoInput.value = '';
+          setSettingsPhotoStatus('Image exceeds the 500 KB upload limit. Choose a smaller image.', true);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function () {
+          if (typeof reader.result !== 'string' || !reader.result.startsWith('data:image/')) {
+            setSettingsPhotoStatus('This image could not be previewed. Please try another file.', true);
+            return;
+          }
+          pendingSettingsPhotoDataUrl = reader.result;
+          settingsPhotoPreview.src = pendingSettingsPhotoDataUrl;
+          settingsSavePhoto.disabled = false;
+          setSettingsPhotoStatus('Preview ready. Select Save Profile Photo to apply it.', false);
+        };
+        reader.onerror = function () { setSettingsPhotoStatus('Unable to read this image. Please try again.', true); };
+        reader.readAsDataURL(file);
+      });
+      settingsSavePhoto.addEventListener('click', async function () {
+        const user = auth.currentUser;
+        if (!pendingSettingsPhotoDataUrl || !user) return;
+        if (pendingSettingsPhotoDataUrl.length > 700000) {
+          setSettingsPhotoStatus('This image is too large after processing. Please choose an image under 500 KB.', true);
+          return;
+        }
+        settingsSavePhoto.disabled = true;
+        settingsPhotoInput.disabled = true;
+        setSettingsPhotoStatus('Saving profile photo…', false);
+        try {
+          if (window.ibrProfileService) {
+            await window.ibrProfileService.updateProfile(user.uid, { imageDataUrl: pendingSettingsPhotoDataUrl });
+          } else {
+            await firebase.firestore().collection('publicProfiles').doc(user.uid).update({ imageDataUrl: pendingSettingsPhotoDataUrl });
+          }
+          document.querySelectorAll('[data-auth-photo]').forEach(function (img) { img.src = pendingSettingsPhotoDataUrl; });
+          setSettingsPhotoStatus('Profile photo saved.', false);
+          pendingSettingsPhotoDataUrl = '';
+          settingsPhotoInput.value = '';
+        } catch (error) {
+          console.error('Profile photo save failed', error);
+          setSettingsPhotoStatus(error && error.code === 'permission-denied'
+            ? 'Permission denied. Your profile photo was not saved.'
+            : 'Unable to save the photo. Please try again.', true);
+          settingsSavePhoto.disabled = false;
+        } finally {
+          settingsPhotoInput.disabled = false;
+        }
+      });
+      const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+      const incognitoBtn = document.getElementById('incognitoBtn');
+      const incognitoStatus = document.getElementById('incognitoStatus');
+      const mfaStatus = document.getElementById('mfaStatus');
+      const mfaSetupBtn = document.getElementById('mfaSetupBtn');
+      const mfaPanel = document.getElementById('mfaPanel');
+      const mfaQr = document.getElementById('mfaQr');
+      const mfaSecret = document.getElementById('mfaSecret');
+      const mfaCode = document.getElementById('mfaCode');
+      const mfaVerifyBtn = document.getElementById('mfaVerifyBtn');
+      const mfaCancelBtn = document.getElementById('mfaCancelBtn');
+      const mfaMessage = document.getElementById('mfaMessage');
+      let pendingTotpSecret = null;
+      let totpApi = null;
+      let totpReadyError = null;
+      const totpReady = window.ibrTotp && window.ibrTotp.ready
+        ? window.ibrTotp.ready
+        : Promise.reject(new Error('TOTP security module is unavailable.'));
+      function showSignedOut() {
+        loginSection.style.display = 'block';
+        settingsShell.style.display = 'none';
+        signOutBtn.style.display = 'none';
+        signInLink.style.display = 'inline-flex';
+        const message = loginSection.querySelector('p');
+        if (message) message.textContent = 'Sign in to access your account settings.';
+        const action = loginSection.querySelector('a');
+        if (action) action.style.display = '';
+        document.body.classList.remove('auth-pending', 'has-sidebar');
+      }
+      async function showSignedIn(user) {
+        // Keep the settings page hidden until the saved name and profile image
+        // have been read, preventing placeholder values from flashing onscreen.
+        settingsShell.style.display = 'none';
+        loginSection.style.display = 'block';
+        const loadingMessage = loginSection.querySelector('p');
+        if (loadingMessage) loadingMessage.textContent = 'Loading your account settings…';
+        const loadingAction = loginSection.querySelector('a');
+        if (loadingAction) loadingAction.style.display = 'none';
+        signOutBtn.style.display = 'inline-flex';
+        signInLink.style.display = 'none';
+        document.body.classList.remove('auth-pending');
+        document.body.classList.add('has-sidebar');
+        settingsUserName.textContent = user.displayName || 'Not set';
+        settingsUserEmail.textContent = user.email || 'Not available';
+        settingsUserId.textContent = user.uid || '-';
+        settingsDateJoined.textContent = user.metadata && user.metadata.creationTime
+          ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+          : 'Not available';
+        settingsLastLogin.textContent = user.metadata && user.metadata.lastSignInTime
+          ? new Date(user.metadata.lastSignInTime).toLocaleString('en-GB', {
+              timeZone: 'Europe/London',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+              timeZoneName: 'short'
+            })
+          : '-';
+        updateMfaUi(user);
+
+        try {
+          if (user.metadata && user.metadata.lastSignInTime) {
+            if (window.ibrProfileService) {
+              await window.ibrProfileService.updateProfile(user.uid, {
+                lastLogin: firebase.firestore.Timestamp.fromDate(new Date(user.metadata.lastSignInTime))
+              });
+            } else {
+              await firebase.firestore().collection('publicProfiles').doc(user.uid).set({
+                lastLogin: firebase.firestore.Timestamp.fromDate(new Date(user.metadata.lastSignInTime))
+              }, { merge: true });
+            }
+          }
+        } catch (loginWriteError) {
+          console.error('Unable to update public profile last login:', loginWriteError);
+        }
+
+        try {
+          const profileResult = window.ibrProfileService
+            ? await window.ibrProfileService.getProfile(user.uid)
+            : await firebase.firestore().collection('publicProfiles').doc(user.uid).get().then(function (snapshot) {
+                return { exists: snapshot.exists, data: snapshot.exists ? (snapshot.data() || {}) : {} };
+              });
+          const profileSnapshot = profileResult;
+          const profileData = profileResult.data || {};
+          const savedName = [profileData.firstName, profileData.lastName]
+            .filter(value => typeof value === 'string' && value.trim())
+            .map(value => value.trim())
+            .join(' ');
+          settingsUserName.textContent = savedName || user.displayName || 'Not set';
+          const savedPhoto = profileData.imageDataUrl || '';
+          settingsPhotoPreview.src = typeof savedPhoto === 'string' && savedPhoto ? savedPhoto : '/assets/images/dark-hamlet.png';
+          settingsPhotoPreview.onerror = function () { settingsPhotoPreview.onerror = null; settingsPhotoPreview.src = '/assets/images/dark-hamlet.png'; };
+          const isPublicProfile = profileSnapshot.exists && profileData.isPublic === true;
+          const profileVisibilityBtn = document.getElementById('profileVisibilityBtn');
+          const profileVisibilityStatus = document.getElementById('profileVisibilityStatus');
+          if (profileVisibilityBtn) {
+            profileVisibilityBtn.setAttribute('aria-pressed', String(isPublicProfile));
+            profileVisibilityBtn.textContent = isPublicProfile ? 'Make Profile Private' : 'Make Profile Public';
+            profileVisibilityBtn.style.background = isPublicProfile ? '#092a4b' : '';
+            profileVisibilityBtn.style.color = isPublicProfile ? '#ffffff' : '';
+          }
+          if (profileVisibilityStatus) {
+            profileVisibilityStatus.textContent = isPublicProfile
+              ? 'Your profile is public and may appear in the Member Directory.'
+              : 'Your profile is private and will not appear in the Member Directory.';
+          }
+          const incognito = profileSnapshot.exists && profileData.incognito === true;
+          if (incognitoBtn) {
+            incognitoBtn.setAttribute('aria-pressed', String(incognito));
+            incognitoBtn.textContent = incognito ? 'Go Visible' : 'Go Incognito';
+            incognitoBtn.style.background = incognito ? '#092a4b' : '';
+            incognitoBtn.style.color = incognito ? '#ffffff' : '';
+          }
+          if (incognitoStatus) {
+            incognitoStatus.textContent = incognito
+              ? 'Incognito is on. Other members will not see “Online Now” for you.'
+              : 'Incognito is off. Your “Online Now” status may be shown when you are active.';
+          }
+          const profileEmail = profileSnapshot.exists ? profileData.email : '';
+          if (auth.currentUser && auth.currentUser.uid === user.uid) {
+            settingsUserEmail.textContent = typeof profileEmail === 'string' && profileEmail.trim()
+              ? profileEmail.trim()
+              : user.email || 'Not available';
+          }
+        } catch (error) {
+          console.error('Unable to load profile details from Firestore:', error);
+          // The account settings can still be used if the profile read fails;
+          // the existing safe fallback values remain in place.
+        }
+
+        // Reveal the settings only after the profile name and photo lookup finishes.
+        loginSection.style.display = 'none';
+        settingsShell.style.display = 'block';
+      }
+      async function updateMfaUi(user) {
+        try {
+          // Read the enrollment state from the authenticated compat user first.
+          // This avoids making the status display depend on the separate modular
+          // TOTP bridge being ready at exactly the same time as the page load.
+          const factors = user && user.multiFactor && Array.isArray(user.multiFactor.enrolledFactors)
+            ? user.multiFactor.enrolledFactors
+            : [];
+          const hasTotp = factors.some(function (factor) { return factor.factorId === 'totp'; });
+          if (mfaStatus) mfaStatus.textContent = hasTotp
+            ? 'Authenticator-app 2FA is enabled on this account.'
+            : '2FA is not enabled. Add an authenticator app as your second factor.';
+          if (mfaSetupBtn) {
+            mfaSetupBtn.disabled = false;
+            mfaSetupBtn.textContent = hasTotp ? 'Disable 2FA' : 'Set Up 2FA';
+            mfaSetupBtn.setAttribute('aria-label', hasTotp ? 'Disable two-factor authentication' : 'Set up two-factor authentication');
+          }
+        } catch (error) {
+          console.error('Unable to read TOTP enrollment state:', error);
+          if (mfaStatus) mfaStatus.textContent = 'Unable to read 2FA status. Please refresh the page.';
+          if (mfaSetupBtn) mfaSetupBtn.disabled = true;
+        }
+      }
+      async function beginTotpEnrollment() {
+        const user = auth.currentUser;
+        if (!user) return;
+        mfaMessage.textContent = '';
+        try {
+          if (!user.emailVerified) {
+            mfaMessage.textContent = 'Please verify your email address before enabling 2FA.';
+            return;
+          }
+          // The modular TOTP bridge is initialized before this button is enabled.
+          // Keeping the resolved API reference here avoids a race with the module
+          // import and preserves the browser user gesture for any required re-auth popup.
+          let totp = totpApi;
+          if (!totp) {
+            try {
+              totp = await totpReady;
+              totpApi = totp;
+              totpReadyError = null;
+            } catch (moduleError) {
+              console.error('TOTP security module is unavailable:', moduleError);
+              mfaMessage.textContent = 'The 2FA security module could not be loaded. Please refresh the page and try again.';
+              return;
+            }
+          }
+          if (!totp || !totp.TotpMultiFactorGenerator) {
+            mfaMessage.textContent = 'The 2FA security module is unavailable. Please refresh the page and try again.';
+            return;
+          }
+          const modularUser = totp.auth.currentUser;
+          if (!modularUser) {
+            mfaMessage.textContent = 'Your authentication session is still loading. Please refresh and try again.';
+            return;
+          }
+          // A freshly completed sign-in is already recent enough for MFA enrollment.
+          // Only invoke provider reauthentication if Firebase explicitly says that
+          // the existing session is too old. This avoids forcing an unnecessary
+          // OAuth popup and prevents provider-specific reauthentication failures.
+          async function reauthenticateIfRequired(error) {
+            const code = error && error.code ? error.code : '';
+            if (code !== 'auth/requires-recent-login') throw error;
+
+            const providerId = modularUser.providerData && modularUser.providerData[0]
+              ? modularUser.providerData[0].providerId
+              : '';
+            let provider = null;
+            if (providerId === 'google.com') {
+              provider = new totp.GoogleAuthProvider();
+              provider.setCustomParameters({ prompt: 'login' });
+            } else if (providerId === 'facebook.com') {
+              provider = new totp.FacebookAuthProvider();
+              provider.setCustomParameters({ auth_type: 'reauthorize' });
+            } else if (providerId === 'twitter.com') {
+              provider = new totp.TwitterAuthProvider();
+            } else if (providerId === 'oidc.linkedin-secure-login') {
+              provider = new totp.OAuthProvider('oidc.linkedin-secure-login');
+              provider.setCustomParameters({ prompt: 'login' });
+            }
+            if (!provider) {
+              throw new Error('Your sign-in provider requires a fresh sign-in before 2FA can be enabled.');
+            }
+            try {
+              await totp.reauthenticateWithPopup(modularUser, provider);
+            } catch (reauthError) {
+              console.error('TOTP reauthentication failed:', reauthError);
+              const reauthCode = reauthError && reauthError.code ? reauthError.code : '';
+              if (reauthCode === 'auth/popup-blocked') {
+                throw new Error('Your browser blocked the sign-in verification window. Please allow pop-ups for this site and try again.');
+              }
+              if (reauthCode === 'auth/popup-closed-by-user' || reauthCode === 'auth/cancelled-popup-request' || reauthCode === 'auth/user-cancelled') {
+                throw new Error('The sign-in verification window was closed before verification was completed.');
+              }
+              throw new Error('Firebase could not complete the required recent sign-in. Please sign out, sign back in, and try again.');
+            }
+          }
+
+          let session;
+          try {
+            session = await totp.multiFactor(modularUser).getSession();
+          } catch (sessionError) {
+            await reauthenticateIfRequired(sessionError);
+            session = await totp.multiFactor(modularUser).getSession();
+          }
+          pendingTotpSecret = await totp.TotpMultiFactorGenerator.generateSecret(session);
+          const uri = pendingTotpSecret.generateQrCodeUrl(modularUser.email || 'IBR member', 'Impact in Business Recruitment');
+          mfaSecret.value = pendingTotpSecret.secretKey || '';
+          if (totp.QRCode && typeof totp.QRCode.toCanvas === 'function') {
+            await totp.QRCode.toCanvas(mfaQr, uri, { width: 220, margin: 1 });
+          } else {
+            throw new Error('The QR-code generator has not loaded. Please refresh the page and try again.');
+          }
+          mfaPanel.hidden = false;
+          mfaCode.value = '';
+          mfaCode.focus();
+        } catch (error) {
+          console.error('Unable to start TOTP enrollment:', error);
+          mfaMessage.textContent = error && error.message
+            ? error.message
+            : 'Unable to start 2FA setup. Make sure TOTP MFA is enabled for this Firebase project.';
+        }
+      }
+      async function verifyTotpEnrollment() {
+        const user = auth.currentUser;
+        const code = (mfaCode.value || '').replace(/\D/g, '');
+        if (!user || !pendingTotpSecret) return;
+        if (!/^\d{6}$/.test(code)) {
+          mfaMessage.textContent = 'Enter the six-digit code shown in your authenticator app.';
+          return;
+        }
+        mfaVerifyBtn.disabled = true;
+        try {
+          const totp = await window.ibrTotp.ready;
+          const modularUser = totp.auth.currentUser;
+          const assertion = totp.TotpMultiFactorGenerator.assertionForEnrollment(pendingTotpSecret, code);
+          await totp.multiFactor(modularUser).enroll(assertion, 'Authenticator app');
+          pendingTotpSecret = null;
+          mfaPanel.hidden = true;
+          mfaSecret.value = '';
+          mfaCode.value = '';
+          mfaMessage.textContent = 'Two-factor authentication is now enabled.';
+          updateMfaUi(modularUser);
+        } catch (error) {
+          console.error('Unable to verify TOTP enrollment:', error);
+          mfaMessage.textContent = error && error.message
+            ? error.message
+            : 'That code could not be verified. Check your authenticator app and try again.';
+        } finally {
+          mfaVerifyBtn.disabled = false;
+        }
+      }
+      totpReady.then(function (api) {
+        totpApi = api;
+        totpReadyError = null;
+        if (auth.currentUser) updateMfaUi(auth.currentUser);
+      }).catch(function (error) {
+        totpReadyError = error;
+        console.error('Unable to initialize TOTP security module:', error);
+        if (mfaStatus && auth.currentUser) {
+          mfaStatus.textContent = '2FA status is available, but the security management module could not be initialized. Please reload the page.';
+        }
+        if (mfaSetupBtn) mfaSetupBtn.disabled = true;
+      });
+
+      mfaSetupBtn.addEventListener('click', async function () {
+        const user = auth.currentUser;
+        if (!user) {
+          mfaMessage.textContent = 'Please sign in to manage two-factor authentication.';
+          return;
+        }
+        const factors = user.multiFactor && Array.isArray(user.multiFactor.enrolledFactors)
+          ? user.multiFactor.enrolledFactors
+          : [];
+        const totpFactor = factors.find(function (factor) { return factor.factorId === 'totp'; });
+        if (!totpFactor) {
+          await beginTotpEnrollment();
+          return;
+        }
+
+        const confirmed = window.confirm('Disable authenticator-app two-factor authentication for your account? This will remove the enrolled authenticator factor.');
+        if (!confirmed) return;
+
+        mfaSetupBtn.disabled = true;
+        mfaMessage.textContent = 'Disabling two-factor authentication…';
+        try {
+          const totp = totpApi || await totpReady;
+          totpApi = totp;
+          const modularUser = totp.auth.currentUser;
+          if (!modularUser) throw new Error('Your authentication session is still loading. Please refresh and try again.');
+          const modularFactors = totp.multiFactor(modularUser).enrolledFactors || [];
+          const enrolledTotp = modularFactors.find(function (factor) { return factor.factorId === 'totp'; });
+          if (!enrolledTotp) {
+            await user.reload();
+          } else {
+            await totp.multiFactor(modularUser).unenroll(enrolledTotp);
+          }
+          await user.reload();
+          mfaMessage.textContent = 'Authenticator-app two-factor authentication has been disabled.';
+          await updateMfaUi(user);
+        } catch (error) {
+          console.error('Unable to disable TOTP enrollment:', error);
+          const code = error && error.code ? error.code : '';
+          if (code === 'auth/requires-recent-login') {
+            mfaMessage.textContent = 'For your security, sign out and sign back in, then return to Settings to disable 2FA.';
+          } else {
+            mfaMessage.textContent = error && error.message
+              ? error.message
+              : 'Unable to disable 2FA. Please try again.';
+          }
+        } finally {
+          mfaSetupBtn.disabled = false;
+        }
+      });
+      mfaVerifyBtn.addEventListener('click', verifyTotpEnrollment);
+      mfaCancelBtn.addEventListener('click', function () {
+        pendingTotpSecret = null;
+        mfaPanel.hidden = true;
+        mfaMessage.textContent = '';
+      });
+      auth.onAuthStateChanged(function (user) {
+        if (!user) { showSignedOut(); return; }
+        showSignedIn(user);
+      });
+      if (incognitoBtn) {
+        incognitoBtn.addEventListener('click', async function () {
+          const user = auth.currentUser;
+          if (!user) {
+            alert('Please sign in first.');
+            return;
+          }
+          const currentlyIncognito = incognitoBtn.getAttribute('aria-pressed') === 'true';
+          incognitoBtn.disabled = true;
+          try {
+            const profileResult = window.ibrProfileService
+              ? await window.ibrProfileService.getProfile(user.uid)
+              : await firebase.firestore().collection('publicProfiles').doc(user.uid).get().then(function (snapshot) {
+                  return { exists: snapshot.exists, data: snapshot.exists ? snapshot.data() : {} };
+                });
+
+            // Incognito requires a saved member profile. Do not create a partial
+            // publicProfiles document just to store this privacy preference.
+            const profileData = profileResult.data || {};
+            // Edit Profile marks a successfully saved directory profile with isPublic: true.
+            const hasSavedProfile = !!profileResult.exists && profileData.isPublic === true;
+
+            if (!currentlyIncognito && !hasSavedProfile) {
+              if (incognitoStatus) {
+                incognitoStatus.textContent = 'Before you can go Incognito, please visit Edit Profile, create your profile, and click Save. Return to Settings once your profile has been saved.';
+                incognitoStatus.style.color = '#b45309';
+                incognitoStatus.setAttribute('role', 'alert');
+              }
+              incognitoBtn.disabled = false;
+              return;
+            }
+
+            if (window.ibrProfileService) {
+              await window.ibrProfileService.updateProfile(user.uid, { incognito: !currentlyIncognito });
+            } else {
+              await firebase.firestore().collection('publicProfiles').doc(user.uid).set({
+                incognito: !currentlyIncognito
+              }, { merge: true });
+            }
+            incognitoBtn.setAttribute('aria-pressed', String(!currentlyIncognito));
+            incognitoBtn.textContent = !currentlyIncognito ? 'Go Visible' : 'Go Incognito';
+            incognitoBtn.style.background = !currentlyIncognito ? '#092a4b' : '';
+            incognitoBtn.style.color = !currentlyIncognito ? '#ffffff' : '';
+            if (incognitoStatus) {
+              incognitoStatus.style.color = '';
+              incognitoStatus.setAttribute('role', 'status');
+              incognitoStatus.textContent = !currentlyIncognito
+                ? 'Incognito is on. Other members will not see “Online Now” for you.'
+                : 'Incognito is off. Your “Online Now” status may be shown when you are active.';
+            }
+          } catch (error) {
+            console.error('Unable to update incognito setting:', error);
+            alert('Unable to update your privacy setting. Please try again shortly.');
+          } finally {
+            incognitoBtn.disabled = false;
+          }
+        });
+      }
+      const profileVisibilityBtn = document.getElementById('profileVisibilityBtn');
+      const profileVisibilityStatus = document.getElementById('profileVisibilityStatus');
+      if (profileVisibilityBtn) {
+        profileVisibilityBtn.addEventListener('click', async function () {
+          const user = auth.currentUser;
+          if (!user) {
+            alert('Please sign in first.');
+            return;
+          }
+          const currentlyPublic = profileVisibilityBtn.getAttribute('aria-pressed') === 'true';
+          profileVisibilityBtn.disabled = true;
+          if (profileVisibilityStatus) {
+            profileVisibilityStatus.style.color = '';
+            profileVisibilityStatus.textContent = 'Updating profile visibility…';
+          }
+          try {
+            const profileResult = window.ibrProfileService
+              ? await window.ibrProfileService.getProfile(user.uid)
+              : await firebase.firestore().collection('publicProfiles').doc(user.uid).get().then(function (snapshot) {
+                  return { exists: snapshot.exists, data: snapshot.exists ? (snapshot.data() || {}) : {} };
+                });
+            if (!profileResult.exists) {
+              if (profileVisibilityStatus) {
+                profileVisibilityStatus.style.color = '#b45309';
+                profileVisibilityStatus.textContent = 'Please visit Edit Profile and save your profile before changing its visibility.';
+                profileVisibilityStatus.setAttribute('role', 'alert');
+              }
+              return;
+            }
+            const nextIsPublic = !currentlyPublic;
+            if (window.ibrProfileService) {
+              await window.ibrProfileService.updateProfile(user.uid, { isPublic: nextIsPublic });
+            } else {
+              await firebase.firestore().collection('publicProfiles').doc(user.uid).update({ isPublic: nextIsPublic });
+            }
+            profileVisibilityBtn.setAttribute('aria-pressed', String(nextIsPublic));
+            profileVisibilityBtn.textContent = nextIsPublic ? 'Make Profile Private' : 'Make Profile Public';
+            profileVisibilityBtn.style.background = nextIsPublic ? '#092a4b' : '';
+            profileVisibilityBtn.style.color = nextIsPublic ? '#ffffff' : '';
+            if (profileVisibilityStatus) {
+              profileVisibilityStatus.style.color = '';
+              profileVisibilityStatus.setAttribute('role', 'status');
+              profileVisibilityStatus.textContent = nextIsPublic
+                ? 'Your profile is public and may appear in the Member Directory.'
+                : 'Your profile is private and will not appear in the Member Directory.';
+            }
+          } catch (error) {
+            console.error('Unable to update profile visibility:', error);
+            if (profileVisibilityStatus) {
+              profileVisibilityStatus.style.color = '#b91c1c';
+              profileVisibilityStatus.setAttribute('role', 'alert');
+              profileVisibilityStatus.textContent = 'Unable to update profile visibility. Please try again shortly.';
+            }
+          } finally {
+            profileVisibilityBtn.disabled = false;
+          }
+        });
+      }
+
+      if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', async function () {
+          const user = auth.currentUser;
+          if (!user) {
+            alert('Please sign in first.');
+            return;
+          }
+          const confirmed = window.confirm('Are you sure you want to permanently delete your account? This cannot be undone.');
+          if (!confirmed) return;
+          try {
+            await user.delete();
+            alert('Your account has been deleted.');
+            window.location.replace('/login.html');
+          } catch (err) {
+            if (err && err.code === 'auth/requires-recent-login') {
+              try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await user.reauthenticateWithPopup(provider);
+                await user.delete();
+                alert('Your account has been deleted.');
+                window.location.replace('/login.html');
+              } catch (reauthErr) {
+                alert('Account deletion failed: ' + (reauthErr && reauthErr.message ? reauthErr.message : 'unknown error'));
+              }
+            } else {
+              alert('Account deletion failed: ' + (err && err.message ? err.message : 'unknown error'));
+            }
+          }
+        });
+      }
+      if (signOutBtn) signOutBtn.addEventListener('click', function () { auth.signOut(); });
+    });
+  </script>
+  <script src="/hamlet-workspace.js?v=20261016-3"></script>
+  <script src="/hamlet-background.js?v=20261015-1"></script>
+</body>
+</html>

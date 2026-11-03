@@ -1,0 +1,63 @@
+/* Shared Hamlet header system — mirrors the 404.html header treatment while preserving page-specific controls. */
+:root {
+  --hamlet-header-bg: rgba(7, 17, 31, .94);
+  --hamlet-header-border: rgba(148, 163, 184, .16);
+  --hamlet-header-text: #dbeafe;
+  --hamlet-header-accent: #60a5fa;
+}
+header, header.topbar, header.top, header.resource-nav, header.site-header {
+  position: relative;
+  z-index: 100;
+  color: #f8fafc !important;
+  background: var(--hamlet-header-bg) !important;
+  background-color: var(--hamlet-header-bg) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--hamlet-header-border) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+header > .container, header .container-nav, header .topbar-inner,
+header .header-row, header .nav-links, header .topbar-actions,
+header .user-menu, header .top-actions, header .toplinks, header .logo {
+  color: #f8fafc !important;
+}
+header .topbar-inner, header .container-nav, header .header-row { min-height: 68px; }
+header .brand, header .site-title, header .legal-brand, header .search-brand,
+header .sector-brand, header .pricing-brand, header .payment-brand, header .brand-wordmark {
+  color: #f8fafc !important;
+  font-weight: 850;
+  letter-spacing: -.045em;
+  text-decoration: none !important;
+}
+header .brand span, header .site-title span, header .legal-brand span,
+header .search-brand span, header .sector-brand span, header .pricing-brand span,
+header .payment-brand span, header .brand-wordmark span { color: var(--hamlet-header-accent) !important; }
+header nav a:not(.btn):not(.signin), header .top-links a:not(.btn):not(.signin),
+header .toplinks a:not(.btn):not(.signin) {
+  color: var(--hamlet-header-text) !important;
+  text-decoration: none;
+  transition: color .18s ease, opacity .18s ease;
+}
+header nav a:not(.btn):not(.signin):hover, header .top-links a:not(.btn):not(.signin):hover,
+header .toplinks a:not(.btn):not(.signin):hover { color: var(--hamlet-header-accent) !important; }
+header .signin, header a.signin {
+  background: #075bea !important;
+  color: #fff !important;
+  border: 1px solid #3b82f6 !important;
+  border-radius: 999px;
+  font-weight: 750;
+}
+header .btn-outline {
+  background: rgba(17,24,39,.72) !important;
+  color: #dbeafe !important;
+  border-color: rgba(96,165,250,.42) !important;
+}
+header .btn-outline:hover, header .btn-outline:focus-visible {
+  background: #1d4ed8 !important; color: #fff !important; border-color: #60a5fa !important;
+}
+header a:focus-visible, header button:focus-visible { outline: 2px solid #93c5fd; outline-offset: 3px; }
+@media (max-width: 720px) {
+  header .topbar-inner, header .container-nav, header .header-row { min-height: 60px; }
+}
+@media (prefers-reduced-motion: reduce) { header * { transition: none !important; } }

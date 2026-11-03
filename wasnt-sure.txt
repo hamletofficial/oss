@@ -1,0 +1,36 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCcsm1Pvh_h1M1OySEXTYeZnOtBUAYExio",
+  authDomain: "wale-491803.firebaseapp.com",
+  projectId: "wale-491803",
+  storageBucket: "wale-491803.firebasestorage.app",
+  messagingSenderId: "916707769747",
+  appId: "1:916707769747:web:9640a284fc4e26837d7c66",
+  measurementId: "G-Z98CWRFB0G"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+{
+  "version": "2",
+  "projectNumber": "916707769747",
+  "projectId": "wale-491803",
+  "appId": "1:916707769747:web:dcc1f83b793c101e7d7c66",
+  "realtimeDatabaseInstanceUri": "https://wale-491803-default-rtdb.firebaseio.com",
+  "realtimeDatabaseUrl": "",
+  "storageBucket": "wale-491803.firebasestorage.app",
+  "locationId": "",
+  "apiKey": "AIzaSyCcsm1Pvh_h1M1OySEXTYeZnOtBUAYExio",
+  "authDomain": "wale-491803.firebaseapp.com",
+  "messagingSenderId": "916707769747",
+  "measurementId": "G-FZMT05FVYY"
+}

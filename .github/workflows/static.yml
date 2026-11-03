@@ -1,0 +1,66 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "hamlet-search-indexed-pages"
+  cancel-in-progress: false
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build and validate public search index
+        run: python3 scripts/build-search-index.py
+      - name: Commit refreshed index to main when changed
+        run: |
+          git add search-index.json
+          if git diff --cached --quiet -- search-index.json; then
+            echo "Public search index is already current."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: refresh public search index"
+            git push origin HEAD:main
+          fi
+      - name: Verify generated JSON search index exists
+        run: test -s search-index.json
+      - name: Inject universal search into public HTML pages
+        run: python3 scripts/inject-universal-search.py
+      - name: Build extensionless public page routes
+        run: python3 scripts/build-extensionless-routes.py
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+      - name: Verify live public search index
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: python3 scripts/build-search-index.py --check-live "$PAGE_URL"

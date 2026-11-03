@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Dedicated super-admin account used by the Hamlet admin dashboard.
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.uid == '6epDJRISlBbRPWKosDZZWuiGQzK2';
+    }
+
+
+    // Public Profiles: Each user can create/update their own, all can read
+    match /publicProfiles/{uid} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly([
+          'uid',
+          'firstName',
+          'lastName',
+          'bio',
+          'email',
+          'updatedAt',
+          'isPublic',
+          'imageDataUrl',
+          'emailVerified',
+          'onfidoVerified',
+          'onfidoVerifiedAt'
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.firstName is string &&
+        request.resource.data.lastName is string &&
+        request.resource.data.bio is string &&
+        request.resource.data.email is string &&
+        request.resource.data.updatedAt is timestamp &&
+        request.resource.data.isPublic == true &&
+        (!('emailVerified' in request.resource.data) || request.resource.data.emailVerified is bool) &&
+        (!('onfidoVerified' in request.resource.data) || request.resource.data.onfidoVerified == false) &&
+        (!('onfidoVerifiedAt' in request.resource.data) || request.resource.data.onfidoVerifiedAt is timestamp);
+      allow update: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly([
+          'uid','firstName','lastName','bio','email','updatedAt','isPublic',
+          'imageDataUrl','emailVerified','onfidoVerified','onfidoVerifiedAt'
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.firstName is string &&
+        request.resource.data.lastName is string &&
+        request.resource.data.bio is string &&
+        request.resource.data.email is string &&
+        request.resource.data.updatedAt is timestamp &&
+        request.resource.data.isPublic == true &&
+        (!('emailVerified' in request.resource.data) || request.resource.data.emailVerified is bool) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['onfidoVerified','onfidoVerifiedAt']));
+      allow delete: if false;
+    }
+
+    // Messages: Only recipient can read/update their messages, no public write
+    match /messages/{messageId} {
+  		allow read: if request.auth != null && resource.data.recipientUid == request.auth.uid;
+  		allow create: if request.auth != null && request.resource.data.recipientUid == request.auth.uid;
+  		allow update: if request.auth != null && resource.data.recipientUid == request.auth.uid;
+  		allow delete: if false;
+}
+
+    // Resume Uploads: Only owner can create/read their uploads
+    match /resumeUploads/{docId} {
+      allow read, create: if request.auth != null && (
+        (request.method == 'get' && resource.data.uid == request.auth.uid) ||
+        (request.method == 'create' && request.resource.data.uid == request.auth.uid)
+      );
+      allow update, delete: if false;
+    }
+
+    // Insights Feed: Read for all signed-in users, no public write
+    match /insightsFeed/{docId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if false;
+    }
+
+    // Residential property records: members can read published listings and their own submissions.
+    // Only the trusted verification workflow can set onfidoVerified=true.
+    match /residentialProperties/{propertyId} {
+      allow read: if request.auth != null
+        && (isSuperAdmin()
+          || resource.data.ownerUid == request.auth.uid
+          || resource.data.status == 'Published');
+      allow create: if request.auth != null
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.status in ['Published', 'Draft', 'Under Offer', 'Sold / Let']
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.onfidoVerified == true;
+      allow update: if request.auth != null
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdByUid == resource.data.createdByUid;
+      allow delete: if request.auth != null
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Fallback: Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

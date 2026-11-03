@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0284c7">
+<title>Member Profile — Hamlet</title>
+<link rel="stylesheet" href="/resource-centre.css"><link rel="stylesheet" href="/index.css"><link rel="stylesheet" href="/mobile-compat.css"><link rel="stylesheet" href="/page-transition.css"><link rel="stylesheet" href="/verified-tick.css"><link rel="stylesheet" href="/broker-posts.css?v=20261010-1">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:'Open Sans',Arial,sans-serif;color:#0f172a;background:linear-gradient(180deg,#f5f9ff,#fff)}.page-wrapper{background:#fff;max-width:1920px;min-height:100vh;margin:auto}.profile-page{width:100%;max-width:none;margin:1.5rem auto 2rem;padding:0 clamp(.75rem,2.5vw,2.5rem)}.profile-panel,.status{width:100%;max-width:820px;margin-left:auto;margin-right:auto;background:#fff;border:1px solid #dbe3ee;border-radius:16px;box-shadow:0 8px 28px #02061712;overflow:hidden}.banner{height:100px;background:linear-gradient(120deg,#071d4a,#0284c7)}.content{padding:0 1.5rem 1.5rem}.avatar{display:block!important;width:108px!important;height:108px!important;min-width:108px;min-height:108px;max-width:none!important;aspect-ratio:1/1;object-fit:cover!important;object-position:center;border-radius:50%!important;overflow:hidden;box-sizing:border-box;border:4px solid white;margin-top:-54px;background:#f8fafc;flex:0 0 108px}.name{font-size:1.8rem;color:#092a4b;margin:.6rem 0}.profile-username{margin:-.25rem 0 .65rem;color:#0284c7;font-size:.92rem;font-weight:700;letter-spacing:.01em;overflow-wrap:anywhere}.profile-username[hidden]{display:none}
+.profile-meta{display:flex;align-items:center;justify-content:flex-start;gap:.55rem;flex-wrap:wrap;margin:.25rem 0 1rem}
+.profile-tag{display:inline-flex;align-items:center;justify-content:center;padding:4px 9px;border-radius:999px;background:transparent;color:#64748b;border:1px solid #94a3b8;font-size:.76rem;font-weight:800}
+.profile-tag.identity-verified{background:#dcfce7;color:#15803d;border-color:#bbf7d0}
+.profile-tag.email-listed{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.profile-presence{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:#16a34a}
+.profile-presence.offline{color:#6b7280}
+.profile-presence-dot{width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 2px rgba(34,197,94,.12)}
+.profile-presence.offline .profile-presence-dot{background:#9ca3af;box-shadow:0 0 0 2px rgba(156,163,175,.16)}
+.profile-provider{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}
+.profile-provider img{display:block;width:15px;height:15px;object-fit:contain}
+.muted{color:#64748b}.bio{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere;color:#334155}.status{padding:1.5rem;text-align:center;line-height:1.6}.status h1{font-size:1.3rem;color:#092a4b}.actions{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:1.3rem}.actions a{display:inline-flex;text-decoration:none;align-items:center}.sidebar-menu-shell{display:none;position:fixed;top:88px;left:24px;width:220px;background:#fff;border:1px solid #dbe3ee;border-radius:12px;padding:10px 0;z-index:950}.sidebar-menu-link{display:block;padding:11px 14px;margin:2px 8px;border-radius:8px;color:#092a4b;text-decoration:none;font-weight:600}.sidebar-menu-link:hover{background:#092a4b;color:white}.mail-header-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:9px;text-decoration:none;font-size:1.15rem;transition:background-color .2s ease,transform .2s ease}.mail-header-icon:hover,.mail-header-icon:focus-visible{background:rgba(255,255,255,.14);transform:translateY(-1px)}@media(max-width:980px){.sidebar-menu-shell{position:static;width:100%;margin:12px auto}}@media(max-width:900px){.resource-nav,.site-header{background:#071D4A!important;border-bottom:1px solid #071D4A!important;backdrop-filter:none!important}}@media(max-width:600px){.content{padding:0 1rem 1rem}.name{font-size:1.5rem}}.profile-feed-panel .empty-feed{background:#111827!important;color:#f8fafc!important;border:1px solid #071D4A!important;border-radius:12px;padding:1.25rem!important;box-shadow:0 8px 24px rgba(2,6,23,.18)}
+.profile-feed-panel .empty-feed a{color:#93c5fd}
+.profile-feeds{display:block;width:100%;max-width:820px;margin:1.2rem auto 0}.profile-feed-panel{width:100%;max-width:820px;min-width:0;padding:1rem;margin:0 auto 1rem}.profile-feed-panel .posts-feed{width:100%}.profile-feed-panel .post-card{width:100%;max-width:none}.profile-feed-panel .feed-heading-row{align-items:flex-start}.profile-feed-panel .feed-heading-row h2{font-size:1.05rem}.profile-feed-panel .post-attachments{grid-template-columns:minmax(0,1fr)}.profile-feed-panel .pdf-preview{height:260px}.profile-feed-panel .post-card{padding:.8rem}.profile-feed-panel .post-delete-button{margin-left:0}.profile-feed-panel #togglePrivateLikes,.profile-feed-panel #closePrivateLikes,.profile-feed-panel a.feed-refresh[href="/posts.html"]{width:124px;height:38px;min-height:38px;min-width:124px;padding:0 .65rem;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;line-height:1;white-space:nowrap}.private-likes-note{margin:.15rem 0 .85rem;color:#64748b;font-size:.84rem;line-height:1.45}@media(max-width:700px){.profile-page{padding:0 .65rem}.profile-feed-panel{padding:.65rem}}
+
+/* Shared responsive Hamlet header fix (mobile) */
+@media(max-width:760px){
+  .resource-nav.hamlet-404-header>.container.container-nav{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;width:100%;min-width:0;box-sizing:border-box;gap:10px;padding:11px 14px;margin:0 auto}
+  .resource-nav.hamlet-404-header>.container.container-nav>.logo{flex:0 0 100%;width:100%;min-width:0}
+  .resource-nav.hamlet-404-header>.container.container-nav>.user-menu,.resource-nav.hamlet-404-header>.container.container-nav>.topbar-actions{flex:0 1 100%;width:100%;max-width:100%;min-width:0;margin-left:0!important;justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;box-sizing:border-box;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .resource-nav.hamlet-404-header .site-title{white-space:nowrap}
+  .resource-nav.hamlet-404-header .user-menu>a,.resource-nav.hamlet-404-header .user-menu>button,.resource-nav.hamlet-404-header .topbar-actions>.btn{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:.8rem;line-height:1.15}
+  .resource-nav.hamlet-404-header .auth-profile-chip,.resource-nav.hamlet-404-header .profile{flex:0 0 auto;min-width:0;max-width:40vw}
+  .resource-nav.hamlet-404-header .auth-profile-name,.resource-nav.hamlet-404-header [data-auth-name]{display:inline-block;max-width:28vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{width:32px;height:32px;flex:0 0 auto}
+}
+@media(max-width:380px){.resource-nav.hamlet-404-header>.container.container-nav{padding-inline:10px}.resource-nav.hamlet-404-header .auth-profile-photo,.resource-nav.hamlet-404-header .profile img{display:none}}
+</style>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-4">
+  </head>
+<body class="auth-pending"><div class="page-wrapper">
+<header class="resource-nav hamlet-404-header"><div class="container container-nav"><div class="logo"><a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a></div><div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px"><div class="auth-profile-chip" data-auth-profile><img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo"><span class="auth-profile-name" data-auth-name></span></div><a class="btn btn-outline" href="/login.html" id="signInLink">Sign In</a><button class="btn btn-outline" id="signOutBtn" style="display:none">Sign Out</button></div></div></header>
+<nav id="topNavMenu" aria-hidden="true" hidden></nav>
+<main class="profile-page"><section id="status" class="status" role="status" aria-live="polite"><h1>Loading member profile</h1><p>Please wait while the profile is retrieved.</p></section><article id="panel" class="profile-panel" style="display:none"><div class="banner"></div><div class="content"><img id="avatar" class="avatar" src="/assets/images/dark-hamlet.png" alt="Member profile photo"><h1 id="name" class="name">Member</h1><p id="username" class="profile-username" aria-label="Member username" hidden></p><p id="subtitle" class="muted">IBR Member</p><div id="profileMeta" class="profile-meta" aria-label="Member profile status"></div><hr style="border:0;border-top:1px solid #e2e8f0"><h2 style="font-size:1rem;color:#092a4b">Professional biography</h2><p id="bio" class="bio">No biography has been added yet.</p><div id="actions" class="actions"></div></div></article><section id="profileFeeds" class="profile-feeds" style="display:none" aria-label="Member posts and private likes"><section class="feed-panel profile-feed-panel" aria-labelledby="profilePostsHeading"><div class="feed-heading-row"><h2 id="profilePostsHeading">Your Posts</h2><div style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap"><button id="togglePrivateLikes" class="feed-refresh" type="button" aria-expanded="false" aria-controls="privateLikesPanel" hidden>💜 Your Likes</button><a class="feed-refresh" href="/posts.html" style="text-decoration:none">📰 Open Feed</a></div></div><div id="profilePostsFeed" class="posts-feed"><div class="empty-feed">Loading posts…</div></div></section><section id="privateLikesPanel" class="feed-panel profile-feed-panel" hidden aria-labelledby="privateLikesHeading"><div class="feed-heading-row"><h2 id="privateLikesHeading">Your private likes</h2><button id="closePrivateLikes" class="feed-refresh" type="button">Close likes</button></div><p class="private-likes-note">Only you can see the posts you have liked. Your likes are not displayed publicly.</p><div id="privateLikesFeed" class="posts-feed"><div class="empty-feed">Loading your likes…</div></div></section></section></main>
+<footer class="resource-footer"><div class="container" style="text-align:center"><div style="margin-bottom:4px;color:#64748b;font-size:.95rem">v1.04.04</div><p style="margin:0;color:#64748b">&copy; 2026 <a href="https://www.ibrecruitment.com/" target="_blank" rel="noopener noreferrer">Impact in Business Recruitment Group Limited</a>. All rights reserved.</p></div></footer></div>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script><script defer src="/firebase-config.js"></script><script defer src="/profile-service.js?v=20261010-2"></script><script defer src="/broker-posts.js?v=20261010-6"></script><script defer src="/header-profile.js?v=20261020-1"></script><script defer src="/mobile-compat.js"></script><script defer src="/page-transition.js"></script>
+<script src="/verified-tick.js"></script>
+<script>
+window.addEventListener('load',function(){
+ const status=document.getElementById('status'),panel=document.getElementById('panel'),nav=document.getElementById('topNavMenu'),signIn=document.getElementById('signInLink'),signOut=document.getElementById('signOutBtn');
+ const feeds=document.getElementById('profileFeeds'),postsContainer=document.getElementById('profilePostsFeed'),likesPanel=document.getElementById('privateLikesPanel'),likesContainer=document.getElementById('privateLikesFeed'),likesToggle=document.getElementById('togglePrivateLikes'),likesClose=document.getElementById('closePrivateLikes');
+ let activeUser=null,activeProfileUid=null,likedIds=new Set(),postsUnsubscribe=null,privateLikesRequest=0;
+ function message(title,detail,login){status.replaceChildren();const h=document.createElement('h1');h.textContent=title;const p=document.createElement('p');p.textContent=detail;status.append(h,p);if(login){const a=document.createElement('a');a.className='btn btn-primary';a.href='/login.html';a.textContent='Go to Sign In';status.append(a)}status.style.display='block';panel.style.display='none';feeds.style.display='none'}
+ function feedMessage(container,text){container.replaceChildren();const el=document.createElement('div');el.className='empty-feed';el.textContent=text;container.appendChild(el)}
+ if(!window.firebase||!window.firebaseConfig){message('Unable to initialise profile','Please refresh the page and try again.',false);document.body.classList.remove('auth-pending');return}
+ try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig)}catch(e){}
+ const auth=firebase.auth(),db=firebase.firestore();
+ function updateAllLikeButtons(postId,liked){document.querySelectorAll('[data-post-id]').forEach(function(card){if(card.dataset.postId!==postId)return;const button=card.querySelector('.post-like-button');if(!button)return;button.classList.toggle('is-liked',liked);button.textContent=liked?'💜 Liked':'💜 Like';button.setAttribute('aria-pressed',liked?'true':'false')})}
+ async function toggleLike(post,alreadyLiked){
+   const ref=db.collection('userPostLikes').doc(activeUser.uid).collection('likes').doc(post.id);
+   if(alreadyLiked){await ref.delete();likedIds.delete(post.id);updateAllLikeButtons(post.id,false);if(activeProfileUid===activeUser.uid)renderPrivateLikes();return false}
+   await ref.set({postId:post.id,likedAt:firebase.firestore.FieldValue.serverTimestamp()});
+   likedIds.add(post.id);updateAllLikeButtons(post.id,true);if(activeProfileUid===activeUser.uid)renderPrivateLikes();return true
+ }
+ async function repostProfilePost(post){
+   if(!activeUser||!post||!post.data||post.data.ownerUid===activeUser.uid)return;
+   const original=post.data;
+   const author=await window.ibrBrokerPosts.getAuthorProfile(original.ownerUid);
+   await db.collection('brokerPosts').add({
+     ownerUid:activeUser.uid,
+     body:typeof original.body==='string'?original.body:'',
+     bodyHtml:typeof original.bodyHtml==='string'?original.bodyHtml:'',
+     attachments:Array.isArray(original.attachments)?original.attachments:[],
+     createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+     repostOf:{postId:post.id,ownerUid:original.ownerUid||'',authorName:author.name||'IBR Member'}
+   });
+ }
+ async function deleteProfilePost(post,card){
+   if(!window.confirm('Delete this post? Only the person who published it can delete it.'))return;
+   const ref=db.collection('brokerPosts').doc(post.id),replies=await ref.collection('replies').get();
+   for(let i=0;i<replies.docs.length;i+=400){const batch=db.batch();replies.docs.slice(i,i+400).forEach(function(doc){batch.delete(doc.ref)});await batch.commit()}
+   const attachments=post.data.repostOf?[]:(Array.isArray(post.data.attachments)?post.data.attachments:[]);
+   await Promise.all(attachments.map(async function(file){if(!file||!file.path)return;try{await firebase.storage().ref(file.path).delete()}catch(error){console.warn('Unable to remove a post attachment:',error)}}));
+   await ref.delete();if(card&&card.parentNode)card.remove();if(activeProfileUid===activeUser.uid)await renderPrivateLikes();if(activeProfileUid===activeUser.uid)await renderPrivateLikes()
+ }
+ function renderProfilePosts(snapshot){
+   const posts=window.ibrBrokerPosts.sortNewest(snapshot.docs.map(function(doc){return {id:doc.id,data:doc.data()||{}}}));
+   postsContainer.replaceChildren();
+   if(!posts.length){feedMessage(postsContainer,'This member has not posted anything yet.');return}
+   posts.forEach(function(post){postsContainer.appendChild(window.ibrBrokerPosts.createPostCard(post,{
+     currentUid:activeUser.uid,liked:likedIds.has(post.id),showLike:true,allowDelete:post.data.ownerUid===activeUser.uid,
+     onLike:toggleLike,onRepost:repostProfilePost,onDelete:deleteProfilePost
+   }))})
+ }
+ async function renderPrivateLikes(){
+   if(!activeUser||activeProfileUid!==activeUser.uid)return;
+   const requestId=++privateLikesRequest;
+   try{
+     const snapshot=await db.collection('userPostLikes').doc(activeUser.uid).collection('likes').get();
+     const records=snapshot.docs.slice().sort(function(a,b){
+       const av=a.data().likedAt, bv=b.data().likedAt;
+       const ad=av&&typeof av.toDate==='function'?av.toDate().getTime():0;
+       const bd=bv&&typeof bv.toDate==='function'?bv.toDate().getTime():0;
+       return bd-ad;
+     });
+     const posts=await Promise.all(records.map(async function(likeDoc){
+       try{const doc=await db.collection('brokerPosts').doc(likeDoc.id).get();if(!doc.exists){await likeDoc.ref.delete().catch(function(){});likedIds.delete(likeDoc.id);return null}return {id:doc.id,data:doc.data()||{}}}
+       catch(error){return null}
+     }));
+     if(requestId!==privateLikesRequest)return;
+     likesContainer.replaceChildren();
+     const visible=posts.filter(Boolean);
+     if(!visible.length){feedMessage(likesContainer,'Posts you like will appear privately in this column.');return}
+     visible.forEach(function(post){likesContainer.appendChild(window.ibrBrokerPosts.createPostCard(post,{
+       currentUid:activeUser.uid,liked:true,showLike:true,allowDelete:post.data.ownerUid===activeUser.uid,
+       onLike:toggleLike,onRepost:repostProfilePost,onDelete:deleteProfilePost
+     }))});
+   }catch(error){if(requestId===privateLikesRequest)feedMessage(likesContainer,'Your private likes could not be loaded. Please refresh the page.')}
+ }
+ async function startProfileFeeds(uid,user){
+   if(typeof postsUnsubscribe==='function')postsUnsubscribe();postsUnsubscribe=null;
+   activeProfileUid=uid;activeUser=user;feeds.style.display='block';
+   likesToggle.hidden=uid!==user.uid;likesPanel.hidden=true;likesToggle.setAttribute('aria-expanded','false');
+   try{likedIds=await window.ibrBrokerPosts.loadLikedIds(db,user.uid)}catch(error){likedIds=new Set()}
+   if(uid===user.uid)await renderPrivateLikes();
+   postsUnsubscribe=db.collection('brokerPosts').where('ownerUid','==',uid).onSnapshot(renderProfilePosts,function(error){
+     console.error('Unable to load this member’s posts:',error);
+     feedMessage(postsContainer,error&&error.code==='permission-denied'?'Your session is not authorised to view these posts.':'Posts could not be loaded. Please refresh the page.')
+   })
+ }
+ auth.onAuthStateChanged(async function(user){
+ document.body.classList.remove('auth-pending');
+ if(typeof postsUnsubscribe==='function')postsUnsubscribe();postsUnsubscribe=null;
+ if(!user){activeUser=null;document.body.classList.remove('has-sidebar');nav.style.display='none';signIn.style.display='inline-flex';signOut.style.display='none';message('Sign in required','Please sign in to view member profiles.',true);return}
+ document.body.classList.add('has-sidebar');nav.style.display='block';signIn.style.display='none';signOut.style.display='inline-flex';
+ const params=new URLSearchParams(location.search),requestedUsername=(params.get('username')||'').trim().toLowerCase();
+ let uid=(params.get('uid')||user.uid).trim();
+ try{
+ if(requestedUsername){if(!/^[a-z0-9_]{3,20}$/.test(requestedUsername)){message('Profile not found','The username in this profile link is invalid.',false);return}const usernameDoc=await db.collection('usernames').doc(requestedUsername).get();if(!usernameDoc.exists){message('Profile not found','No member uses that username.',false);return}uid=String((usernameDoc.data()||{}).uid||'').trim();}
+ if(!uid||uid.length>128){message('Profile not found','The profile address is invalid.',false);return}
+ const profileResult=window.ibrProfileService
+  ? await window.ibrProfileService.getProfile(uid)
+  : await db.collection('publicProfiles').doc(uid).get().then(function(snap){return {exists:snap.exists,data:snap.exists?(snap.data()||{}):{}}});
+ if(!profileResult.exists){message('Profile not found','This member has not saved a profile or it is no longer available.',false);return}
+ const d=profileResult.data||{};
+ if(d.isPublic!==true){message('Profile unavailable',uid===user.uid?'Your profile is not listed publicly. Visit Edit Profile to publish it.':'This member has chosen not to display a public profile.',false);if(uid===user.uid){const a=document.createElement('a');a.className='btn btn-primary';a.href='/editprofile.html';a.textContent='Edit Profile';status.append(a)}return}
+ const name=[d.firstName,d.lastName].filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()).join(' ')||'IBR Member';const username=typeof d.username==='string'&&/^[a-z0-9_]{3,20}$/i.test(d.username.trim())?d.username.trim().toLowerCase():'';const usernameElement=document.getElementById('username');usernameElement.textContent=username?'@'+username:'';usernameElement.hidden=!username;
+ const profileEmail=(typeof d.email==='string'&&d.email.trim())?d.email.trim():(uid===user.uid&&typeof user.email==='string'?user.email.trim():'');const emailListed=IBRVerifiedTick.isValidEmail(profileEmail);const nameHeading=document.getElementById('name');nameHeading.replaceChildren(document.createTextNode(name));const emailTick=IBRVerifiedTick.create(profileEmail);if(emailTick)nameHeading.appendChild(emailTick);document.getElementById('subtitle').textContent=uid===user.uid?'Your member profile':'hamlet member';
+ const meta=document.getElementById('profileMeta');meta.replaceChildren();
+ const identityVerified=d.onfidoVerified===true;
+ const identityTag=document.createElement('span');identityTag.className='profile-tag'+(identityVerified?' identity-verified':'');identityTag.textContent=identityVerified?'Identity verified':'Identity unverified';identityTag.setAttribute('aria-label',identityVerified?'Identity verification completed':'Identity not verified');meta.appendChild(identityTag);
+ if(emailListed){const emailTag=document.createElement('span');emailTag.className='profile-tag email-listed';emailTag.textContent='Email on file';meta.appendChild(emailTag)}
+ function asDate(value){if(!value)return null;if(typeof value.toDate==='function'){const dt=value.toDate();return isNaN(dt.getTime())?null:dt}const dt=new Date(value);return isNaN(dt.getTime())?null:dt}
+ const lastLogin=asDate(d.lastLogin||d['Last Login']);const age=lastLogin?Date.now()-lastLogin.getTime():Infinity;const online=d.incognito!==true&&age>=0&&age<=60*60*1000;
+ const presence=document.createElement('span');presence.className='profile-presence'+(online?'':' offline');presence.setAttribute('aria-label',online?'Online now':'Offline');const dot=document.createElement('span');dot.className='profile-presence-dot';presence.append(dot,document.createTextNode(online?'Online now':'Offline'));meta.appendChild(presence);
+ document.getElementById('bio').textContent=typeof d.bio==='string'&&d.bio.trim()?d.bio.trim():'No biography has been added yet.';
+ const avatar=document.getElementById('avatar');avatar.src=typeof d.imageDataUrl==='string'&&d.imageDataUrl?d.imageDataUrl:'/assets/images/dark-hamlet.png';avatar.alt=name+' profile photo';avatar.onerror=function(){avatar.onerror=null;avatar.src='/assets/images/dark-hamlet.png'};
+ const actions=document.getElementById('actions');actions.replaceChildren();const a=document.createElement('a');a.className='btn btn-primary';a.href=uid===user.uid?'/editprofile.html':'/messages.html?to='+encodeURIComponent(uid);a.textContent=uid===user.uid?'Edit Profile':'Message Member';actions.append(a);const back=document.createElement('a');back.className='btn btn-outline';back.href='/directory.html';back.textContent='Member Directory';actions.append(back);
+ status.style.display='none';panel.style.display='block';
+ await startProfileFeeds(uid,user);
+ }catch(e){console.error('Unable to load member profile',e);message('Unable to load profile',e&&e.code==='permission-denied'?'Your session is not authorised to view this profile. Please sign out and sign in again.':'Please check your connection and try again.',false)}
+ });
+ likesToggle.addEventListener('click',function(){const opening=likesPanel.hidden;likesPanel.hidden=!opening;likesToggle.setAttribute('aria-expanded',String(opening));likesToggle.textContent=opening?'💜 Hide Likes':'💜 Your Likes';if(opening)likesPanel.scrollIntoView({behavior:'smooth',block:'start'});});
+ likesClose.addEventListener('click',function(){likesPanel.hidden=true;likesToggle.setAttribute('aria-expanded','false');likesToggle.textContent='💜 Your Likes';likesToggle.focus()});
+ signOut.addEventListener('click',async function(){try{await auth.signOut();location.replace('/login.html')}catch(e){console.error('Sign out failed',e)}});
+});</script>  <script src="/hamlet-workspace.js?v=20261016-1"></script>
+  <script src="/hamlet-background.js?v=20261013-1"></script>
+</body></html>

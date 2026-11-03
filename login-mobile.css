@@ -1,0 +1,24 @@
+.login-page .card{overflow:hidden}
+.login-page .actions{width:100%;max-width:100%}
+.login-page .portal-return-btn{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  white-space:normal;
+  text-align:center;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+  transform:none !important;
+}
+.login-page .btn:hover,
+.login-page .btn:focus,
+.login-page .btn-primary:hover,
+.login-page .btn-primary:focus{
+  transform:none !important;
+}
+@media (max-width:480px){
+  .login-page .portal-return-btn{
+    font-size:0.9rem;
+    padding:10px 8px;
+  }
+}

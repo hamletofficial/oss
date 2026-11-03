@@ -1,0 +1,63 @@
+name: Build Hamlet for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/hamlet-windows-desktop
+    paths:
+      - "desktop/hamlet-windows/**"
+      - "app/hamlet/index.html"
+      - ".github/workflows/hamlet-windows-build.yml"
+
+concurrency:
+  group: hamlet-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop/hamlet-windows
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm install
+      - name: Check JavaScript syntax and desktop security tests
+        run: npm run check
+      - name: Build Windows installer
+        run: npm run pack:win
+      - name: Validate installer output and calculate SHA-256
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem -Path "release" -Filter "*.exe" -File)
+          if ($installers.Count -ne 1) {
+            throw "Expected exactly one Windows installer; found $($installers.Count)."
+          }
+          $installer = $installers[0]
+          if ($installer.Length -lt 1MB) {
+            throw "Installer is unexpectedly small ($($installer.Length) bytes); refusing to publish the artifact."
+          }
+          $hash = (Get-FileHash -Path $installer.FullName -Algorithm SHA256).Hash
+          "$hash  $($installer.Name)" | Set-Content -Path "release/SHA256SUMS.txt" -Encoding ascii
+          Write-Host "Validated installer: $($installer.Name)"
+          Write-Host "Size: $($installer.Length) bytes"
+          Write-Host "SHA-256: $hash"
+      - name: Upload validated installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamlet-windows-installer
+          path: |
+            desktop/hamlet-windows/release/*.exe
+            desktop/hamlet-windows/release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14

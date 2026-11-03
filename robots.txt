@@ -1,0 +1,22 @@
+User-agent: *
+# Public pages are crawlable. Robots rules are not access controls.
+# Keep known authenticated, workspace, and administrative routes out of crawler discovery.
+Disallow: /superuser/
+Disallow: /app/hamlet/
+Disallow: /app/public/dashboard.html
+Disallow: /members.html
+Disallow: /member.html
+Disallow: /directory.html
+Disallow: /profile.html
+Disallow: /editprofile.html
+Disallow: /posts.html
+Disallow: /dashboard.html
+Disallow: /rankings.html
+Disallow: /portfolio.html
+Disallow: /app/public/live.html
+Disallow: /residential.html
+Disallow: /resi-resources.html
+Disallow: /invoice.html
+Disallow: /insights.html
+
+Sitemap: https://www.hamlet-ai.co.uk/sitemap.xml
