@@ -305,9 +305,9 @@
       epcCertificateInput.addEventListener('input',updateEpcNumberFeedback);
       updateEpcNumberFeedback();
       verifyEpcBtn.addEventListener('click',async function(){
-        const certificateNumber=epcCertificateInput.value.replace(/-/g,'').trim();
+        const certificateNumber=epcCertificateInput.value.trim();
         const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
-        if(!/^\d{20}$/.test(certificateNumber)){epcLookupStatus.textContent='Enter the full 20-digit EPC certificate number.';epcLookupStatus.className='status error';return;}
+        if(!/^[0-9]{4}(-[0-9]{4}){4}$/.test(certificateNumber)){epcLookupStatus.textContent='Enter the full 20-digit EPC certificate number.';epcLookupStatus.className='status error';return;}
         if(!address||!postcode){epcLookupStatus.textContent='Enter the property address and postcode in subsection 1 first.';epcLookupStatus.className='status error';return;}
         if(!currentUser){epcLookupStatus.textContent='Sign in is required to verify an EPC.';epcLookupStatus.className='status error';return;}
         verifyEpcBtn.disabled=true;epcLookupStatus.textContent='Verifying the certificate and property address…';epcLookupStatus.className='status';
@@ -318,7 +318,7 @@
           const c=payload.certificate||{};
           if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate address and postcode do not match subsection 1. No EPC fields were changed.');
           const returnedNumber=String(c.certificate_number||c.certificateNumber||'').trim();
-          if(returnedNumber&&returnedNumber.replace(/[^0-9]/g,'')!==certificateNumber)throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
+          if(returnedNumber&&returnedNumber.replace(/[^0-9]/g,'')!==certificateNumber.replace(/[^0-9]/g,''))throw new Error('The Government register returned a different certificate number. No EPC fields were changed.');
           document.getElementById('epcRating').value=c.current_energy_efficiency_band||c.currentEnergyEfficiencyBand||'';
           document.getElementById('epcCertificateNumber').value=formatEpcNumber(returnedNumber||certificateNumber);
           const date=c.registration_date||c.registrationDate||'';
