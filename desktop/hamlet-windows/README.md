@@ -41,14 +41,15 @@ The GitHub Actions workflow `.github/workflows/hamlet-windows-release.yml`:
 Configure these repository secrets (never commit credentials):
 
 - `AZURE_CLIENT_ID`: Entra application/client ID.
+- `AZURE_SUBSCRIPTION_ID`: Azure subscription ID used by the Azure login action.
 - `AZURE_TENANT_ID`: Entra tenant ID.
 - `AZURE_TRUSTED_SIGNING_ENDPOINT`: region-specific Artifact Signing endpoint.
 - `AZURE_TRUSTED_SIGNING_ACCOUNT`: Artifact Signing account name.
 - `AZURE_TRUSTED_SIGNING_CERT_PROFILE`: public-trust certificate profile name.
 
-The existing Microsoft Entra tenant ID is used as `AZURE_TENANT_ID`. The Entra application must have a federated identity credential trusting this repository's GitHub Actions OIDC subject for the `main` branch (or the release environment/ref you explicitly configure), and the **Artifact Signing Certificate Profile Signer** role on the Artifact Signing account. The action must have `exclude-workload-identity-credential: false` so its DefaultAzureCredential chain accepts GitHub's OIDC token. GitHub Actions must permit OIDC token issuance. Do not use a client secret when workload identity federation is configured.
+The existing Azure subscription ID is used as `AZURE_SUBSCRIPTION_ID`, and the existing Microsoft Entra tenant ID is used as `AZURE_TENANT_ID`. The Entra application must have a federated identity credential trusting this repository's GitHub Actions OIDC subject for the `main` branch (or the release environment/ref you explicitly configure), and the **Artifact Signing Certificate Profile Signer** role on the Artifact Signing account. The action must have `exclude-workload-identity-credential: false` so its DefaultAzureCredential chain accepts GitHub's OIDC token. GitHub Actions must permit OIDC token issuance. Do not use a client secret when workload identity federation is configured.
 
-The repository workflow deliberately fails closed: if signing credentials are missing, signing cannot complete, or Authenticode validation is not `Valid`, the installer is not published.
+Pull requests run the Windows build and tests without requesting Azure credentials, signing, or publishing. The signing job runs only on non-PR events after a successful build. A manual dispatch publishes a public release only when `publish_release` is explicitly set to `true`; leave it `false` for a signing-only validation run. The repository workflow deliberately fails closed: if signing credentials are missing, signing cannot complete, or Authenticode validation is not `Valid`, the installer is not published.
 
 ## Manual Windows acceptance tests
 
