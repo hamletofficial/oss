@@ -42,12 +42,11 @@ Configure these repository secrets (never commit credentials):
 
 - `AZURE_CLIENT_ID`: Entra application/client ID.
 - `AZURE_TENANT_ID`: Entra tenant ID.
-- `AZURE_SUBSCRIPTION_ID`: Azure subscription ID.
 - `AZURE_TRUSTED_SIGNING_ENDPOINT`: region-specific Artifact Signing endpoint.
 - `AZURE_TRUSTED_SIGNING_ACCOUNT`: Artifact Signing account name.
 - `AZURE_TRUSTED_SIGNING_CERT_PROFILE`: public-trust certificate profile name.
 
-The Entra application must have a federated identity credential trusting this repository's GitHub Actions OIDC subject for the `main` branch (or the release environment/ref you explicitly configure), and the appropriate signing role on the Artifact Signing account. GitHub Actions must permit OIDC token issuance. Do not use a client secret when workload identity federation is configured.
+The existing Microsoft Entra tenant ID is used as `AZURE_TENANT_ID`. The Entra application must have a federated identity credential trusting this repository's GitHub Actions OIDC subject for the `main` branch (or the release environment/ref you explicitly configure), and the **Artifact Signing Certificate Profile Signer** role on the Artifact Signing account. The action must have `exclude-workload-identity-credential: false` so its DefaultAzureCredential chain accepts GitHub's OIDC token. GitHub Actions must permit OIDC token issuance. Do not use a client secret when workload identity federation is configured.
 
 The repository workflow deliberately fails closed: if signing credentials are missing, signing cannot complete, or Authenticode validation is not `Valid`, the installer is not published.
 
