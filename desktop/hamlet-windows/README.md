@@ -16,7 +16,7 @@ This folder contains the Electron desktop application for Hamlet. The v1.04.06 W
 From this directory, in PowerShell:
 
 ```powershell
-npm ci
+npm install
 npm run check
 npm start
 npm run pack:win
@@ -29,7 +29,7 @@ The package produces `release/hamlet-Setup-1.4.6.exe`. Local builds are unsigned
 The GitHub Actions workflow `.github/workflows/hamlet-windows-release.yml`:
 
 1. Runs on a Windows 2025 runner with Node.js 24.
-2. Installs the locked desktop dependencies and runs syntax, security and unit tests.
+2. Installs desktop dependencies and runs syntax, security and unit tests.
 3. Verifies package version `1.4.6`.
 4. Builds exactly the x64 NSIS installer.
 5. Signs the installer with Azure Artifact Signing and an RFC 3161 timestamp.
