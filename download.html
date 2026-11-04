@@ -127,19 +127,19 @@
     <div class="release-layout">
       <section class="latest-card" aria-labelledby="latest-title">
         <img class="release-hero-art" src="/release-download-hero.svg" alt="Download-themed illustration with a software package, downward arrow and verification check on a dark navy and royal-blue gradient" width="1600" height="900" fetchpriority="high">
-        <span class="pill">Latest stable release</span>
-        <h2 id="latest-title">Hamlet v1.04.04</h2>
-        <p class="version-meta">Installer <code>hamlet-Setup-1.4.4.exe</code> · Published 29 October 2026</p>
+        <span class="pill">Release candidate · signing setup pending</span>
+        <h2 id="latest-title">Hamlet v1.04.06</h2>
+        <p class="version-meta">Installer <code>hamlet-Setup-1.4.6.exe</code> · Target release 4 November 2026</p>
         <p>Recommended for new installations. Download the installer from Hamlet’s dedicated Cloudflare R2 distribution domain and verify the SHA-256 checksum before running it.</p>
         <div class="release-stats">
           <span>Windows 10 / 11</span>
-          <span>~97.2 MiB installer</span>
+          <span>Installer size confirmed at release</span>
           <span>SHA-256 available</span>
         </div>
         <p class="archive-note"><strong>Compatibility:</strong> This installer supports 64-bit Windows (x64) only. It is not compatible with 32-bit (x86) Windows.</p>
-        <a class="button" href="https://github.com/hamletofficial/oss/releases/download/v1.04.04/hamlet-Setup-1.4.4.exe">Download latest .exe</a>
-        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/download/v1.04.04/SHA256SUMS.txt">SHA-256 checksum</a>
-        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/tag/v1.04.04">Release notes</a>
+        <a class="button" href="https://github.com/hamletofficial/oss/releases/download/v1.04.06/hamlet-Setup-1.4.6.exe">Download latest .exe</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/download/v1.04.06/SHA256SUMS.txt">SHA-256 checksum</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/tag/v1.04.06">Release notes</a>
       </section>
       <aside class="side-card">
         <div>
@@ -171,7 +171,7 @@
       <h2 id="install-title">Install and verify</h2>
       <ol>
         <li>Download the installer and the matching <code>SHA256SUMS.txt</code> file from the same release.</li>
-        <li>In PowerShell, run <code>Get-FileHash .\hamlet-Setup-1.4.4.exe -Algorithm SHA256</code> in the folder containing the latest installer. If using an older version, replace the filename with that version’s exact installer name.</li>
+        <li>In PowerShell, run <code>Get-FileHash .\hamlet-Setup-1.4.6.exe -Algorithm SHA256</code> in the folder containing the latest installer. If using an older version, replace the filename with that version’s exact installer name.</li>
         <li>Compare the computed hash with the entry for the same filename in <code>SHA256SUMS.txt</code>. The values must match exactly.</li>
         <li>If the checksum does not match, do not run the installer. Delete it and download it again from the official GitHub release.</li>
         <li>Review Windows security or publisher prompts before proceeding. Do not bypass a warning if you cannot establish that the file is authentic.</li>
@@ -182,7 +182,7 @@
       <div class="safety-mark" aria-hidden="true">i</div>
       <div>
         <h2 id="security-title">Security and update guidance</h2>
-        <p class="archive-note">SHA-256 verification checks file integrity; it does not independently prove publisher identity. The Hamlet installer is not yet code-signed, and secure automatic updates remain planned. Check the release notes and checksum for the exact version before installing.</p>
+        <p class="archive-note">The v1.04.06 release is being prepared with Microsoft Azure Artifact Signing. The installer must not be published or installed until the release workflow confirms a valid Authenticode signature and publishes the matching SHA-256 checksum. Code signing verifies publisher identity and file integrity; secure automatic updates remain a separate future capability.</p>
       </div>
     </section>
     <section class="panel" aria-labelledby="help-title">
@@ -321,7 +321,6 @@
           const r2Release = {
             'v1.04.02': 'v1.04.02',
             'v1.04.0.2': 'v1.04.02',
-            'v1.04.04': 'v1.04.04',
             'v1.04': 'v1.04'
           }[tag] || null;
           const installerUrl = r2Release

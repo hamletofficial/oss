@@ -1,6 +1,6 @@
 # hamlet for Windows
 
-This folder contains the Electron desktop application for Hamlet. The unified v1.04.04 Windows release workflow runs automated checks and packages the installer on a Windows runner before publishing the Windows prerelease. The desktop build is separate from the GitHub Pages deployment.
+This folder contains the Electron desktop application for Hamlet. The v1.04.06 Windows release workflow runs automated checks, builds the x64 NSIS installer, signs it with Microsoft Azure Artifact Signing and verifies the signature before publishing.
 
 ## Current functionality
 
@@ -22,44 +22,50 @@ npm start
 npm run pack:win
 ```
 
-A successful Windows package build should produce `release/hamlet-Setup-1.4.4.exe`.
+The package produces `release/hamlet-Setup-1.4.6.exe`. Local builds are unsigned unless signed through the configured Azure Artifact Signing workflow.
 
-## Automated validation and v1.04.04 release
+## Automated v1.04.06 release
 
-The GitHub Actions workflow `.github/workflows/hamlet-windows-release.yml` uses Node.js 24 on a Windows runner and:
+The GitHub Actions workflow `.github/workflows/hamlet-windows-release.yml`:
 
-1. Installs dependencies and runs JavaScript syntax, security and unit tests.
-2. Verifies the desktop package version is `1.4.4`.
-3. Builds the NSIS Windows installer.
-4. Requires exactly one installer larger than 1 MB and checks that its filename is `hamlet-Setup-1.4.4.exe`.
-5. Calculates SHA-256 and attaches the installer plus checksum to the `v1.04.04` Windows prerelease only after the preceding checks pass.
+1. Runs on a Windows 2025 runner with Node.js 24.
+2. Installs desktop dependencies and runs syntax, security and unit tests.
+3. Verifies package version `1.4.6`.
+4. Builds exactly the x64 NSIS installer.
+5. Signs the installer with Azure Artifact Signing and an RFC 3161 timestamp.
+6. Requires a valid Authenticode signature before calculating the SHA-256 digest.
+7. Publishes the signed installer and matching checksum to the GitHub release.
 
-To run the release build manually, open the repository's Actions tab, select **Build and publish Hamlet v1.04.04 for Windows**, choose **Run workflow** on `main`, and keep the tag as `v1.04.04`. The workflow tests and builds before publishing. The release remains a prerelease because code signing and real-device acceptance are still outstanding.
+### Required GitHub Actions configuration
 
-The website's browser end-to-end test runs in the repository's smoke-test workflow. It uses a mocked Firebase environment to exercise the deal pipeline, workspace search, deal calculator, saved searches and transaction-document upload. It does not use production credentials or establish that real identity-provider login works in Electron.
+Configure these repository secrets (never commit credentials):
 
-## Manual Windows acceptance test before release
+- `AZURE_CLIENT_ID`: Entra application/client ID.
+- `AZURE_SUBSCRIPTION_ID`: Azure subscription ID used by the Azure login action.
+- `AZURE_TENANT_ID`: Entra tenant ID.
+- `AZURE_TRUSTED_SIGNING_ENDPOINT`: region-specific Artifact Signing endpoint.
+- `AZURE_TRUSTED_SIGNING_ACCOUNT`: Artifact Signing account name.
+- `AZURE_TRUSTED_SIGNING_CERT_PROFILE`: public-trust certificate profile name.
 
-After downloading the workflow artifact, extract it and verify the installer checksum using PowerShell:
+The existing Azure subscription ID is used as `AZURE_SUBSCRIPTION_ID`, and the existing Microsoft Entra tenant ID is used as `AZURE_TENANT_ID`. The Entra application must have a federated identity credential trusting this repository's GitHub Actions OIDC subject for the `main` branch (or the release environment/ref you explicitly configure), and the **Artifact Signing Certificate Profile Signer** role on the Artifact Signing account. The workflow authenticates with `azure/login@v3` using GitHub OIDC, then allows the signing action to use the Azure CLI credential (`exclude-azure-cli-credential: false`). GitHub Actions must permit OIDC token issuance. Do not use a client secret when workload identity federation is configured.
+
+Pull requests run the Windows build and tests without requesting Azure credentials, signing, or publishing. The signing job runs only on non-PR events after a successful build. A manual dispatch publishes a public release only when `publish_release` is explicitly set to `true`; leave it `false` for a signing-only validation run. The repository workflow deliberately fails closed: if signing credentials are missing, signing cannot complete, or Authenticode validation is not `Valid`, the installer is not published.
+
+## Manual Windows acceptance tests
+
+After downloading the signed installer and checksum, verify both:
 
 ```powershell
-Get-FileHash .\\hamlet-Setup-1.4.4.exe -Algorithm SHA256
-Get-Content .\\SHA256SUMS.txt
+Get-AuthenticodeSignature .\hamlet-Setup-1.4.6.exe | Format-List Status,StatusMessage,SignerCertificate
+Get-FileHash .\hamlet-Setup-1.4.6.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS.txt
 ```
 
-Compare the hash with the entry for the installer in `SHA256SUMS.txt`. Then install on a supported Windows 10/11 machine and verify:
-
-- The installer completes and creates the expected Start menu and desktop shortcuts.
-- The app opens the correct Hamlet domain and can be closed and relaunched.
-- Firebase sign-in, sign-out and each enabled provider are tested with real accounts; authentication callback handling may need provider-specific adjustments.
-- The notification-enable action produces a native Windows notification when notifications are allowed.
-- A test critical-path reminder is shown in the configured lead-time window and is not duplicated on the same day.
-- Windows notification permissions, Focus/Do Not Disturb, app restart, upgrade and uninstall behaviour are checked.
-
-A green CI build validates the package process, not every interactive Windows behaviour. The installer still requires the manual acceptance checks above before public release.
+Then install on Windows 10/11 and test launch, sign-in, sign-out, notifications, shortcuts, upgrade and uninstall. Also verify enabled identity-provider sign-in with real accounts. A green CI build validates packaging and signing; it does not establish every interactive Windows behaviour.
 
 ## Release and security notes
 
-- Reminder checks are currently page-driven: the pipeline page must be running. Native notifications are not scheduled while the application is fully closed.
-- Releases are not yet code-signed and an automatic secure update mechanism is not yet configured.
-- Never include Firebase Admin credentials, service-account keys or other privileged secrets in the desktop package. Backend authorisation must remain enforced by the service.
+- Reminder checks are page-driven: the pipeline page must be running; reminders are not scheduled while the application is fully closed.
+- Signing credentials and private keys must remain in Azure/GitHub secure identity configuration and never in the desktop package.
+- Code signing does not yet provide an automatic secure update mechanism.
+- Never include Firebase Admin credentials, service-account keys or other privileged secrets in the desktop package.
