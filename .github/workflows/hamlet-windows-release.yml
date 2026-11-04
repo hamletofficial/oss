@@ -35,7 +35,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: hamlet-v1-04-06-windows-\${{ github.ref }}
+  group: hamlet-v1-04-06-windows-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -120,17 +120,17 @@ jobs:
       - name: Log in to Azure using GitHub OIDC
         uses: azure/login@v3
         with:
-          client-id: \${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Sign installer with Microsoft Artifact Signing
         uses: azure/artifact-signing-action@v2
         with:
-          endpoint: \${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
-          signing-account-name: \${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: \${{ secrets.AZURE_TRUSTED_SIGNING_CERT_PROFILE }}
-          files-folder: \${{ github.workspace }}\desktop\hamlet-windows\release
+          endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_TRUSTED_SIGNING_CERT_PROFILE }}
+          files-folder: ${{ github.workspace }}\desktop\hamlet-windows\release
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -188,7 +188,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.publish_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: \${{ inputs.tag_name }}
+          tag_name: ${{ inputs.tag_name }}
           name: Hamlet v1.04.06 — Windows (Signed)
           body_path: desktop/hamlet-windows/RELEASE-NOTES.md
           prerelease: false
