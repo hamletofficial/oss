@@ -90,10 +90,9 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: https://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          azure-credential-type: workload-identity
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          exclude-workload-identity-credential: false
 
       - name: Verify Authenticode signature and calculate SHA-256
         shell: pwsh
