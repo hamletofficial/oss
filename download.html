@@ -317,18 +317,14 @@
           const checksum = (release.assets || []).find(asset => asset.name === 'SHA256SUMS.txt');
           const latest = index === 0 && !query;
           const label = release.name || ('Hamlet ' + release.tag_name);
-          const tag = String(release.tag_name || '').toLowerCase();
-          const r2Release = {
-            'v1.04.02': 'v1.04.02',
-            'v1.04.0.2': 'v1.04.02',
-            'v1.04': 'v1.04'
-          }[tag] || null;
-          const installerUrl = r2Release
-            ? 'https://downloads.hamlet-ai.co.uk/' + r2Release + '/' + installer.name
-            : installer.browser_download_url;
-          const checksumUrl = r2Release && checksum
-            ? 'https://downloads.hamlet-ai.co.uk/' + r2Release + '/SHA256SUMS.txt'
-            : (checksum ? checksum.browser_download_url : '');
+          const tag = String(release.tag_name || '').trim();
+          // All archive downloads are served from the enabled Hamlet R2 custom domain.
+          // Keep the release tag as the version directory so each published release
+          // resolves to its corresponding R2 asset path.
+          const r2Version = tag.replace(/^v/i, 'v');
+          const r2Base = 'https://downloads.hamlet-ai.co.uk/' + encodeURIComponent(r2Version) + '/';
+          const installerUrl = r2Base + encodeURIComponent(installer.name);
+          const checksumUrl = checksum ? r2Base + 'SHA256SUMS.txt' : '';
           const details = [formatDate(release.published_at), installer.name, formatSize(installer.size)]
             .filter(Boolean).join(' · ');
           return '<article class="release-row' + (latest ? ' latest' : '') + '">' +
