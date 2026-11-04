@@ -41,7 +41,7 @@ jobs:
 
       - name: Install desktop dependencies
         working-directory: desktop/hamlet-windows
-        run: npm ci
+        run: npm install
 
       - name: Run desktop syntax, security and unit tests
         working-directory: desktop/hamlet-windows
