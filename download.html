@@ -127,19 +127,19 @@
     <div class="release-layout">
       <section class="latest-card" aria-labelledby="latest-title">
         <img class="release-hero-art" src="/release-download-hero.svg" alt="Download-themed illustration with a software package, downward arrow and verification check on a dark navy and royal-blue gradient" width="1600" height="900" fetchpriority="high">
-        <span class="pill">Release candidate · signing setup pending</span>
+        <span class="pill">Signed · Windows installation tested</span>
         <h2 id="latest-title">Hamlet v1.04.06</h2>
         <p class="version-meta">Installer <code>hamlet-Setup-1.4.6.exe</code> · Target release 4 November 2026</p>
-        <p>Recommended for new installations. Download the installer from Hamlet’s dedicated Cloudflare R2 distribution domain and verify the SHA-256 checksum before running it.</p>
+        <p>Recommended for new installations. The installer has a verified Microsoft Authenticode signature and has passed installation, launch and uninstallation testing on a Windows computer. Verify the SHA-256 checksum before running it.</p>
         <div class="release-stats">
           <span>Windows 10 / 11</span>
-          <span>Installer size confirmed at release</span>
+          <span>101.99 MiB installer</span>
           <span>SHA-256 available</span>
         </div>
         <p class="archive-note"><strong>Compatibility:</strong> This installer supports 64-bit Windows (x64) only. It is not compatible with 32-bit (x86) Windows.</p>
-        <a class="button" href="https://github.com/hamletofficial/oss/releases/download/v1.04.06/hamlet-Setup-1.4.6.exe">Download latest .exe</a>
-        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/download/v1.04.06/SHA256SUMS.txt">SHA-256 checksum</a>
-        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/tag/v1.04.06">Release notes</a>
+        <a class="button" href="https://downloads.hamlet-ai.co.uk/v1.04.06/hamlet-Setup-1.4.6.exe">Download latest .exe</a>
+        <a class="button secondary" href="https://downloads.hamlet-ai.co.uk/v1.04.06/SHA256SUMS.txt">SHA-256 checksum</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/blob/main/desktop/hamlet-windows/RELEASE-NOTES.md">Release notes</a>
       </section>
       <aside class="side-card">
         <div>
@@ -182,7 +182,7 @@
       <div class="safety-mark" aria-hidden="true">i</div>
       <div>
         <h2 id="security-title">Security and update guidance</h2>
-        <p class="archive-note">The v1.04.06 release is being prepared with Microsoft Azure Artifact Signing. The installer must not be published or installed until the release workflow confirms a valid Authenticode signature and publishes the matching SHA-256 checksum. Code signing verifies publisher identity and file integrity; secure automatic updates remain a separate future capability.</p>
+        <p class="archive-note">Hamlet v1.04.06 has been signed using Microsoft Azure Artifact Signing. GitHub Actions verified the Authenticode signature and generated the matching SHA-256 checksum; the installer has also passed real-device installation, launch and uninstallation checks. The published checksum is <code>477A619C7C468F26CC53215EB070E97D062E8EFF345D009F5387C7FA03F65A7F</code>. Notifications and in-place upgrade behaviour have not yet been independently verified. Code signing verifies publisher identity and file integrity; secure automatic updates remain a separate future capability.</p>
       </div>
     </section>
     <section class="panel" aria-labelledby="help-title">
