@@ -1,38 +1,47 @@
 name: Build, sign and publish Hamlet v1.04.06 for Windows
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "desktop/hamlet-windows/**"
+      - ".github/workflows/hamlet-windows-release.yml"
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Release tag to build and publish"
+        description: "Release tag to publish when explicitly enabled"
         required: true
         default: "v1.04.06"
         type: string
+      publish_release:
+        description: "Publish the signed installer as a public GitHub release"
+        required: true
+        default: false
+        type: boolean
   push:
     branches:
       - main
     paths:
       - "desktop/hamlet-windows/**"
       - ".github/workflows/hamlet-windows-release.yml"
-    tags:
-      - "v1.04.06"
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 concurrency:
-  group: hamlet-v1-04-06-windows-release-${{ github.ref }}
+  group: hamlet-v1-04-06-windows-\${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build-test-sign-and-publish:
+  build-and-test:
+    name: Build and test Windows installer
     runs-on: windows-2025
+    permissions:
+      contents: read
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v4
@@ -73,26 +82,64 @@ jobs:
             throw "Unexpected installer filename: $($installer.Name)"
           }
           if ($installer.Length -lt 1MB) {
-            throw "Installer is unexpectedly small ($($installer.Length) bytes); refusing to publish."
+            throw "Installer is unexpectedly small ($($installer.Length) bytes); refusing to continue."
           }
           Write-Host "Installer ready for signing: $($installer.FullName)"
 
-      # Requires GitHub Actions secrets/variables configured for the Azure
-      # Artifact Signing account and an Entra app using workload identity federation.
-      - name: Sign installer with Microsoft Artifact Signing
-        uses: Azure/artifact-signing-action@v1
+      - name: Retain unsigned build for signing job
+        uses: actions/upload-artifact@v4
         with:
-          endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
-          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ secrets.AZURE_TRUSTED_SIGNING_CERT_PROFILE }}
-          files-folder: ${{ github.workspace }}\desktop\hamlet-windows\release
+          name: hamlet-windows-v1.04.06-unsigned
+          path: desktop/hamlet-windows/release/hamlet-Setup-1.4.6.exe
+          if-no-files-found: error
+          retention-days: 2
+
+  sign-and-publish:
+    name: Sign and optionally publish Windows installer
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    runs-on: windows-2025
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Download unsigned installer
+        uses: actions/download-artifact@v4
+        with:
+          name: hamlet-windows-v1.04.06-unsigned
+          path: desktop/hamlet-windows/release
+
+      - name: Log in to Azure using GitHub OIDC
+        uses: azure/login@v3
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign installer with Microsoft Artifact Signing
+        uses: azure/artifact-signing-action@v2
+        with:
+          endpoint: \${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          signing-account-name: \${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: \${{ secrets.AZURE_TRUSTED_SIGNING_CERT_PROFILE }}
+          files-folder: \${{ github.workspace }}\desktop\hamlet-windows\release
           files-folder-filter: exe
           file-digest: SHA256
-          timestamp-rfc3161: https://timestamp.acs.microsoft.com
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          exclude-workload-identity-credential: false
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
 
       - name: Verify Authenticode signature and calculate SHA-256
         shell: pwsh
@@ -105,6 +152,9 @@ jobs:
           }
           if (-not $signature.SignerCertificate) {
             throw "Signed installer has no signer certificate."
+          }
+          if ($signature.SignerCertificate.Subject -notmatch "Impact in Business Recruitment Group Limited") {
+            throw "Unexpected signing certificate subject: $($signature.SignerCertificate.Subject)"
           }
           Write-Host "Signer: $($signature.SignerCertificate.Subject)"
           Write-Host "Thumbprint: $($signature.SignerCertificate.Thumbprint)"
@@ -130,10 +180,10 @@ jobs:
           retention-days: 30
 
       - name: Publish Hamlet v1.04.06 Windows release
-        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v1.04.06')
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          tag_name: \${{ inputs.tag_name }}
           name: Hamlet v1.04.06 — Windows (Signed)
           body_path: desktop/hamlet-windows/RELEASE-NOTES.md
           prerelease: false
