@@ -10,9 +10,9 @@
       <stop offset="1" stop-color="#4f83ec" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1584" height="396" fill="url(#royalBlue)"/>
-  <rect width="1584" height="396" fill="url(#softGlow)"/>
+  <rect width="1584" height="396" fill="#111827"/>
   <text x="1090" y="240" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="112" font-weight="700" letter-spacing="-4">hamlet</text><circle cx="1447" cy="226" r="8" fill="#8bd8ff"/>
 </svg>
+
 
 
