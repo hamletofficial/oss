@@ -23,6 +23,8 @@
     .github-update-bar:before{content:"";position:absolute;inset:-60% auto -60% -35%;width:28%;z-index:-1;pointer-events:none;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),rgba(103,232,249,.2),transparent);animation:hamletTickerSheen 9s ease-in-out infinite}
     .github-update-bar:after{content:"";position:absolute;inset:auto 0 0;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#60a5fa 18%,#67e8f9 50%,#a5b4fc 82%,transparent);background-size:200% 100%;animation:hamletTickerLine 7s linear infinite}
     .github-update-label{position:relative;display:inline-flex;align-items:center;gap:.55rem;flex:0 0 auto;font-weight:850;letter-spacing:.015em;white-space:nowrap;color:#fff}
+    .github-update-icon{display:block;width:19px;height:19px;flex:0 0 19px;color:#fff;filter:drop-shadow(0 1px 3px rgba(255,255,255,.28))}
+
     .github-update-label:before{content:"";width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#67e8f9;box-shadow:0 0 0 3px rgba(103,232,249,.14),0 0 12px rgba(103,232,249,.8);animation:hamletTickerPulse 2.4s ease-in-out infinite}
     .github-update-viewport{position:relative;min-width:0;max-width:min(700px,100%);flex:1 1 320px;overflow:hidden;text-align:left}
     .github-update-slide{display:flex;align-items:center;gap:.55rem;min-width:0;opacity:1;transform:translate3d(0,0,0);transition:opacity .32s ease,transform .42s cubic-bezier(.2,.75,.25,1);text-shadow:0 1px 1px rgba(0,0,0,.18)}
@@ -108,7 +110,12 @@
 <body>
   <header><div class="wrap head"><a class="brand" href="/index.html">hamlet<span class="brand-dot" style="color:#bfdbfe">.</span></a><a class="back" href="/index.html">Back to Hamlet</a></div></header>
   <aside class="github-update-bar" aria-label="Latest repository commits">
-    <span class="github-update-label">Latest GitHub commits</span>
+    <span class="github-update-label">
+      <svg class="github-update-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.54v-2.1c-3.1.67-3.76-1.32-3.76-1.32-.5-1.28-1.23-1.62-1.23-1.62-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15 1 1.71 2.63 1.22 3.27.93.1-.72.39-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.06 1.15a10.65 10.65 0 0 1 5.57 0c2.12-1.45 3.06-1.15 3.06-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.29-2.61 5.23-5.1 5.5.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/>
+      </svg>
+      <span>Latest GitHub commits</span>
+    </span>
     <div class="github-update-viewport" aria-live="polite" aria-atomic="true">
       <div id="github-update-slide" class="github-update-slide">
         <span id="github-update-message" class="github-update-message">Loading recent repository activity…</span>
