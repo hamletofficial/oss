@@ -184,7 +184,8 @@
                         <div class="field full form-section-heading"><h3>3. EPC and sustainability credentials</h3><p>Verify the Government non-domestic EPC against this property. Certificate details below come from the register; record additional sustainability standards separately.</p></div>
             <div class="field full" style="padding:1rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc">
               <strong style="color:var(--ink)">Government EPC lookup</strong>
-              <p class="photo-help" style="margin:.35rem 0 .75rem">Searches the Government non-domestic EPC register using the address and postcode entered in subsection 1. You can also enter or correct every EPC field below manually while the upstream lookup service is unavailable. Manually entered details are not Government-verified.</p>
+              <p class="photo-help" style="margin:.35rem 0 .5rem">The lookup uses the property address and postcode below. Select a Google Places result in subsection 1 or edit those fields before searching. You can still enter EPC details manually; manual entries are not Government-verified.</p>
+              <p class="photo-help" style="margin:0 0 .75rem" aria-live="polite"><strong>Address being searched:</strong> <span id="epcSearchAddressValue">Not entered</span><br><strong>Postcode being searched:</strong> <span id="epcSearchPostcodeValue">Not entered</span></p>
               <div class="form-actions" style="margin-top:0"><button class="btn btn-outline" id="lookupEpcBtn" type="button">Find EPC for this property</button><span class="status" id="epcLookupStatus" role="status" aria-live="polite">Enter the property address and postcode in subsection 1 first. Manual EPC entry is available below.</span></div>
               <div class="field full" id="epcMatchField" hidden style="margin-top:.8rem"><label for="epcMatchSelect">Matching Government EPC record</label><select id="epcMatchSelect"><option value="">Choose a certificate</option></select><button class="btn btn-primary" id="applyEpcBtn" type="button" disabled>Apply selected EPC</button></div>
             </div>
@@ -278,7 +279,7 @@
           ++seq;if(timer)clearTimeout(timer);close();
           const address=epcAddress(record),pc=String(record.postcode||'').trim(),certificate=record.certificate_number||record.certificateNumber||'';
           if(!address||!pc){status.textContent='The EPC record is missing its address or postcode. Enter the property details manually.';return;}
-          input.value=address.slice(0,250);postcode.value=pc.slice(0,20);updateMap(input.value);if(!document.getElementById('propertyName').value.trim())document.getElementById('propertyName').value=address.slice(0,180);
+          input.value=address.slice(0,250);postcode.value=pc.slice(0,20);updateEpcSearchTarget();updateMap(input.value);if(!document.getElementById('propertyName').value.trim())document.getElementById('propertyName').value=address.slice(0,180);
           delete input.dataset.placeId;delete input.dataset.latitude;delete input.dataset.longitude;
           clearAppliedEpc();
           if(certificate&&typeof epcCertificateInput!=='undefined'){epcCertificateInput.value=formatEpcNumber(certificate);updateEpcNumberFeedback();}
@@ -289,7 +290,7 @@
           try{
             const place=prediction.toPlace();await place.fetchFields({fields:['displayName','formattedAddress','addressComponents','location','id']});
             if(id!==seq)return;if(!place.formattedAddress){status.textContent='Please enter the address manually.';return;}
-            input.value=place.formattedAddress.slice(0,250);updateMap(input.value);const placeName=place.displayName&&place.displayName.text?place.displayName.text:String(place.displayName||'');if(placeName&&!document.getElementById('propertyName').value.trim())document.getElementById('propertyName').value=placeName.slice(0,180);const pc=comp(place.addressComponents,'postal_code');if(pc)postcode.value=pc.slice(0,20);
+            input.value=place.formattedAddress.slice(0,250);updateEpcSearchTarget();updateMap(input.value);const placeName=place.displayName&&place.displayName.text?place.displayName.text:String(place.displayName||'');if(placeName&&!document.getElementById('propertyName').value.trim())document.getElementById('propertyName').value=placeName.slice(0,180);const pc=comp(place.addressComponents,'postal_code');if(pc)postcode.value=pc.slice(0,20);
             input.dataset.placeId=place.id||'';input.dataset.latitude=place.location?String(place.location.lat()):'';input.dataset.longitude=place.location?String(place.location.lng()):'';
             clearAppliedEpc();status.textContent='Address selected from Google Places. Check the address and postcode before saving.';
             if(pc)scheduleSearch(true);
@@ -379,8 +380,15 @@
         }
       }
 
-      const epcLookupBtn=document.getElementById('lookupEpcBtn'),epcLookupStatus=document.getElementById('epcLookupStatus'),epcMatchField=document.getElementById('epcMatchField'),epcMatchSelect=document.getElementById('epcMatchSelect'),applyEpcBtn=document.getElementById('applyEpcBtn');
+      const epcLookupBtn=document.getElementById('lookupEpcBtn'),epcLookupStatus=document.getElementById('epcLookupStatus'),epcMatchField=document.getElementById('epcMatchField'),epcMatchSelect=document.getElementById('epcMatchSelect'),applyEpcBtn=document.getElementById('applyEpcBtn'),epcSearchAddressValue=document.getElementById('epcSearchAddressValue'),epcSearchPostcodeValue=document.getElementById('epcSearchPostcodeValue');
       let epcMatches=[],epcSearchIdentity='';
+      function updateEpcSearchTarget(){
+        const address=document.getElementById('address').value.trim(),postcode=document.getElementById('postcode').value.trim();
+        epcSearchAddressValue.textContent=address||'Not entered';
+        epcSearchPostcodeValue.textContent=postcode||'Not entered';
+      }
+      ['address','postcode'].forEach(id=>document.getElementById(id).addEventListener('input',updateEpcSearchTarget));
+      updateEpcSearchTarget();
       function epcNorm(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
       function epcMatchesProperty(record,address,postcode){
         const actualPostcode=epcNorm(record.postcode),expectedPostcode=epcNorm(postcode);
