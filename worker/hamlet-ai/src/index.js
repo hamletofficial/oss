@@ -107,7 +107,7 @@ async function handleEpcSearch(request, env, origin) {
   let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
   const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
-  const base="https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/";
+  const base="https://api.get-energy-performance-data.communities.gov.uk/api/";
   const headers={"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"};
   try{
     const categories=["domestic","non-domestic"];
@@ -151,7 +151,7 @@ async function handleEpcCertificate(request, env, origin) {
   const digits=certificateNumberInput.replace(/[^0-9]/g,"");
   if(digits.length!==20||!address||!postcode)return json({error:"Enter a valid 20-digit certificate number, property address and postcode."},400,origin);
   const certificateNumber=digits.match(/.{1,4}/g).join("-");
-  const apiUrl=new URL("https://api.get-energy-performance-data.epb-integration.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
+  const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(!upstream.ok){
