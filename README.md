@@ -73,7 +73,7 @@ Before deploying, confirm the target environment, inspect the proposed diff, and
 
 ## Theme and page conventions
 
-Hamlet's shared visual system is in darkmode by default. New or materially revised pages should use the shared styles and initializer where appropriate:
+Hamlet's shared visual system uses dark mode by default. New or materially revised pages should use the shared styles and initializer where appropriate:
 
 ```html
 <link rel="stylesheet" href="/theme.css">
