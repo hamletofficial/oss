@@ -1,19 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Hamlet circular h logo">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#073ca8"/>
-      <stop offset=".55" stop-color="#071d4a"/>
-      <stop offset="1" stop-color="#03102f"/>
-    </linearGradient>
-    <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1478ff"/>
-      <stop offset=".52" stop-color="#22d3ee"/>
-      <stop offset="1" stop-color="#1478ff"/>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1767ff"/>
+      <stop offset=".52" stop-color="#08c9ed"/>
+      <stop offset="1" stop-color="#1767ff"/>
     </linearGradient>
   </defs>
-  <rect x="8" y="8" width="240" height="240" rx="48" fill="url(#bg)"/>
-  <rect x="8.75" y="8.75" width="238.5" height="238.5" rx="47.25" fill="none" stroke="url(#orbit)" stroke-width="2.5"/>
-  <path d="M44 103 A91 91 0 1 1 202 185" fill="none" stroke="url(#orbit)" stroke-width="13" stroke-linecap="round"/>
-  <path d="M56 164 A91 91 0 0 0 202 185" fill="none" stroke="url(#orbit)" stroke-width="13" stroke-linecap="round" opacity=".96"/>
-  <path d="M83 59 H111 V103 C121 91 135 85 152 85 C182 85 199 106 199 139 V197 H170 V145 C170 124 161 112 145 112 C125 112 111 126 111 149 V197 H83Z" fill="#fff"/>
+  <rect width="256" height="256" fill="#082b96"/>
+  <path d="M51 94 A91 91 0 0 1 207 160" fill="none" stroke="url(#ring)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M181 198 A91 91 0 0 1 49 108" fill="none" stroke="url(#ring)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M83 59 H111 V103 C121 91 135 85 152 85 C182 85 199 106 199 139 V197 H170 V145 C170 124 161 112 145 112 C125 112 111 126 111 149 V197 H83 Z" fill="#fff"/>
 </svg>
