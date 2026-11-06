@@ -381,7 +381,7 @@ body{background-color:var(--hamlet-midnight);color:#f8fafc;letter-spacing:-.008e
 .top-links .signin:hover{background:#dbeafe;color:#071d4a!important}
 .hero{position:relative;padding:clamp(3.8rem,8vw,7rem) 0 clamp(3rem,6vw,5rem)}
 .hero:before{content:"";position:absolute;inset:0 0 auto;height:100%;pointer-events:none;background:radial-gradient(ellipse at 78% 18%,rgba(37,99,235,.16),transparent 42%),linear-gradient(180deg,rgba(7,29,74,.16),transparent 72%)}
-.hero-grid{position:relative;width:min(1240px,calc(100% - 2rem));grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:clamp(2rem,5vw,4.5rem)}
+.hero-grid{position:relative;width:100%;min-width:0;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:clamp(1.5rem,3vw,3rem)}
 .hero-kicker{display:flex;align-items:center;gap:.65rem;color:#93c5fd;font-size:.72rem;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
 .hero-kicker:before{content:"";width:26px;height:1px;background:#60a5fa}
 .hero h1{max-width:780px;margin:.85rem 0 1.15rem;font-size:clamp(2.8rem,6.3vw,5.35rem);line-height:.99;letter-spacing:-.072em;text-wrap:balance}
