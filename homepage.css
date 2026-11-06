@@ -41,7 +41,7 @@
     @media(prefers-reduced-motion:reduce){.windows-download-icon{transition:none}}
     .button.primary:hover{background:#e5e7eb}
     .hero{padding:clamp(3rem,8vw,6.2rem) 0 3rem}
-    .hero-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:2rem;align-items:center}
+    .hero-grid{width:min(100%,1000px);margin-inline:auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:2rem;align-items:center}
     .eyebrow{display:inline-flex;padding:.32rem .7rem;border:1px solid #4b5563;border-radius:999px;color:#e5e7eb;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
     
     .hero .eyebrow.homepage-hover-tag{padding:.22rem .55rem;font-size:.66rem;letter-spacing:.065em;line-height:1.35}
