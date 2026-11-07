@@ -137,7 +137,10 @@ def generate():
         plain = re.sub(r"^\s*[-]{3,}\s*$", " ", plain, flags=re.M)
         plain = re.sub(r"\s+", " ", plain).strip()
         relative = path.as_posix()
-        pages.append({"title": title, "url": "/" + relative, "path": relative, "text": plain[:18000]})
+        # GitHub Pages/Jekyll renders Markdown documents as HTML pages. Link search
+        # previews to the rendered page rather than the source .md file.
+        rendered_url = "/" + relative[:-3] + ".html"
+        pages.append({"title": title, "url": rendered_url, "path": relative, "text": plain[:18000]})
 
     if not pages:
         raise SystemExit("ERROR: generated search index is empty; refusing to publish.")
