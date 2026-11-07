@@ -412,6 +412,12 @@ body{background-color:var(--hamlet-midnight);color:#f8fafc;letter-spacing:-.008e
 .notice{border-color:var(--hamlet-border);border-left-color:#60a5fa;background:rgba(17,24,39,.58);line-height:1.7}
 .launch-status{background:rgba(37,99,235,.12);border-color:rgba(147,197,253,.35)}
 footer{border-top-color:var(--hamlet-border);background:#080f1d}
+.hero-grid{width:min(100%,1000px);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1.5rem,4vw,2.5rem);align-items:center}
+.hero-grid>div:first-child{width:min(100%,36rem);justify-self:center;text-align:center}
+.hero h1{margin-inline:auto}
+.hero> .container>div:first-child>p{max-width:56ch;margin-inline:auto;text-align:center}
+.hero .actions{justify-content:center}
+.hero-panel{width:100%;justify-self:center;align-self:center}
 @media(max-width:850px){
  .hero-grid{grid-template-columns:1fr}
  .product-preview{max-width:700px}
