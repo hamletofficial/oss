@@ -164,6 +164,61 @@
     if (lastIndex < value.length) container.appendChild(document.createTextNode(value.slice(lastIndex)));
   }
 
+  // Resolve @mentions from exact, claimed username documents only.
+  // Username registry rules prohibit collection listing; no profile enumeration is used.
+  async function resolveMention(db, username) {
+    var normalized = String(username || '').trim().toLowerCase();
+    if (!db || !/^[a-z0-9_]{3,20}$/.test(normalized)) return null;
+    try {
+      var claim = await db.collection('usernames').doc(normalized).get();
+      if (!claim.exists) return null;
+      var uid = claim.data() && claim.data().uid;
+      if (typeof uid !== 'string' || !uid || uid.length > 128) return null;
+      var profile = await getAuthorProfile(uid);
+      return { uid: uid, username: normalized, name: profile.name || 'Hamlet member' };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function appendMentionAwareText(container, text, db) {
+    var value = typeof text === 'string' ? text : '';
+    var pattern = /(^|[^A-Za-z0-9_])@([a-z0-9_]{3,20})(?![A-Za-z0-9_])/gi;
+    var cursor = 0;
+    var match;
+    var tasks = [];
+    while ((match = pattern.exec(value)) !== null) {
+      var start = match.index;
+      var prefix = match[1] || '';
+      var tokenStart = start + prefix.length;
+      if (tokenStart > cursor) appendLinkedText(container, value.slice(cursor, tokenStart));
+      else if (prefix) container.appendChild(document.createTextNode(prefix));
+      var tokenText = match[0].slice(prefix.length);
+      var placeholder = document.createElement('span');
+      placeholder.className = 'post-mention';
+      placeholder.textContent = tokenText;
+      container.appendChild(placeholder);
+      tasks.push((function (node, username, literal) {
+        return resolveMention(db, username).then(function (member) {
+          if (!node.isConnected) return;
+          if (!member) {
+            node.replaceWith(document.createTextNode(literal));
+            return;
+          }
+          var link = document.createElement('a');
+          link.className = 'post-mention';
+          link.href = '/profile.html?username=' + encodeURIComponent(member.username);
+          link.textContent = '@' + member.username;
+          link.setAttribute('aria-label', 'View ' + member.name + "'s member profile");
+          node.replaceWith(link);
+        });
+      })(placeholder, match[2], tokenText));
+      cursor = pattern.lastIndex;
+    }
+    if (cursor < value.length) appendLinkedText(container, value.slice(cursor));
+    return Promise.all(tasks);
+  }
+
   function appendUrlPreview(container, text) {
     var value = typeof text === 'string' ? text : '';
     var match = value.match(/(?:https?:\/\/|www\.)[^\s<>"']+/i);
@@ -231,12 +286,12 @@
       });
   }
 
-  function appendFormattedBody(container, html, plainText) {
-    if (typeof html !== 'string' || !html.trim()) { appendLinkedText(container, plainText); return; }
+  function appendFormattedBody(container, html, plainText, db) {
+    if (typeof html !== 'string' || !html.trim()) { appendMentionAwareText(container, plainText, db); return; }
     var parsed = new DOMParser().parseFromString(html, 'text/html');
     var allowed = { B: 'strong', STRONG: 'strong', I: 'em', EM: 'em', U: 'u', BR: 'br' };
     function copyNode(source, target) {
-      if (source.nodeType === Node.TEXT_NODE) { appendLinkedText(target, source.nodeValue || ''); return; }
+      if (source.nodeType === Node.TEXT_NODE) { appendMentionAwareText(target, source.nodeValue || '', db); return; }
       if (source.nodeType !== Node.ELEMENT_NODE) return;
       var tag = allowed[source.tagName];
       if (!tag) { Array.prototype.forEach.call(source.childNodes, function (child) { copyNode(child, target); }); return; }
@@ -301,7 +356,7 @@
 
     var body = document.createElement('p');
     body.className = 'post-body';
-    appendFormattedBody(body, data.bodyHtml, typeof data.body === 'string' ? data.body : '');
+    appendFormattedBody(body, data.bodyHtml, typeof data.body === 'string' ? data.body : '', options.db);
     article.appendChild(body);
     var previewBox = document.createElement('div');
     previewBox.className = 'post-url-previews';
@@ -424,6 +479,7 @@
     getAuthorProfile: getAuthorProfile,
     loadLikedIds: loadLikedIds,
     sortNewest: sortNewest,
-    timeLabel: timeLabel
+    timeLabel: timeLabel,
+    resolveMention: resolveMention
   });
 })(window);
