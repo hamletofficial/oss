@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">IBR with a poppy</title>
+  <desc id="desc">Bold white IBR lettering with one red poppy on a black background.</desc>
+  <rect width="1024" height="1024" fill="#050505"/>
+  <g fill="#fff">
+    <path d="M234 290h89v425h-89z"/>
+    <path d="M347 290h127c69 0 104 36 104 99v47c0 37-14 62-42 76 34 12 51 39 51 81v49c0 62-37 73-106 73H347zm87 67v96h28c18 0 27-10 27-30v-36c0-20-9-30-27-30zm0 160v125h32c20 0 30-10 30-31v-61c0-22-10-33-30-33z"/>
+    <path d="M579 290h128c70 0 105 36 105 99v47c0 37-14 62-43 76 35 12 52 39 52 81v122h-88V550c0-22-10-33-30-33h-37v198h-87zm87 67v96h29c19 0 28-10 28-30v-36c0-20-9-30-28-30z"/>
+  </g>
+  <g transform="translate(842 226)">
+    <path d="M17 123c8 46 11 103 5 155" fill="none" stroke="#39713f" stroke-width="9" stroke-linecap="round"/>
+    <path d="M24 228c-20-19-39-15-48-2 17 5 31 12 44 25" fill="#39713f"/>
+    <g fill="#e32636">
+      <path d="M19 68C-5 50-1 14 20 0c22 19 20 45 4 70z"/>
+      <path d="M23 70C24 39 52 18 78 31c-2 30-22 49-52 46z"/>
+      <path d="M27 74c28-17 59-4 66 24-24 18-52 12-68-13z"/>
+      <path d="M22 78c13 27 1 57-28 64-17-24-10-52 13-67z"/>
+      <path d="M16 75c-28 6-52-12-49-42 27-10 51 4 58 31z"/>
+    </g>
+    <circle cx="20" cy="72" r="16" fill="#18110f"/>
+    <circle cx="20" cy="72" r="9" fill="#2a201c"/>
+  </g>
+</svg>
