@@ -435,3 +435,7 @@ footer{border-top-color:var(--hamlet-border);background:#080f1d}
 @media(prefers-reduced-motion:reduce){
  .top-links a{transition:none}
 }
+
+/* Primary conversion action directly above the hero product preview. */
+.hero-preview-column{display:flex;flex-direction:column;align-items:stretch;gap:.85rem;width:100%;min-width:0}
+.hero-preview-cta{width:100%;min-height:48px;justify-content:center;text-align:center}
