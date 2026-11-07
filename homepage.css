@@ -437,5 +437,5 @@ footer{border-top-color:var(--hamlet-border);background:#080f1d}
 }
 
 /* Primary conversion action directly above the hero product preview. */
-.hero-preview-column{display:flex;flex-direction:column;align-items:stretch;gap:.85rem;width:100%;min-width:0}
-.hero-preview-cta{width:100%;min-height:48px;justify-content:center;text-align:center}
+.hero-preview-column{display:flex;flex-direction:column;align-items:center;gap:1.25rem;width:100%;min-width:0}
+.hero-preview-cta{width:min(100%,22rem);min-height:48px;justify-content:center;text-align:center;margin:0 auto}
