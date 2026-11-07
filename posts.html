@@ -262,7 +262,7 @@ window.addEventListener('load', function () {
         var name = [data.firstName, data.lastName].filter(function (part) { return typeof part === 'string' && part.trim(); }).join(' ') || data.displayName || 'Hamlet member';
         return { uid: doc.id, username: username, name: String(name) };
       }).filter(function (member) {
-        return member.uid !== activeUser.uid && /^[a-z0-9_]{3,20}$/.test(member.username);
+        return /^[a-z0-9_]{3,20}$/.test(member.username);
       });
       mentionIndex = -1;
       mentionSuggestions.replaceChildren();
