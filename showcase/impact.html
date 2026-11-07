@@ -16,7 +16,7 @@
     html[data-appearance="dark"],html[data-appearance="dark"] body,
     html[data-appearance="dark"] main,html[data-appearance="dark"] .impact-wrap,
     html[data-appearance="dark"] section,html[data-appearance="dark"] .section,
-    html[data-appearance="dark"] .hero,html[data-appearance="dark"] .impact-nav,
+    html[data-appearance="dark"] .hero,
     html[data-appearance="dark"] footer{
       background:transparent!important;
       background-color:transparent!important;
@@ -26,11 +26,11 @@
     html[data-appearance="dark"] .closing{background:#111c30!important}
     body{background:var(--impact-bg);color:var(--impact-white);font-family:"DM Sans","Segoe UI",Arial,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
     .impact-wrap{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:44px 0 90px}
-    .impact-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px max(20px,calc((100vw - 1120px)/2));border-bottom:1px solid var(--impact-line)}
-    .impact-brand{font-size:1.55rem;font-weight:750;letter-spacing:-.06em;color:#fff;text-decoration:none}
-    .impact-brand span{color:var(--impact-blue)}
-    .impact-back{color:#dbeafe;text-decoration:none;border:1px solid rgba(125,180,255,.35);border-radius:999px;padding:10px 16px;font-size:.9rem}
-    .impact-back:hover{background:rgba(125,180,255,.1)}
+    .impact-nav{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px max(20px,calc((100vw - 1120px)/2));border-bottom:1px solid rgba(96,165,250,.25);background:#071d4a;color:#f8fafc}
+    .impact-brand,.impact-brand:visited{font-size:1.55rem;font-weight:750;letter-spacing:-.06em;color:#f8fafc!important;text-decoration:none}
+    .impact-brand span{color:#60a5fa}
+    .impact-back,.impact-back:visited{color:#dbeafe!important;text-decoration:none;border:1px solid rgba(125,180,255,.45);border-radius:999px;padding:10px 16px;font-size:.9rem}
+    .impact-back:hover,.impact-back:focus-visible{background:rgba(125,180,255,.1);color:#fff!important}
     .eyebrow{color:var(--impact-blue);font-size:.78rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase}
     .hero{padding:58px 0 48px;max-width:none;display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:38px;align-items:center}
     .hero-copy{min-width:0}
