@@ -373,7 +373,7 @@ body{background-color:var(--hamlet-midnight);color:#f8fafc;letter-spacing:-.008e
 .topbar-inner{width:min(1320px,100%);padding:13px clamp(18px,4vw,48px)}
 .topbar .brand{display:inline-flex;align-items:center;gap:.65rem;font-size:1.55rem;letter-spacing:-.055em}
 .home-brand-mark{display:block;width:34px;height:34px;border-radius:10px;box-shadow:0 5px 16px rgba(0,0,0,.24)}
-.home-brand-word{color:#fff}
+.home-brand-word{color:#FFF!important}
 .home-brand-period{color:#60a5fa}
 .top-links{gap:clamp(14px,2vw,30px);font-weight:650}
 .top-links a{transition:color .18s ease}
