@@ -11,6 +11,10 @@
 
 **Impact in Business Recruitment Group Limited adopts Microsoft's managed code-signing service to support the authenticity, integrity and trusted distribution of the Hamlet Windows application.**
 
+![Hamlet Azure Artifact Signing promotional image: a Windows laptop displaying a digital-signature verification shield alongside Hamlet and Azure branding.](../../../assets/images/Hamlet%20Azure%20Artifact%20Signing%20Banner.png)
+
+*Photo caption: Hamlet's Windows application, supported by Microsoft Azure Artifact Signing, illustrating the company's focus on software authenticity, publisher identity and secure distribution.*
+
 **LONDON, United Kingdom — 7 November 2026** — Hamlet, the integrated commercial and residential property workspace developed by Impact in Business Recruitment Group Limited, has become a customer of Microsoft Azure Artifact Signing, the Microsoft-managed code-signing service formerly known as Trusted Signing.
 
 The adoption marks a further step in Hamlet's software distribution and security programme. Artifact Signing enables publishers to digitally sign software, helping recipients verify the publisher identity associated with a signed application and whether the signed code has been altered after signing.
@@ -42,7 +46,6 @@ Website: [https://hamlet-ai.co.uk](https://hamlet-ai.co.uk)
 
 ## Editorial and publication notes
 
-- **Photo caption:** Hamlet's Windows application, supported by Microsoft Azure Artifact Signing, illustrating the company's focus on software authenticity, publisher identity and secure distribution.
 - **Media status:** For immediate release.
 - **Approved company attribution:** Impact in Business Recruitment Group Limited.
 - **Spokesperson:** Alfred Anate Bodurin Mayaki, Founder and Managing Director.
