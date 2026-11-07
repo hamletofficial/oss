@@ -21,6 +21,17 @@
     .posts-shell .feed-panel,.posts-shell .post-composer{width:100%;max-width:820px;margin-left:auto;margin-right:auto}
     .posts-shell .posts-feed,.posts-shell .post-card{width:100%;max-width:820px;margin-left:auto;margin-right:auto}
     @media(max-width:600px){.posts-shell{padding:0 .65rem}.posts-shell .post-composer,.posts-shell .feed-panel{padding:.7rem}}
+    .mention-suggestions{display:flex;flex-direction:column;gap:3px;margin:.35rem 0;padding:.35rem;background:#f8fafc;border:1px solid #cbd5e1;border-radius:9px;max-height:220px;overflow:auto}
+    .mention-suggestions[hidden]{display:none}
+    .mention-option{display:flex;align-items:center;gap:.5rem;width:100%;padding:.55rem .65rem;border:0;border-radius:6px;background:transparent;color:#0f172a;text-align:left;font:inherit;cursor:pointer}
+    .mention-option:hover,.mention-option:focus-visible,.mention-option[aria-selected="true"]{background:#e0ecff;outline:none}
+    .mention-option small{color:#64748b;margin-left:auto}
+    .post-mention{color:#1d4ed8;font-weight:700;text-decoration:none}
+    a.post-mention:hover{text-decoration:underline}
+    html[data-appearance="dark"] .mention-suggestions{background:#111827;border-color:#475569}
+    html[data-appearance="dark"] .mention-option{color:#e5e7eb}
+    html[data-appearance="dark"] .mention-option:hover,html[data-appearance="dark"] .mention-option:focus-visible,html[data-appearance="dark"] .mention-option[aria-selected="true"]{background:#1e3a8a}
+    html[data-appearance="dark"] .mention-option small{color:#cbd5e1}
     .sidebar-menu-shell{display:none;position:fixed;top:88px;left:24px;width:240px;max-height:calc(100vh - 110px);overflow:auto;background:#fff;border:1px solid #dbe3ee;border-radius:12px;box-shadow:0 10px 24px rgba(2,6,23,.12);padding:10px 0;z-index:950}
     .sidebar-menu-link{display:block;padding:11px 14px;margin:2px 8px;border-radius:8px;color:#092a4b;text-decoration:none;font-size:.94rem;font-weight:600;transition:background-color .2s ease,color .2s ease,transform .2s ease}
     .sidebar-menu-link:hover,.sidebar-menu-link:focus{background:#092a4b;color:#fff;transform:translateX(3px)}
@@ -127,6 +138,7 @@
           <div id="emojiPicker" class="emoji-picker" hidden aria-label="Choose an emoji"></div>
         </div>
         <div id="postBody" class="post-textarea post-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="What is on your mind?" data-placeholder="Share a thought with fellow brokers…" spellcheck="true"></div>
+        <div id="mentionSuggestions" class="mention-suggestions" role="listbox" aria-label="Member mention suggestions" hidden></div>
         <div id="postCount" class="character-count">0 / 140</div>
         <div class="composer-tools">
           <label class="attachment-picker" for="postFiles">📎 Add images or PDF files
@@ -187,6 +199,11 @@ window.addEventListener('load', function () {
   var form = document.getElementById('postForm');
   var bodyInput = document.getElementById('postBody');
   var count = document.getElementById('postCount');
+  var mentionSuggestions = document.getElementById('mentionSuggestions');
+  var mentionMatches = [];
+  var mentionIndex = -1;
+  var mentionLookupTimer = null;
+  var mentionLookupToken = 0;
   var filesInput = document.getElementById('postFiles');
   var selectedFiles = document.getElementById('selectedFiles');
   var publishButton = document.getElementById('publishButton');
@@ -206,6 +223,113 @@ window.addEventListener('load', function () {
   var draftKey = '';
   var lastEditorRange = null;
   var emojiList = ['😀','😃','😄','😁','😆','😅','😂','🙂','😉','😊','😍','🥰','😘','🤔','🙌','👏','👍','👎','🤝','💡','🔥','🎉','❤️','💙','💜','🙏','💼','📈','📊','🏡','🏢','📣','📰','🔗','✅','⭐','🚀'];
+
+  function activeMentionQuery() {
+    var selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !bodyInput.contains(selection.anchorNode)) return null;
+    var node = selection.anchorNode;
+    var offset = selection.anchorOffset;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return null;
+    var before = String(node.nodeValue || '').slice(0, offset);
+    var match = before.match(/(^|[^A-Za-z0-9_])@([a-z0-9_]{0,20})$/i);
+    if (!match) return null;
+    return { prefix: match[2].toLowerCase(), node: node, start: offset - match[2].length - 1, end: offset };
+  }
+  function hideMentionSuggestions() {
+    mentionLookupToken++;
+    mentionMatches = [];
+    mentionIndex = -1;
+    mentionSuggestions.replaceChildren();
+    mentionSuggestions.hidden = true;
+  }
+  async function findMentionMatches(prefix, token) {
+    if (!activeUser || !prefix || !/^[a-z0-9_]{1,20}$/.test(prefix)) {
+      hideMentionSuggestions();
+      return;
+    }
+    try {
+      // Only public profiles with saved usernames are eligible; limit results and
+      // never read the usernames collection as a list.
+      var snapshot = await db.collection('publicProfiles')
+        .where('isPublic', '==', true)
+        .where('username', '>=', prefix)
+        .where('username', '<=', prefix + '\uf8ff')
+        .limit(8).get();
+      if (token !== mentionLookupToken || !bodyInput.contains(document.activeElement)) return;
+      mentionMatches = snapshot.docs.map(function (doc) {
+        var data = doc.data() || {};
+        var username = typeof data.username === 'string' ? data.username.trim().toLowerCase() : '';
+        var name = [data.firstName, data.lastName].filter(function (part) { return typeof part === 'string' && part.trim(); }).join(' ') || data.displayName || 'Hamlet member';
+        return { uid: doc.id, username: username, name: String(name) };
+      }).filter(function (member) {
+        return member.uid !== activeUser.uid && /^[a-z0-9_]{3,20}$/.test(member.username);
+      });
+      mentionIndex = -1;
+      mentionSuggestions.replaceChildren();
+      if (!mentionMatches.length) {
+        var empty = document.createElement('div');
+        empty.className = 'mention-option';
+        empty.textContent = 'No matching public member usernames';
+        mentionSuggestions.appendChild(empty);
+      } else {
+        mentionMatches.forEach(function (member, index) {
+          var option = document.createElement('button');
+          option.type = 'button';
+          option.className = 'mention-option';
+          option.setAttribute('role', 'option');
+          option.setAttribute('aria-selected', 'false');
+          var handle = document.createElement('strong');
+          handle.textContent = '@' + member.username;
+          var name = document.createElement('small');
+          name.textContent = member.name;
+          option.append(handle, name);
+          option.addEventListener('mousedown', function (event) { event.preventDefault(); });
+          option.addEventListener('click', function () { insertMention(index); });
+          mentionSuggestions.appendChild(option);
+        });
+      }
+      mentionSuggestions.hidden = false;
+    } catch (error) {
+      console.warn('Unable to load member mention suggestions:', error);
+      hideMentionSuggestions();
+    }
+  }
+  function updateMentionSuggestions() {
+    var query = activeMentionQuery();
+    if (!query || !query.prefix) { hideMentionSuggestions(); return; }
+    var token = ++mentionLookupToken;
+    mentionMatches = [];
+    if (mentionLookupTimer) clearTimeout(mentionLookupTimer);
+    mentionLookupTimer = setTimeout(function () { findMentionMatches(query.prefix, token); }, 140);
+  }
+  function insertMention(index) {
+    var member = mentionMatches[index];
+    var query = activeMentionQuery();
+    if (!member || !query || !bodyInput.contains(query.node)) return;
+    var range = document.createRange();
+    range.setStart(query.node, query.start);
+    range.setEnd(query.node, query.end);
+    range.deleteContents();
+    var insertion = document.createTextNode('@' + member.username + ' ');
+    range.insertNode(insertion);
+    range.setStartAfter(insertion);
+    range.collapse(true);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    rememberSelection();
+    hideMentionSuggestions();
+    updateEditorCount();
+    bodyInput.focus();
+  }
+  function moveMentionSelection(direction) {
+    if (mentionSuggestions.hidden || !mentionMatches.length) return false;
+    mentionIndex = (mentionIndex + direction + mentionMatches.length) % mentionMatches.length;
+    Array.prototype.forEach.call(mentionSuggestions.querySelectorAll('[role="option"]'), function (option, index) {
+      option.setAttribute('aria-selected', index === mentionIndex ? 'true' : 'false');
+    });
+    return true;
+  }
 
   function editorText() { return (bodyInput.innerText || bodyInput.textContent || '').replace(/\u00a0/g, ' ').replace(/\r/g, ''); }
   function updateEditorCount() {
@@ -292,6 +416,7 @@ window.addEventListener('load', function () {
         liked: likedIds.has(post.id),
         showLike: true,
         showReplies: true,
+        db: db,
         allowDelete: true,
         onLike: toggleLike,
         onRepost: repostPost,
@@ -565,7 +690,13 @@ window.addEventListener('load', function () {
     }
   }
   setupEmojiPicker();
-  bodyInput.addEventListener('input', updateEditorCount);
+  bodyInput.addEventListener('input', function () { updateEditorCount(); updateMentionSuggestions(); });
+  bodyInput.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowDown' && !mentionSuggestions.hidden) { event.preventDefault(); moveMentionSelection(1); }
+    else if (event.key === 'ArrowUp' && !mentionSuggestions.hidden) { event.preventDefault(); moveMentionSelection(-1); }
+    else if (event.key === 'Enter' && !mentionSuggestions.hidden && mentionIndex >= 0) { event.preventDefault(); insertMention(mentionIndex); }
+    else if (event.key === 'Escape' && !mentionSuggestions.hidden) { event.preventDefault(); hideMentionSuggestions(); }
+  });
   bodyInput.addEventListener('keyup', rememberSelection); bodyInput.addEventListener('mouseup', rememberSelection); bodyInput.addEventListener('blur', rememberSelection);
   emojiToggle.addEventListener('click', function () { emojiPicker.hidden = !emojiPicker.hidden; emojiToggle.setAttribute('aria-expanded', String(!emojiPicker.hidden)); });
   document.querySelectorAll('[data-format]').forEach(function (button) {
@@ -612,6 +743,7 @@ window.addEventListener('load', function () {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       bodyInput.replaceChildren();
+      hideMentionSuggestions();
       updateEditorCount();
       if (draftKey) localStorage.removeItem(draftKey);
       filesInput.value = '';
