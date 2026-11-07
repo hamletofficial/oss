@@ -415,7 +415,7 @@ footer{border-top-color:var(--hamlet-border);background:#080f1d}
 .hero-grid{width:min(100%,1000px);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1.5rem,4vw,2.5rem);align-items:center}
 .hero-grid>div:first-child{width:min(100%,36rem);justify-self:center;text-align:center}
 .hero h1{margin-inline:auto}
-.hero> .container>div:first-child>p{max-width:56ch;margin-inline:auto;text-align:center}
+.hero> .container>div:first-child>p{max-width:64ch;margin:0 auto;text-align:left}
 .hero .actions{justify-content:center}
 .hero-panel{width:100%;justify-self:center;align-self:center}
 @media(max-width:850px){
