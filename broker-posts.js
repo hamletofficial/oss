@@ -50,7 +50,7 @@
           || (typeof data.photoUrl === 'string' && data.photoUrl.trim())
           || FALLBACK_PHOTO;
         var email = typeof data.email === 'string' ? data.email.trim() : '';
-        return { name: name, photo: photo, email: email, username: typeof data.username === 'string' ? data.username.trim().toLowerCase() : '' };
+        return { name: name, photo: photo, email: email, username: typeof data.username === 'string' ? data.username.trim().toLowerCase() : '', isPublic: data.isPublic === true };
       } catch (error) {
         return { name: 'IBR Member', photo: FALLBACK_PHOTO, email: '' };
       }
@@ -175,6 +175,7 @@
       var uid = claim.data() && claim.data().uid;
       if (typeof uid !== 'string' || !uid || uid.length > 128) return null;
       var profile = await getAuthorProfile(uid);
+      if (!profile.isPublic || profile.username !== normalized) return null;
       return { uid: uid, username: normalized, name: profile.name || 'Hamlet member' };
     } catch (error) {
       return null;
