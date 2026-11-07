@@ -124,18 +124,18 @@ def generate():
             source = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        headings = re.findall(r"^#\\s+(.+?)\\s*$", source, flags=re.M)
+        headings = re.findall(r"^#\s+(.+?)\s*$", source, flags=re.M)
         if not headings:
             continue
         title = headings[0].strip()
         # Markdown is indexed as plain text; links and formatting are reduced to readable copy.
-        plain = re.sub(r"!\\[([^]]*)\\]\\([^)]*\\)", r"\\1", source)
-        plain = re.sub(r"\\[([^]]+)\\]\\(([^)]+)\\)", r"\\1", plain)
-        plain = re.sub(r"^\\s*>\\s?", "", plain, flags=re.M)
-        plain = re.sub(r"^#{1,6}\\s*", "", plain, flags=re.M)
+        plain = re.sub(r"!\[([^]]*)\]\([^)]*\)", r"\1", source)
+        plain = re.sub(r"\[([^]]+)\]\(([^)]+)\)", r"\1", plain)
+        plain = re.sub(r"^\s*>\s?", "", plain, flags=re.M)
+        plain = re.sub(r"^#{1,6}\s*", "", plain, flags=re.M)
         plain = re.sub(r"[*_~`]", "", plain)
-        plain = re.sub(r"^\\s*[-]{3,}\\s*$", " ", plain, flags=re.M)
-        plain = re.sub(r"\\s+", " ", plain).strip()
+        plain = re.sub(r"^\s*[-]{3,}\s*$", " ", plain, flags=re.M)
+        plain = re.sub(r"\s+", " ", plain).strip()
         relative = path.as_posix()
         pages.append({"title": title, "url": "/" + relative, "path": relative, "text": plain[:18000]})
 
