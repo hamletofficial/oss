@@ -117,6 +117,28 @@ def generate():
         url = "/" if relative == "index.html" else "/" + relative
         pages.append({"title": title, "url": url, "path": relative, "text": text[:18000]})
 
+    # Index dated press releases as public editorial resources alongside HTML pages.
+    # Exclude templates, archive guides and month-level README files by requiring a dated filename.
+    for path in sorted((ROOT / "press").rglob("????-??-??-*.md")) if (ROOT / "press").exists() else []:
+        try:
+            source = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        headings = re.findall(r"^#\\s+(.+?)\\s*$", source, flags=re.M)
+        if not headings:
+            continue
+        title = headings[0].strip()
+        # Markdown is indexed as plain text; links and formatting are reduced to readable copy.
+        plain = re.sub(r"!\\[([^]]*)\\]\\([^)]*\\)", r"\\1", source)
+        plain = re.sub(r"\\[([^]]+)\\]\\(([^)]+)\\)", r"\\1", plain)
+        plain = re.sub(r"^\\s*>\\s?", "", plain, flags=re.M)
+        plain = re.sub(r"^#{1,6}\\s*", "", plain, flags=re.M)
+        plain = re.sub(r"[*_~`]", "", plain)
+        plain = re.sub(r"^\\s*[-]{3,}\\s*$", " ", plain, flags=re.M)
+        plain = re.sub(r"\\s+", " ", plain).strip()
+        relative = path.as_posix()
+        pages.append({"title": title, "url": "/" + relative, "path": relative, "text": plain[:18000]})
+
     if not pages:
         raise SystemExit("ERROR: generated search index is empty; refusing to publish.")
     validate_records(pages)
