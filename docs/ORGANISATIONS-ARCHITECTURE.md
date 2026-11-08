@@ -174,11 +174,12 @@ Custom organisation domains (for example `workspace.company.com`) are a later en
 
 - [x] Add trusted organisation creation with atomic slug reservation and initial owner membership.
 - [x] Add trusted invitation creation with single-use token hashing and verified-email acceptance.
+- [x] Add trusted invitation revocation using a separate invitation reference.
 - [x] Add trusted role changes and member removal with owner/admin constraints.
 - [x] Add deny-by-default Firestore rules for organisation, membership, invitation, directory, team and activity collections.
-- [x] Add Firestore Emulator coverage for member isolation, roster visibility, public/private directory projection and client-write denial.
+- [x] Add Firestore Emulator coverage for member isolation, cross-tenant denial, suspended-member denial, roster visibility, public/private directory projection and client-write denial.
+- [x] Run the static, browser and Firestore/Storage Emulator CI suites successfully on functional-code commit `36fd3c1e6809efe51d64792fdd60a95cfbfe9271`.
 - [ ] Confirm the production Firestore database/configuration before any deployment.
-- [ ] Run and review the emulator suite in CI before merge.
 - [ ] Build the organisation registration, invitation and membership management UI.
 - [ ] Add organisation profile editing and public/private visibility controls through trusted operations.
 
