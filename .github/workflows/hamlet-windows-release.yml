@@ -185,10 +185,10 @@ jobs:
           retention-days: 30
 
       - name: Publish Hamlet v1.04.08 Windows release
-        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag_name }}
+          tag_name: v1.04.08
           name: Hamlet v1.04.08 — Windows (Signed)
           body_path: desktop/hamlet-windows/RELEASE-NOTES.md
           prerelease: false
