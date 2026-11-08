@@ -827,7 +827,9 @@ service cloud.firestore {
     // Slugs are routing identifiers, not credentials. Exact gets are public so
     // tenant hostnames can resolve; enumeration and client mutation are denied.
     match /organisationSlugs/{slug} {
-      allow get: if resource.data.status == 'active';
+      allow get: if resource.data.status == 'active'
+        && exists(/databases/$(database)/documents/organisations/$(resource.data.organisationId))
+        && get(/databases/$(database)/documents/organisations/$(resource.data.organisationId)).data.status == 'active';
       allow list: if false;
       allow create, update, delete: if false;
     }
@@ -836,7 +838,9 @@ service cloud.firestore {
     // remains in /organisations and is readable only by active members.
     match /organisationDirectory/{organisationId} {
       allow read: if resource.data.status == 'active'
-        && resource.data.isPublic == true;
+        && resource.data.isPublic == true
+        && exists(/databases/$(database)/documents/organisations/$(resource.data.organisationId))
+        && get(/databases/$(database)/documents/organisations/$(resource.data.organisationId)).data.status == 'active';
       allow create, update, delete: if false;
     }
 
