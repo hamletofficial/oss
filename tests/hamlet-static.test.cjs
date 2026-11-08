@@ -114,6 +114,6 @@ test('organisation lifecycle operations are server-controlled and registered', (
   assert.match(organisationFunctions, /randomBytes\(32\)/);
   assert.match(organisationFunctions, /email_verified !== true/);
   assert.match(functions, /require\("\.\/hamlet-organisations"\)/);
-  assert.match(firestore, /match \/organisations\/{organisationId}/);
+  assert.ok(firestore.includes('match /organisations/{organisationId}'));
   assert.match(firestore, /allow create, update, delete: if false;/);
 });
