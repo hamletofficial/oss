@@ -211,6 +211,7 @@
         var memberships = [];
         var selectedOrganisationId = "";
         var selectedOrganisation = null;
+        var selectedRole = "";
         var functions = null;
         var db = null;
         var acceptingInvitation = false;
@@ -350,12 +351,15 @@
           }
           selectedOrganisation = item.organisation;
           var role = item.membership.role;
+          selectedRole = role;
           document.getElementById("currentOrgRole").textContent = roleLabel(role);
           document.getElementById("currentOrgName").textContent = item.organisation.name;
           document.getElementById("currentOrgSlug").textContent = "URL name: " + item.organisation.slug;
           document.getElementById("currentOrgStatus").textContent = "Active";
           organisationDetail.hidden = false;
           var canManage = role === "owner" || role === "admin";
+          var adminRoleOption = document.querySelector("#inviteRole option[value='admin']");
+          if (adminRoleOption) adminRoleOption.hidden = role !== "owner";
           memberManagement.hidden = !canManage;
           memberReadOnlyNote.hidden = canManage;
           if (canManage) await Promise.all([loadMembers(), loadInvitations()]);
@@ -384,11 +388,12 @@
               row.appendChild(main);
               var actions = document.createElement("div");
               actions.className = "org-row-actions";
-              if (member.role !== "owner" && member.uid !== currentUser.uid) {
+              if (member.role !== "owner" && member.uid !== currentUser.uid &&
+                  (selectedRole === "owner" || member.role !== "admin")) {
                 var select = document.createElement("select");
                 select.setAttribute("aria-label", "Change role for " + (member.email || member.uid));
                 ["admin","manager","member","viewer"].forEach(function (role) {
-                  if (role === "admin" && item.membership.role !== "owner") return;
+                  if (role === "admin" && selectedRole !== "owner") return;
                   var option = document.createElement("option");
                   option.value = role;
                   option.textContent = roleLabel(role);
