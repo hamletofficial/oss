@@ -51,6 +51,9 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_member'), {
       organisationId: 'org-private', uid: 'member', role: 'member', status: 'active',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_viewer'), {
+      organisationId: 'org-private', uid: 'viewer', role: 'viewer', status: 'active',
+    });
     await setDoc(doc(db, 'organisationMembers/org-private_suspended'), {
       organisationId: 'org-private', uid: 'suspended', role: 'member', status: 'suspended',
     });
@@ -223,12 +226,18 @@ test('organisation properties and deals enforce tenant membership and explicit s
     id: 'forged-creator', organisationId: 'org-private', createdByUid: 'owner',
     visibility: 'organisation', sharedWithUids: [],
   }));
-  await assertFails(setDoc(doc(member, 'organisationProperties/member-escalates-sharing'), {
-    id: 'member-escalates-sharing', organisationId: 'org-private', createdByUid: 'member',
-    visibility: 'restricted', sharedWithUids: ['outsider'],
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'), {
+    id: 'member-restricted', organisationId: 'org-private', createdByUid: 'member',
+    visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
   }));
-  await assertFails(setDoc(doc(member, 'organisationDeals/viewer-forgery'), {
-    id: 'viewer-forgery', organisationId: 'org-private', createdByUid: 'suspended',
+  await assertSucceeds(getDoc(doc(admin, 'organisationProperties/member-restricted')));
+  await assertFails(getDoc(doc(owner, 'organisationProperties/member-restricted')) === undefined ? Promise.resolve() : getDoc(doc(owner, 'organisationProperties/member-restricted')));
+  await assertFails(setDoc(doc(member, 'organisationProperties/member-changes-sharing'), {
+    visibility: 'restricted', sharedWithUids: ['outsider'],
+  }, {merge: true}));
+  const viewer = env.authenticatedContext('viewer').firestore();
+  await assertFails(setDoc(doc(viewer, 'organisationDeals/viewer-forgery'), {
+    id: 'viewer-forgery', organisationId: 'org-private', createdByUid: 'viewer',
     visibility: 'organisation', sharedWithUids: [],
   }));
 });
