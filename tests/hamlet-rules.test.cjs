@@ -51,6 +51,12 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_member'), {
       organisationId: 'org-private', uid: 'member', role: 'member', status: 'active',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_suspended'), {
+      organisationId: 'org-private', uid: 'suspended', role: 'member', status: 'suspended',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-other_outsider'), {
+      organisationId: 'org-other', uid: 'outsider', role: 'owner', status: 'active',
+    });
     await setDoc(doc(db, 'organisationInvitations/invite-private'), {
       organisationId: 'org-private', email: 'invitee@example.com', status: 'pending',
     });
@@ -200,4 +206,22 @@ test('organisation lifecycle and audit collections are not client-writable', asy
   await assertFails(setDoc(doc(owner, 'organisationActivity/fake'), {
     organisationId: 'org-private', actorUid: 'owner', action: 'forged',
   }));
+});
+
+
+test('membership in a different organisation does not grant cross-tenant access', async () => {
+  const otherTenantOwner = env.authenticatedContext('outsider').firestore();
+  await assertFails(getDoc(doc(otherTenantOwner, 'organisations/org-private')));
+});
+
+test('suspended members lose access to organisation data', async () => {
+  const suspended = env.authenticatedContext('suspended').firestore();
+  await assertFails(getDoc(doc(suspended, 'organisations/org-private')));
+});
+
+test('organisation invitations are visible only to active organisation administrators', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  await assertSucceeds(getDoc(doc(owner, 'organisationInvitations/invite-private')));
+  await assertFails(getDoc(doc(member, 'organisationInvitations/invite-private')));
 });
