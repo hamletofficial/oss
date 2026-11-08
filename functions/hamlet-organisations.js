@@ -283,14 +283,19 @@ exports.changeOrganisationMemberRole = onCall({
     throw new HttpsError("failed-precondition", "You cannot change your own organisation role.");
   }
   const db = getDb();
+  const orgRef = db.collection("organisations").doc(orgId);
   const actorRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
   const targetRef = db.collection("organisationMembers").doc(membershipId(orgId, targetUid));
 
   await db.runTransaction(async (transaction) => {
-    const [actorSnap, targetSnap] = await Promise.all([
+    const [orgSnap, actorSnap, targetSnap] = await Promise.all([
+      transaction.get(orgRef),
       transaction.get(actorRef),
       transaction.get(targetRef),
     ]);
+    if (!orgSnap.exists || orgSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "The organisation is not currently active.");
+    }
     const actor = actorSnap.exists ? actorSnap.data() : null;
     const target = targetSnap.exists ? targetSnap.data() : null;
     requireRole(actor, ["owner", "admin"]);
