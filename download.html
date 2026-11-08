@@ -77,6 +77,31 @@
     @media(prefers-reduced-motion:reduce){.github-update-slide{transition:none}}
 
     /* Mobile header, activity banner and release badge refinements */
+    .verification-icon,.verification-mobile{display:none}
+    @media(max-width:620px){
+      .latest-card > .verification-pill{
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        gap:.55rem;
+        width:fit-content;
+        max-width:100%;
+        min-height:46px;
+        padding:.5rem .8rem;
+        white-space:normal;
+        text-align:left;
+        line-height:1.2;
+        font-size:.67rem;
+        letter-spacing:.045em;
+        border-radius:12px;
+        overflow-wrap:anywhere;
+      }
+      .verification-icon{display:block;width:19px;height:19px;flex:0 0 19px}
+      .verification-desktop{display:none}
+      .verification-mobile{display:flex;flex-direction:column;gap:.18rem}
+      .verification-mobile span:first-child{font-weight:900}
+      .verification-mobile span:last-child{font-size:.61rem;letter-spacing:.035em}
+    }
     .latest-card > .pill{
       color:#071d4a;
       background:linear-gradient(135deg,#e0f2fe 0%,#93c5fd 48%,#67e8f9 100%);
@@ -134,7 +159,7 @@
     <div class="release-layout">
       <section class="latest-card" aria-labelledby="latest-title">
         <img class="release-hero-art" src="/release-download-hero.svg" alt="Download-themed illustration with a software package, downward arrow and verification check on a dark navy and royal-blue gradient" width="1600" height="900" fetchpriority="high">
-        <span class="pill">Signed · Windows installation tested</span>
+        <span class="pill verification-pill"><svg class="verification-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 10.2 8.2 13.3 15.2 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verification-copy"><span class="verification-desktop">Signed · Windows installation tested</span><span class="verification-mobile"><span>AUTHENTICODE SIGNED</span><span>WINDOWS INSTALLATION TESTED</span></span></span></span>
         <h2 id="latest-title">Hamlet v1.04.06</h2>
         <p class="version-meta">Installer <code>hamlet-Setup-1.4.6.exe</code> · Target release 4 November 2026</p>
         <p>Recommended for new installations. The installer has a verified Microsoft Authenticode signature and has passed installation, launch and uninstallation testing on a Windows computer. Verify the SHA-256 checksum before running it.</p>
