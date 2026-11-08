@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'app/hamlet/index.html'
+      - 'organisations.html'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
@@ -18,6 +19,7 @@ on:
     branches: [main]
     paths:
       - 'app/hamlet/index.html'
+      - 'organisations.html'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
