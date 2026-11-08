@@ -52,18 +52,6 @@ function buildNav(){
  }
  bar.appendChild(trail);
  var search=make('button','hamlet-breadcrumb-search','Search');search.type='button';search.setAttribute('aria-label','Search Hamlet');search.addEventListener('click',openPalette);bar.appendChild(search);
- /* Remove legacy workspace route links from header action groups, but preserve
-    the wordmark, signed-in profile and authentication/sign-out controls. */
- var headerActions=header.querySelector('.topbar-actions, .top-actions');
- if(headerActions){
-  Array.from(headerActions.querySelectorAll('a[href]')).forEach(function(link){
-   var href=link.getAttribute('href')||'';
-   var isWorkspaceRoute=routes.some(function(route){
-    return route.href===href || route.paths.some(function(routePath){return routePath===href});
-   });
-   if(isWorkspaceRoute)link.remove();
-  });
- }
  if(existing)existing.remove();
  if(injected)injected.remove();
  if(oldBar)oldBar.remove();
