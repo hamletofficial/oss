@@ -63,9 +63,20 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationActivity/activity-private'), {
       organisationId: 'org-private', actorUid: 'owner', action: 'organisation.created',
     });
+    await setDoc(doc(db, 'organisations/org-public'), {
+      id: 'org-public', name: 'Public Organisation', slug: 'public-org',
+      status: 'active', visibility: 'public', ownerUid: 'owner',
+    });
     await setDoc(doc(db, 'organisationDirectory/org-public'), {
       organisationId: 'org-public', name: 'Public Organisation',
       slug: 'public-org', isPublic: true, status: 'active',
+    });
+    await setDoc(doc(db, 'organisationSlugs/suspended-org'), {
+      organisationId: 'org-suspended', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationDirectory/org-suspended'), {
+      organisationId: 'org-suspended', name: 'Suspended Organisation',
+      slug: 'suspended-org', isPublic: true, status: 'active',
     });
     await setDoc(doc(db, 'organisations/org-suspended'), {
       id: 'org-suspended', name: 'Suspended Organisation', slug: 'suspended-org',
@@ -198,6 +209,8 @@ test('only active public directory projections are publicly readable', async () 
   const unauthenticated = env.unauthenticatedContext().firestore();
   await assertSucceeds(getDoc(doc(unauthenticated, 'organisationDirectory/org-public')));
   await assertFails(getDoc(doc(unauthenticated, 'organisationDirectory/org-private')));
+  await assertFails(getDoc(doc(unauthenticated, 'organisationDirectory/org-suspended')));
+  await assertFails(getDoc(doc(unauthenticated, 'organisationSlugs/suspended-org')));
 });
 
 test('organisation lifecycle and audit collections are not client-writable', async () => {
