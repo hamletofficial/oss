@@ -179,7 +179,7 @@ Custom organisation domains (for example `workspace.company.com`) are a later en
 - [x] Add deny-by-default Firestore rules for organisation, membership, invitation, directory, team and activity collections.
 - [x] Add Firestore Emulator coverage for member isolation, cross-tenant denial, suspended-member denial, roster visibility, public/private directory projection and client-write denial.
 - [x] Run the static, browser and Firestore/Storage Emulator CI suites successfully on functional-code commit `36fd3c1e6809efe51d64792fdd60a95cfbfe9271`.
-- [ ] Confirm the production Firestore database/configuration before any deployment.
+- [x] Confirm the production Firebase CLI configuration: the user has confirmed root `firebase.json` is authoritative. It targets project `wale-491805`, Firestore `(default)` in `nam5`, and root `firestore.rules` / `firestore.indexes.json`.
 - [x] Build the authenticated organisation registration, invitation and membership management page at `/organisations.html`, linked from the Members Area and excluded from public search.
 - [ ] Add organisation profile editing and public/private visibility controls through trusted operations.
 
@@ -242,4 +242,17 @@ This plan is a product/architecture baseline, not a production deployment instru
 - [x] Keep invitation tokens one-time display only; do not persist them in browser storage or place them in URL parameters.
 - [x] Keep organisation property/deal sharing, team workspaces and tenant subdomain routing disabled pending the separate authorization and authentication-handoff design.
 - [ ] Complete end-to-end callable tests and confirm callable deployment environment.
-- [ ] Confirm canonical production Firestore configuration before production rules or Functions deployment.
+- [x] Confirm canonical production Firebase CLI configuration: root `firebase.json` is authoritative (project `wale-491805`; default Firestore configured in `nam5`). Production deployment itself remains separately gated by review and explicit approval.
+
+
+## Firebase configuration confirmation — 8 November 2026
+
+The product owner has confirmed that the **root `firebase.json` is the authoritative production Firebase configuration**. Accordingly:
+
+- Project alias `default` resolves to `wale-491805` via root `.firebaserc`.
+- The root config targets Firestore database `(default)` in `nam5`, using root `firestore.rules` and `firestore.indexes.json`.
+- The organisation callable functions belong in the root `functions` source under the `default` Functions codebase.
+- `app/firebase.json` is not the production deployment target and must not be used to deploy organisation rules or Functions.
+- This confirmation resolves the repository's configuration-selection question. It does not independently prove the deployed database's physical location or authorize a production deployment.
+
+Next deployment preparation must use the root configuration and verify the live default database, Functions region/runtime, and deployed codebase inventory before applying any production rules or Functions changes. Keep the app-specific rules untouched; do not copy or synchronize rule files without a separate compatibility review.
