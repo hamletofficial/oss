@@ -199,3 +199,57 @@ The following cannot be established from the repository alone and require read-o
 **Proceed with the organisation foundation only after the configuration and authentication questions above are resolved.** The safest model is an additive, single-project tenant layer with explicit memberships, trusted lifecycle operations, personal record ownership retained, and resource-level sharing. The current repository is not ready for wildcard organisation DNS or shared access to existing deals and documents.
 
 No production infrastructure or user data has been modified by this audit.
+
+
+---
+
+## Phase 0 follow-up — implementation branch review (8 November 2026)
+
+This addendum records findings from the organisation foundation work and supersedes any earlier statement that no organisation-specific rules or tests exist.
+
+### Confirmed configuration conflict
+
+- `.firebaserc` maps `default` to `wale-491805`.
+- Root `firebase.json` points to Firestore `(default)` in `nam5`, using root `firestore.rules` and `firestore.indexes.json`.
+- `app/firebase.json` points to the same named database `(default)` in `nam7`, using `app/firestore.rules` and `app/firestore.indexes.json`.
+- The two Rules files are materially different. The organisation Rules are currently in the root `firestore.rules`; `app/firestore.rules` does not yet contain the organisation policies.
+- Root Functions configuration declares codebase `default` from `functions`; `functions/package.json` uses Node 24. Organisation callables use `getFirestore(admin.app())`, i.e. the default Firestore database, and are exported from `functions/index.js`.
+- Existing Functions code includes a helper that deliberately uses named database `chung-lee`; organisation operations do not use that helper.
+
+**Deployment remains blocked** until the live default database location and the Firebase CLI configuration used by each environment are confirmed. Do not deploy from the app configuration or copy rules between the two locations by assumption.
+
+### Cloudflare follow-up
+
+The earlier read-only Cloudflare inspection recorded the active `hamlet-ai.co.uk` zone, 33 DNS records, two existing Worker routes on `www.hamlet-ai.co.uk` (both routed to `hamlet-ai-gateway-staging`), and no `orgs.hamlet-ai.co.uk`, `organisations.hamlet-ai.co.uk`, or wildcard `*.orgs.hamlet-ai.co.uk` DNS records. The two listed Workers are `hamlet-ai-gateway` and `hamlet-ai-gateway-staging`. No organisation hostname route was identified. No DNS, route, certificate, or Worker changes were made.
+
+The repository has two separate Worker configurations: `worker/hamlet-ai/wrangler.toml` and `hamlet-ai-gateway/wrangler.jsonc`. Neither should be repurposed for organisation routing without an explicit architecture decision.
+
+### Implemented on the feature branch
+
+- Trusted callable operations create organisations and atomically reserve slugs; the creator becomes the initial owner.
+- Invitations use high-entropy random tokens, persist only SHA-256 token hashes, expire after seven days, and require verified-email matching at acceptance.
+- Pending invitations can be revoked; the creator receives an invitation reference so the revoke operation can be called without exposing the raw token as a document path.
+- Owner/admin role changes and member removal are server-controlled; owner demotion/removal is blocked pending a separate explicit ownership-transfer implementation.
+- Organisation, membership, invitation, public directory projection, team and activity collection rules are added to root `firestore.rules`. Client writes to these collections are denied.
+- Existing individual deal/property ownership and Storage paths have not been changed. No organisation file-sharing paths exist yet.
+- Emulator tests cover active-member access, cross-tenant denial, suspended-member denial, roster visibility, public/private directory access and client-write denial.
+- A static security correction excludes the authenticated Insights Archive from public search indexing and results.
+
+### Validation status
+
+- On commit `c1dea55741a3f74af168c517b607107b429aaef4`, static checks, browser E2E, and Firestore/Storage Emulator tests all passed.
+- On the current latest PR head, static checks and browser E2E have passed; the Firestore/Storage Emulator job is still running. Do not mark the latest head fully green until that job completes.
+- Firebase Hosting preview completed successfully. This is a PR preview, not a production deployment.
+- The PR remains draft and unmerged. No production Firestore Rules, Functions, Storage Rules, DNS, Worker routes, OAuth settings, or live user data have been changed.
+
+### Remaining release blockers
+
+1. Confirm the production default Firestore database location and the canonical Firebase CLI config.
+2. Confirm which Functions codebase and region should host the new callables.
+3. Complete latest-head Firestore/Storage Emulator tests and review any failures.
+4. Add callable-function tests for verified-email enforcement, slug collision, invitation expiry/replay/revocation, role constraints, and owner protection.
+5. Reconcile root and app Rules/indexes without overwriting unrelated security policy.
+6. Resolve the cross-subdomain authentication handoff before wildcard DNS or organisation workspace routing.
+7. Add the organisation UI only after the data and security contracts are stable.
+
+**Conclusion:** The backend foundation is in review, not production-ready. The next safe action is to finish validation and resolve the Firebase deployment authority question. Existing personal workflows remain unchanged.
