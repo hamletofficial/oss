@@ -180,7 +180,7 @@ Custom organisation domains (for example `workspace.company.com`) are a later en
 - [x] Add Firestore Emulator coverage for member isolation, cross-tenant denial, suspended-member denial, roster visibility, public/private directory projection and client-write denial.
 - [x] Run the static, browser and Firestore/Storage Emulator CI suites successfully on functional-code commit `36fd3c1e6809efe51d64792fdd60a95cfbfe9271`.
 - [ ] Confirm the production Firestore database/configuration before any deployment.
-- [ ] Build the organisation registration, invitation and membership management UI.
+- [x] Build the authenticated organisation registration, invitation and membership management page at `/organisations.html`, linked from the Members Area and excluded from public search.
 - [ ] Add organisation profile editing and public/private visibility controls through trusted operations.
 
 The initial backend foundation is implemented on the feature branch. No production Functions or Firestore Rules have been deployed.
