@@ -360,6 +360,9 @@
           var canManage = role === "owner" || role === "admin";
           var adminRoleOption = document.querySelector("#inviteRole option[value='admin']");
           if (adminRoleOption) adminRoleOption.hidden = role !== "owner";
+          if (role !== "owner" && document.getElementById("inviteRole").value === "admin") {
+            document.getElementById("inviteRole").value = "member";
+          }
           memberManagement.hidden = !canManage;
           memberReadOnlyNote.hidden = canManage;
           if (canManage) await Promise.all([loadMembers(), loadInvitations()]);
