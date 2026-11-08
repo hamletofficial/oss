@@ -1,10 +1,13 @@
-const { app, BrowserWindow, ipcMain, Notification, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, Notification, shell, session } = require("electron");
 const path = require("node:path");
 const { isTrustedAppUrl, isTrustedAuthUrl } = require("./security.cjs");
+const { createHamletPersistentSession, PERSISTENT_SESSION_PARTITION } = require("./desktop-session.cjs");
 
 const APP_URL = "https://www.hamlet-ai.co.uk/";
 
 function createWindow() {
+  const persistentSession = createHamletPersistentSession(session, isTrustedAppUrl);
+
   const win = new BrowserWindow({
     width: 1440,
     height: 940,
@@ -15,6 +18,10 @@ function createWindow() {
     autoHideMenuBar: true,
     backgroundColor: "#0b1120",
     webPreferences: {
+      // A named persist: partition keeps Chromium's origin storage across app restarts.
+      // Firebase Auth's existing LOCAL persistence stores its refresh token in this
+      // origin storage and handles ID-token refresh/revocation through its SDK.
+      partition: PERSISTENT_SESSION_PARTITION,
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
@@ -34,6 +41,8 @@ function createWindow() {
           height: 760,
           autoHideMenuBar: true,
           webPreferences: {
+            // OAuth popups must share the same persistent profile as the main window.
+            partition: PERSISTENT_SESSION_PARTITION,
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
