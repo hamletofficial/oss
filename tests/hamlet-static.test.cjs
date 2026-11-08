@@ -133,7 +133,9 @@ test('organisation management page scripts parse and use authenticated callable 
   assert.match(organisationsHtml, /acceptOrganisationInvitation/);
   assert.match(organisationsHtml, /createOrganisationInvitation/);
   assert.match(organisationsHtml, /revokeOrganisationInvitation/);
-  assert.match(organisationsHtml, /history\.replaceState/);
+  assert.match(organisationsHtml, /id="acceptInviteForm"/);
+  assert.match(organisationsHtml, /acceptInviteToken/);
+  assert.doesNotMatch(organisationsHtml, /location\.hash|replaceState|invitationLink/);
   assert.match(siteSearch, /'organisations\.html'/);
 });
 
@@ -150,5 +152,6 @@ test('workspace organisation management page JavaScript parses', () => {
   assert.match(appOrganisationsHtml, /removeOrganisationMember/);
   assert.match(appOrganisationsHtml, /acceptOrganisationInvitation/);
   assert.match(appOrganisationsHtml, /revokeOrganisationInvitation/);
+  assert.doesNotMatch(appOrganisationsHtml, /location\.hash|replaceState/);
   assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
 });
