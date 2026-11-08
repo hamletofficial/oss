@@ -6,7 +6,7 @@ window.__hamletWorkspaceUX=true;
 var routes=[
  {label:'Deal Pipeline',short:'Deals',href:'/app/hamlet/',icon:'▦',paths:['/app/hamlet','/app/hamlet/','/app/hamlet/index.html'],desc:'Find transactions and next actions.'},
  {label:'My Properties',short:'Properties',href:'/app/public/resources.html',icon:'⌂',paths:['/app/public/resources.html'],desc:'Search and manage properties you own.'},
- {label:'Live Properties',short:'Listings',href:'/app/public/live.html',icon:'▤',paths:['/app/public/live.html'],desc:'Discover active commercial property listings.'},
+ {label:'Live Listings',short:'Listings',href:'/app/public/live.html',icon:'▤',paths:['/app/public/live.html'],desc:'Discover active commercial property listings.'},
  {label:'Broker Dashboard',short:'Dashboard',href:'/app/public/dashboard.html',icon:'▣',paths:['/app/public/dashboard.html'],desc:'Manage your commercial property brokerage workspace.',searchable:false},
  {label:'Contacts & Directory',short:'Contacts',href:'/directory.html',icon:'♙',paths:['/directory.html'],desc:'Find members and start a conversation.'},
  {label:'Messages',short:'Messages',href:'/messages.html',icon:'✉',paths:['/messages.html'],desc:'Open your member mailbox.'},
@@ -23,39 +23,60 @@ function withQuery(href,q){if(!q)return href;return href+(href.indexOf('?')>=0?'
 function make(tag,cls,text){var node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node}
 function buildNav(){
  var existing=document.querySelector('nav.workspace-nav');
- var injected=document.querySelector('.hamlet-primary-nav');
- var oldBar=document.querySelector('.hamlet-breadcrumb-bar');
- if(oldBar)return;
- var header=document.querySelector('header.resource-nav, header.topbar, header.archive-topbar, header.legal-topbar, header.pricing-header, header');
- if(!header)return;
- var path=currentPath();
- var current=routes.find(function(r){return r.paths.indexOf(path)!==-1});
- var dashboard=routes.find(function(r){return r.short==='Dashboard'});
- var bar=make('div','hamlet-breadcrumb-bar');
- bar.setAttribute('aria-label','Workspace navigation');
- var menu=make('button','hamlet-breadcrumb-menu');
- menu.type='button';menu.setAttribute('aria-label','Open workspace navigation');menu.setAttribute('aria-haspopup','dialog');menu.innerHTML='<span></span><span></span><span></span>';
- menu.addEventListener('click',openPalette);
- bar.appendChild(menu);
- var trail=make('nav','hamlet-breadcrumb-trail');trail.setAttribute('aria-label','Breadcrumb');
- var home=make('a','hamlet-breadcrumb-home','hamlet');
- home.href='/app/public/dashboard.html';home.setAttribute('aria-label','Hamlet dashboard');
- var dot=make('span','hamlet-breadcrumb-dot','.');dot.setAttribute('aria-hidden','true');home.appendChild(dot);trail.appendChild(home);
- if(current&&current.short!=='Dashboard'){
-  var sep=make('span','hamlet-breadcrumb-separator','›');sep.setAttribute('aria-hidden','true');trail.appendChild(sep);
-  var parent=make('a','hamlet-breadcrumb-parent','Dashboard');parent.href=dashboard?dashboard.href:'/app/public/dashboard.html';trail.appendChild(parent);
-  sep=make('span','hamlet-breadcrumb-separator','›');sep.setAttribute('aria-hidden','true');trail.appendChild(sep);
-  var active=make('span','hamlet-breadcrumb-current',current.label);active.setAttribute('aria-current','page');trail.appendChild(active);
- }else{
-  var sep=make('span','hamlet-breadcrumb-separator','›');sep.setAttribute('aria-hidden','true');trail.appendChild(sep);
-  var active=make('span','hamlet-breadcrumb-current','Dashboard');active.setAttribute('aria-current','page');trail.appendChild(active);
+ if(existing){
+  /* Flatten previously grouped links so Edit Profile and Invoices remain visible
+     as independent menu items for signed-in and signed-out visitors alike. */
+  existing.querySelectorAll('.workspace-nav-group, .hamlet-nav-group').forEach(function(group){
+   Array.prototype.slice.call(group.querySelectorAll('a[href]')).forEach(function(link){
+    link.classList.remove('hamlet-nav-child');
+    if(group.parentNode)group.parentNode.insertBefore(link,group);
+   });
+   if(group.parentNode)group.parentNode.removeChild(group);
+  });
+  routes.filter(function(r){return !r.parent}).forEach(function(r){
+   var children=routes.filter(function(child){return child.parent===r.short});
+   var existingLink=existing.querySelector('a[href="'+r.href+'"]');
+   if(children.length){
+    if(existing.querySelector('.workspace-nav-group[data-parent="'+r.short+'"]'))return;
+    var group=make('details','hamlet-nav-group workspace-nav-group');group.setAttribute('data-parent',r.short);
+    var summary=make('summary','workspace-nav-link',r.icon+' '+r.short+' ▾');group.appendChild(summary);
+    children.forEach(function(child){var a=make('a','workspace-nav-link hamlet-nav-child');a.href=child.href;a.textContent=child.icon+' '+child.short;if(child.paths.indexOf(currentPath())!==-1){a.setAttribute('aria-current','page');group.open=true}group.appendChild(a)});
+    if(existingLink&&existingLink.parentNode)existingLink.parentNode.replaceChild(group,existingLink);else existing.appendChild(group);
+    return;
+   }
+   if(existingLink)return;
+   var a=make('a','workspace-nav-link');a.href=r.href;a.appendChild(document.createTextNode(r.icon+' '+r.short));if(r.paths.indexOf(currentPath())!==-1){a.setAttribute('aria-current','page');a.title=r.label}if(r.external){a.target='_blank';a.rel='noopener noreferrer'}existing.appendChild(a)
+  });
+  /* Keep the global search on its own row below the workspace links to avoid
+     horizontal overflow while keeping it aligned to the right. */
+  var searchRow=existing.parentNode&&existing.parentNode.querySelector(':scope > .hamlet-global-search-row');
+  if(!searchRow){
+   searchRow=make('div','hamlet-global-search-row');
+   if(existing.parentNode)existing.parentNode.insertBefore(searchRow,existing.nextSibling);
+  }
+  var searchButton=searchRow.querySelector('.hamlet-global-search');
+  if(!searchButton){
+   searchButton=make('button','hamlet-global-search','Search Hamlet');searchButton.type='button';
+   searchButton.setAttribute('aria-haspopup','dialog');searchButton.setAttribute('aria-label','Search Hamlet (Ctrl or Command + K)');
+   var keyLabel=make('kbd','','Ctrl K');searchButton.appendChild(keyLabel);searchButton.addEventListener('click',openPalette);searchRow.appendChild(searchButton);
+  }
+  return;
  }
- bar.appendChild(trail);
- var search=make('button','hamlet-breadcrumb-search','Search');search.type='button';search.setAttribute('aria-label','Search Hamlet');search.addEventListener('click',openPalette);bar.appendChild(search);
- if(existing)existing.remove();
- if(injected)injected.remove();
- if(oldBar)oldBar.remove();
- header.parentNode.insertBefore(bar,header.nextSibling);
+ if(document.querySelector('.hamlet-primary-nav'))return;
+ var header=document.querySelector('header.resource-nav, header.topbar, header.archive-topbar, header.legal-topbar, header.pricing-header');
+ var nav=make('nav','hamlet-primary-nav');nav.setAttribute('aria-label','Hamlet workspace');
+ var path=currentPath();
+ routes.filter(function(r){return !r.parent}).forEach(function(r){
+   var children=routes.filter(function(child){return child.parent===r.short});
+   if(children.length){var group=make('details','hamlet-nav-group');var summary=make('summary','hamlet-nav-link');var icon=make('span','',r.icon);icon.setAttribute('aria-hidden','true');summary.appendChild(icon);summary.appendChild(document.createTextNode(' '+r.short+' ▾'));group.appendChild(summary);children.forEach(function(child){var a=make('a','hamlet-nav-link hamlet-nav-child');a.href=child.href;a.appendChild(document.createTextNode(child.icon+' '+child.short));if(child.paths.indexOf(path)!==-1){a.setAttribute('aria-current','page');a.title=child.label;group.open=true}group.appendChild(a)});nav.appendChild(group);return}
+   var a=make('a','hamlet-nav-link');a.href=r.href;
+   var icon=make('span','',r.icon);icon.setAttribute('aria-hidden','true');a.appendChild(icon);a.appendChild(document.createTextNode(' '+r.short));
+   if(r.paths.indexOf(path)!==-1){a.setAttribute('aria-current','page');a.title=r.label}else a.title=r.label;
+   if(r.external){a.target='_blank';a.rel='noopener noreferrer'}
+   nav.appendChild(a);
+ });
+ var search=make('button','hamlet-global-search','Search Hamlet');search.type='button';search.setAttribute('aria-haspopup','dialog');search.setAttribute('aria-label','Search Hamlet (Ctrl or Command + K)');var key=make('kbd','','Ctrl K');search.appendChild(key);search.addEventListener('click',openPalette);nav.appendChild(search);
+ if(header&&header.parentNode)header.parentNode.insertBefore(nav,header.nextSibling);else{var wrapper=document.querySelector('.page-wrapper')||document.body;wrapper.insertBefore(nav,wrapper.firstChild)}
 }
 function buildPalette(){
  if(palette)return;
