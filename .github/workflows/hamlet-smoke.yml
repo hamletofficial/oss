@@ -6,6 +6,7 @@ on:
     paths:
       - 'app/hamlet/index.html'
       - 'organisations.html'
+      - 'app/hamlet/organisations.html'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
@@ -20,6 +21,7 @@ on:
     paths:
       - 'app/hamlet/index.html'
       - 'organisations.html'
+      - 'app/hamlet/organisations.html'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
