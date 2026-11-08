@@ -276,7 +276,7 @@ document.getElementById('saveListingSearchBtn').addEventListener('click',saveLis
 try{if(!window.firebase||!window.firebaseConfig)throw Error('Firebase configuration unavailable');if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.onAuthStateChanged(function(u){u?showIn(u):showOut()},function(error){console.error('Unable to determine live listings auth state:',error);showOut()})}catch(e){console.error(e);showOut()}
 });
 </script>
-  <script src="/hamlet-workspace.js?v=20261108-1"></script>
+  <script src="/hamlet-workspace.js?v=20261108-2"></script>
   <script src="/app/public/live-product-tour.js?v=20261014-4"></script>
   <script src="/app-page-transition.js" defer></script>
   <script src="/hamlet-ai-assistants.js?v=20261021-1" defer></script>
