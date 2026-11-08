@@ -92,7 +92,7 @@
     .usp .eyebrow{border-color:#7898c7;background:rgba(7,17,40,.28);color:#dbeafe}
     .usp .ticks{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin-top:1.2rem}
     .usp .ticks li{border-color:rgba(191,219,254,.25);background:rgba(11,17,32,.42);color:#f8fafc;font-size:.9rem;line-height:1.45;padding:.75rem;border-radius:10px}
-    .usp-visual{position:relative;min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;overflow:hidden;border:1px solid rgba(191,219,254,.28);border-radius:14px;background:#071d4a;box-shadow:0 16px 35px rgba(0,0,0,.25)}
+    .usp-visual{position:relative;min-width:0;align-self:start;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;border:1px solid rgba(191,219,254,.28);border-radius:14px;background:#071d4a;box-shadow:0 16px 35px rgba(0,0,0,.25)}
     .usp-carousel{position:relative;width:100%;overflow:hidden;background:#071d4a;touch-action:pan-y;outline:none}
     .usp-carousel-track{display:flex;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab;touch-action:pan-x pan-y}
     .usp-carousel-track::-webkit-scrollbar{display:none}
