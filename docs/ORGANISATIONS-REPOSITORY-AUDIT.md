@@ -133,6 +133,18 @@ Avoid a generic callable that accepts arbitrary collection names, document paths
 - No organisation hostname routing implementation was identified in the reviewed application paths.
 - Cloudflare zone DNS records, proxy status, route assignments, certificate coverage and deployed Worker configuration cannot be confirmed from the repository files alone.
 
+### Read-only Cloudflare account inspection
+
+The connected Cloudflare account was inspected using read-only API operations:
+
+- The `hamlet-ai.co.uk` zone is present, active and not paused.
+- The DNS inventory returned 33 records. No record was present for `orgs.hamlet-ai.co.uk`, `organisations.hamlet-ai.co.uk`, or a wildcard `*.orgs.hamlet-ai.co.uk` hostname.
+- The zone currently has two Worker routes, both on `www.hamlet-ai.co.uk`: `/v1/login-notification*` and `/v1/assist*`. Both route to `hamlet-ai-gateway-staging`.
+- The account lists two Workers: `hamlet-ai-gateway` and `hamlet-ai-gateway-staging`.
+- No organisation hostname route is currently configured in the inspected zone.
+
+This confirms that the proposed organisation hostnames have not yet been provisioned in the inspected Cloudflare zone. Certificate coverage and detailed TLS settings were not inspected in this pass.
+
 ### Implications and actions
 
 - Keep existing AI gateway Workers separate from the organisation workspace router unless a deliberate consolidation decision is made.
@@ -179,7 +191,7 @@ The following cannot be established from the repository alone and require read-o
 - Which root/app Firebase configuration is used by each deployed environment.
 - Which Functions codebases are currently deployed and their runtime versions.
 - Firebase Authentication authorised domains, OAuth provider redirect configuration, and any custom auth domain already configured.
-- Cloudflare zone ownership, DNS records, wildcard certificate coverage, Worker routes, deployed Worker versions and account-level routing configuration.
+- Cloudflare zone ownership, DNS records and Worker routes were checked read-only. Wildcard certificate coverage, detailed TLS settings and account-level routing configuration remain to be verified.
 - Whether any external backend or service outside this repository already owns tenant routing or session exchange.
 
 ## Audit conclusion
