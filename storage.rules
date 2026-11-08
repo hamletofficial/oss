@@ -130,31 +130,55 @@ service firebase.storage {
         && ownedDeal();
     }
 
-    // Organisation-shared files inherit access from their parent tenant resource.
+    // Organisation-shared deal files inherit access from their parent tenant resource.
     match /organisationDocuments/{organisationId}/deal/{dealId}/{documentId}/{fileName} {
-      function parentDeal() { return firestore.get(/databases/(default)/documents/organisationDeals/$(dealId)); }
-      function memberRecord() { return firestore.get(/databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid)); }
+      function parentDeal() {
+        return firestore.get(/databases/(default)/documents/organisationDeals/$(dealId));
+      }
+      function memberRecord() {
+        return firestore.get(/databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid));
+      }
       function activeMember() {
-        return request.auth != null && memberRecord().data.status == 'active'
+        return request.auth != null
+          && memberRecord().data.status == 'active'
           && firestore.get(/databases/(default)/documents/organisations/$(organisationId)).data.status == 'active';
       }
       function canReadFile() {
-        return activeMember() && parentDeal().data.organisationId == organisationId
-          && (parentDeal().data.visibility == 'organisation'
+        return activeMember()
+          && parentDeal().data.organisationId == organisationId
+          && (
+            parentDeal().data.visibility == 'organisation'
             || parentDeal().data.createdByUid == request.auth.uid
             || (parentDeal().data.sharedWithUids is list && request.auth.uid in parentDeal().data.sharedWithUids)
-            || memberRecord().data.role in ['owner', 'admin', 'manager']);
+            || memberRecord().data.role in ['owner', 'admin', 'manager']
+          );
       }
       function canWriteFile() {
-        return activeMember() && parentDeal().data.organisationId == organisationId
-          && (memberRecord().data.role in ['owner', 'admin', 'manager']
-            || (parentDeal().data.createdByUid == request.auth.uid && memberRecord().data.role == 'member'));
+        return activeMember()
+          && parentDeal().data.organisationId == organisationId
+          && (
+            memberRecord().data.role in ['owner', 'admin', 'manager']
+            || (parentDeal().data.createdByUid == request.auth.uid && memberRecord().data.role == 'member')
+          );
       }
       allow read: if canReadFile();
-      allow create: if canWriteFile() && request.resource.size > 0
+      allow create: if canWriteFile()
+        && request.resource.size > 0
         && request.resource.size <= 15 * 1024 * 1024
-        && request.resource.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
-        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)      allow read, write: if false;
+        && request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/csv',
+          'text/plain',
+          'image/png',
+          'image/jpeg',
+          'image/webp'
+        ]
+        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)
+      allow read, write: if false;
     }
   }
 }
@@ -163,30 +187,55 @@ service firebase.storage {
       allow delete: if canWriteFile();
     }
 
+    // Organisation-shared property files inherit access from their parent tenant resource.
     match /organisationDocuments/{organisationId}/property/{propertyId}/{documentId}/{fileName} {
-      function parentProperty() { return firestore.get(/databases/(default)/documents/organisationProperties/$(propertyId)); }
-      function memberRecord() { return firestore.get(/databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid)); }
+      function parentProperty() {
+        return firestore.get(/databases/(default)/documents/organisationProperties/$(propertyId));
+      }
+      function memberRecord() {
+        return firestore.get(/databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid));
+      }
       function activeMember() {
-        return request.auth != null && memberRecord().data.status == 'active'
+        return request.auth != null
+          && memberRecord().data.status == 'active'
           && firestore.get(/databases/(default)/documents/organisations/$(organisationId)).data.status == 'active';
       }
       function canReadFile() {
-        return activeMember() && parentProperty().data.organisationId == organisationId
-          && (parentProperty().data.visibility == 'organisation'
+        return activeMember()
+          && parentProperty().data.organisationId == organisationId
+          && (
+            parentProperty().data.visibility == 'organisation'
             || parentProperty().data.createdByUid == request.auth.uid
             || (parentProperty().data.sharedWithUids is list && request.auth.uid in parentProperty().data.sharedWithUids)
-            || memberRecord().data.role in ['owner', 'admin', 'manager']);
+            || memberRecord().data.role in ['owner', 'admin', 'manager']
+          );
       }
       function canWriteFile() {
-        return activeMember() && parentProperty().data.organisationId == organisationId
-          && (memberRecord().data.role in ['owner', 'admin', 'manager']
-            || (parentProperty().data.createdByUid == request.auth.uid && memberRecord().data.role == 'member'));
+        return activeMember()
+          && parentProperty().data.organisationId == organisationId
+          && (
+            memberRecord().data.role in ['owner', 'admin', 'manager']
+            || (parentProperty().data.createdByUid == request.auth.uid && memberRecord().data.role == 'member')
+          );
       }
       allow read: if canReadFile();
-      allow create: if canWriteFile() && request.resource.size > 0
+      allow create: if canWriteFile()
+        && request.resource.size > 0
         && request.resource.size <= 15 * 1024 * 1024
-        && request.resource.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
-        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)      allow read, write: if false;
+        && request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/csv',
+          'text/plain',
+          'image/png',
+          'image/jpeg',
+          'image/webp'
+        ]
+        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)
+      allow read, write: if false;
     }
   }
 }
