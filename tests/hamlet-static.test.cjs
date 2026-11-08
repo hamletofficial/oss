@@ -5,6 +5,7 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
+const organisationsHtml = fs.readFileSync('organisations.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
 const searchIndex = JSON.parse(fs.readFileSync('search-index.json', 'utf8'));
 const firestore = fs.readFileSync('firestore.rules', 'utf8');
@@ -117,4 +118,20 @@ test('organisation lifecycle operations are server-controlled and registered', (
   assert.match(functions, /require\("\.\/hamlet-organisations"\)/);
   assert.ok(firestore.includes('match /organisations/{organisationId}'));
   assert.match(firestore, /allow create, update, delete: if false;/);
+});
+
+
+test('organisation management page scripts parse and use authenticated callable operations', () => {
+  const blocks = [...organisationsHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected organisation management application script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisations-inline-' + index + '.js' }));
+  }
+  assert.match(organisationsHtml, /name="robots" content="noindex,nofollow"/);
+  assert.match(organisationsHtml, /acceptOrganisationInvitation/);
+  assert.match(organisationsHtml, /createOrganisationInvitation/);
+  assert.match(organisationsHtml, /revokeOrganisationInvitation/);
+  assert.match(organisationsHtml, /history\\.replaceState/);
+  assert.match(siteSearch, /'organisations\\.html'/);
 });
