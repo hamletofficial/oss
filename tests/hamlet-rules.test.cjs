@@ -231,7 +231,7 @@ test('organisation properties and deals enforce tenant membership and explicit s
     visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
   }));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/member-restricted')));
-  await assertFails(getDoc(doc(owner, 'organisationProperties/member-restricted')) === undefined ? Promise.resolve() : getDoc(doc(owner, 'organisationProperties/member-restricted')));
+  await assertSucceeds(getDoc(doc(owner, 'organisationProperties/member-restricted')));
   await assertFails(setDoc(doc(member, 'organisationProperties/member-changes-sharing'), {
     visibility: 'restricted', sharedWithUids: ['outsider'],
   }, {merge: true}));
