@@ -897,17 +897,22 @@ service cloud.firestore {
     // File metadata is tied to a tenant resource. Storage access is separately
     // checked against the same parent resource and sharing policy.
     match /organisationDocuments/{documentId} {
-      function parentResource() {
-        return get(/databases/$(database)/documents/$(request.resource.data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(request.resource.data.resourceId));
+      function parentResource(data) {
+        return get(/databases/$(database)/documents/$(data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(data.resourceId));
       }
-      allow read: if canReadOrganisationResource(resource.data);
+      function parentExists(data) {
+        return data.resourceType in ['deal', 'property']
+          && exists(/databases/$(database)/documents/$(data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(data.resourceId));
+      }
+      allow read: if request.auth != null
+        && parentExists(resource.data)
+        && canReadOrganisationResource(parentResource(resource.data).data);
       allow create: if request.auth != null
-        && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','visibility','sharedWithUids','title','fileName','storagePath','size','contentType','createdAt'])
-        && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','visibility','sharedWithUids','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
         && request.resource.data.id == documentId
         && request.resource.data.resourceType in ['deal', 'property']
         && request.resource.data.createdByUid == request.auth.uid
-        && validOrganisationSharing(request.resource.data)
         && request.resource.data.title is string
         && request.resource.data.title.size() >= 1
         && request.resource.data.title.size() <= 120
@@ -920,11 +925,15 @@ service cloud.firestore {
         && request.resource.data.size <= 15 * 1024 * 1024
         && request.resource.data.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
         && request.resource.data.createdAt == request.time
-        && exists(/databases/$(database)/documents/$(request.resource.data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(request.resource.data.resourceId))
-        && canReadOrganisationResource(parentResource().data)
-        && canWriteOrganisationResource(parentResource().data);
+        && parentExists(request.resource.data)
+        && parentResource(request.resource.data).data.organisationId == request.resource.data.organisationId
+        && parentResource(request.resource.data).data.createdByUid == request.resource.data.createdByUid
+        && canReadOrganisationResource(parentResource(request.resource.data).data)
+        && canWriteOrganisationResource(parentResource(request.resource.data).data);
       allow update: if false;
-      allow delete: if canWriteOrganisationResource(resource.data);
+      allow delete: if request.auth != null
+        && parentExists(resource.data)
+        && canWriteOrganisationResource(parentResource(resource.data).data);
     }
 
     match /organisations/{organisationId} {
