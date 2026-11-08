@@ -1,6 +1,6 @@
 # hamlet for Windows
 
-This folder contains the Electron desktop application for Hamlet. The v1.04.06 Windows release workflow runs automated checks, builds the x64 NSIS installer, signs it with Microsoft Azure Artifact Signing and verifies the signature before publishing.
+This folder contains the Electron desktop application for Hamlet. The v1.04.08 Windows release workflow runs automated checks, builds the x64 NSIS installer, signs it with Microsoft Azure Artifact Signing and verifies the signature before publishing.
 
 ## Current functionality
 
@@ -30,15 +30,15 @@ npm start
 npm run pack:win
 ```
 
-The package produces `release/hamlet-Setup-1.4.6.exe`. Local builds are unsigned unless signed through the configured Azure Artifact Signing workflow.
+The package produces `release/hamlet-Setup-1.4.8.exe`. Local builds are unsigned unless signed through the configured Azure Artifact Signing workflow.
 
-## Automated v1.04.06 release
+## Automated v1.04.08 release
 
 The GitHub Actions workflow `.github/workflows/hamlet-windows-release.yml`:
 
 1. Runs on a Windows 2025 runner with Node.js 24.
 2. Installs desktop dependencies and runs syntax, security and unit tests.
-3. Verifies package version `1.4.6`.
+3. Verifies package version `1.4.8`.
 4. Builds exactly the x64 NSIS installer.
 5. Signs the installer with Azure Artifact Signing and an RFC 3161 timestamp.
 6. Requires a valid Authenticode signature before calculating the SHA-256 digest.
@@ -64,8 +64,8 @@ Pull requests run the Windows build and tests without requesting Azure credentia
 After downloading the signed installer and checksum, verify both:
 
 ```powershell
-Get-AuthenticodeSignature .\hamlet-Setup-1.4.6.exe | Format-List Status,StatusMessage,SignerCertificate
-Get-FileHash .\hamlet-Setup-1.4.6.exe -Algorithm SHA256
+Get-AuthenticodeSignature .\hamlet-Setup-1.4.8.exe | Format-List Status,StatusMessage,SignerCertificate
+Get-FileHash .\hamlet-Setup-1.4.8.exe -Algorithm SHA256
 Get-Content .\SHA256SUMS.txt
 ```
 
