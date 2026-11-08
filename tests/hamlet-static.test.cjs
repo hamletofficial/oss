@@ -105,6 +105,7 @@ test('organisation lifecycle operations are server-controlled and registered', (
     'createOrganisation',
     'createOrganisationInvitation',
     'acceptOrganisationInvitation',
+    'revokeOrganisationInvitation',
     'changeOrganisationMemberRole',
     'removeOrganisationMember',
   ]) {
