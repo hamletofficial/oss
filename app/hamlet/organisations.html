@@ -82,8 +82,8 @@
   async function call(name,data){return (await functions.httpsCallable(name)(data)).data;}
   function showApp(){ $('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
   async function loadMemberships(){
-    const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).where('status','==','active').get();
-    memberships=snap.docs.map(doc=>doc.data());
+    const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
+    memberships=snap.docs.map(doc=>doc.data()).filter(m=>m.status==='active');
     const orgs=await Promise.all(memberships.map(async m=>{const d=await db.collection('organisations').doc(m.organisationId).get();return d.exists?{...d.data(),role:m.role}:null;}));
     const valid=orgs.filter(Boolean);
     $('orgList').innerHTML=valid.length?valid.map(o=>'<button class="org-item" data-org="'+esc(o.id)+'" aria-pressed="'+(selectedOrg&&selectedOrg.id===o.id)+'"><span><strong>'+esc(o.name)+'</strong><small>'+esc(o.slug)+'.orgs.hamlet-ai.co.uk · '+esc(o.role)+'</small></span><span class="pill">'+esc(o.status)+'</span></button>').join(''):'<div class="empty">No active organisation memberships yet. Create an organisation or accept an invitation to get started.</div>';
@@ -99,13 +99,13 @@
     if(canManage){
       const [memberSnap,inviteSnap]=await Promise.all([
         db.collection('organisationMembers').where('organisationId','==',org.id).get(),
-        db.collection('organisationInvitations').where('organisationId','==',org.id).where('status','==','pending').get()
+        db.collection('organisationInvitations').where('organisationId','==',org.id).get()
       ]);
       memberRows=memberSnap.docs.map(d=>d.data()).filter(m=>m.status==='active').map(m=>{
         const controls=m.role==='owner'?'':('<select aria-label="Role for '+esc(m.email||m.uid)+'" data-role="'+esc(m.uid)+'"><option value="admin" '+(m.role==='admin'?'selected':'')+'>Admin</option><option value="manager" '+(m.role==='manager'?'selected':'')+'>Manager</option><option value="member" '+(m.role==='member'?'selected':'')+'>Member</option><option value="viewer" '+(m.role==='viewer'?'selected':'')+'>Viewer</option></select><button class="danger" data-remove="'+esc(m.uid)+'">Remove</button>');
         return '<div class="row"><div class="row-main"><strong>'+esc(m.email||m.uid)+'</strong><small>'+esc(m.role)+' · '+esc(m.status)+'</small></div><div class="row-actions">'+controls+'</div></div>';
       }).join('');
-      inviteRows=inviteSnap.docs.map(d=>({id:d.id,...d.data()})).map(i=>'<div class="row"><div class="row-main"><strong>'+esc(i.email)+'</strong><small>'+esc(i.role)+' · expires '+esc(i.expiresAt&&i.expiresAt.toDate?i.expiresAt.toDate().toLocaleDateString(): 'in 7 days')+'</small></div><div class="row-actions"><button class="danger" data-revoke="'+esc(i.id)+'">Revoke</button></div></div>').join('');
+      inviteRows=inviteSnap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>i.status==='pending').map(i=>'<div class="row"><div class="row-main"><strong>'+esc(i.email)+'</strong><small>'+esc(i.role)+' · expires '+esc(i.expiresAt&&i.expiresAt.toDate?i.expiresAt.toDate().toLocaleDateString(): 'in 7 days')+'</small></div><div class="row-actions"><button class="danger" data-revoke="'+esc(i.id)+'">Revoke</button></div></div>').join('');
     }
     $('detailPanel').innerHTML='<div class="panel-head"><div><div class="eyebrow">Selected workspace</div><h2>'+esc(org.name)+'</h2><div class="muted">'+esc(org.slug)+'.orgs.hamlet-ai.co.uk</div></div><span class="pill">'+esc(org.role)+'</span></div>'+
       '<div class="empty">Organisation identity and membership are active. Shared property portfolios, deal pipelines, teams and subdomain routing are not enabled in this preview.</div>'+
