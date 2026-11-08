@@ -1,4 +1,4 @@
-name: Build, sign and publish Hamlet v1.04.06 for Windows
+name: Build, sign and publish Hamlet v1.04.08 for Windows
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ on:
       tag_name:
         description: "Release tag to publish when explicitly enabled"
         required: true
-        default: "v1.04.06"
+        default: "v1.04.08"
         type: string
       sign_installer:
         description: "Run Azure Artifact Signing after the build succeeds"
@@ -35,7 +35,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: hamlet-v1-04-06-windows-${{ github.ref }}
+  group: hamlet-v1-04-08-windows-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -66,8 +66,8 @@ jobs:
         shell: pwsh
         run: |
           $version = (node -p "require('./package.json').version").Trim()
-          if ($version -ne "1.4.6") {
-            throw "Expected Windows package version 1.4.6, found $version."
+          if ($version -ne "1.4.8") {
+            throw "Expected Windows package version 1.4.8, found $version."
           }
 
       - name: Build Windows x64 installer
@@ -83,7 +83,7 @@ jobs:
             throw "Expected exactly one Windows installer; found $($installers.Count)."
           }
           $installer = $installers[0]
-          if ($installer.Name -ne "hamlet-Setup-1.4.6.exe") {
+          if ($installer.Name -ne "hamlet-Setup-1.4.8.exe") {
             throw "Unexpected installer filename: $($installer.Name)"
           }
           if ($installer.Length -lt 1MB) {
@@ -94,8 +94,8 @@ jobs:
       - name: Retain unsigned build for signing job
         uses: actions/upload-artifact@v4
         with:
-          name: hamlet-windows-v1.04.06-unsigned
-          path: desktop/hamlet-windows/release/hamlet-Setup-1.4.6.exe
+          name: hamlet-windows-v1.04.08-unsigned
+          path: desktop/hamlet-windows/release/hamlet-Setup-1.4.8.exe
           if-no-files-found: error
           retention-days: 2
 
@@ -114,7 +114,7 @@ jobs:
       - name: Download unsigned installer
         uses: actions/download-artifact@v4
         with:
-          name: hamlet-windows-v1.04.06-unsigned
+          name: hamlet-windows-v1.04.08-unsigned
           path: desktop/hamlet-windows/release
 
       - name: Log in to Azure using GitHub OIDC
@@ -150,7 +150,7 @@ jobs:
         shell: pwsh
         working-directory: desktop/hamlet-windows
         run: |
-          $installer = Get-Item "release/hamlet-Setup-1.4.6.exe"
+          $installer = Get-Item "release/hamlet-Setup-1.4.8.exe"
           $signature = Get-AuthenticodeSignature -FilePath $installer.FullName
           if ($signature.Status -ne "Valid") {
             throw "Installer Authenticode signature is not valid: $($signature.Status) — $($signature.StatusMessage)"
@@ -177,24 +177,24 @@ jobs:
       - name: Retain verified signed installer and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: hamlet-windows-v1.04.06-signed
+          name: hamlet-windows-v1.04.08-signed
           path: |
-            desktop/hamlet-windows/release/hamlet-Setup-1.4.6.exe
+            desktop/hamlet-windows/release/hamlet-Setup-1.4.8.exe
             desktop/hamlet-windows/release/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish Hamlet v1.04.06 Windows release
+      - name: Publish Hamlet v1.04.08 Windows release
         if: github.event_name == 'workflow_dispatch' && inputs.publish_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag_name }}
-          name: Hamlet v1.04.06 — Windows (Signed)
+          name: Hamlet v1.04.08 — Windows (Signed)
           body_path: desktop/hamlet-windows/RELEASE-NOTES.md
           prerelease: false
           make_latest: true
           generate_release_notes: false
           fail_on_unmatched_files: true
           files: |
-            desktop/hamlet-windows/release/hamlet-Setup-1.4.6.exe
+            desktop/hamlet-windows/release/hamlet-Setup-1.4.8.exe
             desktop/hamlet-windows/release/SHA256SUMS.txt
