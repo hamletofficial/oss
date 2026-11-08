@@ -626,12 +626,14 @@
           }
           if (user.emailVerified !== true) {
             createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
-            status("orgListStatus", "Verify your email address before creating or managing an organisation.", "error");
+            acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
+            status("orgListStatus", "Verify your email address before creating an organisation or accepting an invitation.", "error");
             organisationSelect.replaceChildren();
             addText(organisationSelect, "option", "", "Email verification required");
             return;
           }
           createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
+          acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
           await loadMemberships();
         });
       });
