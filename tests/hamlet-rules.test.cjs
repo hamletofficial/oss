@@ -67,6 +67,14 @@ test.beforeEach(async () => {
       organisationId: 'org-public', name: 'Public Organisation',
       slug: 'public-org', isPublic: true, status: 'active',
     });
+    await setDoc(doc(db, 'organisations/org-suspended'), {
+      id: 'org-suspended', name: 'Suspended Organisation', slug: 'suspended-org',
+      status: 'suspended', visibility: 'private', ownerUid: 'suspended-owner',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-suspended_member'), {
+      organisationId: 'org-suspended', uid: 'suspended-member',
+      role: 'member', status: 'active',
+    });
   });
 });
 
@@ -224,4 +232,10 @@ test('organisation invitations are visible only to active organisation administr
   const member = env.authenticatedContext('member').firestore();
   await assertSucceeds(getDoc(doc(owner, 'organisationInvitations/invite-private')));
   await assertFails(getDoc(doc(member, 'organisationInvitations/invite-private')));
+});
+
+
+test('active membership does not grant access to a suspended organisation', async () => {
+  const member = env.authenticatedContext('suspended-member').firestore();
+  await assertFails(getDoc(doc(member, 'organisations/org-suspended')));
 });
