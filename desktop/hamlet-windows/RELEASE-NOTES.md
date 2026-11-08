@@ -1,6 +1,6 @@
-# Hamlet v1.04.06 — Windows desktop build
+# Hamlet v1.04.08 — Windows desktop build
 
-Hamlet v1.04.06 introduces Microsoft Azure Artifact Signing (formerly Trusted Signing) into the Windows release pipeline.
+Hamlet v1.04.08 introduces Microsoft Azure Artifact Signing (formerly Trusted Signing) into the Windows release pipeline.
 
 ## Windows application and security
 
@@ -13,18 +13,18 @@ Hamlet v1.04.06 introduces Microsoft Azure Artifact Signing (formerly Trusted Si
 
 ## Install and verify
 
-The expected installer filename is `hamlet-Setup-1.4.6.exe`.
+The expected installer filename is `hamlet-Setup-1.4.8.exe`.
 
 Verify the Authenticode signature in PowerShell:
 
 ```powershell
-Get-AuthenticodeSignature .\hamlet-Setup-1.4.6.exe | Format-List Status,StatusMessage,SignerCertificate
+Get-AuthenticodeSignature .\hamlet-Setup-1.4.8.exe | Format-List Status,StatusMessage,SignerCertificate
 ```
 
 The status must be `Valid` and the signer must identify the verified publishing organisation. Then verify the SHA-256 digest:
 
 ```powershell
-Get-FileHash .\hamlet-Setup-1.4.6.exe -Algorithm SHA256
+Get-FileHash .\hamlet-Setup-1.4.8.exe -Algorithm SHA256
 Get-Content .\SHA256SUMS.txt
 ```
 

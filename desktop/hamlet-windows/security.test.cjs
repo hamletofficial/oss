@@ -20,3 +20,10 @@ test("allows only explicitly approved HTTPS authentication hosts", () => {
   assert.equal(isTrustedAuthUrl("https://attacker.google.com/"), false);
   assert.equal(isTrustedAuthUrl("https://another-project.firebaseapp.com/"), false);
 });
+
+test("notification permission is scoped to an allowed Hamlet HTTPS origin", () => {
+  const requestingOrigin = "https://www.hamlet-ai.co.uk/settings.html";
+  assert.equal(isTrustedAppUrl(requestingOrigin), true);
+  assert.equal(isTrustedAppUrl("https://accounts.google.com/"), false);
+  assert.equal(isTrustedAppUrl("https://hamlet-ai.co.uk.attacker.example/"), false);
+});

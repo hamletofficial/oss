@@ -1,6 +1,6 @@
 {
   "name": "hamlet-windows",
-  "version": "1.4.6",
+  "version": "1.4.8",
   "description": "Hamlet commercial property platform for Windows",
   "private": true,
   "main": "main.cjs",
@@ -8,7 +8,7 @@
     "start": "electron .",
     "pack:win": "electron-builder --win nsis",
     "pack:dir": "electron-builder --dir",
-    "check": "node --check main.cjs && node --check preload.cjs && node --check security.cjs && node --check generate-icon.cjs && node --test",
+    "check": "node --check main.cjs && node --check preload.cjs && node --check security.cjs && node --check desktop-session.cjs && node --check generate-icon.cjs && node --test",
     "test": "node --test",
     "prepack:win": "node generate-icon.cjs"
   },
@@ -26,6 +26,7 @@
       "main.cjs",
       "preload.cjs",
       "security.cjs",
+      "desktop-session.cjs",
       "package.json",
       "icon.ico"
     ],
