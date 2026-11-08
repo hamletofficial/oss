@@ -244,7 +244,10 @@ exports.acceptOrganisationInvitation = onCall({
       role: invite.role,
       status: "active",
       joinedAt: now,
+      createdAt: memberSnap.exists ? (memberSnap.data().createdAt || now) : now,
       updatedAt: now,
+      removedAt: FieldValue.delete(),
+      removedByUid: FieldValue.delete(),
     }, {merge: true});
     transaction.update(inviteRef, {
       status: "accepted",
@@ -360,4 +363,46 @@ exports.removeOrganisationMember = onCall({
   });
 
   return {organisationId: orgId, memberUid: targetUid, status: "removed"};
+});
+
+
+exports.revokeOrganisationInvitation = onCall({
+  region: "us-central1",
+  timeoutSeconds: 30,
+  memory: "256MiB",
+}, async (request) => {
+  const user = requireVerifiedUser(request);
+  const invitationId = readDocumentId(request.data && request.data.invitationId, "invitationId");
+  const db = getDb();
+  const inviteRef = db.collection("organisationInvitations").doc(invitationId);
+
+  await db.runTransaction(async (transaction) => {
+    const inviteSnap = await transaction.get(inviteRef);
+    if (!inviteSnap.exists) {
+      throw new HttpsError("not-found", "The organisation invitation was not found.");
+    }
+    const invite = inviteSnap.data();
+    const orgId = invite.organisationId;
+    const actorRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
+    const actorSnap = await transaction.get(actorRef);
+    const actor = actorSnap.exists ? actorSnap.data() : null;
+    requireRole(actor, ["owner", "admin"]);
+    if (invite.status !== "pending") {
+      throw new HttpsError("failed-precondition", "Only pending invitations can be revoked.");
+    }
+    transaction.update(inviteRef, {
+      status: "revoked",
+      revokedAt: FieldValue.serverTimestamp(),
+      revokedByUid: user.uid,
+    });
+    transaction.create(activityRef(db, orgId), {
+      organisationId: orgId,
+      actorUid: user.uid,
+      action: "organisation.invitation_revoked",
+      invitationEmail: invite.email,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+  });
+
+  return {invitationId, status: "revoked"};
 });
