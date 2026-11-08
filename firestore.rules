@@ -808,7 +808,9 @@ service cloud.firestore {
         && exists(organisationMemberPath(orgId))
         && get(organisationMemberPath(orgId)).data.organisationId == orgId
         && get(organisationMemberPath(orgId)).data.uid == request.auth.uid
-        && get(organisationMemberPath(orgId)).data.status == 'active';
+        && get(organisationMemberPath(orgId)).data.status == 'active'
+        && exists(/databases/$(database)/documents/organisations/$(orgId))
+        && get(/databases/$(database)/documents/organisations/$(orgId)).data.status == 'active';
     }
 
     function canManageOrganisation(orgId) {
