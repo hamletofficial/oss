@@ -23,6 +23,8 @@ on:
       - 'functions/hamlet-organisations.js'
       - 'firestore.rules'
       - 'storage.rules'
+      - 'site-search.js'
+      - 'search-index.json'
       - 'tests/**'
       - '.github/workflows/hamlet-smoke.yml'
 
