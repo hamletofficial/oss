@@ -102,6 +102,17 @@ test('public search excludes protected member pages from both its index and resu
 });
 
 
+test('tenant resource rules and storage paths are isolated from legacy individual records', () => {
+  assert.match(firestore, /match \/organisationProperties\/{propertyId}/);
+  assert.match(firestore, /match \/organisationDeals\/{dealId}/);
+  assert.match(firestore, /match \/organisationDocuments\/{documentId}/);
+  assert.match(firestore, /visibility in \['organisation', 'restricted'\]/);
+  assert.match(firestore, /createdByUid == resource\.data\.createdByUid/);
+  assert.match(storage, /match \/organisationDocuments\/{organisationId}\/deal\/{dealId}/);
+  assert.match(storage, /match \/organisationDocuments\/{organisationId}\/property\/{propertyId}/);
+  assert.match(firestore, /match \/hamletDeals\/{dealId}/);
+});
+
 test('organisation lifecycle operations are server-controlled and registered', () => {
   for (const callable of [
     'createOrganisation',
