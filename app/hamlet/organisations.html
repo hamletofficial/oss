@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b1120">
   <meta name="robots" content="noindex,nofollow">
-  <title>Organisations | Hamlet</title>
+  <title>Organisation Workspace | Hamlet</title>
   <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,120 +13,106 @@
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
   <script defer src="/firebase-config.js"></script>
   <style>
-    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--blue2:#60a5fa;--green:#34d399;--red:#f87171}
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--blue2:#60a5fa}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
     a{color:#93c5fd}.shell{width:min(1180px,100%);margin:auto;padding:24px clamp(16px,4vw,42px) 64px}
     header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0 22px;border-bottom:1px solid var(--line)}
     .brand{font:800 22px Manrope,sans-serif;letter-spacing:-.8px;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
-    .header-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.link{color:#cbd5e1;text-decoration:none;font-weight:700}.hero{padding:34px 0 22px}
-    .eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
-    h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:8px 0}h2{font-size:18px;margin:0 0 8px}h3{font-size:14px;margin:0}
-    .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:680px;margin:0}
-    .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:16px;align-items:start}
-    .panel{background:rgba(17,24,39,.96);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0;box-shadow:0 12px 34px #0002}
-    .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}
-    .stack{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:12px;font-weight:700;color:#dbeafe}
-    input,select{width:100%;min-height:43px;padding:10px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:#f8fafc;font:inherit}
-    input:focus,select:focus{outline:2px solid #60a5fa;outline-offset:2px}
-    button,.button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:9px 14px;border:1px solid #40516a;border-radius:9px;background:#172338;color:#e5edf8;text-decoration:none;font:700 12px 'DM Sans',sans-serif;cursor:pointer}
-    button.primary,.button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button.danger{color:#fecaca;border-color:#7f1d1d;background:#351a25}button:disabled{opacity:.55;cursor:wait}
-    .org-list{display:grid;gap:8px}.org-item{width:100%;justify-content:space-between;text-align:left;padding:13px;background:#0d1728}.org-item[aria-pressed=true]{border-color:#60a5fa;background:#142947}.org-item strong{display:block;font-size:13px}.org-item small{display:block;color:var(--muted);margin-top:4px}
-    .pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#bfdbfe;background:#1e3a5f;border:1px solid #315b8c;border-radius:999px;padding:5px 8px}
-    .empty{padding:18px;border:1px dashed #40516a;border-radius:11px;color:var(--muted);line-height:1.6}
-    .section{margin-top:16px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
-    .rows{display:grid;gap:8px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;background:#0d1728;border:1px solid #26374f;border-radius:10px;min-width:0}
-    .row-main{min-width:0}.row-main strong{display:block;overflow-wrap:anywhere}.row-main small{display:block;color:var(--muted);margin-top:3px}
-    .row-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .notice{display:none;padding:11px 13px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin-bottom:13px}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}.notice.show{display:block}
-    .token-box{overflow-wrap:anywhere;padding:12px;background:#08111e;border:1px solid #40516a;border-radius:9px;font-family:ui-monospace,monospace;color:#a7f3d0;user-select:all}
-    .hidden{display:none!important}.footnote{font-size:11px;color:#8192aa;line-height:1.5;margin:10px 0 0}
+    .header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.link{color:#cbd5e1;text-decoration:none;font-weight:700}
+    .hero{padding:34px 0 22px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+    h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:8px 0}h2{font-size:18px;margin:0 0 8px}
+    .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:760px;margin:0}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0 18px;padding:15px 17px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.92)}
+    .org-select{min-width:min(100%,320px);max-width:100%;min-height:42px;padding:9px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:#f8fafc;font:inherit}
+    .role{display:inline-flex;padding:5px 9px;border:1px solid #315b8c;border-radius:999px;background:#1e3a5f;color:#bfdbfe;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .card{display:block;min-width:0;padding:20px;border:1px solid var(--line);border-radius:15px;background:rgba(17,24,39,.96);text-decoration:none;color:var(--text);transition:border-color .18s,transform .18s}
+    .card:hover{border-color:#477bb6;transform:translateY(-2px)}.card .icon{font-size:21px;margin-bottom:13px}.card h2{margin-bottom:7px}.card p{margin:0;color:var(--muted);line-height:1.55}.card .open{display:block;margin-top:15px;color:#93c5fd;font-weight:800;font-size:12px}
+    .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+    .empty{padding:20px;border:1px dashed #40516a;border-radius:12px;color:var(--muted);line-height:1.6}
+    .footnote{font-size:11px;color:#8192aa;line-height:1.55;margin:18px 0 0}
     #authGate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#0b1120}.gate-card{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}.gate-card p{color:var(--muted);line-height:1.6}
-    @media(max-width:800px){.layout{grid-template-columns:1fr}.panel{padding:16px}header{align-items:flex-start}.row{align-items:flex-start;flex-direction:column}.row-actions{justify-content:flex-start}}
+    .hidden{display:none!important}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}.toolbar{align-items:flex-start}.org-select{width:100%}header{align-items:flex-start}}
   </style>
 </head>
 <body>
   <div id="authGate"><div class="gate-card"><a class="brand" href="/">hamlet<span>.</span></a><h2 style="margin-top:20px">Secure organisation workspace</h2><p id="gateMessage">Checking your sign-in…</p></div></div>
-  <div class="shell hidden" id="app">
-    <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/hamlet/">Back to workspace</a><span class="pill" id="userBadge">Signed in</span></div></header>
-    <section class="hero"><div class="eyebrow">Team workspace</div><h1>Organisations</h1><p>Create and manage a shared organisational identity for your property team. Membership is permission-based; your personal property and deal records remain individually owned unless a later sharing workflow explicitly grants access.</p></section>
+  <main class="shell hidden" id="app">
+    <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/hamlet/">Overview &amp; Pipeline</a><a class="link" href="/members.html">Members Area</a><span class="role" id="userBadge">Signed in</span></div></header>
+    <section class="hero"><div class="eyebrow">Team operations</div><h1 id="pageTitle">Organisation workspace</h1><p id="intro">Choose the organisation you are working with, then open the relevant Hamlet tools. Organisation membership is checked before this page displays your available workspaces.</p></section>
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-head"><div><h2>Your organisations</h2><div class="muted">Organisations where your account has an active membership.</div></div><button class="primary" id="showCreate">＋ Create</button></div>
-        <div id="orgList" class="org-list"><div class="empty">Loading your organisation memberships…</div></div>
-        <form id="acceptForm" class="stack section">
-          <div class="section-title"><h3>Accept an invitation</h3></div>
-          <div class="field"><label for="invitationToken">Invitation token</label><input id="invitationToken" name="token" minlength="32" maxlength="128" required autocomplete="off" spellcheck="false" placeholder="Paste the one-time invitation token"></div>
-          <button type="submit">Accept invitation</button>
-          <p class="footnote">Use the verified email address to which the invitation was issued. Tokens should be shared privately and never placed in a URL.</p>
-        </form>
-        <form id="createForm" class="stack section hidden">
-          <div class="section-title"><h3>Create an organisation</h3><button type="button" id="cancelCreate">Cancel</button></div>
-          <div class="field"><label for="orgName">Organisation name</label><input id="orgName" name="name" maxlength="120" required placeholder="e.g. Northbank Property Partners"></div>
-          <div class="field"><label for="orgSlug">Workspace URL name</label><input id="orgSlug" name="slug" minlength="3" maxlength="48" pattern="[a-zA-Z0-9]+([a-zA-Z0-9-]*[a-zA-Z0-9])?" required placeholder="northbank-property" autocomplete="off"><small class="muted">Letters, numbers and single hyphens. This reserves a name only; custom subdomain routing is not yet enabled.</small></div>
-          <button class="primary" type="submit">Create organisation</button>
-        </form>
-      </section>
-      <section class="panel" id="detailPanel">
-        <div class="empty">Select an organisation to view its workspace administration.</div>
-      </section>
-    </div>
-    <p class="footnote">Organisations is in controlled preview. Invitations are issued as one-time tokens for secure sharing; this page does not send invitation emails. Dedicated organisation subdomains and shared property/deal access will be enabled only after the authentication and deployment configuration has been verified.</p>
-  </div>
+    <div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Loading membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select class="org-select" id="orgSelect" aria-label="Select organisation"><option>Loading…</option></select></div><span class="role" id="roleBadge">Member</span></div>
+    <section class="grid" aria-label="Organisation operational tools">
+      <a class="card" href="/app/hamlet/"><div class="icon" aria-hidden="true">▦</div><h2>Deals &amp; pipeline</h2><p>Review transactions, manage deal stages, coordinate critical-path reminders and work through your pipeline.</p><span class="open">Open deal workspace →</span></a>
+      <a class="card" href="/app/public/live.html"><div class="icon" aria-hidden="true">⌂</div><h2>Live properties</h2><p>Browse available commercial and residential property opportunities across Hamlet.</p><span class="open">Browse live properties →</span></a>
+      <a class="card" href="/app/public/resources.html"><div class="icon" aria-hidden="true">▤</div><h2>Property portfolio</h2><p>Open your property records and portfolio tools. Existing individual ownership remains in place.</p><span class="open">Open property portfolio →</span></a>
+      <a class="card" href="/messages.html"><div class="icon" aria-hidden="true">✉</div><h2>Team communications</h2><p>Coordinate with colleagues and other Hamlet members through direct messages.</p><span class="open">Open messages →</span></a>
+      <a class="card" href="/app/hamlet/ai-assistant.html"><div class="icon" aria-hidden="true">✦</div><h2>AI assistant</h2><p>Use Hamlet's assistant to support research, property workflows and deal preparation.</p><span class="open">Open AI assistant →</span></a>
+      <a class="card" href="/organisations.html"><div class="icon" aria-hidden="true">⚙</div><h2>Organisation administration</h2><p>Manage the organisation profile, membership, invitations and access roles in the Members Area.</p><span class="open">Manage organisation →</span></a>
+    </section>
+    <p class="footnote">Operational tools currently open existing Hamlet modules. Organisation membership does not yet make individually owned deals or properties visible to other members. Shared organisation portfolios, tenant-scoped deal pipelines, team permissions and activity reporting will be enabled only after their data access and security rules are implemented and tested.</p>
+  </main>
 <script>
 (function(){
   'use strict';
-  const $ = (id) => document.getElementById(id);
-  let auth, db, functions, currentUser, selectedOrg = null, memberships = [];
-  const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function notice(message, error){const box=$('notice');box.textContent=message;box.className='notice show'+(error?' error':'');}
-  function clearNotice(){$('notice').className='notice';$('notice').textContent='';}
-  function busy(button, state, label){if(!button)return;button.disabled=state;if(state){button.dataset.label=button.textContent;button.textContent=label||'Working…';}else if(button.dataset.label){button.textContent=button.dataset.label;delete button.dataset.label;}}
-  async function call(name,data){return (await functions.httpsCallable(name)(data)).data;}
-  function showApp(){ $('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
+  const $=id=>document.getElementById(id);
+  let auth,db,currentUser,organisations=[];
+  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
+  function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
+  function selectOrganisation(id){
+    const org=organisations.find(item=>item.id===id);
+    if(!org)return;
+    $('selectedName').textContent=org.name;
+    $('selectedSlug').textContent=org.slug+'.orgs.hamlet-ai.co.uk';
+    $('roleBadge').textContent=org.role;
+    $('pageTitle').textContent=org.name+' workspace';
+    $('orgSelect').value=org.id;
+    try{sessionStorage.setItem('hamletActiveOrganisationId',org.id);}catch(e){}
+  }
   async function loadMemberships(){
     const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
-    memberships=snap.docs.map(doc=>doc.data()).filter(m=>m.status==='active');
-    const orgs=await Promise.all(memberships.map(async m=>{const d=await db.collection('organisations').doc(m.organisationId).get();return d.exists?{...d.data(),role:m.role}:null;}));
-    const valid=orgs.filter(Boolean);
-    $('orgList').innerHTML=valid.length?valid.map(o=>'<button class="org-item" data-org="'+esc(o.id)+'" aria-pressed="'+(selectedOrg&&selectedOrg.id===o.id)+'"><span><strong>'+esc(o.name)+'</strong><small>'+esc(o.slug)+'.orgs.hamlet-ai.co.uk · '+esc(o.role)+'</small></span><span class="pill">'+esc(o.status)+'</span></button>').join(''):'<div class="empty">No active organisation memberships yet. Create an organisation or accept an invitation to get started.</div>';
-    $('orgList').querySelectorAll('[data-org]').forEach(b=>b.addEventListener('click',()=>selectOrganisation(b.dataset.org)));
-    if(selectedOrg&&valid.some(o=>o.id===selectedOrg.id)){selectedOrg=valid.find(o=>o.id===selectedOrg.id);await renderDetail();}
-    else if(valid.length){selectedOrg=valid[0];await renderDetail();}
-    else{$('detailPanel').innerHTML='<div class="empty">Your organisation workspace will appear here after you create or join an organisation.</div>';}
-  }
-  async function selectOrganisation(id){selectedOrg=memberships.find(m=>m.organisationId===id)?{...memberships.find(m=>m.organisationId===id),id}:null;const snap=await db.collection('organisations').doc(id).get();if(!snap.exists){notice('This organisation is no longer available.',true);return;}selectedOrg={...snap.data(),role:memberships.find(m=>m.organisationId===id).role};$('orgList').querySelectorAll('[data-org]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.org===id)));await renderDetail();}
-  async function renderDetail(){
-    if(!selectedOrg)return;const org=selectedOrg;const canManage=['owner','admin'].includes(org.role);
-    let memberRows='',inviteRows='';
-    if(canManage){
-      const [memberSnap,inviteSnap]=await Promise.all([
-        db.collection('organisationMembers').where('organisationId','==',org.id).get(),
-        db.collection('organisationInvitations').where('organisationId','==',org.id).get()
-      ]);
-      memberRows=memberSnap.docs.map(d=>d.data()).filter(m=>m.status==='active').map(m=>{
-        const controls=(m.role==='owner'||m.uid===currentUser.uid)?'':('<select aria-label="Role for '+esc(m.email||m.uid)+'" data-role="'+esc(m.uid)+'"><option value="admin" '+(m.role==='admin'?'selected':'')+'>Admin</option><option value="manager" '+(m.role==='manager'?'selected':'')+'>Manager</option><option value="member" '+(m.role==='member'?'selected':'')+'>Member</option><option value="viewer" '+(m.role==='viewer'?'selected':'')+'>Viewer</option></select><button class="danger" data-remove="'+esc(m.uid)+'">Remove</button>');
-        return '<div class="row"><div class="row-main"><strong>'+esc(m.email||m.uid)+'</strong><small>'+esc(m.role)+' · '+esc(m.status)+'</small></div><div class="row-actions">'+controls+'</div></div>';
-      }).join('');
-      inviteRows=inviteSnap.docs.map(d=>({id:d.id,...d.data()})).filter(i=>i.status==='pending').map(i=>'<div class="row"><div class="row-main"><strong>'+esc(i.email)+'</strong><small>'+esc(i.role)+' · expires '+esc(i.expiresAt&&i.expiresAt.toDate?i.expiresAt.toDate().toLocaleDateString(): 'in 7 days')+'</small></div><div class="row-actions"><button class="danger" data-revoke="'+esc(i.id)+'">Revoke</button></div></div>').join('');
+    const active=snap.docs.map(d=>d.data()).filter(m=>m.status==='active');
+    const records=await Promise.all(active.map(async m=>{
+      const orgSnap=await db.collection('organisations').doc(m.organisationId).get();
+      if(!orgSnap.exists||orgSnap.data().status!=='active')return null;
+      return {...orgSnap.data(),id:orgSnap.id,role:m.role};
+    }));
+    organisations=records.filter(Boolean);
+    const select=$('orgSelect');select.replaceChildren();
+    if(!organisations.length){
+      select.add(new Option('No active memberships',''));
+      $('selectedName').textContent='No organisation selected';
+      $('selectedSlug').textContent='Create or join an organisation to continue.';
+      $('roleBadge').textContent='No membership';
+      $('pageTitle').textContent='Your organisation workspace';
+      $('intro').textContent='You do not currently belong to an active organisation. Organisation creation, invitations and membership administration are available in the Members Area.';
+      $('notice').className='notice show';
+      $('notice').textContent='No active organisation membership was found for this account.';
+      return;
     }
-    $('detailPanel').innerHTML='<div class="panel-head"><div><div class="eyebrow">Selected workspace</div><h2>'+esc(org.name)+'</h2><div class="muted">'+esc(org.slug)+'.orgs.hamlet-ai.co.uk</div></div><span class="pill">'+esc(org.role)+'</span></div>'+
-      '<div class="empty">Organisation identity and membership are active. Shared property portfolios, deal pipelines, teams and subdomain routing are not enabled in this preview.</div>'+
-      (canManage?'<div class="section"><div class="section-title"><h3>Invite a colleague</h3></div><form id="inviteForm" class="stack"><div class="field"><label for="inviteEmail">Work email address</label><input id="inviteEmail" type="email" maxlength="254" required placeholder="colleague@company.com"></div><div class="field"><label for="inviteRole">Initial role</label><select id="inviteRole"><option value="manager">Manager</option><option value="member">Member</option><option value="viewer">Viewer</option>'+(org.role==='owner'?'<option value="admin">Admin</option>':'')+'</select></div><button class="primary" type="submit">Generate invitation</button></form><div id="inviteResult" class="section hidden"></div></div><div class="section"><div class="section-title"><h3>Members</h3><span class="pill">'+memberRows.length+'</span></div><div class="rows">'+(memberRows||'<div class="empty">No members found.</div>')+'</div></div><div class="section"><div class="section-title"><h3>Pending invitations</h3></div><div class="rows">'+(inviteRows||'<div class="empty">No pending invitations.</div>')+'</div></div>':'<div class="section"><h3>Membership permissions</h3><p class="muted">Your current role is '+esc(org.role)+'. Contact an organisation owner or administrator to manage members and invitations.</p></div>');
-    const form=$('inviteForm');if(form)form.addEventListener('submit',createInvitation);
-    $('detailPanel').querySelectorAll('[data-role]').forEach(el=>el.addEventListener('change',async()=>{try{await call('changeOrganisationMemberRole',{organisationId:org.id,memberUid:el.dataset.role,role:el.value});notice('Member role updated.');await renderDetail();}catch(e){notice(e.message||'Could not update member role.',true);await renderDetail();}}));
-    $('detailPanel').querySelectorAll('[data-remove]').forEach(el=>el.addEventListener('click',async()=>{if(!confirm('Remove this member from the organisation?'))return;try{await call('removeOrganisationMember',{organisationId:org.id,memberUid:el.dataset.remove});notice('Member removed.');await renderDetail();}catch(e){notice(e.message||'Could not remove member.',true);}}));
-    $('detailPanel').querySelectorAll('[data-revoke]').forEach(el=>el.addEventListener('click',async()=>{if(!confirm('Revoke this pending invitation?'))return;try{await call('revokeOrganisationInvitation',{invitationId:el.dataset.revoke});notice('Invitation revoked.');await renderDetail();}catch(e){notice(e.message||'Could not revoke invitation.',true);}}));
+    organisations.forEach(org=>select.add(new Option(org.name+' · '+org.role,org.id)));
+    let preferred='';
+    try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
+    const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
+    selectOrganisation(chosen);
   }
-  async function createInvitation(event){event.preventDefault();const button=event.currentTarget.querySelector('button[type=submit]');busy(button,true);try{const result=await call('createOrganisationInvitation',{organisationId:selectedOrg.id,email:$('inviteEmail').value,role:$('inviteRole').value});await loadMemberships();const resultBox=$('inviteResult');if(!resultBox){notice('Invitation was created, but the panel refreshed. Reopen the organisation to view the pending invitation.',true);return;}resultBox.classList.remove('hidden');resultBox.innerHTML='<div class="notice show">Invitation created. Copy this token now; it is returned only once and is not stored in browser storage.</div><div class="token-box" id="inviteToken">'+esc(result.token)+'</div><div class="row-actions" style="margin-top:9px"><button type="button" id="copyToken" class="primary">Copy token</button><span class="muted">Expires '+esc(new Date(result.expiresAt).toLocaleString())+'</span></div><p class="footnote">Send the token to the intended colleague through a trusted channel. They must sign in using the same verified email address.</p>';$('copyToken').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(result.token);notice('Invitation token copied.');}catch(e){notice('Clipboard access was unavailable. Select and copy the token manually.',true);}});const freshForm=$('inviteForm');if(freshForm)freshForm.reset();}catch(e){notice(e.message||'Could not create invitation.',true);}finally{busy(button,false);}}
-  $('acceptForm').addEventListener('submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button[type=submit]');busy(button,true);try{const result=await call('acceptOrganisationInvitation',{token:$('invitationToken').value.trim()});$('acceptForm').reset();notice('Invitation accepted. You are now a '+result.role+' of the organisation.');await loadMemberships();await selectOrganisation(result.organisationId);}catch(err){notice(err.message||'Could not accept invitation.',true);}finally{busy(button,false);}});
-  $('showCreate').addEventListener('click',()=>$('createForm').classList.remove('hidden'));
-  $('cancelCreate').addEventListener('click',()=>$('createForm').classList.add('hidden'));
-  $('createForm').addEventListener('submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button[type=submit]');busy(button,true);try{const result=await call('createOrganisation',{name:$('orgName').value,slug:$('orgSlug').value.toLowerCase()});notice('Organisation created. You are its owner.');$('createForm').reset();$('createForm').classList.add('hidden');await loadMemberships();await selectOrganisation(result.organisationId);}catch(err){notice(err.message||'Could not create organisation.',true);}finally{busy(button,false);}});
-  function init(){if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('us-central1');auth.onAuthStateChanged(async user=>{if(!user){$('gateMessage').textContent='Sign in is required. Redirecting to secure sign-in…';const next=location.pathname+location.search;location.replace('/login.html?next='+encodeURIComponent(next));return;}currentUser=user;showApp();try{await user.reload();await user.getIdToken(true);}catch(e){console.warn('Could not refresh verified email state:',e);}if(user.emailVerified!==true){$('createForm').querySelectorAll('input,button').forEach(el=>el.disabled=true);$('acceptForm').querySelectorAll('input,button').forEach(el=>el.disabled=true);notice('Verify your email address before creating an organisation or accepting an invitation.',true);return;}$('createForm').querySelectorAll('input,button').forEach(el=>el.disabled=false);$('acceptForm').querySelectorAll('input,button').forEach(el=>el.disabled=false);try{await loadMemberships();}catch(e){notice(e.message||'Unable to load organisation memberships. The organisation backend may not yet be deployed.',true);$('orgList').innerHTML='<div class="empty">Organisation services are not currently available. Please try again later.</div>';}});}catch(e){$('gateMessage').textContent='Secure sign-in could not be initialised. Please retry later.';console.error(e);}}
+  $('orgSelect').addEventListener('change',e=>selectOrganisation(e.target.value));
+  function init(){
+    if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+    try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();
+      auth.onAuthStateChanged(async user=>{
+        if(!user){$('gateMessage').textContent='Sign in is required. Redirecting to secure sign-in…';location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));return;}
+        currentUser=user;showApp();
+        try{await user.reload();await user.getIdToken(true);}catch(e){console.warn('Unable to refresh account state:',e);}
+        if(user.emailVerified!==true){notice('Verify your email address to access organisation workspaces.',true);return;}
+        try{await loadMemberships();}catch(e){notice(e.message||'Unable to load organisation memberships. Please try again later.',true);}
+      });
+    }catch(e){$('gateMessage').textContent='Secure sign-in could not be initialised. Please retry later.';console.error(e);}
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
