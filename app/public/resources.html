@@ -214,7 +214,7 @@ const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=ut
 try{if(!window.firebase||!window.firebaseConfig)throw Error('Firebase configuration unavailable');if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.onAuthStateChanged(function(u){u?showIn(u):showOut()})}catch(e){console.error(e);showOut()}
 });
 </script>
-  <script src="/hamlet-workspace.js?v=20261108-1"></script>
+  <script src="/hamlet-workspace.js?v=20261108-2"></script>
   <script src="/app-page-transition.js" defer></script>
 </body>
 </html>
