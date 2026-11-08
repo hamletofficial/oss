@@ -8,7 +8,6 @@ on:
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
-      - 'functions/hamlet-organisations.js'
       - 'firestore.rules'
       - 'storage.rules'
       - 'site-search.js'
