@@ -41,7 +41,30 @@ This document establishes the safe delivery sequence. It does not claim that DNS
 
 The workspace should reuse existing Hamlet modules where their data model and permissions support tenant-scoped access. It must not silently convert individually owned records into organisation-owned records.
 
-### Membership roles
+#
+
+### Property address search and Google Places
+
+The connected commercial and residential portfolio experience must retain a consistent, structured address lookup across both property types. Use the existing Google Places integration as the address discovery/autocomplete provider, subject to production API enablement and key restrictions.
+
+Required search and capture fields:
+- UK postcode (including partial postcode input);
+- street name;
+- first line of address / building number and street.
+
+The address workflow should:
+- support address autocomplete and selection rather than treating free-text search as a verified address;
+- populate structured address components (first line, street, locality/town, postcode, and country) from the selected Place result where available;
+- allow the user to review and correct the returned address before saving;
+- preserve the existing property record schema and individual ownership rules;
+- work consistently in both commercial and residential property search/submission journeys, including organisation-connected portfolio views;
+- avoid exposing the Google API key in source control or server logs.
+
+Before release, enable the appropriate Google Places API service(s) in the correct Google Cloud project, restrict the browser key to the required Hamlet production origins and only the required APIs, and verify billing/quota controls. If server-side Places requests are introduced, use a separate server key stored in managed secrets and restrict it by API and server egress/IP where supported. Do not broaden key restrictions or commit credentials to the repository. Test postcode, street, and first-line searches on desktop and mobile.
+
+This integration provides address discovery; it does not itself grant access to, share, or transfer a property record between personal and organisation portfolios. Those permissions remain governed by the tenant/resource-sharing model above.
+
+## Membership roles
 
 Initial roles:
 
