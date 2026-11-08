@@ -97,7 +97,7 @@
     .usp-carousel-track{display:flex;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab;touch-action:pan-x pan-y}
     .usp-carousel-track::-webkit-scrollbar{display:none}
     .usp-carousel-track.is-dragging{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto;user-select:none}
-    .usp-carousel-slide{flex:0 0 100%;min-width:0;aspect-ratio:4/3;scroll-snap-align:start;scroll-snap-stop:always;background:#0b1120;display:flex;align-items:center;justify-content:center}
+    .usp-carousel-slide{flex:0 0 100%;min-width:0;aspect-ratio:16/9;scroll-snap-align:start;scroll-snap-stop:always;background:#0b1120;display:flex;align-items:center;justify-content:center}
     .usp-carousel-slide img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#0b1120;-webkit-user-drag:none;user-select:none}
     .usp-carousel-control{position:absolute;z-index:2;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(219,234,254,.72);border-radius:50%;background:rgba(7,29,74,.92);color:#fff;font-size:1.4rem;line-height:1;cursor:pointer;box-shadow:0 3px 12px #02061766;transition:background .18s ease,transform .18s ease}
     .usp-carousel-control:hover{background:#1d4ed8}
@@ -109,7 +109,7 @@
     .usp-carousel-dots{display:flex;align-items:center;gap:.45rem}
     .usp-carousel-dot{width:9px;height:9px;flex:0 0 auto;padding:0;border:0;border-radius:50%;background:#64748b;cursor:pointer;transition:background .18s ease,transform .18s ease}
     .usp-carousel-dot[aria-current="true"]{background:#fff;transform:scale(1.35)}
-    @media(max-width:850px){.usp-carousel-slide{aspect-ratio:16/10}.usp-carousel-control{width:36px;height:36px}.usp-carousel-footer{padding:.6rem .75rem .8rem}}
+    @media(max-width:850px){.usp-carousel-slide{aspect-ratio:16/9}.usp-carousel-control{width:36px;height:36px}.usp-carousel-footer{padding:.6rem .75rem .8rem}}
     @media(prefers-reduced-motion:reduce){.usp-carousel-track{scroll-behavior:auto}.usp-carousel-control,.usp-carousel-dot{transition:none}}
     .usp-caption{position:absolute;z-index:1;left:.85rem;right:.85rem;bottom:.85rem;padding:.65rem .8rem;border:1px solid rgba(191,219,254,.25);border-radius:9px;background:rgba(7,17,40,.82);color:#dbeafe;font-size:.76rem;font-weight:700;backdrop-filter:blur(8px)}
     .ticks{list-style:none;padding:0;margin:1rem 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
