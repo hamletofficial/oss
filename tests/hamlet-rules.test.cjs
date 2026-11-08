@@ -54,6 +54,18 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_suspended'), {
       organisationId: 'org-private', uid: 'suspended', role: 'member', status: 'suspended',
     });
+    await setDoc(doc(db, 'organisationProperties/property-shared'), {
+      id: 'property-shared', organisationId: 'org-private', createdByUid: 'member',
+      visibility: 'organisation', sharedWithUids: [], propertyName: 'Shared House',
+    });
+    await setDoc(doc(db, 'organisationProperties/property-restricted'), {
+      id: 'property-restricted', organisationId: 'org-private', createdByUid: 'member',
+      visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted House',
+    });
+    await setDoc(doc(db, 'organisationDeals/deal-shared'), {
+      id: 'deal-shared', organisationId: 'org-private', createdByUid: 'member',
+      visibility: 'organisation', sharedWithUids: [], name: 'Shared acquisition',
+    });
     await setDoc(doc(db, 'organisationMembers/org-other_outsider'), {
       organisationId: 'org-other', uid: 'outsider', role: 'owner', status: 'active',
     });
@@ -182,6 +194,56 @@ test('transaction files are owner-restricted in Firebase Storage', async () => {
   await assertFails(uploadBytes(ref(otherStorage, filePath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
 });
 
+
+test('organisation properties and deals enforce tenant membership and explicit sharing', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+  const suspended = env.authenticatedContext('suspended').firestore();
+
+  await assertSucceeds(getDoc(doc(member, 'organisationProperties/property-shared')));
+  await assertSucceeds(getDoc(doc(owner, 'organisationProperties/property-restricted')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationProperties/property-restricted')));
+  await assertFails(getDoc(doc(member, 'organisationProperties/property-restricted')));
+  await assertFails(getDoc(doc(outsider, 'organisationProperties/property-shared')));
+  await assertFails(getDoc(doc(suspended, 'organisationProperties/property-shared')));
+  await assertSucceeds(getDoc(doc(member, 'organisationDeals/deal-shared')));
+  await assertFails(getDoc(doc(outsider, 'organisationDeals/deal-shared')));
+
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-created'), {
+    id: 'member-created', organisationId: 'org-private', createdByUid: 'member',
+    visibility: 'organisation', sharedWithUids: [], propertyName: 'New team asset',
+  }));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'), {
+    id: 'forged-tenant', organisationId: 'org-other', createdByUid: 'member',
+    visibility: 'organisation', sharedWithUids: [],
+  }));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'), {
+    id: 'forged-creator', organisationId: 'org-private', createdByUid: 'owner',
+    visibility: 'organisation', sharedWithUids: [],
+  }));
+  await assertFails(setDoc(doc(member, 'organisationProperties/member-escalates-sharing'), {
+    id: 'member-escalates-sharing', organisationId: 'org-private', createdByUid: 'member',
+    visibility: 'restricted', sharedWithUids: ['outsider'],
+  }));
+  await assertFails(setDoc(doc(member, 'organisationDeals/viewer-forgery'), {
+    id: 'viewer-forgery', organisationId: 'org-private', createdByUid: 'suspended',
+    visibility: 'organisation', sharedWithUids: [],
+  }));
+});
+
+test('organisation document files inherit parent resource permissions', async () => {
+  const memberStorage = env.authenticatedContext('member').storage();
+  const adminStorage = env.authenticatedContext('admin').storage();
+  const outsiderStorage = env.authenticatedContext('outsider').storage();
+  const restrictedPath = 'organisationDocuments/org-private/property/property-restricted/doc-1/brief.pdf';
+  const sharedPath = 'organisationDocuments/org-private/deal/deal-shared/doc-2/brief.pdf';
+  await assertFails(uploadBytes(ref(memberStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertSucceeds(uploadBytes(ref(adminStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertSucceeds(uploadBytes(ref(memberStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertFails(uploadBytes(ref(outsiderStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+});
 
 test('organisation documents are readable only by active members of that organisation', async () => {
   const owner = env.authenticatedContext('owner').firestore();
