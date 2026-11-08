@@ -51,6 +51,9 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_member'), {
       organisationId: 'org-private', uid: 'member', role: 'member', status: 'active',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_colleague'), {
+      organisationId: 'org-private', uid: 'colleague', role: 'member', status: 'active',
+    });
     await setDoc(doc(db, 'organisationMembers/org-private_viewer'), {
       organisationId: 'org-private', uid: 'viewer', role: 'viewer', status: 'active',
     });
@@ -208,7 +211,10 @@ test('organisation properties and deals enforce tenant membership and explicit s
   await assertSucceeds(getDoc(doc(member, 'organisationProperties/property-shared')));
   await assertSucceeds(getDoc(doc(owner, 'organisationProperties/property-restricted')));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/property-restricted')));
-  await assertFails(getDoc(doc(member, 'organisationProperties/property-restricted')));
+  // The creator retains access to a restricted resource; unlisted peers do not.
+  await assertSucceeds(getDoc(doc(member, 'organisationProperties/property-restricted')));
+  const colleague = env.authenticatedContext('colleague').firestore();
+  await assertFails(getDoc(doc(colleague, 'organisationProperties/property-restricted')));
   await assertFails(getDoc(doc(outsider, 'organisationProperties/property-shared')));
   await assertFails(getDoc(doc(suspended, 'organisationProperties/property-shared')));
   await assertSucceeds(getDoc(doc(member, 'organisationDeals/deal-shared')));
@@ -242,15 +248,15 @@ test('organisation properties and deals enforce tenant membership and explicit s
   }));
 });
 
-test('organisation document files inherit parent resource permissions', async () => {
+test('organisation document uploads remain disabled until separately validated', async () => {
   const memberStorage = env.authenticatedContext('member').storage();
   const adminStorage = env.authenticatedContext('admin').storage();
   const outsiderStorage = env.authenticatedContext('outsider').storage();
   const restrictedPath = 'organisationDocuments/org-private/property/property-restricted/doc-1/brief.pdf';
   const sharedPath = 'organisationDocuments/org-private/deal/deal-shared/doc-2/brief.pdf';
   await assertFails(uploadBytes(ref(memberStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
-  await assertSucceeds(uploadBytes(ref(adminStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
-  await assertSucceeds(uploadBytes(ref(memberStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertFails(uploadBytes(ref(adminStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertFails(uploadBytes(ref(memberStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(outsiderStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
 });
 
