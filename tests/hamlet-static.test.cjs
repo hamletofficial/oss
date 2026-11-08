@@ -6,6 +6,7 @@ const vm = require('node:vm');
 const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
 const organisationsHtml = fs.readFileSync('organisations.html', 'utf8');
+const appOrganisationsHtml = fs.readFileSync('app/hamlet/organisations.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
 const searchIndex = JSON.parse(fs.readFileSync('search-index.json', 'utf8'));
 const firestore = fs.readFileSync('firestore.rules', 'utf8');
@@ -134,4 +135,17 @@ test('organisation management page scripts parse and use authenticated callable 
   assert.match(organisationsHtml, /revokeOrganisationInvitation/);
   assert.match(organisationsHtml, /history\.replaceState/);
   assert.match(siteSearch, /'organisations\.html'/);
+});
+
+
+test('workspace organisation management page JavaScript parses', () => {
+  const blocks = [...appOrganisationsHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected app organisation management script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'app-organisations-inline-' + index + '.js' }));
+  }
+  assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
+  assert.match(appOrganisationsHtml, /createOrganisationInvitation/);
+  assert.match(appOrganisationsHtml, /removeOrganisationMember/);
 });
