@@ -148,4 +148,7 @@ test('workspace organisation management page JavaScript parses', () => {
   assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
   assert.match(appOrganisationsHtml, /createOrganisationInvitation/);
   assert.match(appOrganisationsHtml, /removeOrganisationMember/);
+  assert.match(appOrganisationsHtml, /acceptOrganisationInvitation/);
+  assert.match(appOrganisationsHtml, /revokeOrganisationInvitation/);
+  assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
 });
