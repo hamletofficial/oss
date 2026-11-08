@@ -122,8 +122,8 @@ test('organisation lifecycle operations are server-controlled and registered', (
 
 
 test('organisation management page scripts parse and use authenticated callable operations', () => {
-  const blocks = [...organisationsHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-    .filter((match) => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+  const blocks = [...organisationsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
   assert.ok(blocks.length >= 1, 'expected organisation management application script');
   for (const [index, block] of blocks.entries()) {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisations-inline-' + index + '.js' }));
@@ -132,6 +132,6 @@ test('organisation management page scripts parse and use authenticated callable 
   assert.match(organisationsHtml, /acceptOrganisationInvitation/);
   assert.match(organisationsHtml, /createOrganisationInvitation/);
   assert.match(organisationsHtml, /revokeOrganisationInvitation/);
-  assert.match(organisationsHtml, /history\\.replaceState/);
-  assert.match(siteSearch, /'organisations\\.html'/);
+  assert.match(organisationsHtml, /history\.replaceState/);
+  assert.match(siteSearch, /'organisations\.html'/);
 });
