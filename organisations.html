@@ -95,7 +95,6 @@
       <h1>Sign in to Hamlet Organisations</h1>
       <p id="loginMessage">Sign in to create an organisation, manage memberships or accept an invitation.</p>
       <a class="org-btn" href="/login.html?next=%2Forganisations.html">Go to Sign In</a>
-      <p class="org-muted" id="inviteSignInNote" hidden>If you received an invitation, sign in first and then reopen the original invitation link. The invitation token is deliberately not copied into the sign-in URL.</p>
     </section>
 
     <main id="orgShell" class="org-main" hidden>
@@ -122,6 +121,18 @@
             <button class="org-btn" id="createOrgBtn" type="submit">Create Organisation</button>
           </form>
           <p class="org-status" id="createOrgStatus" role="status" aria-live="polite"></p>
+          <div class="org-panel">
+            <h2>Accept an invitation</h2>
+            <p class="org-muted">Paste the one-time invitation token shared with you. You must be signed in with the same verified email address to which it was issued.</p>
+            <form id="acceptInviteForm" class="org-form">
+              <div>
+                <label for="acceptInviteToken">One-time invitation token</label>
+                <input id="acceptInviteToken" type="text" minlength="32" maxlength="128" required autocomplete="off" spellcheck="false" placeholder="Paste invitation token">
+              </div>
+              <button class="org-btn secondary" id="acceptInviteBtn" type="submit">Accept Invitation</button>
+            </form>
+            <p class="org-status" id="acceptInviteStatus" role="status" aria-live="polite"></p>
+          </div>
         </section>
 
         <section class="org-card" aria-labelledby="yourOrgsHeading">
@@ -207,6 +218,7 @@
         var invitationList = document.getElementById("invitationList");
         var createOrgForm = document.getElementById("createOrgForm");
         var inviteForm = document.getElementById("inviteForm");
+        var acceptInviteForm = document.getElementById("acceptInviteForm");
         var currentUser = null;
         var memberships = [];
         var selectedOrganisationId = "";
@@ -254,39 +266,6 @@
         function addEmpty(container, message) {
           container.replaceChildren();
           addText(container, "div", "org-empty", message);
-        }
-
-        function invitationLink(token) {
-          return window.location.origin + "/organisations.html#invite=" + encodeURIComponent(token);
-        }
-
-        function readInvitationToken() {
-          var match = window.location.hash.match(/^#invite=([^&]+)$/);
-          if (!match) return "";
-          try { return decodeURIComponent(match[1]); } catch (error) { return ""; }
-        }
-
-        function clearInvitationToken() {
-          window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
-        }
-
-        async function acceptInvitationFromFragment() {
-          var token = readInvitationToken();
-          if (!token || acceptingInvitation || !currentUser) return;
-          acceptingInvitation = true;
-          status("orgListStatus", "Checking your organisation invitation…");
-          try {
-            await currentUser.getIdToken(true);
-            var result = await makeCallable("acceptOrganisationInvitation")({token:token});
-            clearInvitationToken();
-            status("orgListStatus", "Invitation accepted. You have joined the organisation as " + roleLabel(result.data && result.data.role) + ".", "success");
-            await loadMemberships(result.data && result.data.organisationId);
-          } catch (error) {
-            console.error("Organisation invitation acceptance failed:", error);
-            status("orgListStatus", error && error.message ? error.message : "This invitation could not be accepted. Check that you are signed in with the invited verified email address.", "error");
-          } finally {
-            acceptingInvitation = false;
-          }
         }
 
         async function loadMemberships(preferredOrganisationId) {
@@ -530,26 +509,33 @@
               role:document.getElementById("inviteRole").value
             });
             var data = result.data || {};
-            var link = invitationLink(data.token);
             var panel = document.getElementById("inviteResult");
             panel.replaceChildren();
             addText(panel, "div", "org-row-title", "Invitation created for " + data.email + ".");
-            addText(panel, "p", "org-muted", "Copy this private link and send it only to the invited colleague. It is single-use and expires in seven days. The raw token is shown only once.");
-            var anchor = addText(panel, "a", "", link);
-            anchor.href = link;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
+            addText(panel, "p", "org-muted", "Copy this one-time token and send it privately to the invited colleague. It expires in seven days. The token is not placed in a URL or browser storage.");
+            var tokenInput = document.createElement("input");
+            tokenInput.type = "text";
+            tokenInput.readOnly = true;
+            tokenInput.autocomplete = "off";
+            tokenInput.spellcheck = false;
+            tokenInput.value = data.token;
+            tokenInput.setAttribute("aria-label", "One-time invitation token");
+            tokenInput.style.width = "100%";
+            tokenInput.style.marginTop = "8px";
+            panel.appendChild(tokenInput);
             var copy = document.createElement("button");
             copy.type = "button";
             copy.className = "org-btn secondary";
-            copy.textContent = "Copy invitation link";
+            copy.textContent = "Copy one-time token";
             copy.style.marginTop = "10px";
             copy.addEventListener("click", async function () {
               try {
-                await navigator.clipboard.writeText(link);
-                status("inviteStatus", "Invitation link copied.", "success");
+                await navigator.clipboard.writeText(data.token);
+                status("inviteStatus", "One-time invitation token copied.", "success");
               } catch (error) {
-                status("inviteStatus", "Clipboard access was blocked. Select and copy the invitation link above.", "error");
+                tokenInput.focus();
+                tokenInput.select();
+                status("inviteStatus", "Clipboard access was blocked. The token is selected so you can copy it manually.", "error");
               }
             });
             panel.appendChild(copy);
@@ -560,6 +546,28 @@
           } catch (error) {
             console.error("Organisation invitation creation failed:", error);
             status("inviteStatus", error.message || "Unable to create this invitation.", "error");
+          } finally {
+            setBusy(button, false);
+          }
+        });
+
+        acceptInviteForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!acceptInviteForm.reportValidity()) return;
+          var button = document.getElementById("acceptInviteBtn");
+          setBusy(button, true, "Accepting…");
+          status("acceptInviteStatus", "Validating your invitation…");
+          try {
+            await currentUser.getIdToken(true);
+            var result = await makeCallable("acceptOrganisationInvitation")({
+              token: document.getElementById("acceptInviteToken").value.trim()
+            });
+            acceptInviteForm.reset();
+            status("acceptInviteStatus", "Invitation accepted. You joined as " + roleLabel(result.data && result.data.role) + ".", "success");
+            await loadMemberships(result.data && result.data.organisationId);
+          } catch (error) {
+            console.error("Organisation invitation acceptance failed:", error);
+            status("acceptInviteStatus", error.message || "Unable to accept this invitation. Check the token and your verified email address.", "error");
           } finally {
             setBusy(button, false);
           }
@@ -602,7 +610,6 @@
             loginSection.hidden = false;
             signInLink.hidden = false;
             signOutBtn.hidden = true;
-            document.getElementById("inviteSignInNote").hidden = !readInvitationToken();
             document.body.classList.remove("auth-pending");
             return;
           }
@@ -625,7 +632,6 @@
             return;
           }
           createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
-          await acceptInvitationFromFragment();
           await loadMemberships();
         });
       });
