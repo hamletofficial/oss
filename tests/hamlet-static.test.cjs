@@ -148,10 +148,12 @@ test('workspace organisation management page JavaScript parses', () => {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'app-organisations-inline-' + index + '.js' }));
   }
   assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
-  assert.match(appOrganisationsHtml, /createOrganisationInvitation/);
-  assert.match(appOrganisationsHtml, /removeOrganisationMember/);
-  assert.match(appOrganisationsHtml, /acceptOrganisationInvitation/);
-  assert.match(appOrganisationsHtml, /revokeOrganisationInvitation/);
+  assert.match(appOrganisationsHtml, /Team operations/);
+  assert.match(appOrganisationsHtml, /Deals &amp; pipeline/);
+  assert.match(appOrganisationsHtml, /Property portfolio/);
+  assert.match(appOrganisationsHtml, /Organisation administration/);
+  assert.match(appOrganisationsHtml, /organisationMembers/);
+  assert.doesNotMatch(appOrganisationsHtml, /createOrganisationInvitation|removeOrganisationMember|acceptOrganisationInvitation|revokeOrganisationInvitation/);
   assert.doesNotMatch(appOrganisationsHtml, /location\.hash|replaceState/);
   assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
 });
