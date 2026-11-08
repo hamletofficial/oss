@@ -166,7 +166,7 @@ jobs:
           $hash = (Get-FileHash -Path $installer.FullName -Algorithm SHA256).Hash
           "$hash  $($installer.Name)" | Set-Content -Path "release/SHA256SUMS.txt" -Encoding ascii
           $checksumLine = (Get-Content -Path "release/SHA256SUMS.txt" -Raw).Trim()
-          if ($checksumLine -notmatch '^[A-Fa-f0-9]{64}  hamlet-Setup-1\.4\.6\.exe$') {
+          if ($checksumLine -notmatch '^[A-Fa-f0-9]{64}  hamlet-Setup-1\.4\.8\.exe$') {
             throw "Checksum file does not match the required SHA-256 format."
           }
           if ($checksumLine.Substring(0, 64).ToUpperInvariant() -ne $hash) {
