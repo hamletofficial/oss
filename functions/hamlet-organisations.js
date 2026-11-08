@@ -196,7 +196,7 @@ exports.createOrganisationInvitation = onCall({
   });
 
   // The raw token is returned once. Only its SHA-256 hash is persisted.
-  return {token, expiresAt: expiresAt.toDate().toISOString(), email, role};
+  return {invitationId: tokenHash, token, expiresAt: expiresAt.toDate().toISOString(), email, role};
 });
 
 exports.acceptOrganisationInvitation = onCall({
