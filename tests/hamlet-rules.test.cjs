@@ -30,6 +30,37 @@ test.beforeEach(async () => {
       owner: '', client: '', notes: '', createdAt: '2026-10-13T00:00:00.000Z',
       updatedAt: new Date(),
     });
+    const db = context.firestore();
+    await setDoc(doc(db, 'organisations/org-private'), {
+      id: 'org-private', name: 'Private Organisation', slug: 'private-org',
+      status: 'active', visibility: 'private', ownerUid: 'owner',
+    });
+    await setDoc(doc(db, 'organisationSlugs/private-org'), {
+      organisationId: 'org-private', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationDirectory/org-private'), {
+      organisationId: 'org-private', name: 'Private Organisation',
+      slug: 'private-org', isPublic: false, status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-private_owner'), {
+      organisationId: 'org-private', uid: 'owner', role: 'owner', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-private_admin'), {
+      organisationId: 'org-private', uid: 'admin', role: 'admin', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-private_member'), {
+      organisationId: 'org-private', uid: 'member', role: 'member', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationInvitations/invite-private'), {
+      organisationId: 'org-private', email: 'invitee@example.com', status: 'pending',
+    });
+    await setDoc(doc(db, 'organisationActivity/activity-private'), {
+      organisationId: 'org-private', actorUid: 'owner', action: 'organisation.created',
+    });
+    await setDoc(doc(db, 'organisationDirectory/org-public'), {
+      organisationId: 'org-public', name: 'Public Organisation',
+      slug: 'public-org', isPublic: true, status: 'active',
+    });
   });
 });
 
@@ -124,4 +155,49 @@ test('transaction files are owner-restricted in Firebase Storage', async () => {
   await assertSucceeds(getBytes(ref(ownerStorage, filePath)));
   await assertFails(getBytes(ref(otherStorage, filePath)));
   await assertFails(uploadBytes(ref(otherStorage, filePath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+});
+
+
+test('organisation documents are readable only by active members of that organisation', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+  await assertSucceeds(getDoc(doc(owner, 'organisations/org-private')));
+  await assertSucceeds(getDoc(doc(member, 'organisations/org-private')));
+  await assertFails(getDoc(doc(outsider, 'organisations/org-private')));
+});
+
+test('members can read their own membership and organisation admins can read the roster', async () => {
+  const member = env.authenticatedContext('member').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  await assertSucceeds(getDoc(doc(member, 'organisationMembers/org-private_member')));
+  await assertFails(getDoc(doc(member, 'organisationMembers/org-private_owner')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationMembers/org-private_member')));
+});
+
+test('organisation slug lookup is exact-get only and cannot be enumerated', async () => {
+  const unauthenticated = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(unauthenticated, 'organisationSlugs/private-org')));
+});
+
+test('only active public directory projections are publicly readable', async () => {
+  const unauthenticated = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(unauthenticated, 'organisationDirectory/org-public')));
+  await assertFails(getDoc(doc(unauthenticated, 'organisationDirectory/org-private')));
+});
+
+test('organisation lifecycle and audit collections are not client-writable', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  await assertFails(setDoc(doc(owner, 'organisations/org-forged'), {
+    id: 'org-forged', name: 'Forged', status: 'active',
+  }));
+  await assertFails(setDoc(doc(owner, 'organisationMembers/org-private_attacker'), {
+    organisationId: 'org-private', uid: 'attacker', role: 'owner', status: 'active',
+  }));
+  await assertFails(setDoc(doc(owner, 'organisationInvitations/fake'), {
+    organisationId: 'org-private', email: 'attacker@example.com', status: 'pending',
+  }));
+  await assertFails(setDoc(doc(owner, 'organisationActivity/fake'), {
+    organisationId: 'org-private', actorUid: 'owner', action: 'forged',
+  }));
 });
