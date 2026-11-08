@@ -226,10 +226,16 @@ The initial backend foundation is implemented on the feature branch. No producti
 
 ### Phase 4 — Shared property and deal collaboration
 
-- Add explicit organisation sharing/association to supported property and deal records.
-- Preserve individual ownership and attribution.
-- Add resource-level access controls, document access, and revocation behaviour.
-- Add Storage Rules and query indexes as required.
+- [x] Add separate tenant-scoped collections for organisation properties and deals; legacy individual collections remain unchanged.
+- [x] Add explicit `organisation` and `restricted` visibility, with an allow-list of member UIDs for restricted resources.
+- [x] Enforce immutable `organisationId` and `createdByUid`; owners/admins/managers manage resources, members manage their own resources, and viewers are read-only.
+- [x] Add server-authored, client-immutable organisation deal activity events.
+- [x] Add organisation document metadata and separate tenant-aware Storage paths for deal and property files.
+- [x] Add emulator tests for active membership, cross-tenant denial, restricted sharing, creator attribution, role boundaries and file-upload isolation.
+- [ ] Complete the emulator run and review all rule evaluation results before treating this phase as validated.
+- [ ] Build the organisation workspace UI against the new collections; do not expose legacy personal records as shared resources.
+- [ ] Implement explicit opt-in association/migration for existing individual records; never silently transfer ownership.
+- [ ] Add server-side audit event generation, file metadata lifecycle, query indexes and revocation/deletion tests before production.
 
 ### Phase 5 — Directory, analytics and enterprise
 
@@ -279,3 +285,19 @@ The product owner has confirmed that the **root `firebase.json` is the authorita
 - This confirmation resolves the repository's configuration-selection question. It does not independently prove the deployed database's physical location or authorize a production deployment.
 
 Next deployment preparation must use the root configuration and verify the live default database, Functions region/runtime, and deployed codebase inventory before applying any production rules or Functions changes. Keep the app-specific rules untouched; do not copy or synchronize rule files without a separate compatibility review.
+
+
+## Tenant resource contract — 8 November 2026
+
+The first tenant-resource rules are additive and deliberately use new collections rather than changing the semantics of existing individual records:
+
+- `organisationProperties/{propertyId}`
+- `organisationDeals/{dealId}`
+- `organisationDealEvents/{eventId}` (server-authored)
+- `organisationDocuments/{documentId}`
+
+Each property/deal resource must include `organisationId`, immutable `createdByUid`, `visibility` (`organisation` or `restricted`), and `sharedWithUids` (maximum 100 member UIDs). Organisation-wide resources are readable by active members. Restricted resources are readable by the creator, explicitly listed members, and organisation owner/admin/manager roles. All access additionally requires active membership and an active organisation.
+
+Owners, admins and managers can manage tenant resources. A member can create and maintain their own resources but cannot alter the sharing policy after creation. Viewers are read-only. Tenant identifiers and creator attribution cannot be changed by clients. Deal history is client-immutable. Tenant documents use `organisationDocuments/{organisationId}/{deal|property}/{resourceId}/{documentId}/{fileName}` and inherit the parent resource's membership/sharing access.
+
+These collections are a new data contract only. Existing `hamletDeals`, `commercialProperties`, `residentialProperties`, public listing projections, and owner-scoped document paths remain unchanged. No existing personal record is automatically shared or migrated. No UI is yet wired to these collections, and no production rules or Storage rules have been deployed. Before production use, add the trusted audit writer, end-to-end document metadata lifecycle, revocation/deletion handling, query indexes, and migration consent workflow.
