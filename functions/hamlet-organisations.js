@@ -40,6 +40,14 @@ function readString(value, field, min, max) {
   return clean;
 }
 
+function readDocumentId(value, field) {
+  const id = readString(value, field, 1, 128);
+  if (id.includes("/") || id.includes("\\\\")) {
+    throw new HttpsError("invalid-argument", field + " is invalid.");
+  }
+  return id;
+}
+
 function normaliseSlug(value) {
   const slug = readString(value, "slug", 3, 48).toLowerCase();
   if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug) ||
@@ -136,7 +144,7 @@ exports.createOrganisationInvitation = onCall({
   memory: "256MiB",
 }, async (request) => {
   const user = requireVerifiedUser(request);
-  const orgId = readString(request.data && request.data.organisationId, "organisationId", 1, 128);
+  const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const email = readString(request.data && request.data.email, "email", 5, 254).toLowerCase();
   const role = readString(request.data && request.data.role, "role", 4, 12);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -263,7 +271,7 @@ exports.changeOrganisationMemberRole = onCall({
 }, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readString(request.data && request.data.organisationId, "organisationId", 1, 128);
-  const targetUid = readString(request.data && request.data.memberUid, "memberUid", 1, 128);
+  const targetUid = readDocumentId(request.data && request.data.memberUid, "memberUid");
   const role = readString(request.data && request.data.role, "role", 4, 12);
   if (!ALLOWED_MEMBER_ROLES.includes(role)) {
     throw new HttpsError("invalid-argument", "The requested membership role is not permitted.");
