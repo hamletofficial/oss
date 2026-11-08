@@ -253,3 +253,17 @@ The repository has two separate Worker configurations: `worker/hamlet-ai/wrangle
 7. Add the organisation UI only after the data and security contracts are stable.
 
 **Conclusion:** The backend foundation is in review, not production-ready. The next safe action is to finish validation and resolve the Firebase deployment authority question. Existing personal workflows remain unchanged.
+
+
+---
+
+## Production Firebase configuration decision — 8 November 2026
+
+The product owner has explicitly confirmed that **root `firebase.json` is the production configuration**. This supersedes the earlier open question about whether `app/firebase.json` was authoritative.
+
+- Root `.firebaserc`: default project `wale-491805`.
+- Root `firebase.json`: Firestore database `(default)`, configured location `nam5`, rules `firestore.rules`, indexes `firestore.indexes.json`.
+- Root Functions: `default` codebase sourced from `functions/`; organisation callables are exported from this codebase.
+- `app/firebase.json` and `app/firestore.rules` are not the production deployment target and must not be used for this rollout.
+
+This records the user's production-configuration decision; it is not independent evidence of the deployed database location and is not authorization to deploy. Before a production change, inspect the live default database and deployed Functions inventory read-only, verify the Functions region/runtime, and review the exact rules diff against the current production rules. No production Firebase resources have been changed by this documentation update.
