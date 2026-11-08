@@ -818,6 +818,115 @@ service cloud.firestore {
         && get(organisationMemberPath(orgId)).data.role in ['owner', 'admin'];
     }
 
+    function isOrganisationManager(orgId) {
+      return isActiveOrganisationMember(orgId)
+        && get(organisationMemberPath(orgId)).data.role in ['owner', 'admin', 'manager'];
+    }
+
+    function validOrganisationSharing(data) {
+      return data.visibility in ['organisation', 'restricted']
+        && data.sharedWithUids is list
+        && data.sharedWithUids.size() <= 100;
+    }
+
+    function canReadOrganisationResource(data) {
+      return isActiveOrganisationMember(data.organisationId)
+        && (
+          data.visibility == 'organisation'
+          || data.createdByUid == request.auth.uid
+          || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
+          || isOrganisationManager(data.organisationId)
+        );
+    }
+
+    function canWriteOrganisationResource(data) {
+      return isActiveOrganisationMember(data.organisationId)
+        && (
+          isOrganisationManager(data.organisationId)
+          || (
+            data.createdByUid == request.auth.uid
+            && get(organisationMemberPath(data.organisationId)).data.role == 'member'
+          )
+        );
+    }
+
+    // Tenant-scoped operational resources are separate from legacy individually
+    // owned records. New records carry immutable organisationId/createdByUid and
+    // an explicit organisation-wide or restricted sharing policy.
+    match /organisationProperties/{propertyId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create: if request.resource.data.organisationId is string
+        && request.resource.data.createdByUid == request.auth.uid
+        && validOrganisationSharing(request.resource.data)
+        && canWriteOrganisationResource(request.resource.data);
+      allow update: if canWriteOrganisationResource(resource.data)
+        && request.resource.data.organisationId == resource.data.organisationId
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && validOrganisationSharing(request.resource.data)
+        && (
+          isOrganisationManager(resource.data.organisationId)
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
+        );
+      allow delete: if canWriteOrganisationResource(resource.data);
+    }
+
+    match /organisationDeals/{dealId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create: if request.resource.data.organisationId is string
+        && request.resource.data.createdByUid == request.auth.uid
+        && validOrganisationSharing(request.resource.data)
+        && canWriteOrganisationResource(request.resource.data);
+      allow update: if canWriteOrganisationResource(resource.data)
+        && request.resource.data.organisationId == resource.data.organisationId
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && validOrganisationSharing(request.resource.data)
+        && (
+          isOrganisationManager(resource.data.organisationId)
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
+        );
+      allow delete: if canWriteOrganisationResource(resource.data);
+    }
+
+    // Operational audit events are server-authored and inherit the parent deal's
+    // sharing policy; client-side event forgery and mutation are prohibited.
+    match /organisationDealEvents/{eventId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    // File metadata is tied to a tenant resource. Storage access is separately
+    // checked against the same parent resource and sharing policy.
+    match /organisationDocuments/{documentId} {
+      function parentResource() {
+        return get(/databases/$(database)/documents/$(request.resource.data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(request.resource.data.resourceId));
+      }
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','visibility','sharedWithUids','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','visibility','sharedWithUids','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.id == documentId
+        && request.resource.data.resourceType in ['deal', 'property']
+        && request.resource.data.createdByUid == request.auth.uid
+        && validOrganisationSharing(request.resource.data)
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.fileName is string
+        && request.resource.data.fileName.size() <= 180
+        && request.resource.data.storagePath is string
+        && request.resource.data.storagePath.matches('organisationDocuments/' + request.resource.data.organisationId + '/' + request.resource.data.resourceType + '/' + request.resource.data.resourceId + '/.*')
+        && request.resource.data.size is int
+        && request.resource.data.size > 0
+        && request.resource.data.size <= 15 * 1024 * 1024
+        && request.resource.data.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
+        && request.resource.data.createdAt == request.time
+        && exists(/databases/$(database)/documents/$(request.resource.data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(request.resource.data.resourceId))
+        && canReadOrganisationResource(parentResource().data)
+        && canWriteOrganisationResource(parentResource().data);
+      allow update: if false;
+      allow delete: if canWriteOrganisationResource(resource.data);
+    }
+
     match /organisations/{organisationId} {
       allow read: if isActiveOrganisationMember(organisationId);
       // Creation, settings changes, suspension and deletion are server-controlled.
