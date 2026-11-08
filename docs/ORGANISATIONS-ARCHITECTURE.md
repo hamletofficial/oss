@@ -231,3 +231,15 @@ The initial backend foundation is implemented on the feature branch. No producti
 ## Deployment and change control
 
 This plan is a product/architecture baseline, not a production deployment instruction. Implement in a feature branch, review the diff, run automated and emulator tests, and open a pull request. Deploy frontend, Firestore rules/indexes, Functions, DNS, and Worker routing as separate, explicitly verified changes. Do not change production DNS, Firebase Auth settings, secrets, or live security rules as part of an unreviewed code commit.
+
+
+## User-facing foundation — 8 November 2026
+
+- [x] Add authenticated `/app/hamlet/organisations.html` workspace page on the feature branch.
+- [x] Connect organisation creation, invitation creation/acceptance backend contract, role changes, member removal and invitation revocation callables.
+- [x] Display the signed-in user's active organisation memberships and organisation administration panel.
+- [x] Add the Organisations destination to the authenticated Hamlet workspace navigation.
+- [x] Keep invitation tokens one-time display only; do not persist them in browser storage or place them in URL parameters.
+- [x] Keep organisation property/deal sharing, team workspaces and tenant subdomain routing disabled pending the separate authorization and authentication-handoff design.
+- [ ] Complete end-to-end callable tests and confirm callable deployment environment.
+- [ ] Confirm canonical production Firestore configuration before production rules or Functions deployment.
