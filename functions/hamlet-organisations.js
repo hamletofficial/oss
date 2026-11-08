@@ -273,7 +273,7 @@ exports.changeOrganisationMemberRole = onCall({
   memory: "256MiB",
 }, async (request) => {
   const user = requireVerifiedUser(request);
-  const orgId = readString(request.data && request.data.organisationId, "organisationId", 1, 128);
+  const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const targetUid = readDocumentId(request.data && request.data.memberUid, "memberUid");
   const role = readString(request.data && request.data.role, "role", 4, 12);
   if (!ALLOWED_MEMBER_ROLES.includes(role)) {
@@ -328,20 +328,25 @@ exports.removeOrganisationMember = onCall({
   memory: "256MiB",
 }, async (request) => {
   const user = requireVerifiedUser(request);
-  const orgId = readString(request.data && request.data.organisationId, "organisationId", 1, 128);
-  const targetUid = readString(request.data && request.data.memberUid, "memberUid", 1, 128);
+  const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
+  const targetUid = readDocumentId(request.data && request.data.memberUid, "memberUid");
   if (targetUid === user.uid) {
     throw new HttpsError("failed-precondition", "Use an explicit ownership transfer before leaving an organisation you own.");
   }
   const db = getDb();
+  const orgRef = db.collection("organisations").doc(orgId);
   const actorRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
   const targetRef = db.collection("organisationMembers").doc(membershipId(orgId, targetUid));
 
   await db.runTransaction(async (transaction) => {
-    const [actorSnap, targetSnap] = await Promise.all([
+    const [orgSnap, actorSnap, targetSnap] = await Promise.all([
+      transaction.get(orgRef),
       transaction.get(actorRef),
       transaction.get(targetRef),
     ]);
+    if (!orgSnap.exists || orgSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "The organisation is not currently active.");
+    }
     const actor = actorSnap.exists ? actorSnap.data() : null;
     const target = targetSnap.exists ? targetSnap.data() : null;
     requireRole(actor, ["owner", "admin"]);
@@ -388,8 +393,15 @@ exports.revokeOrganisationInvitation = onCall({
     }
     const invite = inviteSnap.data();
     const orgId = invite.organisationId;
+    const orgRef = db.collection("organisations").doc(orgId);
     const actorRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
-    const actorSnap = await transaction.get(actorRef);
+    const [orgSnap, actorSnap] = await Promise.all([
+      transaction.get(orgRef),
+      transaction.get(actorRef),
+    ]);
+    if (!orgSnap.exists || orgSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "The organisation is not currently active.");
+    }
     const actor = actorSnap.exists ? actorSnap.data() : null;
     requireRole(actor, ["owner", "admin"]);
     if (invite.status !== "pending") {
