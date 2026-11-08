@@ -71,7 +71,11 @@ Suggested fields:
 
 ### `organisationSlugs/{slug}`
 
-A reservation registry for unique, normalised slugs. Creation and release should be transactional and trusted; clients must not be able to overwrite an existing reservation or claim a reserved system name.
+A reservation registry for unique, normalised slugs. Creation and release should be transactional and trusted; clients must not be able to overwrite an existing reservation or claim a reserved system name. Exact document gets may be public for hostname resolution; collection listing and client writes remain denied.
+
+### `organisationDirectory/{organisationId}`
+
+A server-maintained, whitelisted public projection. Public reads are allowed only when `isPublic == true` and `status == active`; private organisation fields and member data stay outside this projection.
 
 ### `organisationMembers/{membershipId}`
 
@@ -168,12 +172,17 @@ Custom organisation domains (for example `workspace.company.com`) are a later en
 
 ### Phase 1 — Organisation foundation
 
-- Add organisation registration/profile workflow.
-- Add unique slug reservation and organisation public/private visibility.
-- Add membership records and owner/admin roles.
-- Add secure organisation profile and member management UI.
-- Add Firestore Rules, indexes, and emulator tests before enabling writes.
-- Keep registration and invitation actions behind trusted code where needed.
+- [x] Add trusted organisation creation with atomic slug reservation and initial owner membership.
+- [x] Add trusted invitation creation with single-use token hashing and verified-email acceptance.
+- [x] Add trusted role changes and member removal with owner/admin constraints.
+- [x] Add deny-by-default Firestore rules for organisation, membership, invitation, directory, team and activity collections.
+- [x] Add Firestore Emulator coverage for member isolation, roster visibility, public/private directory projection and client-write denial.
+- [ ] Confirm the production Firestore database/configuration before any deployment.
+- [ ] Run and review the emulator suite in CI before merge.
+- [ ] Build the organisation registration, invitation and membership management UI.
+- [ ] Add organisation profile editing and public/private visibility controls through trusted operations.
+
+The initial backend foundation is implemented on the feature branch. No production Functions or Firestore Rules have been deployed.
 
 ### Phase 2 — Membership lifecycle
 
