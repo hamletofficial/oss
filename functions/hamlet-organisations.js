@@ -42,7 +42,7 @@ function readString(value, field, min, max) {
 
 function readDocumentId(value, field) {
   const id = readString(value, field, 1, 128);
-  if (id.includes("/") || id.includes("\\\\")) {
+  if (id.includes("/") || id.includes("\\")) {
     throw new HttpsError("invalid-argument", field + " is invalid.");
   }
   return id;
