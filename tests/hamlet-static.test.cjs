@@ -10,6 +10,7 @@ const searchIndex = JSON.parse(fs.readFileSync('search-index.json', 'utf8'));
 const firestore = fs.readFileSync('firestore.rules', 'utf8');
 const storage = fs.readFileSync('storage.rules', 'utf8');
 const functions = fs.readFileSync('functions/index.js', 'utf8');
+const organisationFunctions = fs.readFileSync('functions/hamlet-organisations.js', 'utf8');
 
 test('all inline JavaScript blocks parse', () => {
   const blocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -19,6 +20,7 @@ test('all inline JavaScript blocks parse', () => {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'hamlet-inline-' + index + '.js' }));
   }
   assert.doesNotThrow(() => new vm.Script(functions, { filename: 'functions/index.js' }));
+  assert.doesNotThrow(() => new vm.Script(organisationFunctions, { filename: 'functions/hamlet-organisations.js' }));
 });
 
 test('advanced transaction features are present and connected', () => {
@@ -95,4 +97,23 @@ test('public search excludes protected member pages from both its index and resu
     assert.notEqual(filename, 'insights.html', 'protected page must not be published in search-index.json');
     assert.ok(!/^(?:app|functions|public|superuser|admin|account|accounts|auth|authentication)(?:\/|$)/i.test(path), 'private directory must not appear in public search index: ' + path);
   }
+});
+
+
+test('organisation lifecycle operations are server-controlled and registered', () => {
+  for (const callable of [
+    'createOrganisation',
+    'createOrganisationInvitation',
+    'acceptOrganisationInvitation',
+    'changeOrganisationMemberRole',
+    'removeOrganisationMember',
+  ]) {
+    assert.match(organisationFunctions, new RegExp('exports\\.' + callable + ' = onCall'));
+  }
+  assert.match(organisationFunctions, /createHash\("sha256"\)/);
+  assert.match(organisationFunctions, /randomBytes\(32\)/);
+  assert.match(organisationFunctions, /email_verified !== true/);
+  assert.match(functions, /require\("\.\/hamlet-organisations"\)/);
+  assert.match(firestore, /match \/organisations\/{organisationId}/);
+  assert.match(firestore, /allow create, update, delete: if false;/);
 });
