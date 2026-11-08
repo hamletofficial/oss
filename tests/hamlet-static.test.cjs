@@ -108,8 +108,9 @@ test('tenant resource rules and storage paths are isolated from legacy individua
   assert.match(firestore, /match \/organisationDocuments\/{documentId}/);
   assert.match(firestore, /visibility in \['organisation', 'restricted'\]/);
   assert.match(firestore, /createdByUid == resource\.data\.createdByUid/);
-  assert.match(storage, /match \/organisationDocuments\/{organisationId}\/deal\/{dealId}/);
-  assert.match(storage, /match \/organisationDocuments\/{organisationId}\/property\/{propertyId}/);
+  // Organisation uploads are intentionally deferred; the catch-all deny remains in force.
+  assert.doesNotMatch(storage, /match \/organisationDocuments\//);
+  assert.match(storage, /match \/\{allPaths=\*\*\}[\s\S]*allow read, write: if false;/);
   assert.match(firestore, /match \/hamletDeals\/{dealId}/);
 });
 
