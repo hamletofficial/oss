@@ -237,7 +237,7 @@ test('organisation document workspace JavaScript parses and uses tenant-scoped S
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-files-inline-' + index + '.js' }));
   }
   assert.match(organisationFilesHtml, /firebase-storage-compat\.js/);
-  assert.match(organisationFilesHtml, /organisationDocuments\/\+activeOrg\.organisationId/);
+  assert.match(organisationFilesHtml, /organisationDocuments\\/['"]\\+activeOrg\\.organisationId/);
   assert.match(organisationFilesHtml, /organisationResourceShares/);
   assert.match(organisationFilesHtml, /15\*1024\*1024/);
   assert.match(organisationFilesHtml, /getDownloadURL/);
