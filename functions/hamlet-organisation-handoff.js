@@ -8,7 +8,7 @@ const CODE_TTL_MS = 90 * 1000;
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
 function db() {
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   return admin.firestore();
 }
 function verifiedUser(request) {

@@ -9,7 +9,7 @@ const TEAM_PERMISSIONS = [
 const TEAM_NAME_MAX = 80;
 
 function db() {
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   return admin.firestore();
 }
 function userFrom(request) {
