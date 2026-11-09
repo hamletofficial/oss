@@ -249,3 +249,100 @@ test('authenticated organisation workspace loads only active memberships and swi
     await browser.close();
   }
 });
+
+
+test('organisation deal workspace creates and reloads tenant-scoped deals without touching personal deals', async () => {
+  const browser = await chromium.launch({headless: true});
+  try {
+    const page = await browser.newPage();
+    const mockFirebase = `
+      (() => {
+        const stores = new Map();
+        const currentUser = {
+          uid: 'e2e-org-owner', email: 'owner@example.com', emailVerified: true,
+          async reload() {}, async getIdToken() { return 'e2e-token'; }
+        };
+        const key = (collection, id) => collection + '/' + id;
+        function snapshot(collection, filters) {
+          const docs = [];
+          for (const [path, data] of stores.entries()) {
+            if (!path.startsWith(collection + '/')) continue;
+            if (filters.every(([field, op, value]) => op === '==' ? data[field] === value : op === 'array-contains' ? Array.isArray(data[field]) && data[field].includes(value) : false)) {
+              docs.push({id: path.slice(collection.length + 1), data: () => ({...data})});
+            }
+          }
+          return {docs, empty: docs.length === 0, size: docs.length};
+        }
+        const db = {collection(name) {
+          return {
+            where(field, op, value) {
+              const filters = [[field, op, value]];
+              const q = {
+                where(f, o, v) { filters.push([f, o, v]); return q; },
+                async get() { return snapshot(name, filters); }
+              };
+              return q;
+            },
+            doc(id) {
+              return {
+                async get() {
+                  const data = stores.get(key(name, id));
+                  return {id, exists: !!data, data: () => data ? ({...data}) : undefined};
+                },
+                async set(data, options) {
+                  const old = stores.get(key(name, id)) || {};
+                  stores.set(key(name, id), options && options.merge ? {...old, ...data} : {...data});
+                },
+                async update(data) {
+                  const old = stores.get(key(name, id));
+                  if (!old) throw new Error('Document does not exist');
+                  stores.set(key(name, id), {...old, ...data});
+                },
+                async delete() { stores.delete(key(name, id)); }
+              };
+            }
+          };
+        }};
+        stores.set(key('organisationMembers', 'org-one_e2e-org-owner'), {
+          uid: currentUser.uid, organisationId: 'org-one', role: 'owner', status: 'active'
+        });
+        stores.set(key('organisations', 'org-one'), {
+          name: 'Example Organisation', slug: 'example-org', status: 'active'
+        });
+        stores.set(key('hamletDeals', 'personal-deal'), {
+          uid: currentUser.uid, name: 'Personal deal — must remain separate', stage: 'Due Diligence'
+        });
+        window.__e2eStores = stores;
+        const auth = {onAuthStateChanged(callback) { callback(currentUser); return () => {}; }};
+        const firebase = {apps: [], initializeApp(config) { this.apps.push({config}); }, auth: () => auth, firestore: () => db};
+        firebase.firestore.FieldValue = {serverTimestamp: () => new Date().toISOString()};
+        window.firebase = firebase;
+        window.firebaseConfig = {apiKey: 'e2e-test', authDomain: 'localhost', projectId: 'demo-hamlet-e2e'};
+      })();
+    `;
+    await page.route('https://www.gstatic.com/firebasejs/9.22.2/**', route => route.fulfill({status: 200, contentType: 'application/javascript', body: ''}));
+    await page.route('https://fonts.googleapis.com/**', route => route.fulfill({status: 200, contentType: 'text/css', body: ''}));
+    await page.route('https://fonts.gstatic.com/**', route => route.fulfill({status: 200, body: ''}));
+    await page.route('**/firebase-config.js', route => route.fulfill({status: 200, contentType: 'application/javascript', body: mockFirebase}));
+
+    await page.goto(origin + '/app/hamlet/organisation-deals.html', {waitUntil: 'domcontentloaded'});
+    await page.locator('#app').waitFor({state: 'visible', timeout: 10000});
+    await page.getByText('Example Organisation', {exact: true}).waitFor({state: 'visible', timeout: 10000});
+    await page.locator('#dealName').fill('E2E shared office acquisition');
+    await page.locator('#dealProperty').fill('10 Market Street, London');
+    await page.locator('#dealValue').fill('1250000');
+    await page.locator('#dealStage').selectOption('Due Diligence');
+    await page.locator('#saveBtn').click();
+    await page.getByText('E2E shared office acquisition', {exact: true}).waitFor({state: 'visible', timeout: 10000});
+    const persisted = await page.evaluate(() => Array.from(window.__e2eStores.entries()));
+    const orgDeal = persisted.find(([path]) => path.startsWith('organisationDeals/'));
+    assert.ok(orgDeal, 'deal should be persisted in the organisationDeals collection');
+    assert.equal(orgDeal[1].organisationId, 'org-one');
+    assert.equal(orgDeal[1].createdByUid, 'e2e-org-owner');
+    assert.equal(orgDeal[1].visibility, 'organisation');
+    assert.ok(persisted.some(([path]) => path === 'hamletDeals/personal-deal'), 'personal deal must remain untouched');
+    assert.equal(await page.locator('#pipelineMeta').textContent(), '1 accessible organisation deal · manager view');
+  } finally {
+    await browser.close();
+  }
+});
