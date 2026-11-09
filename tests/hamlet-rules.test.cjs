@@ -6,7 +6,7 @@ const {doc, getDoc, setDoc, deleteDoc, updateDoc, serverTimestamp} = require('fi
 const {ref, uploadBytes, getBytes} = require('firebase/storage');
 
 let env;
-const projectId = 'demo-hamlet-rules';
+const projectId = 'demo-hamlet-functions';
 
 test.before(async () => {
   env = await initializeTestEnvironment({
