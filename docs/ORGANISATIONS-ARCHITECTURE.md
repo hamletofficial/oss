@@ -10,6 +10,8 @@ Introduce **Hamlet Organisations** as a first-class multi-tenant capability alon
 
 This document establishes the safe delivery sequence. It does not claim that DNS, Firebase, Cloudflare, or production configuration has already been changed.
 
+**Canonical implementation contract:** See [Organisation Tenancy, Ownership and Permissions](./ORGANISATION-TENANCY-OWNERSHIP-PERMISSIONS.md) for the authoritative UID, membership, ownership, role, team, resource-sharing and lifecycle rules. Where older illustrative schema examples below differ from the deployed implementation, the canonical contract records the implementation field names and the reconciliation required.
+
 ## Core product principles
 
 1. Individual accounts remain independently owned and usable outside any organisation.

@@ -1,0 +1,52 @@
+name: Organisation Firestore Emulator Tests
+# Dedicated emulator validation; deliberately does not deploy Hosting previews.
+# Runs against the PR head so governance-specific tests execute in the feature branch.
+
+on:
+  pull_request:
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - "storage.rules"
+      - "firestore.indexes.json"
+      - "tests/**"
+      - "firebase.json"
+      - ".github/workflows/organisation-emulator-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  organisation-emulator-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GCLOUD_PROJECT: demo-hamlet-functions
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Set up Java for Firebase Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install Functions dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Install Firestore Rules test dependencies
+        working-directory: functions
+        run: npm install --no-save firebase @firebase/rules-unit-testing
+
+      - name: Run callable and Firestore / Storage Rules tests against emulators
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --config firebase.json --project demo-hamlet-functions --only firestore,storage "npm --prefix functions run test:organisations && NODE_PATH=functions/node_modules node --test tests/hamlet-rules.test.cjs"
