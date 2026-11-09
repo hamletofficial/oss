@@ -26,7 +26,7 @@
     select,input,button{font:inherit;color:var(--text);background:#0d1728;border:1px solid #40516a;border-radius:8px;padding:10px 12px}
     button{cursor:pointer;font-weight:700;background:#1d4ed8;border-color:#2563eb}button.secondary{background:#172338;border-color:#40516a}
     .filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.filters label{display:grid;gap:5px;color:#a8b6ca;font-size:11px}
-    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat,.panel{border:1px solid var(--line);border-radius:12px;background:rgba(17,24,39,.96);padding:16px}.stat strong{display:block;font:800 24px Manrope,sans-serif}.stat span{font-size:11px;color:var(--muted)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat,.panel{border:1px solid var(--line);border-radius:12px;background:rgba(17,24,39,.96);padding:16px}.stat strong{display:block;font:800 24px Manrope,sans-serif}.stat span{font-size:11px;color:var(--muted)}
     .event-list{display:grid;gap:9px}.event{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:14px;align-items:start;padding:14px;border:1px solid #2b3c55;border-radius:10px;background:#101b2c}.date{font-size:11px;color:#9fb0c7;line-height:1.5}.event h3{font-size:13px;margin:0 0 5px}.event p{font-size:11px;color:#a8b6ca;line-height:1.5;margin:0;overflow-wrap:anywhere}.tag{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:5px 7px;border:1px solid #40516a;border-radius:999px;color:#bfdbfe;white-space:nowrap}
     .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
     .empty{padding:22px;text-align:center;border:1px dashed #40516a;border-radius:10px;color:#a8b6ca;line-height:1.6}.hidden{display:none!important}.footnote{font-size:11px;color:#8192aa;line-height:1.6;margin-top:18px}
@@ -37,7 +37,7 @@
   <div id="authGate" class="shell"><div class="panel"><a class="brand" href="/">hamlet<span>.</span></a><h2>Secure organisation audit</h2><p id="gateMessage" class="muted">Checking your sign-in…</p></div></div>
   <main class="shell hidden" id="app">
     <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><nav class="nav"><a href="/app/hamlet/organisations.html">Organisation workspace</a><a href="/organisations.html">Administration</a><a href="/app/hamlet/">Personal workspace</a></nav></header>
-    <section class="hero"><div class="eyebrow">Governance · administrative record</div><h1>Organisation audit history</h1><p>Review trusted records of organisation creation, invitations and membership administration. This log is read-only and visible to organisation owners and administrators.</p></section>
+    <section class="hero"><div class="eyebrow">Governance · administrative record</div><h1>Organisation audit history</h1><p>Review trusted records of organisation, membership, deal and property changes. This log is read-only and visible to organisation owners and administrators.</p></section>
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
     <section class="toolbar"><div><strong id="selectedName">Organisation</strong><div class="muted" id="selectedSlug">Loading active membership…</div></div><div class="filters">
       <label>Organisation<select id="orgSelect"><option>Loading…</option></select></label>
@@ -45,9 +45,9 @@
       <label>Period<select id="periodFilter"><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="all">All available</option></select></label>
       <button type="button" class="secondary" id="refreshBtn">Refresh</button><button type="button" id="exportBtn">Export CSV</button>
     </div></section>
-    <section class="stats" aria-label="Audit summary"><div class="stat"><strong id="totalCount">—</strong><span>Events in selected period</span></div><div class="stat"><strong id="inviteCount">—</strong><span>Invitation events</span></div><div class="stat"><strong id="memberCount">—</strong><span>Membership events</span></div></section>
+    <section class="stats" aria-label="Audit summary"><div class="stat"><strong id="totalCount">—</strong><span>Events in selected period</span></div><div class="stat"><strong id="inviteCount">—</strong><span>Invitation events</span></div><div class="stat"><strong id="memberCount">—</strong><span>Membership events</span></div><div class="stat"><strong id="resourceCount">—</strong><span>Deal & property events</span></div></section>
     <section class="panel"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px"><h2 style="font:700 16px Manrope;margin:0">Activity register</h2><span class="muted" id="resultMeta">Loading…</span></div><div id="eventList" class="event-list" aria-live="polite"><div class="empty">Loading audit records…</div></div></section>
-    <p class="footnote">Integrity and access: audit events are authored by trusted Cloud Functions, are immutable to client accounts, and are restricted by Firestore Rules to active organisation owners and administrators. This initial register covers organisation and membership lifecycle events; deal/property field-level change history is a separate future increment.</p>
+    <p class="footnote">Integrity and access: audit events are authored by trusted Cloud Functions, are immutable to client accounts, and are restricted by Firestore Rules to active organisation owners and administrators. Deal and property changes are captured by trusted Firestore triggers. Changed-field names are recorded without copying commercial notes, client details or other field values into the audit log.</p>
   </main>
 <script>
 (function(){
@@ -60,7 +60,7 @@
     'organisation.invitation_accepted':'Invitation accepted',
     'organisation.invitation_revoked':'Invitation revoked',
     'organisation.member_role_changed':'Member role changed',
-    'organisation.member_removed':'Member removed'
+    'organisation.member_removed':'Member removed',\n    'organisation.deal_created':'Deal created',\n    'organisation.deal_updated':'Deal updated',\n    'organisation.deal_stage_changed':'Deal stage changed',\n    'organisation.deal_deleted':'Deal deleted',\n    'organisation.property_created':'Property created',\n    'organisation.property_updated':'Property updated',\n    'organisation.property_deleted':'Property deleted'
   };
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
@@ -111,7 +111,7 @@
     const events=filtered();
     $('totalCount').textContent=events.length;
     $('inviteCount').textContent=events.filter(e=>(e.action||'').includes('invitation')).length;
-    $('memberCount').textContent=events.filter(e=>(e.action||'').includes('member_')||e.action==='organisation.created').length;
+    $('memberCount').textContent=events.filter(e=>(e.action||'').includes('member_')||e.action==='organisation.created').length;\n    $('resourceCount').textContent=events.filter(e=>e.resourceType==='deal'||e.resourceType==='property').length;
     $('resultMeta').textContent=events.length+' matching event'+(events.length===1?'':'s');
     const list=$('eventList');list.replaceChildren();
     if(!events.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No audit events match this period and event type.';list.appendChild(empty);return;}
@@ -119,8 +119,8 @@
       const row=document.createElement('article');row.className='event';
       const date=document.createElement('div');date.className='date';date.textContent=dateText(e.createdAt);row.appendChild(date);
       const detail=document.createElement('div');const title=document.createElement('h3');title.textContent=labels[e.action]||e.action||'Organisation event';detail.appendChild(title);
-      const parts=[];if(e.actorUid)parts.push('Actor: '+e.actorUid);if(e.targetUid)parts.push('Target: '+e.targetUid);if(e.role)parts.push('Role: '+e.role);if(e.invitationEmail)parts.push('Invitation: '+e.invitationEmail);
-      const meta=document.createElement('p');meta.textContent=parts.join(' · ')||'No additional event metadata';detail.appendChild(meta);row.appendChild(detail);
+      const parts=[];if(e.actorName)parts.push('Actor: '+e.actorName);else if(e.actorUid)parts.push('Actor UID: '+e.actorUid);if(e.targetUid)parts.push('Target: '+e.targetUid);if(e.role)parts.push('Role: '+e.role);if(e.invitationEmail)parts.push('Invitation: '+e.invitationEmail);if(e.resourceId)parts.push((e.resourceType==='deal'?'Deal':'Property')+' ID: '+e.resourceId);if(Array.isArray(e.changedFields)&&e.changedFields.length)parts.push('Changed: '+e.changedFields.join(', '));
+      const meta=document.createElement('p');meta.textContent=[e.summary||'',parts.join(' · ')].filter(Boolean).join(' · ')||'No additional event metadata';detail.appendChild(meta);row.appendChild(detail);
       const tag=document.createElement('span');tag.className='tag';tag.textContent=(e.action||'event').replace('organisation.','').replace(/_/g,' ');row.appendChild(tag);list.appendChild(row);
     });
     if(events.length>250){const note=document.createElement('div');note.className='empty';note.textContent='Showing the latest 250 matching events. Export CSV to retain the full filtered register.';list.appendChild(note);}
@@ -128,7 +128,7 @@
   function exportCsv(){
     const rows=filtered(),columns=['createdAt','action','actorUid','targetUid','role','invitationEmail'];
     const quote=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-    const csv=[columns.join(','),...rows.map(e=>columns.map(k=>quote(k==='createdAt'?dateText(e[k]):e[k])).join(','))].join('\r\n');
+    const csv=[columns.join(','),...rows.map(e=>columns.map(k=>quote(k==='createdAt'?dateText(e[k]):Array.isArray(e[k])?e[k].join('; '):e[k])).join(','))].join('\r\n');
     const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download='hamlet-organisation-audit-'+activeOrg.slug+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   }
