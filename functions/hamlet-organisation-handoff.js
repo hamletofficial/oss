@@ -109,6 +109,11 @@ exports.exchangeOrganisationHandoffCode = onCall({
     return {uid: code.uid, organisationId: code.organisationId, slug};
   });
 
+  const account = await admin.auth().getUser(result.uid);
+  if (account.disabled || account.emailVerified !== true) {
+    throw new HttpsError("permission-denied", "The account must remain enabled with a verified email address.");
+  }
+
   // The custom token is returned only in this HTTPS response, never in a URL or persisted record.
   const customToken = await admin.auth().createCustomToken(result.uid, {
     hamletOrganisationId: result.organisationId,
