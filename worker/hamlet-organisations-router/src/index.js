@@ -1,4 +1,4 @@
-const MAIN_ORIGIN = "https://wale-491805--pr82-feat-organisations-h-gon23gzd.web.app";
+const MAIN_ORIGIN = "https://www.hamlet-ai.co.uk";
 const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","press","public","root","settings","signin","signup","support","www"]);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
