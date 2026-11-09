@@ -128,8 +128,13 @@
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('createdByUid','==',user.uid),
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('sharedWithUids','array-contains',user.uid)
     ];
-    const snapshots=await Promise.all(queries.map(q=>q.get()));
+    const [snapshots, grants]=await Promise.all([
+      Promise.all(queries.map(q=>q.get())),
+      db.collection('organisationResourceShares').where('sharedWithUid','==',user.uid).where('organisationId','==',activeOrg.id).where('resourceType','==','property').get()
+    ]);
     const unique=new Map();snapshots.forEach(s=>s.docs.forEach(d=>unique.set(d.id,d)));
+    const granted=await Promise.all(grants.docs.map(g=>collection.doc(g.data().resourceId).get()));
+    granted.filter(d=>d.exists).forEach(d=>unique.set(d.id,d));
     return Array.from(unique.values());
   }
   async function loadProperties(){
