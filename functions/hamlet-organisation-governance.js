@@ -3,7 +3,7 @@ const {FieldValue} = require("firebase-admin/firestore");
 const {HttpsError, onCall} = require("firebase-functions/v2/https");
 
 function database() {
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   return admin.firestore();
 }
 function verifiedActor(request) {
