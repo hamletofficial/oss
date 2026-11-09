@@ -948,7 +948,9 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/organisationMembers/$(data.organisationId + '_' + data.sharedWithUid)).data.uid == data.sharedWithUid;
       }
       function mayManageShare(data) {
-        return request.auth != null && validParent(data)
+        return request.auth != null
+          && isActiveOrganisationMember(data.organisationId)
+          && validParent(data)
           && (isOrganisationManager(data.organisationId)
             || get(parentPath(data)).data.createdByUid == request.auth.uid);
       }
