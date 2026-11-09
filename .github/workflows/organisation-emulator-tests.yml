@@ -1,0 +1,45 @@
+name: Organisation Firestore Emulator Tests
+
+on:
+  pull_request:
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - "storage.rules"
+      - "firebase.json"
+      - ".github/workflows/organisation-emulator-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  organisation-emulator-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GCLOUD_PROJECT: demo-hamlet-functions
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Set up Java for Firebase Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install Functions dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Run organisation callable tests against Firestore Emulator
+        working-directory: functions
+        run: npx --yes firebase-tools@15.35.0 emulators:exec --config ../firebase.json --project demo-hamlet-functions --only firestore "npm run test:organisations"
