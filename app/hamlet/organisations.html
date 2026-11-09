@@ -68,11 +68,16 @@
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
+  function tenantSlugFromHost(){
+    const match=location.hostname.toLowerCase().match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.platform\\.hamlet-ai\\.co\\.uk$/);
+    return match?match[1]:'';
+  }
+  const tenantSlug=tenantSlugFromHost();
   function selectOrganisation(id){
     const org=organisations.find(item=>item.id===id);
     if(!org)return;
     $('selectedName').textContent=org.name;
-    $('selectedSlug').textContent='Organisation slug: '+org.slug+' · tenant hostname not yet provisioned';
+    $('selectedSlug').textContent='Tenant address: '+org.slug+'.platform.hamlet-ai.co.uk';
     $('roleBadge').textContent=org.role;
     $('pageTitle').textContent=org.name+' workspace';
     $('orgSelect').value=org.id;
@@ -87,6 +92,14 @@
       return {...orgSnap.data(),id:orgSnap.id,role:m.role};
     }));
     organisations=records.filter(Boolean);
+    if(tenantSlug){
+      organisations=organisations.filter(org=>org.slug===tenantSlug);
+      if(organisations.length!==1){
+        $('gateMessage').textContent='Your account does not have active membership in this organisation.';
+        await auth.signOut();
+        throw new Error('Tenant membership verification failed for '+tenantSlug+'.');
+      }
+    }
     window.__hamletOrganisationChoices=organisations;
     const select=$('orgSelect');select.replaceChildren();
     if(!organisations.length){
@@ -101,6 +114,10 @@
       return;
     }
     organisations.forEach(org=>select.add(new Option(org.name+' · '+org.role,org.id)));
+    if(tenantSlug){
+      select.disabled=true;
+      select.closest('.toolbar').querySelector('label').textContent='Verified tenant';
+    }
     let preferred='';
     try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
     const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
