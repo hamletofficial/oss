@@ -9,7 +9,7 @@ const updateBrokerRankingAggregates = onDocumentWritten({
   timeoutSeconds: 120,
   memory: "256MiB",
 }, async (event) => {
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   const db = getFirestore(admin.app());
   const before = event.data?.before?.exists ? event.data.before.data() : null;
   const after = event.data?.after?.exists ? event.data.after.data() : null;
@@ -75,7 +75,7 @@ const syncBrokerRankingVisibility = onDocumentWritten({
   // recalculation. A create event has no "before" document, so it proceeds.
   if (before && before.isPublic === after.isPublic) return;
 
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   const db = getFirestore(admin.app());
   const uid = event.params.userId;
   const profileRef = db.collection("publicProfiles").doc(uid);
