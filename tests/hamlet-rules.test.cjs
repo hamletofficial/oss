@@ -459,3 +459,46 @@ test('organisation property portfolio enforces tenant ownership, field validatio
     updatedAt: serverTimestamp(),
   }));
 });
+
+
+test('explicit organisation resource grants are tenant-scoped, recipient-readable and revocable', async () => {
+  const creator = env.authenticatedContext('member').firestore();
+  const recipient = env.authenticatedContext('colleague').firestore();
+  const manager = env.authenticatedContext('admin').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+  const suspended = env.authenticatedContext('suspended').firestore();
+  const shareId = 'org-private_property_property-restricted_colleague';
+  const grant = {
+    organisationId: 'org-private',
+    resourceType: 'property',
+    resourceId: 'property-restricted',
+    sharedWithUid: 'colleague',
+    createdByUid: 'member',
+    createdAt: serverTimestamp(),
+  };
+
+  await assertSucceeds(setDoc(doc(creator, 'organisationResourceShares/' + shareId), grant));
+  await assertSucceeds(getDoc(doc(recipient, 'organisationResourceShares/' + shareId)));
+  await assertSucceeds(getDoc(doc(manager, 'organisationResourceShares/' + shareId)));
+  await assertFails(getDoc(doc(creator, 'organisationResourceShares/' + shareId)));
+  await assertSucceeds(getDoc(doc(recipient, 'organisationProperties/property-restricted')));
+  await assertFails(getDoc(doc(outsider, 'organisationProperties/property-restricted')));
+
+  await assertFails(setDoc(doc(creator, 'organisationResourceShares/self-grant'), {
+    ...grant, sharedWithUid: 'member',
+  }));
+  await assertFails(setDoc(doc(creator, 'organisationResourceShares/suspended-grant'), {
+    ...grant, sharedWithUid: 'suspended',
+  }));
+  await assertFails(setDoc(doc(outsider, 'organisationResourceShares/cross-tenant-grant'), {
+    ...grant, organisationId: 'org-other',
+  }));
+  await assertFails(setDoc(doc(creator, 'organisationResourceShares/' + shareId), {
+    ...grant, sharedWithUid: 'owner',
+  }, {merge: true}));
+
+  await assertSucceeds(deleteDoc(doc(creator, 'organisationResourceShares/' + shareId)));
+  await assertFails(getDoc(doc(recipient, 'organisationProperties/property-restricted')));
+  await assertFails(getDoc(doc(recipient, 'organisationResourceShares/' + shareId)));
+  await assertFails(getDoc(doc(suspended, 'organisationResourceShares/' + shareId)));
+});
