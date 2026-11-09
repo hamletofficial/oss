@@ -329,3 +329,40 @@ test('active membership does not grant access to a suspended organisation', asyn
   const member = env.authenticatedContext('suspended-member').firestore();
   await assertFails(getDoc(doc(member, 'organisations/org-suspended')));
 });
+
+
+test('organisation deal writes enforce member ownership, manager controls and viewer read-only access', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const viewer = env.authenticatedContext('viewer').firestore();
+  const deal = {
+    id: 'member-shared-deal',
+    organisationId: 'org-private',
+    createdByUid: 'member',
+    visibility: 'organisation',
+    sharedWithUids: [],
+    name: 'Organisation acquisition',
+    type: 'Acquisition',
+    stage: 'Due Diligence',
+    value: 1250000,
+  };
+
+  await assertSucceeds(setDoc(doc(member, 'organisationDeals/member-shared-deal'), deal));
+  await assertFails(setDoc(doc(viewer, 'organisationDeals/viewer-deal'), {
+    ...deal, id: 'viewer-deal', createdByUid: 'viewer',
+  }));
+  await assertFails(setDoc(doc(member, 'organisationDeals/forged-creator'), {
+    ...deal, id: 'forged-creator', createdByUid: 'owner',
+  }));
+  await assertFails(setDoc(doc(member, 'organisationDeals/member-shared-deal'), {
+    visibility: 'restricted',
+  }, {merge: true}));
+  await assertSucceeds(setDoc(doc(admin, 'organisationDeals/member-shared-deal'), {
+    visibility: 'restricted',
+  }, {merge: true}));
+  await assertSucceeds(getDoc(doc(owner, 'organisationDeals/member-shared-deal')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationDeals/member-shared-deal')));
+  await assertSucceeds(getDoc(doc(member, 'organisationDeals/member-shared-deal')));
+  await assertFails(getDoc(doc(env.authenticatedContext('colleague').firestore(), 'organisationDeals/member-shared-deal')));
+});
