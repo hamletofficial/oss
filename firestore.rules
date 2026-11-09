@@ -851,14 +851,29 @@ service cloud.firestore {
     }
 
     function canReadOrganisationResource(data, resourceType, resourceId) {
-      return isActiveOrganisationMember(data.organisationId)
+      let memberPath = organisationMemberPath(data.organisationId);
+      let organisationPath = /databases/$(database)/documents/organisations/$(data.organisationId);
+      let sharePath = /databases/$(database)/documents/organisationResourceShares/$(data.organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid);
+      let memberExists = exists(memberPath);
+      let organisationExists = exists(organisationPath);
+      let member = memberExists ? get(memberPath).data : {};
+      let organisation = organisationExists ? get(organisationPath).data : {};
+      let teamRead = ('teamId' in data)
+        && hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.read' : 'properties.read');
+      return request.auth != null
+        && memberExists
+        && member.organisationId == data.organisationId
+        && member.uid == request.auth.uid
+        && member.status == 'active'
+        && organisationExists
+        && organisation.status == 'active'
         && (
           data.visibility == 'organisation'
           || data.createdByUid == request.auth.uid
           || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
-          || exists(/databases/$(database)/documents/organisationResourceShares/$(data.organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid))
-          || hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.read' : 'properties.read')
-          || isOrganisationManager(data.organisationId)
+          || exists(sharePath)
+          || teamRead
+          || member.role in ['owner', 'admin', 'manager']
         );
     }
 
@@ -1022,6 +1037,16 @@ service cloud.firestore {
       allow read: if request.auth != null
         && parentExists(resource.data)
         && canReadOrganisationResource(parentResource(resource.data).data, resource.data.resourceType, resource.data.resourceId);
+      function canCreateForParent(data) {
+        let path = /databases/$(database)/documents/$(data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(data.resourceId);
+        let validType = data.resourceType in ['deal', 'property'];
+        let existsParent = validType && exists(path);
+        let parent = existsParent ? get(path).data : {};
+        return existsParent
+          && parent.organisationId == data.organisationId
+          && canReadOrganisationResource(parent, data.resourceType, data.resourceId)
+          && canWriteOrganisationResource(parent, data.resourceType);
+      }
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
         && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
@@ -1040,10 +1065,7 @@ service cloud.firestore {
         && request.resource.data.size <= 15 * 1024 * 1024
         && request.resource.data.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
         && request.resource.data.createdAt == request.time
-        && parentExists(request.resource.data)
-        && parentResource(request.resource.data).data.organisationId == request.resource.data.organisationId
-        && canReadOrganisationResource(parentResource(request.resource.data).data, request.resource.data.resourceType, request.resource.data.resourceId)
-        && canWriteOrganisationResource(parentResource(request.resource.data).data, request.resource.data.resourceType);
+        && canCreateForParent(request.resource.data);
       allow update: if false;
       allow delete: if request.auth != null
         && parentExists(resource.data)
