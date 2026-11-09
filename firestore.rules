@@ -1022,8 +1022,10 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Organisation audit history contains administrative metadata and is restricted to owners/admins.
+    // Events are append-only and authored by trusted Cloud Functions only.
     match /organisationActivity/{activityId} {
-      allow read: if isActiveOrganisationMember(resource.data.organisationId);
+      allow read: if canManageOrganisation(resource.data.organisationId);
       allow create, update, delete: if false;
     }
 

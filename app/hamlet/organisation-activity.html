@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1120">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Organisation Audit History | Hamlet</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--blue2:#60a5fa}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
+    a{color:#93c5fd}.shell{width:min(1120px,100%);margin:auto;padding:22px clamp(16px,4vw,42px) 64px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 0 20px;border-bottom:1px solid var(--line)}
+    .brand{font:800 22px Manrope,sans-serif;letter-spacing:-.8px;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
+    .nav{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.nav a{font-size:12px;text-decoration:none;color:#bfdbfe}
+    .hero{padding:26px 0 18px}.eyebrow{color:#60a5fa;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:1.4px}.hero h1{font:800 clamp(26px,4vw,38px) Manrope,sans-serif;letter-spacing:-1px;margin:8px 0}.hero p,.muted{color:var(--muted);line-height:1.6}
+    .toolbar{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(17,24,39,.9);margin:12px 0 18px}
+    select,input,button{font:inherit;color:var(--text);background:#0d1728;border:1px solid #40516a;border-radius:8px;padding:10px 12px}
+    button{cursor:pointer;font-weight:700;background:#1d4ed8;border-color:#2563eb}button.secondary{background:#172338;border-color:#40516a}
+    .filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.filters label{display:grid;gap:5px;color:#a8b6ca;font-size:11px}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat,.panel{border:1px solid var(--line);border-radius:12px;background:rgba(17,24,39,.96);padding:16px}.stat strong{display:block;font:800 24px Manrope,sans-serif}.stat span{font-size:11px;color:var(--muted)}
+    .event-list{display:grid;gap:9px}.event{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:14px;align-items:start;padding:14px;border:1px solid #2b3c55;border-radius:10px;background:#101b2c}.date{font-size:11px;color:#9fb0c7;line-height:1.5}.event h3{font-size:13px;margin:0 0 5px}.event p{font-size:11px;color:#a8b6ca;line-height:1.5;margin:0;overflow-wrap:anywhere}.tag{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:5px 7px;border:1px solid #40516a;border-radius:999px;color:#bfdbfe;white-space:nowrap}
+    .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+    .empty{padding:22px;text-align:center;border:1px dashed #40516a;border-radius:10px;color:#a8b6ca;line-height:1.6}.hidden{display:none!important}.footnote{font-size:11px;color:#8192aa;line-height:1.6;margin-top:18px}
+    @media(max-width:650px){.stats{grid-template-columns:1fr}.event{grid-template-columns:1fr;gap:7px}.tag{justify-self:start}.toolbar{align-items:flex-start}.filters{width:100%}.filters label{flex:1;min-width:140px}.filters select,.filters input{width:100%}}
+  </style>
+</head>
+<body>
+  <div id="authGate" class="shell"><div class="panel"><a class="brand" href="/">hamlet<span>.</span></a><h2>Secure organisation audit</h2><p id="gateMessage" class="muted">Checking your sign-in…</p></div></div>
+  <main class="shell hidden" id="app">
+    <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><nav class="nav"><a href="/app/hamlet/organisations.html">Organisation workspace</a><a href="/organisations.html">Administration</a><a href="/app/hamlet/">Personal workspace</a></nav></header>
+    <section class="hero"><div class="eyebrow">Governance · administrative record</div><h1>Organisation audit history</h1><p>Review trusted records of organisation creation, invitations and membership administration. This log is read-only and visible to organisation owners and administrators.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <section class="toolbar"><div><strong id="selectedName">Organisation</strong><div class="muted" id="selectedSlug">Loading active membership…</div></div><div class="filters">
+      <label>Organisation<select id="orgSelect"><option>Loading…</option></select></label>
+      <label>Event type<select id="actionFilter"><option value="">All event types</option></select></label>
+      <label>Period<select id="periodFilter"><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="all">All available</option></select></label>
+      <button type="button" class="secondary" id="refreshBtn">Refresh</button><button type="button" id="exportBtn">Export CSV</button>
+    </div></section>
+    <section class="stats" aria-label="Audit summary"><div class="stat"><strong id="totalCount">—</strong><span>Events in selected period</span></div><div class="stat"><strong id="inviteCount">—</strong><span>Invitation events</span></div><div class="stat"><strong id="memberCount">—</strong><span>Membership events</span></div></section>
+    <section class="panel"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px"><h2 style="font:700 16px Manrope;margin:0">Activity register</h2><span class="muted" id="resultMeta">Loading…</span></div><div id="eventList" class="event-list" aria-live="polite"><div class="empty">Loading audit records…</div></div></section>
+    <p class="footnote">Integrity and access: audit events are authored by trusted Cloud Functions, are immutable to client accounts, and are restricted by Firestore Rules to active organisation owners and administrators. This initial register covers organisation and membership lifecycle events; deal/property field-level change history is a separate future increment.</p>
+  </main>
+<script>
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  let auth,db,user,organisations=[],activeOrg=null,allEvents=[];
+  const labels={
+    'organisation.created':'Organisation created',
+    'organisation.invitation_created':'Invitation issued',
+    'organisation.invitation_accepted':'Invitation accepted',
+    'organisation.invitation_revoked':'Invitation revoked',
+    'organisation.member_role_changed':'Member role changed',
+    'organisation.member_removed':'Member removed'
+  };
+  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
+  function timestamp(value){if(value&&typeof value.toMillis==='function')return value.toMillis();const n=Date.parse(value||'');return Number.isFinite(n)?n:0;}
+  function dateText(value){const n=timestamp(value);return n?new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(n)):'Date unavailable';}
+  function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');}
+  async function loadMemberships(){
+    const snap=await db.collection('organisationMembers').where('uid','==',user.uid).get();
+    const active=snap.docs.map(d=>d.data()).filter(m=>m.status==='active');
+    const rows=await Promise.all(active.map(async m=>{
+      const os=await db.collection('organisations').doc(m.organisationId).get();
+      return os.exists&&os.data().status==='active'?{id:os.id,name:os.data().name,slug:os.data().slug,role:m.role}:null;
+    }));
+    organisations=rows.filter(Boolean);
+    const select=$('orgSelect');select.replaceChildren();
+    if(!organisations.length){select.add(new Option('No active organisation',''));notice('No active organisation membership was found.',true);return;}
+    const preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';
+    const permitted=organisations.filter(o=>['owner','admin'].includes(o.role));
+    const initial=permitted.find(o=>o.id===preferred)||permitted[0];
+    if(!initial){select.add(new Option('No audit access',''));notice('Audit history is restricted to active organisation owners and administrators.',true);return;}
+    permitted.forEach(o=>select.add(new Option(o.name+' · '+o.role,o.id)));
+    await selectOrganisation(initial.id);
+  }
+  async function selectOrganisation(id){
+    activeOrg=organisations.find(o=>o.id===id&&['owner','admin'].includes(o.role));
+    if(!activeOrg)return;
+    $('orgSelect').value=id;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Organisation slug: '+activeOrg.slug;
+    try{sessionStorage.setItem('hamletActiveOrganisationId',id);}catch(e){}
+    await loadEvents();
+  }
+  async function loadEvents(){
+    $('eventList').innerHTML='<div class="empty">Loading audit records…</div>';
+    try{
+      const snap=await db.collection('organisationActivity').where('organisationId','==',activeOrg.id).get();
+      allEvents=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>timestamp(b.createdAt)-timestamp(a.createdAt));
+      const actions=[...new Set(allEvents.map(e=>e.action).filter(Boolean))].sort();
+      const filter=$('actionFilter'),current=filter.value;filter.replaceChildren(new Option('All event types',''));
+      actions.forEach(a=>filter.add(new Option(labels[a]||a,a)));
+      if(actions.includes(current))filter.value=current;
+      render();
+    }catch(error){console.error('Organisation audit query failed:',error);allEvents=[];$('eventList').innerHTML='<div class="empty">Audit history could not be loaded. Confirm your organisation administrator role and Firestore access.</div>';notice('The audit register is unavailable for this account or organisation.',true);}
+  }
+  function filtered(){
+    const now=Date.now(),period=$('periodFilter').value,days=period==='all'?0:Number(period);
+    return allEvents.filter(e=>(!days||timestamp(e.createdAt)>=now-days*86400000)&&(!$('actionFilter').value||e.action===$('actionFilter').value));
+  }
+  function render(){
+    const events=filtered();
+    $('totalCount').textContent=events.length;
+    $('inviteCount').textContent=events.filter(e=>(e.action||'').includes('invitation')).length;
+    $('memberCount').textContent=events.filter(e=>(e.action||'').includes('member_')||e.action==='organisation.created').length;
+    $('resultMeta').textContent=events.length+' matching event'+(events.length===1?'':'s');
+    const list=$('eventList');list.replaceChildren();
+    if(!events.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No audit events match this period and event type.';list.appendChild(empty);return;}
+    events.slice(0,250).forEach(e=>{
+      const row=document.createElement('article');row.className='event';
+      const date=document.createElement('div');date.className='date';date.textContent=dateText(e.createdAt);row.appendChild(date);
+      const detail=document.createElement('div');const title=document.createElement('h3');title.textContent=labels[e.action]||e.action||'Organisation event';detail.appendChild(title);
+      const parts=[];if(e.actorUid)parts.push('Actor: '+e.actorUid);if(e.targetUid)parts.push('Target: '+e.targetUid);if(e.role)parts.push('Role: '+e.role);if(e.invitationEmail)parts.push('Invitation: '+e.invitationEmail);
+      const meta=document.createElement('p');meta.textContent=parts.join(' · ')||'No additional event metadata';detail.appendChild(meta);row.appendChild(detail);
+      const tag=document.createElement('span');tag.className='tag';tag.textContent=(e.action||'event').replace('organisation.','').replace(/_/g,' ');row.appendChild(tag);list.appendChild(row);
+    });
+    if(events.length>250){const note=document.createElement('div');note.className='empty';note.textContent='Showing the latest 250 matching events. Export CSV to retain the full filtered register.';list.appendChild(note);}
+  }
+  function exportCsv(){
+    const rows=filtered(),columns=['createdAt','action','actorUid','targetUid','role','invitationEmail'];
+    const quote=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+    const csv=[columns.join(','),...rows.map(e=>columns.map(k=>quote(k==='createdAt'?dateText(e[k]):e[k])).join(','))].join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='hamlet-organisation-audit-'+activeOrg.slug+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  $('orgSelect').addEventListener('change',e=>selectOrganisation(e.target.value));
+  $('actionFilter').addEventListener('change',render);$('periodFilter').addEventListener('change',render);
+  $('refreshBtn').addEventListener('click',loadEvents);$('exportBtn').addEventListener('click',exportCsv);
+  function init(){
+    if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Firebase could not be initialised.';return;}
+    try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();}
+    catch(error){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+    auth.onAuthStateChanged(async current=>{
+      if(!current){$('gateMessage').textContent='Sign in is required. Redirecting…';location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
+      user=current;showApp();
+      try{await current.reload();await current.getIdToken(true);}catch(error){console.warn('Identity refresh failed:',error);}
+      if(current.emailVerified!==true){notice('Verify your email address before accessing organisation audit history.',true);return;}
+      try{await loadMemberships();}catch(error){console.error(error);notice('Unable to load organisation memberships.',true);}
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+</body>
+</html>

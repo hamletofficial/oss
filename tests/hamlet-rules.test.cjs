@@ -277,6 +277,24 @@ test('members can read their own membership and organisation admins can read the
   await assertSucceeds(getDoc(doc(admin, 'organisationMembers/org-private_member')));
 });
 
+test('organisation audit history is readable only by organisation owners and admins', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  const viewer = env.authenticatedContext('viewer').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+
+  await assertSucceeds(getDoc(doc(owner, 'organisationActivity/activity-private')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationActivity/activity-private')));
+  await assertFails(getDoc(doc(member, 'organisationActivity/activity-private')));
+  await assertFails(getDoc(doc(viewer, 'organisationActivity/activity-private')));
+  await assertFails(getDoc(doc(outsider, 'organisationActivity/activity-private')));
+  await assertFails(setDoc(doc(owner, 'organisationActivity/forged-event'), {
+    organisationId: 'org-private', actorUid: 'owner',
+    action: 'organisation.fake_event', createdAt: serverTimestamp(),
+  }));
+});
+
 test('organisation slug lookup is exact-get only and cannot be enumerated', async () => {
   const unauthenticated = env.unauthenticatedContext().firestore();
   await assertSucceeds(getDoc(doc(unauthenticated, 'organisationSlugs/private-org')));
