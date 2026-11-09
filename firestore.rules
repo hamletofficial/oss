@@ -1045,7 +1045,7 @@ service cloud.firestore {
     match /organisationMembers/{membershipId} {
       allow read: if request.auth != null
         && (resource.data.uid == request.auth.uid
-          || canManageOrganisation(resource.data.organisationId));
+          || isOrganisationManager(resource.data.organisationId));
       allow create, update, delete: if false;
     }
 

@@ -46,6 +46,8 @@
     .footnote{font-size:11px;color:#8192aa;line-height:1.6;margin:18px 0 0}
     @media(max-width:900px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:560px){.form-grid,.cards{grid-template-columns:1fr}.full{grid-column:auto}.toolbar{align-items:flex-start}.org-select{width:100%}}
+  
+    .share-tools{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);display:grid;gap:7px}.share-tools label{font-size:10px;font-weight:800;color:#cbd5e1}.share-row{display:flex;gap:6px;align-items:center}.share-row select{flex:1;font-size:11px;padding:7px}.share-row button{white-space:nowrap;padding:7px 9px;font-size:10px}.share-list{display:flex;gap:5px;flex-wrap:wrap}.share-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #40516a;border-radius:999px;padding:4px 7px;font-size:10px;color:#bfdbfe}.share-chip button{padding:2px 5px;font-size:9px;border-radius:5px}
   </style>
 </head>
 <body>
@@ -118,6 +120,7 @@
     canManage=['owner','admin','manager'].includes(activeOrg.role);
     $('propertyVisibility').disabled=!canManage;$('propertyVisibility').value='organisation';
     $('saveBtn').disabled=activeOrg.role==='viewer';
+    if(canManage){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
     await loadProperties();
   }
   async function queryVisibleProperties(){
@@ -148,6 +151,35 @@
     }catch(error){console.error('Organisation property query failed:',error);records=[];renderProperties();$('portfolioMeta').textContent='Portfolio unavailable';status('loadStatus','Unable to load property records. Check membership, permissions and Firestore indexes.');}
   }
   function stamp(value){if(value&&typeof value.toMillis==='function')return value.toMillis();const n=Date.parse(value||'');return Number.isFinite(n)?n:0;}
+  let activeShareMembers=[];
+  async function loadShareMembers(){
+    activeShareMembers=[];
+    if(!canManage||!activeOrg)return;
+    const snap=await db.collection('organisationMembers').where('organisationId','==',activeOrg.id).where('status','==','active').get();
+    activeShareMembers=snap.docs.map(doc=>doc.data()).filter(m=>m.uid&&m.uid!==user.uid);
+    const profiles=await Promise.all(activeShareMembers.map(async m=>{try{const p=await db.collection('publicProfiles').doc(m.uid).get();return p.exists?p.data():{};}catch(e){return {};}}));
+    activeShareMembers=activeShareMembers.map((m,i)=>({...m,label:[profiles[i].firstName,profiles[i].lastName].filter(Boolean).join(' ')||profiles[i].displayName||profiles[i].email||m.uid.slice(0,12)}));
+  }
+  async function renderShareTools(card, resource){
+    if(!canManage)return;
+    const box=document.createElement('div');box.className='share-tools';
+    const label=document.createElement('label');label.textContent='Explicit member access';box.appendChild(label);
+    const row=document.createElement('div');row.className='share-row';const select=document.createElement('select');
+    select.add(new Option('Select an active member…',''));
+    activeShareMembers.forEach(m=>select.add(new Option(m.label+' · '+m.role,m.uid)));
+    const grant=document.createElement('button');grant.type='button';grant.textContent='Share';grant.disabled=!activeShareMembers.length;
+    grant.addEventListener('click',async()=>{
+      const uid=select.value;if(!uid)return;
+      grant.disabled=true;
+      try{const id=activeOrg.id+'_property_'+resource.id+'_'+uid;await db.collection('organisationResourceShares').doc(id).set({organisationId:activeOrg.id,resourceType:'property',resourceId:resource.id,sharedWithUid:uid,createdByUid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotice('Access granted to '+(activeShareMembers.find(m=>m.uid===uid)?.label||'the selected member')+'.');await loadProperties();}
+      catch(error){console.error('Unable to grant resource access:',error);showNotice('Unable to grant access. Confirm active membership and permissions.',true);grant.disabled=false;}
+    });row.append(select,grant);box.appendChild(row);
+    const list=document.createElement('div');list.className='share-list';list.textContent='Loading current grants…';box.appendChild(list);card.appendChild(box);
+    try{const snap=await db.collection('organisationResourceShares').where('organisationId','==',activeOrg.id).where('resourceType','==','property').where('resourceId','==',resource.id).get();list.replaceChildren();
+      if(!snap.docs.length){list.textContent='No additional members have access.';return;}
+      snap.docs.forEach(doc=>{const data=doc.data(),member=activeShareMembers.find(m=>m.uid===data.sharedWithUid);const chip=document.createElement('span');chip.className='share-chip';const name=document.createTextNode((member?member.label:data.sharedWithUid.slice(0,12))+' · shared');chip.appendChild(name);const revoke=document.createElement('button');revoke.type='button';revoke.className='danger';revoke.textContent='Revoke';revoke.addEventListener('click',async()=>{if(!confirm('Revoke this member’s access to the resource?'))return;revoke.disabled=true;try{await doc.ref.delete();showNotice('Explicit access revoked.');await loadProperties();}catch(error){console.error('Unable to revoke access:',error);showNotice('Unable to revoke access.',true);revoke.disabled=false;}});chip.appendChild(revoke);list.appendChild(chip);});
+    }catch(error){console.error('Unable to load resource shares:',error);list.textContent='Sharing details unavailable.';}
+  }
   function renderProperties(){
     const root=$('propertyCards');root.replaceChildren();
     if(!records.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No organisation properties yet. Add the first asset using the form.';root.appendChild(empty);return;}
@@ -163,6 +195,7 @@
       if(p.description){const description=document.createElement('p');description.textContent=p.description;card.appendChild(description);}
       const mayEdit=canManage||(p.createdByUid===user.uid&&activeOrg.role==='member');
       if(mayEdit){const actions=document.createElement('div');actions.className='card-actions';const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';edit.addEventListener('click',()=>editProperty(p.id));actions.appendChild(edit);const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteProperty(p.id));actions.appendChild(remove);card.appendChild(actions);}
+      renderShareTools(card,p);
       root.appendChild(card);
     });
   }
