@@ -18,7 +18,7 @@ function setup(){
   const org=selected();
   if(!org||!org.slug){message('Select an active organisation with a valid tenant address first.',true);return;}
   const origin='https://'+org.slug+'.orgs.hamlet-ai.co.uk';
-  const popup=window.open(origin+'/','_blank','noopener=false');
+  const popup=window.open(origin+'/','hamletTenant_'+org.slug);
   if(!popup){message('Allow pop-ups for Hamlet to open the secure organisation workspace.',true);return;}
   pending={popup,org,origin,startedAt:Date.now()};
   message('Waiting for the organisation workspace to establish a secure sign-in handoff…');
