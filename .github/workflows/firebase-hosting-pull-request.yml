@@ -19,5 +19,4 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WALE_491805 }}
-          expires: 30d
           projectId: wale-491805
