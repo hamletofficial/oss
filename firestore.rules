@@ -863,14 +863,25 @@ service cloud.firestore {
     }
 
     function canWriteOrganisationResource(data, resourceType) {
-      return isActiveOrganisationMember(data.organisationId)
+      let memberPath = organisationMemberPath(data.organisationId);
+      let organisationPath = /databases/$(database)/documents/organisations/$(data.organisationId);
+      let memberExists = exists(memberPath);
+      let organisationExists = exists(organisationPath);
+      let member = memberExists ? get(memberPath).data : {};
+      let organisation = organisationExists ? get(organisationPath).data : {};
+      let teamWrite = ('teamId' in data)
+        && hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.write' : 'properties.write');
+      return request.auth != null
+        && memberExists
+        && member.organisationId == data.organisationId
+        && member.uid == request.auth.uid
+        && member.status == 'active'
+        && organisationExists
+        && organisation.status == 'active'
         && (
-          isOrganisationManager(data.organisationId)
-          || hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.write' : 'properties.write')
-          || (
-            data.createdByUid == request.auth.uid
-            && get(organisationMemberPath(data.organisationId)).data.role == 'member'
-          )
+          member.role in ['owner', 'admin', 'manager']
+          || teamWrite
+          || (data.createdByUid == request.auth.uid && member.role == 'member')
         );
     }
 
