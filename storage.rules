@@ -131,57 +131,32 @@ service firebase.storage {
     }
 
 
-    // Tenant-scoped organisation files. Every object is linked to a Firestore
-    // organisationDocuments record and a parent deal or property.
+    // Tenant-scoped organisation files linked to parent deals and properties.
     match /organisationDocuments/{organisationId}/{resourceType}/{resourceId}/{documentId}/{fileName} {
-      function memberPath() {
-        return /databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid);
-      }
-      function organisationPath() {
-        return /databases/(default)/documents/organisations/$(organisationId);
-      }
-      function parentPath() {
-        return /databases/(default)/documents/$(resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(resourceId);
-      }
-      function sharePath() {
-        return /databases/(default)/documents/organisationResourceShares/$(organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid);
-      }
+      function memberPath() { return /databases/(default)/documents/organisationMembers/$(organisationId + '_' + request.auth.uid); }
+      function organisationPath() { return /databases/(default)/documents/organisations/$(organisationId); }
+      function parentPath() { return /databases/(default)/documents/$(resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(resourceId); }
+      function sharePath() { return /databases/(default)/documents/organisationResourceShares/$(organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid); }
       function activeMember() {
-        return request.auth != null
-          && firestore.exists(memberPath())
+        return request.auth != null && firestore.exists(memberPath())
           && firestore.get(memberPath()).data.uid == request.auth.uid
           && firestore.get(memberPath()).data.organisationId == organisationId
           && firestore.get(memberPath()).data.status == 'active'
           && firestore.exists(organisationPath())
           && firestore.get(organisationPath()).data.status == 'active';
       }
-      function parentExists() {
-        return resourceType in ['deal', 'property'] && firestore.exists(parentPath());
-      }
-      function parentData() {
-        return firestore.get(parentPath()).data;
-      }
-      function manager() {
-        return activeMember()
-          && firestore.get(memberPath()).data.role in ['owner', 'admin', 'manager'];
-      }
+      function parentExists() { return resourceType in ['deal', 'property'] && firestore.exists(parentPath()); }
+      function parentData() { return firestore.get(parentPath()).data; }
+      function manager() { return activeMember() && firestore.get(memberPath()).data.role in ['owner', 'admin', 'manager']; }
       function canReadParent() {
-        return activeMember() && parentExists()
-          && (
-            parentData().visibility == 'organisation'
-            || parentData().createdByUid == request.auth.uid
-            || (parentData().sharedWithUids is list && request.auth.uid in parentData().sharedWithUids)
-            || firestore.exists(sharePath())
-            || manager()
-          );
+        return activeMember() && parentExists() && (parentData().visibility == 'organisation'
+          || parentData().createdByUid == request.auth.uid
+          || (parentData().sharedWithUids is list && request.auth.uid in parentData().sharedWithUids)
+          || firestore.exists(sharePath()) || manager());
       }
       function canWriteParent() {
-        return activeMember() && parentExists()
-          && (
-            manager()
-            || (parentData().createdByUid == request.auth.uid
-              && firestore.get(memberPath()).data.role == 'member')
-          );
+        return activeMember() && parentExists() && (manager()
+          || (parentData().createdByUid == request.auth.uid && firestore.get(memberPath()).data.role == 'member'));
       }
       function validFileMetadata() {
         return request.resource.metadata.organisationId == organisationId
@@ -191,28 +166,10 @@ service firebase.storage {
           && request.resource.metadata.uploaderUid == request.auth.uid;
       }
       allow read: if canReadParent();
-      allow create: if canWriteParent()
-        && validFileMetadata()
-        && request.resource.size > 0
-        && request.resource.size <= 15 * 1024 * 1024
-        && request.resource.contentType in [
-          'application/pdf',
-          'application/msword',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'application/vnd.ms-excel',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'text/csv',
-          'text/plain',
-          'image/png',
-          'image/jpeg',
-          'image/webp'
-        ]
-        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)
-      allow read, write: if false;
-    }
-  }
-}
-);
+      allow create: if canWriteParent() && validFileMetadata()
+        && request.resource.size > 0 && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
+        && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)$');
       allow update: if false;
       allow delete: if canWriteParent()
         && resource.metadata.organisationId == organisationId
@@ -220,7 +177,6 @@ service firebase.storage {
         && resource.metadata.resourceId == resourceId
         && resource.metadata.documentId == documentId;
     }
-
     match /{allPaths=**} {
       allow read, write: if false;
     }
