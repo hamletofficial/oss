@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1120"><meta name="robots" content="noindex,nofollow">
+<title>Organisation Documents | Hamlet</title><link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script><script defer src="/firebase-config.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--red:#f87171}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}a{color:#93c5fd}.shell{width:min(1120px,100%);margin:auto;padding:22px clamp(16px,4vw,42px) 64px}header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 0 20px;border-bottom:1px solid var(--line)}.brand{font:800 22px Manrope,sans-serif;color:#fff;text-decoration:none}.brand span{color:#60a5fa}.nav{display:flex;gap:16px;flex-wrap:wrap}.nav a{color:#cbd5e1;text-decoration:none;font-weight:700}.hero{padding:30px 0 18px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}h1,h2{font-family:Manrope,sans-serif}h1{font-size:clamp(27px,4vw,38px);margin:8px 0}h2{font-size:17px;margin:0 0 12px}.hero p,.muted{color:var(--muted);line-height:1.6}.toolbar,.panel{border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.96);padding:16px;margin:14px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:11px;font-weight:800;color:#cbd5e1}select,input{font:inherit;color:var(--text);background:#0d1728;border:1px solid #40516a;border-radius:8px;padding:10px 11px;width:100%;min-width:0}button{font:700 12px 'DM Sans',sans-serif;border:1px solid #3b82f6;border-radius:8px;padding:10px 14px;background:#1d4ed8;color:#fff;cursor:pointer}button.secondary{background:#172338;border-color:#40516a;color:#dbeafe}button.danger{background:#3a1c2a;border-color:#7f1d1d;color:#fecaca}button:disabled{opacity:.5;cursor:wait}.notice{display:none;padding:12px;border:1px solid #315b8c;background:#142947;border-radius:9px;margin:12px 0}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}.file-list{display:grid;gap:9px}.file{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid #33465f;border-radius:10px;background:#172338;padding:12px}.file strong{display:block;overflow-wrap:anywhere}.file small{display:block;color:#a8b6ca;margin-top:4px}.file-actions{display:flex;gap:7px;flex-wrap:wrap}.status{font-size:11px;color:#a8b6ca;min-height:17px}.hidden{display:none!important}.gate{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#0b1120;padding:24px}.gate-card{width:min(420px,100%);padding:28px;background:var(--panel);border:1px solid var(--line);border-radius:16px;text-align:center}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="gate" id="gate"><div class="gate-card"><a class="brand" href="/">hamlet<span>.</span></a><h2 style="margin-top:20px">Secure organisation workspace</h2><p id="gateMessage" class="muted">Checking your sign-in…</p></div></div>
+<main class="shell hidden" id="app">
+<header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><nav class="nav"><a href="/app/hamlet/organisations.html">Organisation workspace</a><a href="/app/hamlet/organisation-deals.html">Deals</a><a href="/app/hamlet/organisation-properties.html">Properties</a></nav></header>
+<section class="hero"><div class="eyebrow">Tenant-scoped asset management</div><h1>Organisation documents & assets</h1><p>Upload and manage supporting documents and property imagery against organisation deals and properties. Access follows the parent record’s membership and sharing policy.</p></section>
+<div id="notice" class="notice" role="status" aria-live="polite"></div>
+<section class="toolbar grid"><div class="field"><label for="orgSelect">Organisation</label><select id="orgSelect"></select></div><div class="field"><label for="resourceSelect">Deal or property</label><select id="resourceSelect" disabled><option>Select an organisation first</option></select></div></section>
+<section class="panel">
+<h2>Upload a document or property image</h2>
+<div class="grid"><div class="field"><label for="fileTitle">Document title</label><input id="fileTitle" maxlength="120" placeholder="e.g. EPC certificate or floorplan"></div><div class="field"><label for="fileInput">Choose file</label><input id="fileInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.webp"></div></div>
+<p class="muted">Maximum 15 MB per file. Supported formats: PDF, Word, Excel, CSV, text, JPEG, PNG and WebP. Property images are stored privately; they are not published as public listing photographs.</p>
+<button id="uploadBtn" type="button" disabled>Upload securely</button><p id="uploadStatus" class="status" aria-live="polite"></p>
+</section>
+<section class="panel"><h2>Stored files</h2><div id="fileList" class="file-list"><p class="muted">Select an organisation resource to view its files.</p></div><p id="listStatus" class="status" aria-live="polite"></p></section>
+<p class="muted">Security: files are stored under organisation-specific paths. Firebase Storage Rules validate active membership, parent-resource access, uploader identity, file type and size. Firestore metadata is immutable; deletion requires write access to the parent resource.</p>
+</main>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);let auth,db,storage,user,memberships=[],activeOrg=null,resources=[],selected=null,files=[];
+const allowed={'application/pdf':'pdf','application/msword':'doc','application/vnd.openxmlformats-officedocument.wordprocessingml.document':'docx','application/vnd.ms-excel':'xls','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','text/csv':'csv','text/plain':'txt','image/png':'png','image/jpeg':'jpg','image/webp':'webp'};
+const cleanName=s=>String(s||'file').normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,100)||'file';
+const notice=(s,error)=>{$('notice').textContent=s;$('notice').className='notice show'+(error?' error':'');};
+const role=m=>String(m.role||'member');
+function active(m){return m.status==='active'&&m.organisationId;}
+function canWrite(){return !!selected&&(['owner','admin','manager'].includes(role(activeOrg))||(selected.createdByUid===user.uid&&role(activeOrg)==='member'));}
+function parentLabel(r){return (r.resourceType==='deal'?'Deal · ':'Property · ')+(r.name||r.propertyName||r.id);}
+async function loadMemberships(){
+ const snap=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
+ memberships=snap.docs.map(d=>({id:d.id,...d.data()}));
+ const options=[];
+ for(const m of memberships){const org=await db.collection('organisations').doc(m.organisationId).get();if(org.exists&&org.data().status==='active')options.push({id:m.organisationId,name:org.data().name||'Organisation',slug:org.data().slug||'',role:role(m)});}
+ $('orgSelect').replaceChildren(...options.map(o=>new Option(o.name+' · '+o.role,o.id)));
+ if(!options.length){notice('No active organisation memberships were found.',true);return;}
+ $('orgSelect').value=options[0].id;await selectOrg(options[0].id);
+}
+async function selectOrg(id){
+ activeOrg=memberships.find(m=>m.organisationId===id);if(!activeOrg)return;
+ const org=await db.collection('organisations').doc(id).get();activeOrg={...activeOrg,...org.data()};
+ $('resourceSelect').disabled=true;$('resourceSelect').replaceChildren(new Option('Loading resources…',''));
+ const manager=['owner','admin','manager'].includes(role(activeOrg));
+ const collections=[['deal','organisationDeals'],['property','organisationProperties']];
+ const visible=[];
+ for(const [type,name] of collections){
+  let snaps;
+  if(manager) snaps=[await db.collection(name).where('organisationId','==',id).get()];
+  else snaps=await Promise.all([
+   db.collection(name).where('organisationId','==',id).where('visibility','==','organisation').get(),
+   db.collection(name).where('organisationId','==',id).where('createdByUid','==',user.uid).get(),
+   db.collection(name).where('organisationId','==',id).where('sharedWithUids','array-contains',user.uid).get()
+  ]);
+  snaps.flatMap(s=>s.docs).forEach(d=>visible.push({id:d.id,resourceType:type,...d.data()}));
+ }
+ const grants=await db.collection('organisationResourceShares').where('organisationId','==',id).where('sharedWithUid','==',user.uid).get();
+ for(const grant of grants.docs){
+  const g=grant.data();const type=g.resourceType;const collection=type==='deal'?'organisationDeals':type==='property'?'organisationProperties':null;
+  if(!collection)continue;
+  const parent=await db.collection(collection).doc(g.resourceId).get();
+  if(parent.exists)visible.push({id:parent.id,resourceType:type,...parent.data()});
+ }
+ resources=Array.from(new Map(visible.map(r=>[r.resourceType+'|'+r.id,r])).values());
+ $('resourceSelect').replaceChildren(new Option('Choose a deal or property…',''),...resources.map(r=>new Option(parentLabel(r),r.resourceType+'|'+r.id)));
+ $('resourceSelect').disabled=false;$('fileList').textContent='Select a resource to view its files.';selected=null;$('uploadBtn').disabled=true;
+}
+async function selectResource(value){
+ selected=resources.find(r=>r.resourceType+'|'+r.id===value)||null;
+ $('uploadBtn').disabled=!selected||!canWrite();
+ await loadFiles();
+}
+async function loadFiles(){
+ const root=$('fileList');root.replaceChildren();if(!selected){root.textContent='Select a resource to view its files.';return;}
+ try{
+  const snap=await db.collection('organisationDocuments').where('organisationId','==',activeOrg.organisationId).where('resourceType','==',selected.resourceType).where('resourceId','==',selected.id).get();
+  files=snap.docs.map(d=>({ref:d.ref,...d.data()}));if(!files.length){root.textContent='No files have been uploaded to this resource.';return;}
+  for(const f of files){
+   const row=document.createElement('article');row.className='file';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=f.title||f.fileName;const meta=document.createElement('small');meta.textContent=f.fileName+' · '+(f.size/1024/1024).toFixed(2)+' MB · '+(f.contentType||'file');info.append(title,meta);
+   const actions=document.createElement('div');actions.className='file-actions';const open=document.createElement('button');open.type='button';open.className='secondary';open.textContent='Open';open.addEventListener('click',async()=>{try{const url=await storage.ref(f.storagePath).getDownloadURL();window.open(url,'_blank','noopener');}catch(e){notice('Unable to open this file. Your access may have changed.',true);}});
+   actions.appendChild(open);
+   if(canWrite()){const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.addEventListener('click',async()=>{if(!confirm('Permanently delete '+(f.title||f.fileName)+'?'))return;del.disabled=true;try{await storage.ref(f.storagePath).delete();await f.ref.delete();notice('File deleted.');await loadFiles();}catch(e){console.error(e);notice('Unable to delete this file.',true);del.disabled=false;}});actions.appendChild(del);}
+   row.append(info,actions);root.appendChild(row);
+  }
+ }catch(error){console.error(error);root.textContent='Files could not be loaded. Check resource access and Firestore indexes.';}
+}
+async function upload(){
+ if(!selected||!canWrite())return;
+ const file=$('fileInput').files[0];if(!file){notice('Choose a file first.',true);return;}
+ const type=file.type||'application/octet-stream';if(!allowed[type]){notice('This file type is not supported.',true);return;}
+ if(file.size<1||file.size>15*1024*1024){notice('File must be between 1 byte and 15 MB.',true);return;}
+ const title=$('fileTitle').value.trim()||file.name;if(title.length>120){notice('Document title must be 120 characters or fewer.',true);return;}
+ const id=db.collection('organisationDocuments').doc().id;const fileName=cleanName(file.name);const path='organisationDocuments/'+activeOrg.organisationId+'/'+selected.resourceType+'/'+selected.id+'/'+id+'/'+fileName;
+ const btn=$('uploadBtn');btn.disabled=true;$('uploadStatus').textContent='Uploading file securely…';let uploadedRef=null;
+ try{
+  uploadedRef=storage.ref(path);
+  await uploadedRef.put(file,{contentType:type,customMetadata:{organisationId:activeOrg.organisationId,resourceType:selected.resourceType,resourceId:selected.id,documentId:id,uploaderUid:user.uid}});
+  await db.collection('organisationDocuments').doc(id).set({id,organisationId:activeOrg.organisationId,resourceType:selected.resourceType,resourceId:selected.id,createdByUid:user.uid,title,fileName,storagePath:path,size:file.size,contentType:type,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  $('fileInput').value='';$('fileTitle').value='';$('uploadStatus').textContent='Upload complete.';notice('File added to '+parentLabel(selected)+'.');await loadFiles();
+ }catch(error){if(uploadedRef){try{await uploadedRef.delete();}catch(cleanupError){console.warn('Unable to clean up an unreferenced organisation upload:',cleanupError);}}console.error('Organisation file upload failed:',error);$('uploadStatus').textContent='Upload failed.';notice('Upload failed. Confirm your organisation role and Storage Rules deployment status.',true);}
+ finally{btn.disabled=!canWrite();}
+}
+function init(){
+ if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Firebase could not be initialised.';return;}
+ if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();
+ auth.onAuthStateChanged(async current=>{
+  if(!current){location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
+  user=current;try{await current.reload();await current.getIdToken(true);}catch(e){}
+  if(current.emailVerified!==true){$('gateMessage').textContent='Verify your email address to access organisation files.';return;}
+  $('gate').classList.add('hidden');$('app').classList.remove('hidden');
+  try{await loadMemberships();}catch(e){console.error(e);notice('Unable to load organisation memberships.',true);}
+ });
+}
+$('orgSelect').addEventListener('change',e=>selectOrg(e.target.value));$('resourceSelect').addEventListener('change',e=>selectResource(e.target.value));$('uploadBtn').addEventListener('click',upload);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script></body></html>

@@ -14,6 +14,7 @@ const storage = fs.readFileSync('storage.rules', 'utf8');
 const functions = fs.readFileSync('functions/index.js', 'utf8');
 const organisationFunctions = fs.readFileSync('functions/hamlet-organisations.js', 'utf8');
 const organisationDealsHtml = fs.readFileSync('app/hamlet/organisation-deals.html', 'utf8');
+const organisationFilesHtml = fs.readFileSync('app/hamlet/organisation-files.html', 'utf8');
 
 test('all inline JavaScript blocks parse', () => {
   const blocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -109,8 +110,12 @@ test('tenant resource rules and storage paths are isolated from legacy individua
   assert.match(firestore, /match \/organisationDocuments\/{documentId}/);
   assert.match(firestore, /visibility in \['organisation', 'restricted'\]/);
   assert.match(firestore, /createdByUid == resource\.data\.createdByUid/);
-  // Organisation uploads are intentionally deferred; the catch-all deny remains in force.
-  assert.doesNotMatch(storage, /match \/organisationDocuments\//);
+  assert.match(storage, /match \/organisationDocuments\/{organisationId}\/{resourceType}\/{resourceId}\/{documentId}\/{fileName}/);
+  assert.match(storage, /function activeMember\(\)/);
+  assert.match(storage, /function canReadParent\(\)/);
+  assert.match(storage, /function canWriteParent\(\)/);
+  assert.match(storage, /request\.resource\.size <= 15 \* 1024 \* 1024/);
+  assert.match(storage, /allow update: if false;/);
   assert.match(storage, /match \/\{allPaths=\*\*\}[\s\S]*allow read, write: if false;/);
   assert.match(firestore, /match \/hamletDeals\/{dealId}/);
 });
@@ -208,4 +213,19 @@ test('organisation property portfolio is authenticated, tenant-scoped and separa
   assert.match(firestore, /function validPropertyRecord\(data\)/);
   assert.match(firestore, /data\.propertyType in \['Commercial','Residential'\]/);
   assert.match(appOrganisationsHtml, /href="\/app\/hamlet\/organisation-properties\.html"/);
+});
+
+
+test('organisation document workspace JavaScript parses and uses tenant-scoped Storage paths', () => {
+  const blocks = [...organisationFilesHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected organisation document workspace application script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-files-inline-' + index + '.js' }));
+  }
+  assert.match(organisationFilesHtml, /firebase-storage-compat\.js/);
+  assert.match(organisationFilesHtml, /organisationDocuments\/\+activeOrg\.organisationId/);
+  assert.match(organisationFilesHtml, /organisationResourceShares/);
+  assert.match(organisationFilesHtml, /15\*1024\*1024/);
+  assert.match(organisationFilesHtml, /getDownloadURL/);
 });

@@ -502,3 +502,41 @@ test('explicit organisation resource grants are tenant-scoped, recipient-readabl
   await assertFails(getDoc(doc(recipient, 'organisationResourceShares/' + shareId)));
   await assertFails(getDoc(doc(suspended, 'organisationResourceShares/' + shareId)));
 });
+
+
+test('organisation document storage is tenant-scoped and follows parent sharing access', async () => {
+  const memberStorage = env.authenticatedContext('member').storage();
+  const colleagueStorage = env.authenticatedContext('colleague').storage();
+  const outsiderStorage = env.authenticatedContext('outsider').storage();
+  const path = 'organisationDocuments/org-private/property/property-shared/doc-image-1/photo.jpg';
+  const bytes = new Uint8Array([1, 2, 3, 4]);
+  const metadata = {contentType:'image/jpeg',customMetadata:{
+    organisationId:'org-private',resourceType:'property',resourceId:'property-shared',
+    documentId:'doc-image-1',uploaderUid:'member'
+  }};
+  await assertSucceeds(uploadBytes(ref(memberStorage,path),bytes,metadata));
+  await assertSucceeds(getBytes(ref(memberStorage,path)));
+  await assertSucceeds(getBytes(ref(colleagueStorage,path)));
+  await assertFails(getBytes(ref(outsiderStorage,path)));
+  await assertFails(uploadBytes(ref(outsiderStorage,'organisationDocuments/org-private/property/property-shared/forged/file.jpg'),bytes,metadata));
+  await assertFails(uploadBytes(ref(memberStorage,'organisationDocuments/org-private/property/property-shared/oversize/file.exe'),bytes,{contentType:'application/octet-stream',customMetadata:metadata.customMetadata}));
+});
+
+
+test('organisation document metadata can be created by an authorised manager for another member’s resource', async () => {
+  const manager = env.authenticatedContext('admin').firestore();
+  const creator = env.authenticatedContext('member').firestore();
+  const metadata = {
+    id:'org-doc-manager-1',organisationId:'org-private',resourceType:'property',
+    resourceId:'property-shared',createdByUid:'admin',title:'EPC certificate',
+    fileName:'epc.pdf',
+    storagePath:'organisationDocuments/org-private/property/property-shared/org-doc-manager-1/epc.pdf',
+    size:1024,contentType:'application/pdf',createdAt:serverTimestamp()
+  };
+  await assertSucceeds(setDoc(doc(manager,'organisationDocuments/org-doc-manager-1'),metadata));
+  await assertSucceeds(getDoc(doc(creator,'organisationDocuments/org-doc-manager-1')));
+  await assertFails(setDoc(doc(creator,'organisationDocuments/forged-doc'),{
+    ...metadata,id:'forged-doc',createdByUid:'outsider',
+    storagePath:'organisationDocuments/org-private/property/property-shared/forged-doc/epc.pdf'
+  }));
+});
