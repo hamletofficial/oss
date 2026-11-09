@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const MAIN_ORIGIN=location.origin;
-const TENANT_DOMAIN='platform.hamlet-ai.co.uk';
+const TENANT_DOMAIN='orgs.hamlet-ai.co.uk';
 let pending=null;
 function message(text,error){let el=document.getElementById('notice');if(!el){el=document.createElement('div');el.id='notice';el.className='notice';const toolbar=document.querySelector('.toolbar');if(toolbar)toolbar.after(el);}el.textContent=text;el.className='notice show'+(error?' error':'');}
 function setup(){
