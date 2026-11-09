@@ -1065,6 +1065,13 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /organisationTeamMembers/{assignmentId} {
+      allow read: if request.auth != null
+        && isActiveOrganisationMember(resource.data.organisationId)
+        && (resource.data.uid == request.auth.uid || isOrganisationManager(resource.data.organisationId));
+      allow create, update, delete: if false;
+    }
+
     // Organisation audit history contains administrative metadata and is restricted to owners/admins.
     // Events are append-only and authored by trusted Cloud Functions only.
     match /organisationActivity/{activityId} {
