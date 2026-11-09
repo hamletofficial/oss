@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {initializeTestEnvironment, assertSucceeds, assertFails} = require('@firebase/rules-unit-testing');
-const {doc, getDoc, setDoc, deleteDoc, updateDoc, serverTimestamp} = require('firebase/firestore');
+const {doc, getDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, collection, getDocs, query, where} = require('firebase/firestore');
 const {ref, uploadBytes, getBytes} = require('firebase/storage');
 
 let env;
@@ -41,6 +41,10 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationDirectory/org-private'), {
       organisationId: 'org-private', name: 'Private Organisation',
       slug: 'private-org', isPublic: false, status: 'active',
+    });
+    await setDoc(doc(db, 'organisationVerificationRequests/org-private'), {
+      organisationId: 'org-private', status: 'pending', legalName: 'Private Legal Ltd',
+      registrationNumber: '01234567', evidenceUrl: 'https://example.com/registry',
     });
     await setDoc(doc(db, 'organisationMembers/org-private_owner'), {
       organisationId: 'org-private', uid: 'owner', role: 'owner', status: 'active',
@@ -374,6 +378,25 @@ test('only active public directory projections are publicly readable', async () 
   await assertFails(getDoc(doc(unauthenticated, 'organisationDirectory/org-private')));
   await assertFails(getDoc(doc(unauthenticated, 'organisationDirectory/org-suspended')));
   await assertFails(getDoc(doc(unauthenticated, 'organisationSlugs/suspended-org')));
+  const results = await assertSucceeds(getDocs(query(
+    collection(unauthenticated, 'organisationDirectory'),
+    where('isPublic', '==', true), where('status', '==', 'active')
+  )));
+  assert.deepEqual(results.docs.map(snapshot => snapshot.id), ['org-public']);
+});
+
+test('organisation verification evidence is private to managers and platform super-admin', async () => {
+  const member = env.authenticatedContext('member').firestore();
+  const manager = env.authenticatedContext('admin').firestore();
+  const anonymous = env.unauthenticatedContext().firestore();
+  const platformAdmin = env.authenticatedContext('6epDJRISlBbRPWKosDZZWuiGQzK2').firestore();
+  await assertFails(getDoc(doc(anonymous, 'organisationVerificationRequests/org-private')));
+  await assertFails(getDoc(doc(member, 'organisationVerificationRequests/org-private')));
+  await assertSucceeds(getDoc(doc(manager, 'organisationVerificationRequests/org-private')));
+  await assertSucceeds(getDoc(doc(platformAdmin, 'organisationVerificationRequests/org-private')));
+  await assertFails(setDoc(doc(manager, 'organisationVerificationRequests/forged'), {
+    organisationId: 'org-private', status: 'verified',
+  }));
 });
 
 test('organisation lifecycle and audit collections are not client-writable', async () => {
@@ -389,6 +412,9 @@ test('organisation lifecycle and audit collections are not client-writable', asy
   }));
   await assertFails(setDoc(doc(owner, 'organisationActivity/fake'), {
     organisationId: 'org-private', actorUid: 'owner', action: 'forged',
+  }));
+  await assertFails(setDoc(doc(owner, 'organisationResourceImports/fake'), {
+    organisationId: 'org-private', actorUid: 'owner', sourceDocumentId: 'personal-deal',
   }));
 });
 

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Discover organisations working across the Hamlet commercial property network.">
+  <meta name="theme-color" content="#071D4A">
+  <title>Organisations | Hamlet</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/index.css?v=20261015-5">
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#60a5fa}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px 'Open Sans',Arial,sans-serif}
+    .page{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:24px 0 64px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:12px 0 20px}
+    .brand{color:#fff;text-decoration:none;font-size:24px;font-weight:800}.brand span{color:var(--blue)}.top a:last-child{color:#bfdbfe;font-weight:700}
+    .hero{padding:44px 0 28px}.eyebrow{color:#93c5fd;text-transform:uppercase;letter-spacing:.13em;font-size:.72rem;font-weight:800}.hero h1{font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.04em;margin:.45rem 0 .8rem}.hero p{max-width:720px;color:var(--muted);line-height:1.65}
+    .controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,260px);gap:12px;margin:12px 0 20px}.controls input,.controls select{width:100%;min-height:46px;padding:10px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:var(--text);font:inherit}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.org{min-width:0;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.org h2{font-size:1.12rem;margin:0 0 7px;overflow-wrap:anywhere}.org p{margin:8px 0;color:var(--muted);line-height:1.55;overflow-wrap:anywhere}.meta{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.chip{border:1px solid #334155;background:#172338;border-radius:999px;padding:4px 9px;color:#bfdbfe;font-size:.75rem;font-weight:700}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}.actions a{color:#93c5fd;font-size:.86rem;font-weight:750}.state{min-height:1.5em;color:var(--muted);line-height:1.5;margin:12px 0}.empty{grid-column:1/-1;border:1px dashed #475569;border-radius:12px;padding:22px;color:var(--muted);line-height:1.6}
+    @media(max-width:820px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.controls,.grid{grid-template-columns:1fr}.page{width:calc(100% - 22px)}.hero{padding-top:32px}}
+  </style>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="top"><a class="brand" href="/index.html">hamlet<span>.</span></a><a href="/login.html?next=%2Forganisations.html">Organisation sign in</a></header>
+    <section class="hero"><div class="eyebrow">Hamlet network</div><h1>Organisations</h1><p>Discover organisations that have chosen to share their profile with the Hamlet network. Public information is published by each organisation’s owner or administrator.</p></section>
+    <section class="controls" aria-label="Filter organisations"><input id="search" type="search" autocomplete="off" placeholder="Search name, industry or location" aria-label="Search organisations"><select id="industry" aria-label="Filter by industry"><option value="">All industries</option></select></section>
+    <p class="state" id="status" role="status" aria-live="polite">Loading public organisation profiles…</p>
+    <section class="grid" id="results" aria-label="Public organisations"></section>
+  </main>
+  <script>
+    (function(){
+      'use strict';
+      const $=id=>document.getElementById(id);
+      let profiles=[],auth,functions;
+      function render(){
+        const query=$('search').value.trim().toLowerCase(),industry=$('industry').value;
+        const rows=profiles.filter(item=>{
+          const text=[item.name,item.description,item.industry,item.publicLocation].join(' ').toLowerCase();
+          return (!query||text.includes(query))&&(!industry||item.industry===industry);
+        });
+        const root=$('results');root.replaceChildren();
+        if(!rows.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=profiles.length?'No public organisations match those filters.':'No organisations have published a public profile yet.';root.appendChild(empty);return;}
+        rows.forEach(item=>{
+          const card=document.createElement('article');card.className='org';
+          const name=document.createElement('h2');name.textContent=item.name||'Organisation';card.appendChild(name);
+          if(item.description){const desc=document.createElement('p');desc.textContent=item.description;card.appendChild(desc);}
+          const meta=document.createElement('div');meta.className='meta';
+          if(item.verificationStatus==='verified'){const verified=document.createElement('span');verified.className='chip';verified.textContent='Hamlet verified';meta.appendChild(verified);}
+          [item.industry,item.publicLocation].filter(Boolean).forEach(value=>{const chip=document.createElement('span');chip.className='chip';chip.textContent=value;meta.appendChild(chip);});
+          if(meta.childNodes.length)card.appendChild(meta);
+          const actions=document.createElement('div');actions.className='actions';
+          if(typeof item.website==='string'&&/^https:\/\//i.test(item.website)){const website=document.createElement('a');website.href=item.website;website.target='_blank';website.rel='noopener noreferrer';website.textContent='Organisation website';actions.appendChild(website);}
+          if(typeof item.slug==='string'&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(item.slug)){const workspace=document.createElement('a');workspace.href='https://'+item.slug+'.orgs.hamlet-ai.co.uk/';workspace.textContent='Open Hamlet workspace';actions.appendChild(workspace);}
+          const requestButton=document.createElement('button');requestButton.type='button';requestButton.textContent='Request to join';requestButton.className='request-join';requestButton.addEventListener('click',async()=>{
+            const user=auth.currentUser;
+            if(!user){location.href='/login.html?next='+encodeURIComponent('/organisation-directory.html');return;}
+            requestButton.disabled=true;
+            try{await user.reload();if(user.emailVerified!==true)throw new Error('Verify your email address before requesting membership.');const result=await functions.httpsCallable('requestOrganisationMembership')({organisationId:item.organisationId});requestButton.textContent=result.data.status==='active'?'Already a member':'Request pending';}
+            catch(error){requestButton.disabled=false;requestButton.textContent='Request to join';$('status').textContent=error.message||'Unable to request membership.';}
+          });actions.appendChild(requestButton);
+          if(actions.childNodes.length)card.appendChild(actions);
+          root.appendChild(card);
+        });
+      }
+      async function load(){
+        if(!window.firebase||!window.firebaseConfig){$('status').textContent='Organisation profiles are temporarily unavailable.';return;}
+        try{
+          if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+          auth=firebase.auth();functions=firebase.app().functions('us-central1');
+          const snapshot=await firebase.firestore().collection('organisationDirectory').where('isPublic','==',true).where('status','==','active').orderBy('name').limit(200).get();
+          profiles=snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(item=>item.isPublic===true&&item.status==='active');
+          const industries=[...new Set(profiles.map(item=>item.industry).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+          industries.forEach(value=>$('industry').add(new Option(value,value)));
+          $('status').textContent=profiles.length+' public organisation'+(profiles.length===1?'':'s');render();
+        }catch(error){console.error('Public organisation directory could not load:',error);$('status').textContent='The public organisation directory is unavailable right now. Please try again later.';}
+      }
+      $('search').addEventListener('input',render);$('industry').addEventListener('change',render);load();
+    })();
+  </script>
+</body>
+</html>

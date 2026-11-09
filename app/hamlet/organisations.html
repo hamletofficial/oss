@@ -34,6 +34,9 @@
     .card:hover{border-color:#477bb6;transform:translateY(-2px)}.card .icon{font-size:21px;margin-bottom:13px}.card h2{margin-bottom:7px}.card p{margin:0;color:var(--muted);line-height:1.55}.card .open{display:block;margin-top:15px;color:#93c5fd;font-weight:800;font-size:12px}
     .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
     .empty{padding:20px;border:1px dashed #40516a;border-radius:12px;color:var(--muted);line-height:1.6}
+    .profile-panel{margin:0 0 16px;padding:18px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.96)}.profile-panel h2{margin:0 0 8px}.profile-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.profile-form label{display:grid;gap:5px;color:#cbd5e1;font-size:11px;font-weight:800}.profile-form input,.profile-form select,.profile-form textarea{width:100%;min-width:0;padding:10px 11px;border:1px solid #40516a;border-radius:8px;background:#0d1728;color:var(--text);font:inherit}.profile-form textarea{min-height:90px;resize:vertical}.profile-form .wide{grid-column:1/-1}.profile-form button{justify-self:start;min-height:40px;padding:9px 13px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:white;font:700 12px inherit;cursor:pointer}.profile-form button:disabled{opacity:.55;cursor:not-allowed}.profile-hint{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+    .requests-panel{margin:0 0 16px;padding:18px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.96)}.request-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.request-row:first-child{border-top:0}.request-detail{min-width:0;overflow-wrap:anywhere}.request-detail small{display:block;color:var(--muted);margin-top:4px}.request-actions{display:flex;gap:7px;flex-wrap:wrap}.request-actions button{min-height:36px;padding:8px 10px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer}.request-actions button.secondary{border-color:#475569;background:#172338;color:#dbeafe}
+    .leave-bar{display:flex;justify-content:flex-end;margin:-6px 0 14px}.leave-bar button{min-height:36px;padding:8px 11px;border:1px solid #7f1d1d;border-radius:8px;background:#3a1c2a;color:#fecaca;font:700 12px inherit;cursor:pointer}.leave-bar button:disabled{opacity:.55;cursor:not-allowed}
     .footnote{font-size:11px;color:#8192aa;line-height:1.55;margin:18px 0 0}
     #authGate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#0b1120}.gate-card{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}.gate-card p{color:var(--muted);line-height:1.6}
     .hidden{display:none!important}
@@ -47,15 +50,50 @@
     <section class="hero"><div class="eyebrow">Team operations</div><h1 id="pageTitle">Organisation workspace</h1><p id="intro">Choose the organisation you are working with, then open the relevant Hamlet tools. Organisation membership is checked before this page displays your available workspaces.</p></section>
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
     <div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Loading membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select class="org-select" id="orgSelect" aria-label="Select organisation"><option>Loading…</option></select></div><span class="role" id="roleBadge">Member</span></div>
+    <div class="leave-bar"><button type="button" id="leaveOrganisationBtn" hidden>Leave organisation</button></div>
+    <section class="profile-panel" aria-labelledby="profileHeading">
+      <h2 id="profileHeading">Organisation profile</h2>
+      <p class="muted">Owners and administrators can update the organisation profile and choose whether it appears in the public Hamlet directory. Only approved public profile fields are published.</p>
+      <form class="profile-form" id="profileForm">
+        <label>Organisation name<input id="profileName" maxlength="120" minlength="2" required></label>
+        <label>Industry<input id="profileIndustry" maxlength="80" placeholder="e.g. Commercial property"></label>
+        <label>Website (HTTPS)<input id="profileWebsite" type="url" maxlength="254" placeholder="https://example.com"></label>
+        <label>Public location<input id="profileLocation" maxlength="120" placeholder="e.g. London, UK"></label>
+        <label class="wide">Public description<textarea id="profileDescription" maxlength="500" placeholder="A short introduction to your organisation"></textarea></label>
+        <label>Directory visibility<select id="profileVisibility"><option value="private">Private</option><option value="public">Public</option></select></label>
+        <button id="saveProfileBtn" type="submit">Save organisation profile</button>
+      </form>
+      <p class="profile-hint" id="profileStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section class="requests-panel hidden" id="membershipRequestPanel" aria-labelledby="membershipRequestsHeading">
+      <h2 id="membershipRequestsHeading">Membership requests</h2>
+      <p class="muted">Approve requests to add verified applicants as standard members, or decline them.</p>
+      <div id="membershipRequestList" class="muted">Select an organisation to review requests.</div>
+    </section>
+    <section class="profile-panel" aria-labelledby="verificationHeading">
+      <h2 id="verificationHeading">Organisation verification</h2>
+      <p class="muted">Hamlet reviews the registered legal name and registration number against the official registry or evidence URL. Do not submit identity documents here. Verification status is shown in the public directory.</p>
+      <p id="verificationStatus" role="status" aria-live="polite">Status: unverified.</p>
+      <p id="verificationReport" class="profile-hint"></p>
+      <form class="profile-form" id="verificationForm">
+        <label>Registered legal name<input id="verificationLegalName" maxlength="160" minlength="2" required></label>
+        <label>Company / organisation registration number<input id="verificationRegistrationNumber" maxlength="80" minlength="2" required></label>
+        <label class="wide">Official registry or evidence page (HTTPS)<input id="verificationEvidenceUrl" type="url" maxlength="500" placeholder="https://find-and-update.company-information.service.gov.uk/" required></label>
+        <label class="wide" style="display:flex;align-items:flex-start;gap:9px"><input id="verificationAttestation" type="checkbox" required style="width:auto;margin-top:2px">I confirm that I am authorised to submit this information and that it accurately identifies this organisation.</label>
+        <button id="submitVerificationBtn" type="submit">Submit for verification</button>
+      </form>
+    </section>
     <section class="grid" aria-label="Organisation operational tools">
+      <a class="card" href="/app/hamlet/organisation-association.html"><div class="icon" aria-hidden="true">↗</div><h2>Copy a personal record</h2><p>Choose a personal deal or property to copy into this organisation as a restricted snapshot. Your personal record stays unchanged.</p><span class="open">Review personal records →</span></a>
       <a class="card" href="/app/hamlet/organisation-deals.html"><div class="icon" aria-hidden="true">▦</div><h2>Shared deals &amp; pipeline</h2><p>Create and manage tenant-scoped organisation deals, with access controlled by your organisation role and each deal’s sharing policy.</p><span class="open">Open organisation pipeline →</span></a>
       <a class="card" href="/app/public/live.html"><div class="icon" aria-hidden="true">⌂</div><h2>Live properties</h2><p>Browse available commercial and residential property opportunities across Hamlet.</p><span class="open">Browse live properties →</span></a>
       <a class="card" href="/app/hamlet/organisation-properties.html"><div class="icon" aria-hidden="true">▤</div><h2>Organisation property portfolio</h2><p>Manage commercial and residential assets held by this organisation, separately from individual broker portfolios.</p><span class="open">Open organisation portfolio →</span></a>
       <a class="card" href="/app/hamlet/organisation-files.html"><div class="icon" aria-hidden="true">▧</div><h2>Documents & assets</h2><p>Securely store and manage property imagery, certificates and transaction documents against organisation resources.</p><span>Open document workspace →</span></a>
       <a class="card" href="/messages.html"><div class="icon" aria-hidden="true">✉</div><h2>Team communications</h2><p>Coordinate with colleagues and other Hamlet members through direct messages.</p><span class="open">Open messages →</span></a>
       <a class="card" href="/app/hamlet/ai-assistant.html"><div class="icon" aria-hidden="true">✦</div><h2>AI assistant</h2><p>Use Hamlet's assistant to support research, property workflows and deal preparation.</p><span class="open">Open AI assistant →</span></a>
-      <a class="card" href="/app/hamlet/organisation-teams.html"><div class="icon" aria-hidden="true">⚑</div><h2>Teams & permissions</h2><p>Create teams, assign colleagues and configure access to restricted deals, properties and documents.</p><span class="open">Manage teams →</span></a>
+      <a class="card" href="/app/hamlet/organisation-teams.html"><div class="icon" aria-hidden="true">⚑</div><h2>Teams & permissions</h2><p>Create teams, assign colleagues and configure access to restricted deals and properties.</p><span class="open">Manage teams →</span></a>
       <a class="card" href="/app/hamlet/organisation-activity.html"><div class="icon" aria-hidden="true">◷</div><h2>Audit history</h2><p>Review organisation creation, invitations and membership administration events. Available to owners and administrators.</p><span class="open">View audit history →</span></a>
+      <a class="card" href="/app/hamlet/organisation-analytics.html"><div class="icon" aria-hidden="true">◧</div><h2>Organisation analytics</h2><p>Review aggregate membership, team, deal pipeline and property portfolio counts. Available to owners and administrators.</p><span class="open">View analytics →</span></a>
       <a class="card" href="/organisations.html"><div class="icon" aria-hidden="true">⚙</div><h2>Organisation administration</h2><p>Manage the organisation profile, membership, invitations and access roles in the Members Area.</p><span class="open">Manage organisation →</span></a>
     </section>
     <p class="footnote">The shared deal pipeline and property portfolio use separate organisation-owned collections. Audit history is restricted to organisation owners and administrators; events are written by trusted backend operations and cannot be forged or altered by clients. Resource-level deal and property change history will be added in a later increment.</p>
@@ -76,6 +114,18 @@
     $('roleBadge').textContent=org.role;
     $('pageTitle').textContent=org.name+' workspace';
     $('orgSelect').value=org.id;
+    $('profileName').value=org.name||'';$('profileIndustry').value=org.industry||'';$('profileWebsite').value=org.website||'';$('profileLocation').value=org.publicLocation||'';$('profileDescription').value=org.description||'';$('profileVisibility').value=org.visibility==='public'?'public':'private';
+    const editable=['owner','admin'].includes(org.role);
+    ['profileName','profileIndustry','profileWebsite','profileLocation','profileDescription','profileVisibility','saveProfileBtn'].forEach(id=>$(id).disabled=!editable);
+    $('profileStatus').textContent=editable?'Only owners and administrators can edit this profile.':'Profile editing is restricted to organisation owners and administrators.';
+    const verificationStatus=org.verificationStatus||'unverified';
+    $('verificationStatus').textContent='Status: '+verificationStatus+'.';
+    $('verificationReport').textContent='';
+    ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=!editable||verificationStatus==='pending'||verificationStatus==='verified');
+    if(editable)firebase.app().functions('us-central1').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
+    $('leaveOrganisationBtn').hidden=org.role==='owner';
+    $('membershipRequestPanel').classList.toggle('hidden',!editable);
+    if(editable)loadMembershipRequests(org.id);
     try{sessionStorage.setItem('hamletActiveOrganisationId',org.id);}catch(e){}
   }
   async function loadMemberships(){
@@ -106,6 +156,70 @@
     const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
     selectOrganisation(chosen);
   }
+  $('profileForm').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const org=organisations.find(item=>item.id===$('orgSelect').value);
+    if(!org||!['owner','admin'].includes(org.role))return;
+    const button=$('saveProfileBtn');button.disabled=true;$('profileStatus').textContent='Saving organisation profile…';
+    try{
+      if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+      const result=await firebase.app().functions('us-central1').httpsCallable('updateOrganisationProfile')({
+        organisationId:org.id,name:$('profileName').value,industry:$('profileIndustry').value,
+        website:$('profileWebsite').value,publicLocation:$('profileLocation').value,
+        description:$('profileDescription').value,visibility:$('profileVisibility').value
+      });
+      Object.assign(org,result.data);
+      $('selectedName').textContent=org.name;$('pageTitle').textContent=org.name+' workspace';
+      $('profileStatus').textContent='Organisation profile saved.';
+      notice(org.visibility==='public'?'Profile saved and listed in the public directory.':'Profile saved and hidden from the public directory.');
+    }catch(error){console.error('Organisation profile update failed:',error);$('profileStatus').textContent=error.message||'Unable to save the organisation profile.';}
+    finally{button.disabled=false;}
+  });
+  $('verificationForm').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const org=organisations.find(item=>item.id===$('orgSelect').value);
+    if(!org||!['owner','admin'].includes(org.role))return;
+    if(!$('verificationAttestation').checked)return;
+    const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
+    try{
+      const result=await firebase.app().functions('us-central1').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
+      org.verificationStatus=result.data.status;
+      $('verificationStatus').textContent='Status: pending.';$('verificationReport').textContent='Your request is awaiting review by Hamlet.';
+      ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
+      notice('Verification request submitted.');
+    }catch(error){console.error('Organisation verification request failed:',error);$('verificationReport').textContent=error.message||'Unable to submit verification request.';button.disabled=false;}
+  });
+  async function loadMembershipRequests(orgId){
+    const root=$('membershipRequestList');root.textContent='Loading requests…';
+    try{
+      const snapshot=await db.collection('organisationMembershipRequests').where('organisationId','==',orgId).where('status','==','pending').orderBy('createdAt','desc').limit(100).get();
+      root.replaceChildren();
+      if(snapshot.empty){root.textContent='No pending membership requests.';return;}
+      snapshot.docs.forEach(doc=>{
+        const data=doc.data(),row=document.createElement('div');row.className='request-row';
+        const detail=document.createElement('div');detail.className='request-detail';detail.textContent=data.email||'Verified Hamlet member';
+        const meta=document.createElement('small');meta.textContent='Requested membership as a standard member';detail.appendChild(meta);
+        const actions=document.createElement('div');actions.className='request-actions';
+        [[true,'Approve'],[false,'Decline']].forEach(([approve,label])=>{
+          const button=document.createElement('button');button.type='button';button.textContent=label;if(!approve)button.className='secondary';
+          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('us-central1').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
+          actions.appendChild(button);
+        });
+        row.append(detail,actions);root.appendChild(row);
+      });
+    }catch(error){console.error('Membership request list unavailable:',error);root.textContent='Membership requests could not be loaded.';}
+  }
+  $('leaveOrganisationBtn').addEventListener('click',async()=>{
+    const org=organisations.find(item=>item.id===$('orgSelect').value);
+    if(!org||org.role==='owner'||!confirm('Leave '+org.name+'? Your membership and team access will be removed. You will need a new invitation to rejoin.'))return;
+    const button=$('leaveOrganisationBtn');button.disabled=true;
+    try{
+      await firebase.app().functions('us-central1').httpsCallable('leaveOrganisation')({organisationId:org.id});
+      notice('You have left '+org.name+'.');
+      if(organisations.length<=1){location.replace('/organisations.html');return;}
+      await loadMemberships();
+    }catch(error){console.error('Unable to leave organisation:',error);notice(error.message||'Unable to leave this organisation.',true);button.disabled=false;}
+  });
   $('orgSelect').addEventListener('change',e=>selectOrganisation(e.target.value));
   function init(){
     if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}

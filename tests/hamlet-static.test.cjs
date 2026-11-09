@@ -7,14 +7,20 @@ const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
 const organisationsHtml = fs.readFileSync('organisations.html', 'utf8');
 const appOrganisationsHtml = fs.readFileSync('app/hamlet/organisations.html', 'utf8');
+const organisationDirectoryHtml = fs.readFileSync('organisation-directory.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
 const searchIndex = JSON.parse(fs.readFileSync('search-index.json', 'utf8'));
 const firestore = fs.readFileSync('firestore.rules', 'utf8');
 const storage = fs.readFileSync('storage.rules', 'utf8');
 const functions = fs.readFileSync('functions/index.js', 'utf8');
 const organisationFunctions = fs.readFileSync('functions/hamlet-organisations.js', 'utf8');
+const organisationAuditFunctions = fs.readFileSync('functions/hamlet-organisation-audit.js', 'utf8');
 const organisationDealsHtml = fs.readFileSync('app/hamlet/organisation-deals.html', 'utf8');
 const organisationFilesHtml = fs.readFileSync('app/hamlet/organisation-files.html', 'utf8');
+const organisationActivityHtml = fs.readFileSync('app/hamlet/organisation-activity.html', 'utf8');
+const organisationAssociationHtml = fs.readFileSync('app/hamlet/organisation-association.html', 'utf8');
+const organisationAnalyticsHtml = fs.readFileSync('app/hamlet/organisation-analytics.html', 'utf8');
+const organisationVerificationAdminHtml = fs.readFileSync('app/hamlet/organisation-verification-admin.html', 'utf8');
 
 test('all inline JavaScript blocks parse', () => {
   const blocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -174,6 +180,81 @@ test('workspace organisation management page JavaScript parses', () => {
   assert.doesNotMatch(appOrganisationsHtml, /createOrganisationInvitation|removeOrganisationMember|acceptOrganisationInvitation|revokeOrganisationInvitation/);
   assert.doesNotMatch(appOrganisationsHtml, /location\.hash|replaceState/);
   assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
+});
+
+test('organisation profile editing uses a trusted callable and public directory projection', () => {
+  const blocks = [...appOrganisationsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-profile-inline-' + index + '.js' }));
+  }
+  assert.match(appOrganisationsHtml, /updateOrganisationProfile/);
+  assert.match(organisationFunctions, /exports\.updateOrganisationProfile = onCall/);
+  assert.match(organisationFunctions, /exports\.requestOrganisationMembership = onCall/);
+  assert.match(organisationFunctions, /exports\.reviewOrganisationMembershipRequest = onCall/);
+  assert.match(organisationFunctions, /exports\.leaveOrganisation = onCall/);
+  assert.match(organisationFunctions, /exports\.submitOrganisationVerification = onCall/);
+  assert.match(organisationFunctions, /exports\.reviewOrganisationVerification = onCall/);
+  assert.match(organisationDirectoryHtml, /collection\('organisationDirectory'\)/);
+  assert.match(organisationDirectoryHtml, /where\('isPublic','==',true\)/);
+  assert.match(organisationDirectoryHtml, /where\('status','==','active'\)/);
+  assert.match(organisationDirectoryHtml, /\.orgs\.hamlet-ai\.co\.uk/);
+  assert.match(firestore, /match \/organisationDirectory\/{organisationId}/);
+  assert.match(firestore, /match \/organisationMembershipRequests\/{requestId}/);
+  assert.match(appOrganisationsHtml, /reviewOrganisationMembershipRequest/);
+  assert.match(appOrganisationsHtml, /leaveOrganisation/);
+  assert.match(organisationDirectoryHtml, /requestOrganisationMembership/);
+});
+
+test('organisation verification review page parses and is protected by the trusted platform callable', () => {
+  const blocks = [...organisationVerificationAdminHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-verification-inline-' + index + '.js' }));
+  }
+  assert.match(organisationVerificationAdminHtml, /reviewOrganisationVerification/);
+  assert.match(organisationFunctions, /HAMLET_SUPER_ADMIN_UID = "6epDJRISlBbRPWKosDZZWuiGQzK2"/);
+  assert.match(organisationDirectoryHtml, /Hamlet verified/);
+  assert.match(firestore, /match \/organisationVerificationRequests\/{organisationId}/);
+});
+
+test('organisation audit page script parses and file removal uses the trusted lifecycle callable', () => {
+  const blocks = [...organisationActivityHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-activity-inline-' + index + '.js' }));
+  }
+  assert.match(organisationFilesHtml, /deleteOrganisationDocument/);
+  assert.match(organisationFunctions, /exports\.deleteOrganisationDocument = onCall/);
+  assert.match(organisationAuditFunctions, /exports\.recordOrganisationDocumentActivity/);
+  assert.match(organisationActivityHtml, /organisation\.document_uploaded/);
+  assert.match(organisationActivityHtml, /organisation\.document_deleted/);
+});
+
+test('personal-record association is explicit, tenant-scoped, owner-checked and snapshot-only', () => {
+  const blocks = [...organisationAssociationHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-association-inline-' + index + '.js' }));
+  }
+  assert.match(organisationAssociationHtml, /explicitly authorise organisation owners and administrators/);
+  assert.match(organisationAssociationHtml, /The original stays unchanged/);
+  assert.match(organisationFunctions, /exports\.copyPersonalResourceToOrganisation = onCall/);
+  assert.match(organisationFunctions, /sourceOwner !== user\.uid/);
+  assert.match(organisationFunctions, /visibility: "restricted"/);
+  assert.match(firestore, /match \/organisationResourceImports\/{importId}/);
+  assert.match(appOrganisationsHtml, /organisation-association\.html/);
+});
+
+test('organisation analytics client parses and is connected to a restricted aggregate callable', () => {
+  const blocks = [...organisationAnalyticsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-analytics-inline-' + index + '.js' }));
+  }
+  assert.match(organisationFunctions, /exports\.getOrganisationAnalytics = onCall/);
+  assert.match(organisationFunctions, /requireRole\(memberSnap\.exists \? memberSnap\.data\(\) : null, \["owner", "admin"\]\)/);
+  assert.match(appOrganisationsHtml, /organisation-analytics\.html/);
 });
 
 
