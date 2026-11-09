@@ -15,7 +15,7 @@ const RESERVED_SLUGS = new Set([
 const HAMLET_SUPER_ADMIN_UID = "6epDJRISlBbRPWKosDZZWuiGQzK2";
 
 function getDb() {
-  if (!admin.apps.length) admin.initializeApp();
+  try { admin.app(); } catch (err) { admin.initializeApp(); }
   return getFirestore(admin.app());
 }
 
