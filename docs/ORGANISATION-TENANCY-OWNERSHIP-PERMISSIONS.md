@@ -114,13 +114,13 @@ Roles are organisation-scoped. A role does not grant access to another organisat
 | Create and administer teams | Yes | Yes | No | No | No |
 | Assign members to teams | Yes | Yes | No | No | No |
 | Read organisation-wide resources | Yes | Yes | Yes | Yes | Yes |
-| Read restricted resources | Yes | Yes | Yes | Creator / explicit share / team grant | Creator / explicit share / team grant |
-| Create and manage organisation resources | Yes | Yes | Yes | Own created resources | No |
-| Change sharing policy | Yes | Yes | Yes | No | No |
+| Read restricted resources | Yes | Yes | Creator / explicit share / team grant | Creator / explicit share / team grant | Creator / explicit share / team grant |
+| Create and manage organisation resources | Yes | Yes | Own created resources, organisation-wide resources, and resources with both team read and write grants | Own created resources | No |
+| Change sharing policy | Yes | Yes | No | No | No |
 | Read organisation audit history | Yes | Yes | No | No | No |
 | Transfer organisation ownership | Dedicated trusted operation only | No | No | No | No |
 
-**Implementation note:** Existing code and Firestore Rules grant managers broad access to restricted organisation resources and allow them to manage resource sharing. Team creation and team assignment are currently limited to owners and admins. The table records this intended baseline; any future narrowing or expansion must update backend checks, Firestore Rules, Storage Rules, tests and UI together.
+**Implementation note:** Managers do not receive blanket access to restricted resources. They retain access to resources they create and can read restricted resources explicitly shared with them or granted through a team read permission. A direct share is read-only; editing or deleting a restricted resource requires creator ownership or both team read and write permissions. Managers may continue to manage organisation-wide resources. Only owners and administrators may grant or revoke individual resource access, change resource visibility or assign resources to teams. Team creation, team permission changes and team membership assignment are also limited to owners and administrators. Backend checks, Firestore Rules, Storage Rules, tests and UI must enforce this policy together.
 
 “Limited” means the precise operation must be checked in the trusted callable; it is not permission to change the owner's identity or transfer ownership.
 
@@ -196,7 +196,9 @@ Before production approval, the emulator and staging suites must cover:
 - Each role is tested for each administrative and resource operation.
 - A viewer cannot create or modify tenant resources.
 - A member cannot change visibility, shared-member lists, team assignment, tenant ID or creator attribution where prohibited.
-- A manager's restricted-resource access matches the approved role matrix.
+- A manager can read restricted resources only when they are the creator, receive an explicit share, or hold the required team permission.
+- Direct shares grant managers read access only; editing restricted resources requires creator ownership or both team read and write permissions.
+- Managers cannot grant/revoke individual resource access, change visibility or assign resources to teams; owners and administrators can.
 - Team permissions cannot grant access outside the parent organisation or beyond the declared permission.
 - Removing or suspending a member revokes direct and team-derived access.
 - Suspending an organisation denies all tenant access without deleting data.
@@ -212,12 +214,12 @@ The existing organisation foundation provides trusted creation, invitation and m
 
 - End-to-end tenant staging and cross-tenant isolation acceptance.
 - Ownership transfer callable and corresponding tests.
-- Organisation suspension/closure callable and lifecycle tests.
+- [x] Owner-only organisation suspension, reactivation from suspension, and irreversible closure callable with slug/directory synchronisation and audit events; emulator coverage is included, pending a full test run.
 - Full Storage Rules acceptance for organisation documents.
 - Complete resource-level audit and document metadata lifecycle.
 - Query/index review for membership and tenant resource access patterns.
 - Explicit role matrix tests across Firestore, Storage and callable operations.
-- Review of manager access to restricted resources against product policy.
+- [x] Manager restricted-resource access, sharing administration and team assignment are aligned to the least-privilege policy in the role matrix; emulator coverage added, pending a full test run.
 - Reconciliation of the older architecture schema descriptions with the canonical `uid` / `email` implementation fields.
 
 Do not infer that a gap is complete because a related UI control, callable, deployment or CI workflow exists.

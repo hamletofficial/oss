@@ -75,7 +75,7 @@
             <div class="field"><label for="propertyRent">Annual rent (£)</label><input id="propertyRent" type="number" min="0" step="0.01"></div>
             <div class="field full"><label for="propertySustainability">Sustainability credential</label><select id="propertySustainability"><option value="">Not specified</option><option>Passivhaus</option><option>EnerPHit</option><option>BREEAM</option><option>WELL</option><option>EPC A</option><option>EPC B</option><option>Other</option></select></div>
             <div class="field full"><label for="propertyDescription">Description / notes</label><textarea id="propertyDescription" maxlength="4000" placeholder="Asset overview, sustainability details and relevant notes"></textarea></div>
-            <div class="field full"><label for="propertyVisibility">Sharing policy</label><select id="propertyVisibility"><option value="organisation">Visible to active organisation members</option><option value="restricted">Restricted to creator and organisation managers</option></select><p class="muted" style="font-size:11px;margin:0;line-height:1.5">Only owners, administrators and managers can change sharing policy. Per-user sharing grants are not yet available.</p></div>
+            <div class="field full"><label for="propertyVisibility">Sharing policy</label><select id="propertyVisibility"><option value="organisation">Visible to active organisation members</option><option value="restricted">Restricted to creator, shared members and authorised teams</option></select><p class="muted" style="font-size:11px;margin:0;line-height:1.5">Restricted properties are visible only to their creator, members explicitly granted access, and members with the required team permission. Only owners and administrators can change sharing settings.</p></div>
           </div>
           <div class="actions"><button id="saveBtn" type="submit">Save organisation property</button><button id="cancelBtn" type="button" class="secondary hidden">Cancel edit</button></div>
           <p class="status" id="formStatus" aria-live="polite"></p>
@@ -93,7 +93,7 @@
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
-  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,activeTeams=[];
+  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,canManageSharing=false,activeTeams=[];
   const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showNotice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function status(id,message){$(id).textContent=message||'';}
@@ -119,10 +119,11 @@
     $('orgSelect').value=orgId;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Organisation slug: '+activeOrg.slug+' · tenant hostname not provisioned';$('roleBadge').textContent=activeOrg.role;
     try{sessionStorage.setItem('hamletActiveOrganisationId',orgId);}catch(e){}
     canManage=['owner','admin','manager'].includes(activeOrg.role);
+    canManageSharing=['owner','admin'].includes(activeOrg.role);
     await loadActiveTeams();
-    $('propertyVisibility').disabled=!canManage;$('propertyVisibility').value='organisation';
+    $('propertyVisibility').disabled=!canManageSharing;$('propertyVisibility').value='organisation';
     $('saveBtn').disabled=activeOrg.role==='viewer';
-    if(canManage){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
+    if(canManageSharing){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
     await loadProperties();
   }
   async function loadActiveTeams(){
@@ -132,7 +133,7 @@
     activeTeams=snap.docs.map(d=>({id:d.id,...d.data()}));
   }
   async function assignResourceTeam(card,resource){
-    if(!canManage)return;
+    if(!canManageSharing)return;
     const box=document.createElement('div');box.className='share-tools';
     const label=document.createElement('label');label.textContent='Assigned team';box.appendChild(label);
     const row=document.createElement('div');row.className='share-row';const select=document.createElement('select');
@@ -153,11 +154,13 @@
   }
   async function queryVisibleProperties(){
     const collection=db.collection('organisationProperties');
-    if(canManage)return (await collection.where('organisationId','==',activeOrg.id).get()).docs;
+    if(canManageSharing)return (await collection.where('organisationId','==',activeOrg.id).get()).docs;
     const queries=[
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','organisation'),
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('createdByUid','==',user.uid),
-      collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('sharedWithUids','array-contains',user.uid)
+      collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('sharedWithUids','array-contains',user.uid),
+      ...activeTeams.filter(team=>(team.permissions||[]).includes('properties.read')).map(team=>
+        collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('teamId','==',team.id))
     ];
     const [snapshots, grants]=await Promise.all([
       Promise.all(queries.map(q=>q.get())),
@@ -179,17 +182,27 @@
     }catch(error){console.error('Organisation property query failed:',error);records=[];renderProperties();$('portfolioMeta').textContent='Portfolio unavailable';status('loadStatus','Unable to load property records. Check membership, permissions and Firestore indexes.');}
   }
   function stamp(value){if(value&&typeof value.toMillis==='function')return value.toMillis();const n=Date.parse(value||'');return Number.isFinite(n)?n:0;}
+  function mayWriteResource(resource, resourceType){
+    if(['owner','admin'].includes(activeOrg.role))return true;
+    if(resource.createdByUid===user.uid)return true;
+    if(activeOrg.role==='manager'&&resource.visibility==='organisation')return true;
+    const permission=resourceType==='deal'?'deals.write':'properties.write';
+    return !!resource.teamId&&activeTeams.some(team=>team.id===resource.teamId
+      &&(team.permissions||[]).includes(permission)
+      &&(team.permissions||[]).includes(resourceType==='deal'?'deals.read':'properties.read'));
+  }
+
   let activeShareMembers=[];
   async function loadShareMembers(){
     activeShareMembers=[];
-    if(!canManage||!activeOrg)return;
+    if(!canManageSharing||!activeOrg)return;
     const snap=await db.collection('organisationMembers').where('organisationId','==',activeOrg.id).where('status','==','active').get();
     activeShareMembers=snap.docs.map(doc=>doc.data()).filter(m=>m.uid&&m.uid!==user.uid);
     const profiles=await Promise.all(activeShareMembers.map(async m=>{try{const p=await db.collection('publicProfiles').doc(m.uid).get();return p.exists?p.data():{};}catch(e){return {};}}));
     activeShareMembers=activeShareMembers.map((m,i)=>({...m,label:[profiles[i].firstName,profiles[i].lastName].filter(Boolean).join(' ')||profiles[i].displayName||profiles[i].email||m.uid.slice(0,12)}));
   }
   async function renderShareTools(card, resource){
-    if(!canManage)return;
+    if(!canManageSharing)return;
     const box=document.createElement('div');box.className='share-tools';
     const label=document.createElement('label');label.textContent='Explicit member access';box.appendChild(label);
     const row=document.createElement('div');row.className='share-row';const select=document.createElement('select');
@@ -221,17 +234,17 @@
       const size=document.createElement('p');size.textContent=p.size?Number(p.size).toLocaleString('en-GB')+' '+(p.sizeUnit||''):'';if(size.textContent)card.appendChild(size);
       if(p.sustainabilityStandard){const sustainability=document.createElement('p');sustainability.textContent='Sustainability: '+p.sustainabilityStandard;card.appendChild(sustainability);}
       if(p.description){const description=document.createElement('p');description.textContent=p.description;card.appendChild(description);}
-      const mayEdit=canManage||(p.createdByUid===user.uid&&activeOrg.role==='member');
+      const mayEdit=mayWriteResource(p,'property');
       if(mayEdit){const actions=document.createElement('div');actions.className='card-actions';const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';edit.addEventListener('click',()=>editProperty(p.id));actions.appendChild(edit);const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteProperty(p.id));actions.appendChild(remove);card.appendChild(actions);}
       assignResourceTeam(card,p);
       renderShareTools(card,p);
       root.appendChild(card);
     });
   }
-  function resetForm(){editingId=null;$('propertyForm').reset();$('propertyType').value='Commercial';$('propertyStatus').value='Available';$('propertyVisibility').value='organisation';$('formTitle').textContent='Add organisation property';$('saveBtn').textContent='Save organisation property';$('cancelBtn').classList.add('hidden');$('propertyVisibility').disabled=!canManage;status('formStatus','');}
+  function resetForm(){editingId=null;$('propertyForm').reset();$('propertyType').value='Commercial';$('propertyStatus').value='Available';$('propertyVisibility').value='organisation';$('formTitle').textContent='Add organisation property';$('saveBtn').textContent='Save organisation property';$('cancelBtn').classList.add('hidden');$('propertyVisibility').disabled=!canManageSharing;status('formStatus','');}
   function editProperty(id){
     const p=records.find(item=>item.id===id);if(!p)return;editingId=id;
-    $('propertyName').value=p.propertyName||'';$('propertyType').value=p.propertyType||'Commercial';$('propertyStatus').value=p.status||'Available';$('propertyAddress').value=p.address||'';$('propertyCity').value=p.city||'';$('propertyPostcode').value=p.postcode||'';$('propertySize').value=p.size==null?'':p.size;$('propertySizeUnit').value=p.sizeUnit||'sq ft';$('propertyPrice').value=p.askingPrice==null?'':p.askingPrice;$('propertyRent').value=p.askingRent==null?'':p.askingRent;$('propertySustainability').value=p.sustainabilityStandard||'';$('propertyDescription').value=p.description||'';$('propertyVisibility').value=p.visibility||'organisation';$('propertyVisibility').disabled=!canManage;
+    $('propertyName').value=p.propertyName||'';$('propertyType').value=p.propertyType||'Commercial';$('propertyStatus').value=p.status||'Available';$('propertyAddress').value=p.address||'';$('propertyCity').value=p.city||'';$('propertyPostcode').value=p.postcode||'';$('propertySize').value=p.size==null?'':p.size;$('propertySizeUnit').value=p.sizeUnit||'sq ft';$('propertyPrice').value=p.askingPrice==null?'':p.askingPrice;$('propertyRent').value=p.askingRent==null?'':p.askingRent;$('propertySustainability').value=p.sustainabilityStandard||'';$('propertyDescription').value=p.description||'';$('propertyVisibility').value=p.visibility||'organisation';$('propertyVisibility').disabled=!canManageSharing;
     $('formTitle').textContent='Edit organisation property';$('saveBtn').textContent='Update organisation property';$('cancelBtn').classList.remove('hidden');status('formStatus','Editing '+(p.propertyName||'property'));
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -244,7 +257,7 @@
     const data={
       id:editingId||db.collection('organisationProperties').doc().id,
       organisationId:activeOrg.id,createdByUid:existing?existing.createdByUid:user.uid,
-      visibility:canManage?$('propertyVisibility').value:(existing?existing.visibility:'organisation'),
+      visibility:canManageSharing?$('propertyVisibility').value:(existing?existing.visibility:'organisation'),
       sharedWithUids:existing&&Array.isArray(existing.sharedWithUids)?existing.sharedWithUids:[],
       propertyName:name,propertyType:$('propertyType').value,status:$('propertyStatus').value,
       address:$('propertyAddress').value.trim(),city:$('propertyCity').value.trim(),postcode:$('propertyPostcode').value.trim(),

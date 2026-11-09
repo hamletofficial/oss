@@ -1,6 +1,8 @@
 name: Organisation Firestore Emulator Tests
 # Dedicated emulator validation; deliberately does not deploy Hosting previews.
 # Runs against the PR head so governance-specific tests execute in the feature branch.
+# Covers ownership/lifecycle callables and Firestore / Storage role-based access rules.
+# Runs against the PR merge ref; no live Firebase resources are modified.
 
 on:
   pull_request:
