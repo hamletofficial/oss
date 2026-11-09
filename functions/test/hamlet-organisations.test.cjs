@@ -13,6 +13,7 @@ if (!admin.apps.length) {
 
 const db = getFirestore();
 const callables = require("../hamlet-organisations");
+const governance = require("../hamlet-organisation-governance");
 const suffix = () => crypto.randomBytes(5).toString("hex");
 const identity = (uid, email, verified = true) => ({
   uid,
@@ -251,4 +252,131 @@ test("trusted organisation deal and property triggers append immutable tenant-sc
 
 test.after(async () => {
   await db.terminate();
+});
+
+
+test("ownership transfer is atomic, audited and protects the former owner", async () => {
+  const governance = require("../hamlet-organisation-governance");
+  const tag = suffix();
+  const ownerUid = "transfer-owner-" + tag;
+  const nextUid = "transfer-next-" + tag;
+  const org = await invoke("createOrganisation",
+    {name: "Ownership Transfer", slug: "transfer-" + tag},
+    identity(ownerUid, "owner-" + tag + "@example.com"));
+  const orgId = org.organisationId;
+  const nextRef = db.collection("organisationMembers").doc(orgId + "_" + nextUid);
+  await nextRef.set({
+    organisationId: orgId, uid: nextUid, email: "next@example.com",
+    role: "manager", status: "active",
+  });
+
+  await expectCode(
+    governance.transferOrganisationOwnership.run({
+      data: {organisationId: orgId, newOwnerUid: nextUid},
+      auth: identity("outsider-" + tag, "outsider@example.com"),
+    }),
+    "permission-denied"
+  );
+  const result = await governance.transferOrganisationOwnership.run({
+    data: {organisationId: orgId, newOwnerUid: nextUid},
+    auth: identity(ownerUid, "owner-" + tag + "@example.com"),
+  });
+  assert.equal(result.newOwnerUid, nextUid);
+
+  const [organisation, former, next] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(),
+    db.collection("organisationMembers").doc(orgId + "_" + ownerUid).get(),
+    nextRef.get(),
+  ]);
+  assert.equal(organisation.data().ownerUid, nextUid);
+  assert.equal(former.data().role, "admin");
+  assert.equal(next.data().role, "owner");
+  const events = await db.collection("organisationActivity")
+    .where("organisationId", "==", orgId)
+    .where("action", "==", "organisation.ownership_transferred").get();
+  assert.equal(events.size, 1);
+  assert.equal(events.docs[0].data().previousOwnerUid, ownerUid);
+  assert.equal(events.docs[0].data().newOwnerUid, nextUid);
+
+  await expectCode(
+    invoke("removeOrganisationMember", {organisationId: orgId, memberUid: nextUid},
+      identity(ownerUid, "owner-" + tag + "@example.com")),
+    "permission-denied"
+  );
+  await expectCode(
+    governance.transferOrganisationOwnership.run({
+      data: {organisationId: orgId, newOwnerUid: nextUid},
+      auth: identity(ownerUid, "owner-" + tag + "@example.com"),
+    }),
+    "permission-denied"
+  );
+});
+
+test("organisation lifecycle transitions are owner-only, audited and irreversible after closure", async () => {
+  const governance = require("../hamlet-organisation-governance");
+  const tag = suffix();
+  const ownerUid = "lifecycle-owner-" + tag;
+  const org = await invoke("createOrganisation",
+    {name: "Lifecycle Test", slug: "lifecycle-" + tag},
+    identity(ownerUid, "lifecycle-" + tag + "@example.com"));
+  const orgId = org.organisationId;
+  const slugRef = db.collection("organisationSlugs").doc(org.slug);
+  const directoryRef = db.collection("organisationDirectory").doc(orgId);
+  await directoryRef.update({isPublic: true});
+
+  await expectCode(
+    governance.setOrganisationLifecycleStatus.run({
+      data: {organisationId: orgId, status: "suspended"},
+      auth: identity("not-owner-" + tag, "not-owner@example.com"),
+    }),
+    "permission-denied"
+  );
+  await governance.setOrganisationLifecycleStatus.run({
+    data: {organisationId: orgId, status: "suspended"},
+    auth: identity(ownerUid, "lifecycle-" + tag + "@example.com"),
+  });
+  let [organisation, slug, directory] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(), slugRef.get(), directoryRef.get(),
+  ]);
+  assert.equal(organisation.data().status, "suspended");
+  assert.equal(slug.data().status, "suspended");
+  assert.equal(directory.data().status, "suspended");
+  assert.equal(directory.data().isPublic, true);
+
+  await expectCode(
+    invoke("createOrganisationInvitation",
+      {organisationId: orgId, email: "invitee@example.com", role: "member"},
+      identity(ownerUid, "lifecycle-" + tag + "@example.com")),
+    "failed-precondition"
+  );
+
+  await governance.setOrganisationLifecycleStatus.run({
+    data: {organisationId: orgId, status: "active"},
+    auth: identity(ownerUid, "lifecycle-" + tag + "@example.com"),
+  });
+  directory = await directoryRef.get();
+  assert.equal(directory.data().status, "active");
+  assert.equal(directory.data().isPublic, true);
+  await governance.setOrganisationLifecycleStatus.run({
+    data: {organisationId: orgId, status: "closed"},
+    auth: identity(ownerUid, "lifecycle-" + tag + "@example.com"),
+  });
+  [organisation, slug, directory] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(), slugRef.get(), directoryRef.get(),
+  ]);
+  assert.equal(organisation.data().status, "closed");
+  assert.equal(slug.data().status, "closed");
+  assert.equal(directory.data().status, "closed");
+
+  await expectCode(
+    governance.setOrganisationLifecycleStatus.run({
+      data: {organisationId: orgId, status: "active"},
+      auth: identity(ownerUid, "lifecycle-" + tag + "@example.com"),
+    }),
+    "failed-precondition"
+  );
+  const events = await db.collection("organisationActivity")
+    .where("organisationId", "==", orgId)
+    .where("action", "==", "organisation.lifecycle_status_changed").get();
+  assert.equal(events.size, 3);
 });
