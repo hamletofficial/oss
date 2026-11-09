@@ -25,12 +25,12 @@ function tenantFromRequest(request) {
     return {kind: "directory"};
   }
 
-  const production = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
+  const production = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.organisations\.hamlet-ai\.co\.uk$/);
   if (production) {
     return {kind: "tenant", slug: production[1], production: true, initial: url.pathname === "/"};
   }
 
-  const staging = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs-staging\.hamlet-ai\.co\.uk$/);
+  const staging = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.organisations-staging\.hamlet-ai\.co\.uk$/);
   if (staging) {
     return {kind: "tenant", slug: staging[1], production: false, initial: url.pathname === "/"};
   }
