@@ -613,7 +613,8 @@ test('multi-organisation members can work in each tenant without crossing tenant
     });
     await setDoc(doc(db, 'organisationProperties/property-second'), {
       id: 'property-second', organisationId: 'org-second',
-      createdByUid: 'second-owner', visibility: 'organisation',
+      // The multi-organisation member owns this resource and may upload its files.
+      createdByUid: 'multi-org-user', visibility: 'organisation',
       sharedWithUids: [], propertyName: 'Second tenant asset',
     });
   });
