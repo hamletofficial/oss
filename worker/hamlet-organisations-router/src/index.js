@@ -34,7 +34,7 @@ export default {
     if (tenant.production && (originPath === "/" || originPath === "")) {
       originPath = "/app/hamlet/tenant.html";
       originQuery = "?tenantSlug=" + encodeURIComponent(tenant.slug);
-    } else if (!tenant.production && originPath.startsWith("/tenant/")) {
+    } else if (!tenant.production && tenant.initial) {
       originPath = "/app/hamlet/tenant.html";
       originQuery = "?tenantSlug=" + encodeURIComponent(tenant.slug);
     }
@@ -50,7 +50,9 @@ export default {
     headers.set("X-Content-Type-Options", "nosniff");
     headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     headers.set("X-Hamlet-Tenant-Route", tenant.slug);
-    headers.delete("Set-Cookie");
+    if (!tenant.production && tenant.initial) {
+      headers.append("Set-Cookie", "hamlet_tenant_slug=" + encodeURIComponent(tenant.slug) + "; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=28800");
+    }
     return new Response(upstream.body, {status: upstream.status, statusText: upstream.statusText, headers});
   },
 };
