@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1120">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Property Portfolio | Hamlet Organisations</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--green:#34d399;--amber:#fbbf24;--red:#f87171}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
+    a{color:#93c5fd}.shell{width:min(1280px,100%);margin:auto;padding:22px clamp(16px,4vw,42px) 64px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .brand{font:800 22px Manrope,sans-serif;letter-spacing:-.8px;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
+    .nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.nav a{color:#cbd5e1;text-decoration:none;font-weight:700}
+    .hero{padding:30px 0 18px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+    h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1.2px;margin:8px 0}h2{font-size:17px;margin:0 0 8px}
+    .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:850px;margin:0}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.92)}
+    select,input,textarea{font:inherit;color:var(--text);background:#0d1728;border:1px solid #40516a;border-radius:8px;padding:10px 11px;min-width:0;width:100%}
+    select:focus,input:focus,textarea:focus{outline:2px solid #60a5fa;outline-offset:1px}textarea{min-height:86px;resize:vertical}
+    button{font:700 12px 'DM Sans',sans-serif;border:1px solid #3b82f6;border-radius:8px;padding:10px 14px;background:#1d4ed8;color:#fff;cursor:pointer}
+    button.secondary{background:#172338;border-color:#40516a;color:#dbeafe}button.danger{background:#3a1c2a;border-color:#7f1d1d;color:#fecaca}button:disabled{opacity:.55;cursor:wait}
+    .org-select{width:min(360px,80vw)}.notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+    .layout{display:grid;grid-template-columns:minmax(270px,360px) minmax(0,1fr);gap:18px;align-items:start}
+    .panel{border:1px solid var(--line);border-radius:14px;background:rgba(17,24,39,.96);padding:18px;min-width:0}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:11px;font-weight:800;color:#cbd5e1}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.full{grid-column:1/-1}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none!important}
+    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .property{border:1px solid #33465f;border-radius:11px;background:#172338;padding:14px;min-width:0}
+    .property h3{font-size:14px;margin:0 0 6px;overflow-wrap:anywhere}.property p{font-size:11px;line-height:1.5;color:#a8b6ca;margin:5px 0;overflow-wrap:anywhere}
+    .meta{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.pill{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 6px;border:1px solid #40516a;border-radius:999px;color:#bfdbfe}
+    .card-actions{display:flex;gap:6px;margin-top:10px}.card-actions button{padding:7px 9px;font-size:10px}
+    .empty{padding:16px;color:#8293a9;font-size:12px;line-height:1.5;border:1px dashed #40516a;border-radius:8px;grid-column:1/-1}
+    .status{font-size:11px;color:#a8b6ca;min-height:17px;margin:8px 0}.gate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#0b1120}.gate-card{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}.gate-card p{color:var(--muted);line-height:1.6}
+    .footnote{font-size:11px;color:#8192aa;line-height:1.6;margin:18px 0 0}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.form-grid,.cards{grid-template-columns:1fr}.full{grid-column:auto}.toolbar{align-items:flex-start}.org-select{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="gate" id="authGate"><div class="gate-card"><a class="brand" href="/">hamlet<span>.</span></a><h2 style="margin-top:20px">Secure organisation workspace</h2><p id="gateMessage">Checking your sign-in…</p></div></div>
+  <main class="shell hidden" id="app">
+    <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><nav class="nav"><a href="/app/hamlet/organisations.html">Organisation workspace</a><a href="/organisations.html">Administration</a><a href="/portfolio.html">Personal portfolio</a></nav></header>
+    <section class="hero"><div class="eyebrow">Team operations · tenant-scoped</div><h1>Organisation property portfolio</h1><p>Maintain property records owned by this organisation. These assets are separate from individual broker portfolios and are visible only under the active organisation membership and each record’s sharing policy.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <div class="toolbar"><div><strong id="selectedName">Organisation</strong><div class="muted" id="selectedSlug">Loading active membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select id="orgSelect" class="org-select"><option>Loading…</option></select></div><span class="pill" id="roleBadge">Member</span></div>
+    <div class="layout">
+      <section class="panel" aria-labelledby="formTitle">
+        <div class="panel-head"><h2 id="formTitle">Add organisation property</h2></div>
+        <form id="propertyForm">
+          <div class="field"><label for="propertyName">Property name *</label><input id="propertyName" required maxlength="180" placeholder="e.g. 25 Bishopsgate"></div>
+          <div class="form-grid">
+            <div class="field"><label for="propertyType">Asset class</label><select id="propertyType"><option>Commercial</option><option>Residential</option></select></div>
+            <div class="field"><label for="propertyStatus">Status</label><select id="propertyStatus"><option>Available</option><option>Draft</option><option>Under Offer</option><option>Let</option><option>Sold</option><option>Withdrawn</option></select></div>
+            <div class="field full"><label for="propertyAddress">Address</label><input id="propertyAddress" maxlength="300" placeholder="Street address"></div>
+            <div class="field"><label for="propertyCity">Town / city</label><input id="propertyCity" maxlength="100"></div>
+            <div class="field"><label for="propertyPostcode">Postcode</label><input id="propertyPostcode" maxlength="20"></div>
+            <div class="field"><label for="propertySize">Floor area / size</label><input id="propertySize" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            <div class="field"><label for="propertySizeUnit">Unit</label><select id="propertySizeUnit"><option value="sq ft">sq ft</option><option value="sq m">sq m</option><option value="acres">acres</option></select></div>
+            <div class="field"><label for="propertyPrice">Asking price (£)</label><input id="propertyPrice" type="number" min="0" step="0.01"></div>
+            <div class="field"><label for="propertyRent">Annual rent (£)</label><input id="propertyRent" type="number" min="0" step="0.01"></div>
+            <div class="field full"><label for="propertySustainability">Sustainability credential</label><select id="propertySustainability"><option value="">Not specified</option><option>Passivhaus</option><option>EnerPHit</option><option>BREEAM</option><option>WELL</option><option>EPC A</option><option>EPC B</option><option>Other</option></select></div>
+            <div class="field full"><label for="propertyDescription">Description / notes</label><textarea id="propertyDescription" maxlength="4000" placeholder="Asset overview, sustainability details and relevant notes"></textarea></div>
+            <div class="field full"><label for="propertyVisibility">Sharing policy</label><select id="propertyVisibility"><option value="organisation">Visible to active organisation members</option><option value="restricted">Restricted to creator and organisation managers</option></select><p class="muted" style="font-size:11px;margin:0;line-height:1.5">Only owners, administrators and managers can change sharing policy. Per-user sharing grants are not yet available.</p></div>
+          </div>
+          <div class="actions"><button id="saveBtn" type="submit">Save organisation property</button><button id="cancelBtn" type="button" class="secondary hidden">Cancel edit</button></div>
+          <p class="status" id="formStatus" aria-live="polite"></p>
+        </form>
+      </section>
+      <section class="panel" aria-labelledby="portfolioTitle">
+        <div class="panel-head"><div><h2 id="portfolioTitle">Organisation assets</h2><div class="muted" id="portfolioMeta">Loading property records…</div></div><button type="button" class="secondary" id="refreshBtn">Refresh</button></div>
+        <div class="cards" id="propertyCards" aria-live="polite"></div>
+        <p class="status" id="loadStatus" aria-live="polite"></p>
+      </section>
+    </div>
+    <p class="footnote">Security boundary: organisation properties are stored in <code>organisationProperties</code>, not <code>commercialProperties</code>, <code>residentialProperties</code> or public listing projections. No existing individual property records are read, migrated, updated or deleted. Property images and document uploads remain disabled pending separate Storage Rules validation.</p>
+  </main>
+<script>
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false;
+  const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function showNotice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
+  function status(id,message){$(id).textContent=message||'';}
+  function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');}
+  function money(value){const n=Number(value);return Number.isFinite(n)&&n>0?new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(n):'Not stated';}
+  async function loadMemberships(){
+    const snapshot=await db.collection('organisationMembers').where('uid','==',user.uid).get();
+    const active=snapshot.docs.map(d=>d.data()).filter(m=>m.status==='active');
+    const resolved=await Promise.all(active.map(async m=>{
+      const snap=await db.collection('organisations').doc(m.organisationId).get();
+      if(!snap.exists||snap.data().status!=='active')return null;
+      return {id:snap.id,name:snap.data().name,slug:snap.data().slug,role:m.role};
+    }));
+    memberships=resolved.filter(Boolean);
+    const select=$('orgSelect');select.replaceChildren();
+    if(!memberships.length){select.add(new Option('No active organisation',''));activeOrg=null;showNotice('You do not have an active organisation membership. Create or join one in Organisation Administration.',true);$('selectedName').textContent='No organisation selected';$('selectedSlug').textContent='No active membership';$('roleBadge').textContent='No role';$('propertyCards').replaceChildren();$('portfolioMeta').textContent='No active organisation';$('saveBtn').disabled=true;return;}
+    memberships.forEach(m=>select.add(new Option(m.name+' · '+m.role,m.id)));
+    let preferred='';try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
+    await selectOrganisation(memberships.some(m=>m.id===preferred)?preferred:memberships[0].id);
+  }
+  async function selectOrganisation(orgId){
+    activeOrg=memberships.find(m=>m.id===orgId)||null;if(!activeOrg)return;
+    $('orgSelect').value=orgId;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Organisation slug: '+activeOrg.slug+' · tenant hostname not provisioned';$('roleBadge').textContent=activeOrg.role;
+    try{sessionStorage.setItem('hamletActiveOrganisationId',orgId);}catch(e){}
+    canManage=['owner','admin','manager'].includes(activeOrg.role);
+    $('propertyVisibility').disabled=!canManage;$('propertyVisibility').value='organisation';
+    $('saveBtn').disabled=activeOrg.role==='viewer';
+    await loadProperties();
+  }
+  async function queryVisibleProperties(){
+    const collection=db.collection('organisationProperties');
+    if(canManage)return (await collection.where('organisationId','==',activeOrg.id).get()).docs;
+    const queries=[
+      collection.where('organisationId','==',activeOrg.id).where('visibility','==','organisation'),
+      collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('createdByUid','==',user.uid),
+      collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('sharedWithUids','array-contains',user.uid)
+    ];
+    const snapshots=await Promise.all(queries.map(q=>q.get()));
+    const unique=new Map();snapshots.forEach(s=>s.docs.forEach(d=>unique.set(d.id,d)));
+    return Array.from(unique.values());
+  }
+  async function loadProperties(){
+    status('loadStatus','Loading organisation properties…');$('propertyCards').replaceChildren();
+    try{
+      const docs=await queryVisibleProperties();
+      records=docs.map(d=>({...d.data(),id:d.id})).filter(d=>d.organisationId===activeOrg.id);
+      records.sort((a,b)=>stamp(b.updatedAt)-stamp(a.updatedAt));renderProperties();
+      $('portfolioMeta').textContent=records.length+' accessible organisation asset'+(records.length===1?'':'s')+' · '+(canManage?'manager view':'member view');status('loadStatus','');
+      $('saveBtn').disabled=activeOrg.role==='viewer';
+    }catch(error){console.error('Organisation property query failed:',error);records=[];renderProperties();$('portfolioMeta').textContent='Portfolio unavailable';status('loadStatus','Unable to load property records. Check membership, permissions and Firestore indexes.');}
+  }
+  function stamp(value){if(value&&typeof value.toMillis==='function')return value.toMillis();const n=Date.parse(value||'');return Number.isFinite(n)?n:0;}
+  function renderProperties(){
+    const root=$('propertyCards');root.replaceChildren();
+    if(!records.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No organisation properties yet. Add the first asset using the form.';root.appendChild(empty);return;}
+    records.forEach(p=>{
+      const card=document.createElement('article');card.className='property';
+      const title=document.createElement('h3');title.textContent=p.propertyName||'Untitled property';card.appendChild(title);
+      const address=document.createElement('p');address.textContent=[p.address,p.city,p.postcode].filter(Boolean).join(', ')||'No address supplied';card.appendChild(address);
+      const meta=document.createElement('div');meta.className='meta';
+      [p.propertyType||'Property',p.status||'Unspecified',p.visibility==='restricted'?'Restricted':'Organisation-wide'].forEach(label=>{const pill=document.createElement('span');pill.className='pill';pill.textContent=label;meta.appendChild(pill);});card.appendChild(meta);
+      const finance=document.createElement('p');finance.textContent='Asking price: '+money(p.askingPrice)+' · Annual rent: '+money(p.askingRent);card.appendChild(finance);
+      const size=document.createElement('p');size.textContent=p.size?Number(p.size).toLocaleString('en-GB')+' '+(p.sizeUnit||''):'';if(size.textContent)card.appendChild(size);
+      if(p.sustainabilityStandard){const sustainability=document.createElement('p');sustainability.textContent='Sustainability: '+p.sustainabilityStandard;card.appendChild(sustainability);}
+      if(p.description){const description=document.createElement('p');description.textContent=p.description;card.appendChild(description);}
+      const mayEdit=canManage||(p.createdByUid===user.uid&&activeOrg.role==='member');
+      if(mayEdit){const actions=document.createElement('div');actions.className='card-actions';const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='Edit';edit.addEventListener('click',()=>editProperty(p.id));actions.appendChild(edit);const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteProperty(p.id));actions.appendChild(remove);card.appendChild(actions);}
+      root.appendChild(card);
+    });
+  }
+  function resetForm(){editingId=null;$('propertyForm').reset();$('propertyType').value='Commercial';$('propertyStatus').value='Available';$('propertyVisibility').value='organisation';$('formTitle').textContent='Add organisation property';$('saveBtn').textContent='Save organisation property';$('cancelBtn').classList.add('hidden');$('propertyVisibility').disabled=!canManage;status('formStatus','');}
+  function editProperty(id){
+    const p=records.find(item=>item.id===id);if(!p)return;editingId=id;
+    $('propertyName').value=p.propertyName||'';$('propertyType').value=p.propertyType||'Commercial';$('propertyStatus').value=p.status||'Available';$('propertyAddress').value=p.address||'';$('propertyCity').value=p.city||'';$('propertyPostcode').value=p.postcode||'';$('propertySize').value=p.size==null?'':p.size;$('propertySizeUnit').value=p.sizeUnit||'sq ft';$('propertyPrice').value=p.askingPrice==null?'':p.askingPrice;$('propertyRent').value=p.askingRent==null?'':p.askingRent;$('propertySustainability').value=p.sustainabilityStandard||'';$('propertyDescription').value=p.description||'';$('propertyVisibility').value=p.visibility||'organisation';$('propertyVisibility').disabled=!canManage;
+    $('formTitle').textContent='Edit organisation property';$('saveBtn').textContent='Update organisation property';$('cancelBtn').classList.remove('hidden');status('formStatus','Editing '+(p.propertyName||'property'));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  async function saveProperty(event){
+    event.preventDefault();if(!activeOrg||activeOrg.role==='viewer')return;
+    const name=$('propertyName').value.trim();if(!name){status('formStatus','Enter a property name.');return;}
+    const numeric=id=>$(id).value===''?null:Number($(id).value);
+    const now=firebase.firestore.FieldValue.serverTimestamp();
+    const existing=editingId?records.find(p=>p.id===editingId):null;
+    const data={
+      id:editingId||db.collection('organisationProperties').doc().id,
+      organisationId:activeOrg.id,createdByUid:existing?existing.createdByUid:user.uid,
+      visibility:canManage?$('propertyVisibility').value:(existing?existing.visibility:'organisation'),
+      sharedWithUids:existing&&Array.isArray(existing.sharedWithUids)?existing.sharedWithUids:[],
+      propertyName:name,propertyType:$('propertyType').value,status:$('propertyStatus').value,
+      address:$('propertyAddress').value.trim(),city:$('propertyCity').value.trim(),postcode:$('propertyPostcode').value.trim(),
+      size:numeric('propertySize'),sizeUnit:$('propertySizeUnit').value,askingPrice:numeric('propertyPrice'),askingRent:numeric('propertyRent'),
+      sustainabilityStandard:$('propertySustainability').value,description:$('propertyDescription').value.trim(),
+      createdAt:existing?existing.createdAt:now,updatedAt:now
+    };
+    try{
+      await db.collection('organisationProperties').doc(data.id).set(data);
+      status('formStatus',editingId?'Property updated.':'Organisation property saved.');showNotice('Property record saved to '+activeOrg.name+'.');
+      resetForm();await loadProperties();
+    }catch(error){console.error('Unable to save organisation property:',error);status('formStatus','Unable to save. Check your organisation role and Firestore permissions.');}
+  }
+  async function deleteProperty(id){
+    const p=records.find(item=>item.id===id);if(!p||!confirm('Delete '+(p.propertyName||'this property')+' from the organisation portfolio?'))return;
+    try{await db.collection('organisationProperties').doc(id).delete();if(editingId===id)resetForm();showNotice('Organisation property deleted.');await loadProperties();}
+    catch(error){console.error('Unable to delete organisation property:',error);showNotice('Unable to delete this property. Check your organisation permissions.',true);}
+  }
+  function init(){
+    if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+    try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();
+      auth.onAuthStateChanged(async signedIn=>{
+        if(!signedIn){$('gateMessage').textContent='Sign in is required. Redirecting to secure sign-in…';location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));return;}
+        user=signedIn;showApp();try{await user.reload();await user.getIdToken(true);}catch(error){console.warn('Unable to refresh account state:',error);}
+        if(user.emailVerified!==true){showNotice('Verify your email address to access organisation workspaces.',true);return;}
+        try{await loadMemberships();}catch(error){showNotice(error.message||'Unable to load organisation memberships.',true);}
+      });
+    }catch(error){$('gateMessage').textContent='Secure sign-in could not be initialised. Please retry later.';console.error(error);}
+  }
+  $('orgSelect').addEventListener('change',event=>selectOrganisation(event.target.value));
+  $('propertyForm').addEventListener('submit',saveProperty);
+  $('cancelBtn').addEventListener('click',resetForm);
+  $('refreshBtn').addEventListener('click',loadProperties);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+</body>
+</html>
