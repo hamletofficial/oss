@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
 
-async function route(url, options = {}, env = {}) {
+async function route(url, options = {}) {
   let upstreamUrl = "";
   globalThis.fetch = async request => {
     upstreamUrl = request.url;
@@ -11,16 +11,15 @@ async function route(url, options = {}, env = {}) {
       headers: {"Content-Type": "text/plain"}
     });
   };
-  const response = await worker.fetch(new Request(url, options), env);
+  const response = await worker.fetch(new Request(url, options));
   return {response, upstreamUrl};
 }
 
-test("workers.dev root serves the organisation directory in staging", async () => {
+test("workers.dev root serves the organisation directory for router smoke tests", async () => {
   const {response, upstreamUrl} = await route("https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/");
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/organisations.html");
   assert.equal(response.headers.get("X-Hamlet-Organisation-Route"), "directory");
-  assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "staging");
 });
 
 test("workers.dev tenant path opens the tenant handoff page and sets a tenant cookie", async () => {
@@ -40,43 +39,37 @@ test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped",
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
 });
 
-test("canonical directory hostname serves organisation administration in staging", async () => {
-  const {response, upstreamUrl} = await route("https://organisations.hamlet-ai.co.uk/");
+test("canonical platform hostname serves the organisation directory", async () => {
+  const {response, upstreamUrl} = await route("https://platform.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/organisations.html");
-  assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "staging");
+  assert.equal(response.headers.get("X-Hamlet-Organisation-Route"), "directory");
 });
 
-test("canonical tenant hostname opens tenant handoff in staging by default", async () => {
-  const {response, upstreamUrl} = await route("https://acme-group.organisations.hamlet-ai.co.uk/");
+test("canonical tenant hostname opens the tenant handoff page", async () => {
+  const {response, upstreamUrl} = await route("https://acme-group.platform.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
-  assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "staging");
-  assert.match(response.headers.get("Set-Cookie"), /hamlet_tenant_slug=acme-group/);
-});
-
-test("canonical tenant hostname switches to production only with explicit environment", async () => {
-  const {response} = await route(
-    "https://acme-group.organisations.hamlet-ai.co.uk/",
-    {},
-    {HAMLET_ORGANISATIONS_ENV: "production"}
-  );
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "production");
+  assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
   assert.equal(response.headers.get("Set-Cookie"), null);
 });
 
-test("reserved tenant slugs are rejected", async () => {
-  const {response} = await route("https://admin.organisations.hamlet-ai.co.uk/");
+test("reserved platform tenant slug is rejected", async () => {
+  const {response} = await route("https://platform.platform.hamlet-ai.co.uk/");
+  assert.equal(response.status, 404);
+});
+
+test("other reserved tenant slugs are rejected", async () => {
+  const {response} = await route("https://admin.platform.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
 
 test("unsupported methods are rejected before proxying", async () => {
-  const {response} = await route("https://organisations.hamlet-ai.co.uk/", {method: "POST"});
+  const {response} = await route("https://platform.hamlet-ai.co.uk/", {method: "POST"});
   assert.equal(response.status, 405);
 });
 
-test("legacy staging hostname is not accepted", async () => {
-  const {response} = await route("https://organisations-staging.hamlet-ai.co.uk/");
+test("legacy organisations hostname is not accepted", async () => {
+  const {response} = await route("https://organisations.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
