@@ -40,7 +40,7 @@ test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped",
 });
 
 test("staging tenant hostname opens the tenant handoff page", async () => {
-  const {response, upstreamUrl} = await route("https://acme-group.orgs-staging.hamlet-ai.co.uk/");
+  const {response, upstreamUrl} = await route("https://acme-group.organisations-staging.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
   assert.match(response.headers.get("Set-Cookie"), /hamlet_tenant_slug=acme-group/);
@@ -53,7 +53,7 @@ test("staging directory hostname serves organisation administration", async () =
 });
 
 test("reserved tenant slugs are rejected", async () => {
-  const {response} = await route("https://admin.orgs-staging.hamlet-ai.co.uk/");
+  const {response} = await route("https://admin.organisations-staging.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
 
