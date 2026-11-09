@@ -152,7 +152,7 @@ Before adapting existing collections, map their current fields, queries, Storage
 Preferred organisational address pattern:
 
 - Directory: `platform.hamlet-ai.co.uk`
-- Tenant workspace: `{slug}.platform.hamlet-ai.co.uk`
+- Tenant workspace: `{slug}.orgs.hamlet-ai.co.uk`
 
 Examples:
 
@@ -224,7 +224,7 @@ The initial backend foundation is implemented on the feature branch. No producti
 
 - Organisation switcher in the authenticated application.
 - Dedicated workspace shell and tenant resolution.
-- Cloudflare wildcard routing for `*.platform.hamlet-ai.co.uk`.
+- Cloudflare wildcard routing for `*.orgs.hamlet-ai.co.uk`.
 - Resolve authentication/session design and validate Firebase/OAuth domains.
 - Launch subdomains only after tenant isolation tests pass.
 
@@ -330,7 +330,7 @@ The feature branch `feat/organisations-auth-handoff-routing` adds the first impl
 ### Routing implementation
 
 - `worker/hamlet-organisations-router` is an isolated Worker and Wrangler configuration.
-- Canonical directory host resolution recognises `platform.hamlet-ai.co.uk`; tenant host resolution recognises `{slug}.platform.hamlet-ai.co.uk`. Reserved and malformed slugs are rejected.
+- Canonical directory host resolution recognises `platform.hamlet-ai.co.uk`; tenant host resolution recognises `{slug}.orgs.hamlet-ai.co.uk`. Reserved and malformed slugs are rejected.
 - Pull Requests provide the development and testing workflow. The Worker `workers.dev` hostname remains available for isolated router smoke tests using `/tenant/{slug}`; its short-lived, HttpOnly, Secure, SameSite=Lax cookie is scoped to that simulation origin only.
 - The Worker proxies tenant-origin paths to the existing Hamlet Pages origin, preserving the tenant browser origin so Firebase's tenant session remains available to tenant workspace pages.
 - The Worker adds no production route declaration and makes no DNS changes. The `platform` directory hostname and wildcard tenant route require a separately reviewed and explicitly approved release action.
