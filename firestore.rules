@@ -829,6 +829,20 @@ service cloud.firestore {
         && data.sharedWithUids.size() <= 100;
     }
 
+    function hasTeamPermission(data, resourceType, permission) {
+      return request.auth != null
+        && ('teamId' in data)
+        && data.teamId is string
+        && exists(/databases/$(database)/documents/organisationTeams/$(data.teamId))
+        && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.organisationId == data.organisationId
+        && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.status == 'active'
+        && permission in get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.permissions
+        && exists(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data.organisationId == data.organisationId
+        && get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data.status == 'active'
+        && isActiveOrganisationMember(data.organisationId);
+    }
+
     function canReadOrganisationResource(data, resourceType, resourceId) {
       return isActiveOrganisationMember(data.organisationId)
         && (
@@ -836,6 +850,7 @@ service cloud.firestore {
           || data.createdByUid == request.auth.uid
           || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
           || exists(/databases/$(database)/documents/organisationResourceShares/$(data.organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid))
+          || hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.read' : 'properties.read')
           || isOrganisationManager(data.organisationId)
         );
     }
@@ -844,6 +859,8 @@ service cloud.firestore {
       return isActiveOrganisationMember(data.organisationId)
         && (
           isOrganisationManager(data.organisationId)
+          || hasTeamPermission(data, 'deal', 'deals.write')
+          || hasTeamPermission(data, 'property', 'properties.write')
           || (
             data.createdByUid == request.auth.uid
             && get(organisationMemberPath(data.organisationId)).data.role == 'member'
@@ -864,7 +881,7 @@ service cloud.firestore {
             'id','organisationId','createdByUid','visibility','sharedWithUids',
             'propertyName','propertyType','status','address','city','postcode',
             'size','sizeUnit','askingPrice','askingRent','sustainabilityStandard',
-            'description','createdAt','updatedAt'
+            'description','teamId','createdAt','updatedAt'
           ])
           && data.id == propertyId
           && data.organisationId is string
@@ -875,6 +892,7 @@ service cloud.firestore {
           && data.propertyType in ['Commercial','Residential']
           && data.status in ['Available','Draft','Under Offer','Let','Sold','Withdrawn']
           && validOrganisationSharing(data)
+          && (!('teamId' in data) || (data.teamId is string && data.teamId.size() <= 128))
           && (!('address' in data) || (data.address is string && data.address.size() <= 300))
           && (!('city' in data) || (data.city is string && data.city.size() <= 100))
           && (!('postcode' in data) || (data.postcode is string && data.postcode.size() <= 20))
