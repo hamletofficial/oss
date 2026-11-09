@@ -70,7 +70,7 @@ async function receive(event){
  }catch(error){console.error('Organisation sign-in handoff failed:',error);status(error.message||'The secure handoff failed. Return to Hamlet and try again.',true);exchanged=false;}
 }
 window.addEventListener('message',receive);
-if(window.opener){window.opener.postMessage({type:'HAMLET_ORGANISATION_HANDOFF_READY',slug},MAIN_ORIGINS[0]);}
+if(window.opener){MAIN_ORIGINS.forEach(origin=>window.opener.postMessage({type:'HAMLET_ORGANISATION_HANDOFF_READY',slug},origin));}
 else{status('Open this organisation workspace from the signed-in Hamlet organisation selector. Direct sign-in is not enabled.',true);}
 })();
 </script></body></html>
