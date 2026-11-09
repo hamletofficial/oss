@@ -157,8 +157,8 @@ Preferred organisational address pattern:
 Examples:
 
 - `platform.hamlet-ai.co.uk`
-- `abccommercial.platform.hamlet-ai.co.uk`
-- `xyzproperty.platform.hamlet-ai.co.uk`
+- `abccommercial.orgs.hamlet-ai.co.uk`
+- `xyzproperty.orgs.hamlet-ai.co.uk`
 
 The platform hostname is the single public entry point for Hamlet Organisations. Feature branches and GitHub Pull Requests provide development, preview and acceptance testing; there is no separate staging hostname. The main site and existing app routes remain intact.
 
