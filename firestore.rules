@@ -1007,7 +1007,6 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && parentExists(request.resource.data)
         && parentResource(request.resource.data).data.organisationId == request.resource.data.organisationId
-        && parentResource(request.resource.data).data.createdByUid == request.resource.data.createdByUid
         && canReadOrganisationResource(parentResource(request.resource.data).data, request.resource.data.resourceType, request.resource.data.resourceId)
         && canWriteOrganisationResource(parentResource(request.resource.data).data);
       allow update: if false;
