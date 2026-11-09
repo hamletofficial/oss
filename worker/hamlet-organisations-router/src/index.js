@@ -25,13 +25,13 @@ function tenantFromRequest(request, environment) {
     return {kind: "directory"};
   }
 
-  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.organisations\\.hamlet-ai\\.co\\.uk$/);
+  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.organisations\.hamlet-ai\.co\.uk$/);
   if (tenant) {
     return {kind: "tenant", slug: tenant[1], production, initial: url.pathname === "/"};
   }
 
   if (host.endsWith(".workers.dev")) {
-    const match = url.pathname.match(/^\\/tenant\\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\/?$/);
+    const match = url.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
     if (match) return {kind: "tenant", slug: match[1], production: false, initial: true};
 
     const cookieSlug = readTenantCookie(request);
