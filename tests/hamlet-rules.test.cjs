@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {initializeTestEnvironment, assertSucceeds, assertFails} = require('@firebase/rules-unit-testing');
-const {doc, getDoc, setDoc, deleteDoc, serverTimestamp} = require('firebase/firestore');
+const {doc, getDoc, setDoc, deleteDoc, updateDoc, serverTimestamp} = require('firebase/firestore');
 const {ref, uploadBytes, getBytes} = require('firebase/storage');
 
 let env;
@@ -60,6 +60,30 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_suspended'), {
       organisationId: 'org-private', uid: 'suspended', role: 'member', status: 'suspended',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_team-reader'), {
+      organisationId: 'org-private', uid: 'team-reader', role: 'member', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-private_team-no-read'), {
+      organisationId: 'org-private', uid: 'team-no-read', role: 'member', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationTeams/team-alpha'), {
+      id: 'team-alpha', organisationId: 'org-private', name: 'Alpha',
+      status: 'active', permissions: ['deals.read'], createdByUid: 'owner',
+    });
+    await setDoc(doc(db, 'organisationTeamMembers/team-alpha_team-reader'), {
+      teamId: 'team-alpha', organisationId: 'org-private', uid: 'team-reader', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationTeamMembers/team-alpha_team-no-read'), {
+      teamId: 'team-alpha', organisationId: 'org-private', uid: 'team-no-read', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationDeals/deal-team-restricted'), {
+      id: 'deal-team-restricted', organisationId: 'org-private', createdByUid: 'owner',
+      visibility: 'restricted', teamId: 'team-alpha', sharedWithUids: [], name: 'Team restricted deal',
+    });
+    await setDoc(doc(db, 'organisationDeals/deal-team-org-wide'), {
+      id: 'deal-team-org-wide', organisationId: 'org-private', createdByUid: 'owner',
+      visibility: 'organisation', teamId: 'team-alpha', sharedWithUids: [], name: 'Organisation-wide deal',
+    });
     await setDoc(doc(db, 'organisationProperties/property-shared'), {
       id: 'property-shared', organisationId: 'org-private', createdByUid: 'member',
       visibility: 'organisation', sharedWithUids: [], propertyName: 'Shared House',
@@ -105,6 +129,25 @@ test.beforeEach(async () => {
       role: 'member', status: 'active',
     });
   });
+});
+
+test('team capabilities grant access only to active members of assigned teams', async () => {
+  const reader = env.authenticatedContext('team-reader').firestore();
+  const noRead = env.authenticatedContext('team-no-read').firestore();
+  await assertSucceeds(getDoc(doc(reader, 'organisationDeals/deal-team-restricted')));
+  await assertFails(getDoc(doc(noRead, 'organisationDeals/deal-team-restricted')));
+  // Organisation-wide visibility remains independent of team permissions.
+  await assertSucceeds(getDoc(doc(noRead, 'organisationDeals/deal-team-org-wide')));
+});
+
+test('archived teams and removed assignments no longer grant restricted-resource access', async () => {
+  const reader = env.authenticatedContext('team-reader').firestore();
+  await assertSucceeds(getDoc(doc(reader, 'organisationDeals/deal-team-restricted')));
+  await env.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await updateDoc(doc(db, 'organisationTeams/team-alpha'), {status: 'archived'});
+  });
+  await assertFails(getDoc(doc(reader, 'organisationDeals/deal-team-restricted')));
 });
 
 test('only a message sender can permanently delete their own message', async () => {

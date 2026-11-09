@@ -216,6 +216,19 @@ test('organisation property portfolio is authenticated, tenant-scoped and separa
 });
 
 
+test('organisation teams expose only implemented capabilities and team assignment controls', () => {
+  const teamsHtml = fs.readFileSync('app/hamlet/organisation-teams.html', 'utf8');
+  const teamFunctions = fs.readFileSync('functions/hamlet-organisation-teams.js', 'utf8');
+  const propertiesHtml = fs.readFileSync('app/hamlet/organisation-properties.html', 'utf8');
+  assert.ok(teamsHtml.includes('deals.read'));
+  assert.ok(teamsHtml.includes('properties.write'));
+  assert.ok(!teamsHtml.includes('documents.read') && !teamsHtml.includes('documents.write') && !teamsHtml.includes('members.view'));
+  assert.ok(!teamFunctions.includes('exports.organisationTeamPermissions'));
+  assert.ok(organisationDealsHtml.includes('assignResourceTeam'));
+  assert.ok(propertiesHtml.includes('assignResourceTeam'));
+  assert.ok(firestore.includes("data.visibility == 'restricted'"));
+});
+
 test('organisation document workspace JavaScript parses and uses tenant-scoped Storage paths', () => {
   const blocks = [...organisationFilesHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
@@ -224,7 +237,7 @@ test('organisation document workspace JavaScript parses and uses tenant-scoped S
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-files-inline-' + index + '.js' }));
   }
   assert.match(organisationFilesHtml, /firebase-storage-compat\.js/);
-  assert.match(organisationFilesHtml, /organisationDocuments\/\+activeOrg\.organisationId/);
+  assert.match(organisationFilesHtml, /organisationDocuments\/['"]\+activeOrg\.organisationId/);
   assert.match(organisationFilesHtml, /organisationResourceShares/);
   assert.match(organisationFilesHtml, /15\*1024\*1024/);
   assert.match(organisationFilesHtml, /getDownloadURL/);

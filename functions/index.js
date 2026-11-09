@@ -1002,3 +1002,5 @@ exports.getSuperAdminAccountMetrics = onCall({
 Object.assign(exports, require("./hamlet-rankings"));
 Object.assign(exports, require("./hamlet-organisations"));
 Object.assign(exports, require("./hamlet-organisation-audit"));
+
+Object.assign(exports, require("./hamlet-organisation-teams"));

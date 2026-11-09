@@ -95,7 +95,7 @@
   const $=id=>document.getElementById(id);
   const stages=['Initial Inspection','LOI Issued','Due Diligence','Under Contract','Lease Execution','Closing','Commission Payout','Closed'];
   const stageGroups=[stages.slice(0,2),stages.slice(2,4),stages.slice(4,6),stages.slice(6)];
-  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false;
+  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,activeTeams=[];
   const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showNotice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function status(id,message){$(id).textContent=message||'';}
@@ -123,11 +123,38 @@
     $('orgSelect').value=orgId;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Organisation slug: '+activeOrg.slug+' · tenant hostname not provisioned';$('roleBadge').textContent=activeOrg.role;
     try{sessionStorage.setItem('hamletActiveOrganisationId',orgId);}catch(e){}
     canManage=['owner','admin','manager'].includes(activeOrg.role);
+    await loadActiveTeams();
     $('dealVisibility').disabled=!canManage;
     $('dealVisibility').value='organisation';
     $('saveBtn').disabled=activeOrg.role==='viewer';
     if(canManage){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
     await loadDeals();
+  }
+  async function loadActiveTeams(){
+    activeTeams=[];
+    if(!activeOrg)return;
+    const snap=await db.collection('organisationTeams').where('organisationId','==',activeOrg.id).where('status','==','active').get();
+    activeTeams=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }
+  async function assignResourceTeam(card,resource){
+    if(!canManage)return;
+    const box=document.createElement('div');box.className='share-tools';
+    const label=document.createElement('label');label.textContent='Assigned team';box.appendChild(label);
+    const row=document.createElement('div');row.className='share-row';const select=document.createElement('select');
+    select.add(new Option('No team assignment',''));
+    activeTeams.forEach(team=>select.add(new Option(team.name,team.id)));
+    select.value=resource.teamId||'';
+    const save=document.createElement('button');save.type='button';save.textContent='Apply';
+    save.addEventListener('click',async()=>{
+      save.disabled=true;
+      try{
+        const update={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+        if(select.value)update.teamId=select.value;else update.teamId=firebase.firestore.FieldValue.delete();
+        await db.collection('organisationDeals').doc(resource.id).update(update);
+        showNotice(select.value?'Deal assigned to team.':'Team assignment removed.');await loadDeals();
+      }catch(error){console.error('Unable to assign deal team:',error);showNotice('Unable to update team assignment. Confirm manager permissions.',true);save.disabled=false;}
+    });
+    row.append(select,save);box.appendChild(row);card.appendChild(box);
   }
   async function queryVisibleDeals(){
     const collection=db.collection('organisationDeals');
@@ -224,6 +251,7 @@
       const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteDeal(deal.id));actions.appendChild(remove);
       card.appendChild(actions);
     }
+    assignResourceTeam(card,deal);
     renderShareTools(card,deal);
     return card;
   }
