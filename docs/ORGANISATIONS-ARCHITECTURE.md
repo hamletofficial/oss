@@ -151,14 +151,16 @@ Before adapting existing collections, map their current fields, queries, Storage
 
 Preferred organisational address pattern:
 
-`{slug}.orgs.hamlet-ai.co.uk`
+- Directory: `platform.hamlet-ai.co.uk`
+- Tenant workspace: `{slug}.platform.hamlet-ai.co.uk`
 
 Examples:
 
-- `abccommercial.orgs.hamlet-ai.co.uk`
-- `xyzproperty.orgs.hamlet-ai.co.uk`
+- `platform.hamlet-ai.co.uk`
+- `abccommercial.platform.hamlet-ai.co.uk`
+- `xyzproperty.platform.hamlet-ai.co.uk`
 
-The directory remains at `organisations.hamlet-ai.co.uk`; the main site and existing app routes remain intact.
+The platform hostname is the single public entry point for Hamlet Organisations. Feature branches and GitHub Pull Requests provide development, preview and acceptance testing; there is no separate staging hostname. The main site and existing app routes remain intact.
 
 Use Cloudflare wildcard DNS and a Worker/hosting routing layer to resolve a validated slug to an organisation ID. The slug is a routing key only, never proof of membership or authority.
 
@@ -328,11 +330,10 @@ The feature branch `feat/organisations-auth-handoff-routing` adds the first impl
 ### Routing implementation
 
 - `worker/hamlet-organisations-router` is an isolated Worker and Wrangler configuration.
-- Production host resolution recognises only `{slug}.orgs.hamlet-ai.co.uk`. Reserved and malformed slugs are rejected.
-- Staging can be exercised on the Worker `workers.dev` hostname using `/tenant/{slug}`; a short-lived, HttpOnly, Secure, SameSite=Lax cookie retains the staging tenant route while navigating within the workspace.
+- Canonical directory host resolution recognises `platform.hamlet-ai.co.uk`; tenant host resolution recognises `{slug}.platform.hamlet-ai.co.uk`. Reserved and malformed slugs are rejected.
+- Pull Requests provide the development and testing workflow. The Worker `workers.dev` hostname remains available for isolated router smoke tests using `/tenant/{slug}`; its short-lived, HttpOnly, Secure, SameSite=Lax cookie is scoped to that simulation origin only.
 - The Worker proxies tenant-origin paths to the existing Hamlet Pages origin, preserving the tenant browser origin so Firebase's tenant session remains available to tenant workspace pages.
-- The Worker adds no production route declaration and makes no DNS changes. Production wildcard DNS and Worker route binding remain a separately gated release action.
-- The directory hostname `organisations.hamlet-ai.co.uk` remains separate from tenant hostnames.
+- The Worker adds no production route declaration and makes no DNS changes. The `platform` directory hostname and wildcard tenant route require a separately reviewed and explicitly approved release action.
 
 ### Test and release gates
 
