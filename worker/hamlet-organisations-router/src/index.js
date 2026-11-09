@@ -1,6 +1,6 @@
 const MAIN_ORIGIN = "https://www.hamlet-ai.co.uk";
-const ORGANISATIONS_HOST = "organisations.hamlet-ai.co.uk";
-const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","press","public","root","settings","signin","signup","support","www"]);
+const PLATFORM_HOST = "platform.hamlet-ai.co.uk";
+const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","platform","press","public","root","settings","signin","signup","support","www"]);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
 function readTenantCookie(request) {
@@ -16,30 +16,29 @@ function readTenantCookie(request) {
   }
 }
 
-function tenantFromRequest(request, environment) {
+function tenantFromRequest(request) {
   const url = new URL(request.url);
   const host = url.hostname.toLowerCase();
-  const production = environment === "production";
 
-  if (host === ORGANISATIONS_HOST) {
-    return {kind: "directory"};
+  if (host === PLATFORM_HOST) {
+    return {kind: "directory", simulated: false};
   }
 
-  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.organisations\.hamlet-ai\.co\.uk$/);
+  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.platform\.hamlet-ai\.co\.uk$/);
   if (tenant) {
-    return {kind: "tenant", slug: tenant[1], production, initial: url.pathname === "/"};
+    return {kind: "tenant", slug: tenant[1], initial: url.pathname === "/", simulated: false};
   }
 
   if (host.endsWith(".workers.dev")) {
     const match = url.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
-    if (match) return {kind: "tenant", slug: match[1], production: false, initial: true};
+    if (match) return {kind: "tenant", slug: match[1], initial: true, simulated: true};
 
     const cookieSlug = readTenantCookie(request);
     if (SLUG.test(cookieSlug) && !RESERVED.has(cookieSlug)) {
-      return {kind: "tenant", slug: cookieSlug, production: false, initial: false};
+      return {kind: "tenant", slug: cookieSlug, initial: false, simulated: true};
     }
 
-    return {kind: "directory"};
+    return {kind: "directory", simulated: true};
   }
 
   return null;
@@ -51,14 +50,13 @@ function tenantCookie(slug) {
 }
 
 export default {
-  async fetch(request, env = {}) {
+  async fetch(request) {
     const url = new URL(request.url);
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response("Method not allowed", {status: 405, headers: {"Allow": "GET, HEAD"}});
     }
 
-    const environment = env.HAMLET_ORGANISATIONS_ENV === "production" ? "production" : "staging";
-    const route = tenantFromRequest(request, environment);
+    const route = tenantFromRequest(request);
     if (!route) return new Response("Not found", {status: 404});
 
     if (route.kind === "directory") {
@@ -74,7 +72,6 @@ export default {
       headers.set("X-Content-Type-Options", "nosniff");
       headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
       headers.set("X-Hamlet-Organisation-Route", "directory");
-      headers.set("X-Hamlet-Organisation-Environment", environment);
       return new Response(upstream.body, {status: upstream.status, statusText: upstream.statusText, headers});
     }
 
@@ -105,8 +102,7 @@ export default {
     headers.set("X-Content-Type-Options", "nosniff");
     headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     headers.set("X-Hamlet-Tenant-Route", route.slug);
-    headers.set("X-Hamlet-Organisation-Environment", environment);
-    if (route.initial && !route.production) headers.append("Set-Cookie", tenantCookie(route.slug));
+    if (route.initial && route.simulated) headers.append("Set-Cookie", tenantCookie(route.slug));
 
     return new Response(upstream.body, {
       status: upstream.status,
