@@ -105,6 +105,20 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "organisationResourceShares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "organisationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sharedWithUid",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
