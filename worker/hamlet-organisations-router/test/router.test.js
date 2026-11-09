@@ -47,7 +47,7 @@ test("canonical platform hostname serves the organisation directory", async () =
 });
 
 test("canonical tenant hostname opens the tenant handoff page", async () => {
-  const {response, upstreamUrl} = await route("https://acme-group.platform.hamlet-ai.co.uk/");
+  const {response, upstreamUrl} = await route("https://acme-group.orgs.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
@@ -55,12 +55,12 @@ test("canonical tenant hostname opens the tenant handoff page", async () => {
 });
 
 test("reserved platform tenant slug is rejected", async () => {
-  const {response} = await route("https://platform.platform.hamlet-ai.co.uk/");
+  const {response} = await route("https://platform.orgs.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
 
 test("other reserved tenant slugs are rejected", async () => {
-  const {response} = await route("https://admin.platform.hamlet-ai.co.uk/");
+  const {response} = await route("https://admin.orgs.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
 
