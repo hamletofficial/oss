@@ -162,7 +162,7 @@ test('workspace organisation management page JavaScript parses', () => {
   }
   assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
   assert.match(appOrganisationsHtml, /Team operations/);
-  assert.match(appOrganisationsHtml, /Deals &amp; pipeline/);
+  assert.match(appOrganisationsHtml, /Shared deals &amp; pipeline/);
   assert.match(appOrganisationsHtml, /Property portfolio/);
   assert.match(appOrganisationsHtml, /Organisation administration/);
   assert.match(appOrganisationsHtml, /organisationMembers/);
