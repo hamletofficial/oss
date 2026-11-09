@@ -829,13 +829,13 @@ service cloud.firestore {
         && data.sharedWithUids.size() <= 100;
     }
 
-    function canReadOrganisationResource(data) {
+    function canReadOrganisationResource(data, resourceType, resourceId) {
       return isActiveOrganisationMember(data.organisationId)
         && (
           data.visibility == 'organisation'
           || data.createdByUid == request.auth.uid
           || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
-          || exists(/databases/$(database)/documents/organisationResourceShares/$(data.organisationId + '_' + data.resourceType + '_' + data.id + '_' + request.auth.uid))
+          || exists(/databases/$(database)/documents/organisationResourceShares/$(data.organisationId + '_' + resourceType + '_' + resourceId + '_' + request.auth.uid))
           || isOrganisationManager(data.organisationId)
         );
     }
@@ -886,7 +886,7 @@ service cloud.firestore {
           && (!('description' in data) || (data.description is string && data.description.size() <= 4000));
       }
 
-      allow read: if canReadOrganisationResource(resource.data);
+      allow read: if canReadOrganisationResource(resource.data, 'property', propertyId);
       allow create: if request.auth != null
         && validPropertyRecord(request.resource.data)
         && request.resource.data.createdByUid == request.auth.uid
@@ -908,7 +908,7 @@ service cloud.firestore {
     }
 
     match /organisationDeals/{dealId} {
-      allow read: if canReadOrganisationResource(resource.data);
+      allow read: if canReadOrganisationResource(resource.data, 'deal', dealId);
       allow create: if request.resource.data.organisationId is string
         && request.resource.data.createdByUid == request.auth.uid
         && validOrganisationSharing(request.resource.data)
@@ -927,7 +927,7 @@ service cloud.firestore {
     // Operational audit events are server-authored and inherit the parent deal's
     // sharing policy; client-side event forgery and mutation are prohibited.
     match /organisationDealEvents/{eventId} {
-      allow read: if canReadOrganisationResource(resource.data);
+      allow read: if canReadOrganisationResource(resource.data, 'deal', resource.data.resourceId);
       allow create, update, delete: if false;
     }
 
@@ -986,7 +986,7 @@ service cloud.firestore {
       }
       allow read: if request.auth != null
         && parentExists(resource.data)
-        && canReadOrganisationResource(parentResource(resource.data).data);
+        && canReadOrganisationResource(parentResource(resource.data).data, resource.data.resourceType, resource.data.resourceId);
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
         && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
@@ -1008,7 +1008,7 @@ service cloud.firestore {
         && parentExists(request.resource.data)
         && parentResource(request.resource.data).data.organisationId == request.resource.data.organisationId
         && parentResource(request.resource.data).data.createdByUid == request.resource.data.createdByUid
-        && canReadOrganisationResource(parentResource(request.resource.data).data)
+        && canReadOrganisationResource(parentResource(request.resource.data).data, request.resource.data.resourceType, request.resource.data.resourceId)
         && canWriteOrganisationResource(parentResource(request.resource.data).data);
       allow update: if false;
       allow delete: if request.auth != null
