@@ -45,7 +45,7 @@
       <label>Period<select id="periodFilter"><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="all">All available</option></select></label>
       <button type="button" class="secondary" id="refreshBtn">Refresh</button><button type="button" id="exportBtn">Export CSV</button>
     </div></section>
-    <section class="stats" aria-label="Audit summary"><div class="stat"><strong id="totalCount">—</strong><span>Events in selected period</span></div><div class="stat"><strong id="inviteCount">—</strong><span>Invitation events</span></div><div class="stat"><strong id="memberCount">—</strong><span>Membership events</span></div><div class="stat"><strong id="resourceCount">—</strong><span>Deal & property events</span></div></section>
+    <section class="stats" aria-label="Audit summary"><div class="stat"><strong id="totalCount">—</strong><span>Events in selected period</span></div><div class="stat"><strong id="inviteCount">—</strong><span>Invitation events</span></div><div class="stat"><strong id="memberCount">—</strong><span>Membership events</span></div><div class="stat"><strong id="resourceCount">—</strong><span>Deal, property & file events</span></div></section>
     <section class="panel"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px"><h2 style="font:700 16px Manrope;margin:0">Activity register</h2><span class="muted" id="resultMeta">Loading…</span></div><div id="eventList" class="event-list" aria-live="polite"><div class="empty">Loading audit records…</div></div></section>
     <p class="footnote">Integrity and access: audit events are authored by trusted Cloud Functions, are immutable to client accounts, and are restricted by Firestore Rules to active organisation owners and administrators. Deal and property changes are captured by trusted Firestore triggers. Changed-field names are recorded without copying commercial notes, client details or other field values into the audit log.</p>
   </main>
@@ -60,7 +60,20 @@
     'organisation.invitation_accepted':'Invitation accepted',
     'organisation.invitation_revoked':'Invitation revoked',
     'organisation.member_role_changed':'Member role changed',
-    'organisation.member_removed':'Member removed',\n    'organisation.deal_created':'Deal created',\n    'organisation.deal_updated':'Deal updated',\n    'organisation.deal_stage_changed':'Deal stage changed',\n    'organisation.deal_deleted':'Deal deleted',\n    'organisation.property_created':'Property created',\n    'organisation.property_updated':'Property updated',\n    'organisation.property_deleted':'Property deleted'
+    'organisation.member_removed':'Member removed',
+    'organisation.deal_created':'Deal created',
+    'organisation.deal_updated':'Deal updated',
+    'organisation.deal_stage_changed':'Deal stage changed',
+    'organisation.deal_deleted':'Deal deleted',
+    'organisation.property_created':'Property created',
+    'organisation.property_updated':'Property updated',
+    'organisation.property_deleted':'Property deleted',
+    'organisation.profile_updated':'Organisation profile updated',
+    'organisation.membership_requested':'Membership requested',
+    'organisation.membership_request_approved':'Membership request approved',
+    'organisation.membership_request_declined':'Membership request declined',
+    'organisation.document_uploaded':'Organisation file uploaded',
+    'organisation.document_deleted':'Organisation file deleted'
   };
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
@@ -111,7 +124,8 @@
     const events=filtered();
     $('totalCount').textContent=events.length;
     $('inviteCount').textContent=events.filter(e=>(e.action||'').includes('invitation')).length;
-    $('memberCount').textContent=events.filter(e=>(e.action||'').includes('member_')||e.action==='organisation.created').length;\n    $('resourceCount').textContent=events.filter(e=>e.resourceType==='deal'||e.resourceType==='property').length;
+    $('memberCount').textContent=events.filter(e=>(e.action||'').includes('member_')||e.action==='organisation.created').length;
+    $('resourceCount').textContent=events.filter(e=>e.resourceType==='deal'||e.resourceType==='property'||e.resourceType==='document').length;
     $('resultMeta').textContent=events.length+' matching event'+(events.length===1?'':'s');
     const list=$('eventList');list.replaceChildren();
     if(!events.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No audit events match this period and event type.';list.appendChild(empty);return;}
@@ -119,7 +133,7 @@
       const row=document.createElement('article');row.className='event';
       const date=document.createElement('div');date.className='date';date.textContent=dateText(e.createdAt);row.appendChild(date);
       const detail=document.createElement('div');const title=document.createElement('h3');title.textContent=labels[e.action]||e.action||'Organisation event';detail.appendChild(title);
-      const parts=[];if(e.actorName)parts.push('Actor: '+e.actorName);else if(e.actorUid)parts.push('Actor UID: '+e.actorUid);if(e.targetUid)parts.push('Target: '+e.targetUid);if(e.role)parts.push('Role: '+e.role);if(e.invitationEmail)parts.push('Invitation: '+e.invitationEmail);if(e.resourceId)parts.push((e.resourceType==='deal'?'Deal':'Property')+' ID: '+e.resourceId);if(Array.isArray(e.changedFields)&&e.changedFields.length)parts.push('Changed: '+e.changedFields.join(', '));
+      const parts=[];if(e.actorName)parts.push('Actor: '+e.actorName);else if(e.actorUid)parts.push('Actor UID: '+e.actorUid);if(e.targetUid)parts.push('Target: '+e.targetUid);if(e.role)parts.push('Role: '+e.role);if(e.invitationEmail)parts.push('Invitation: '+e.invitationEmail);if(e.resourceId)parts.push((e.resourceType==='deal'?'Deal':e.resourceType==='document'?'Parent resource':'Property')+' ID: '+e.resourceId);if(Array.isArray(e.changedFields)&&e.changedFields.length)parts.push('Changed: '+e.changedFields.join(', '));
       const meta=document.createElement('p');meta.textContent=[e.summary||'',parts.join(' · ')].filter(Boolean).join(' · ')||'No additional event metadata';detail.appendChild(meta);row.appendChild(detail);
       const tag=document.createElement('span');tag.className='tag';tag.textContent=(e.action||'event').replace('organisation.','').replace(/_/g,' ');row.appendChild(tag);list.appendChild(row);
     });

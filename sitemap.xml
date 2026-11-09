@@ -5,6 +5,10 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://platform.hamlet-ai.co.uk/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.hamlet-ai.co.uk/resources/passivhaus.html</loc>
     <priority>0.7</priority>
   </url>

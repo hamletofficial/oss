@@ -158,7 +158,7 @@ Examples:
 - `abccommercial.orgs.hamlet-ai.co.uk`
 - `xyzproperty.orgs.hamlet-ai.co.uk`
 
-The directory remains at `organisations.hamlet-ai.co.uk`; the main site and existing app routes remain intact.
+The organisation platform uses `platform.hamlet-ai.co.uk`; tenant workspaces use `{slug}.orgs.hamlet-ai.co.uk`.
 
 Use Cloudflare wildcard DNS and a Worker/hosting routing layer to resolve a validated slug to an organisation ID. The slug is a routing key only, never proof of membership or authority.
 
@@ -206,23 +206,25 @@ Custom organisation domains (for example `workspace.company.com`) are a later en
 - [x] Run the static, browser and Firestore/Storage Emulator CI suites successfully on functional-code commit `36fd3c1e6809efe51d64792fdd60a95cfbfe9271`.
 - [x] Confirm the production Firebase CLI configuration: the user has confirmed root `firebase.json` is authoritative. It targets project `wale-491805`, Firestore `(default)` in `nam5`, and root `firestore.rules` / `firestore.indexes.json`.
 - [x] Build the authenticated organisation registration, invitation and membership management page at `/organisations.html`, linked from the Members Area and excluded from public search.
-- [ ] Add organisation profile editing and public/private visibility controls through trusted operations.
+- [x] Add owner/admin organisation profile editing and public/private visibility controls through a trusted callable; sync a whitelisted public projection transactionally.
 
-The initial backend foundation is implemented on the feature branch. No production Functions or Firestore Rules have been deployed.
+The organisation backend and authenticated resource workspaces are implemented on the feature branch. No production Functions or Firestore Rules have been deployed.
 
 ### Phase 2 — Membership lifecycle
 
-- Invitations, verified-email acceptance, expiry and revocation.
-- Membership requests and approval.
-- Multiple organisations per user.
-- Role management, suspension, removal, exit and ownership transfer.
-- Append-only activity audit.
+- [x] Invitations, verified-email acceptance, expiry and revocation.
+- [x] Public-organisation membership requests, owner/admin approval and standard-member assignment.
+- [x] Multiple organisations per user.
+- [x] Role management, suspension, removal and ownership transfer.
+- [x] Add a safe self-service exit path for non-owners and revoke active team assignments transactionally.
+- [x] Append-only activity audit for membership, ownership, lifecycle, team, deal/property and file events.
 
 ### Phase 3 — Workspace and subdomain routing
 
 - Organisation switcher in the authenticated application.
 - Dedicated workspace shell and tenant resolution.
-- Cloudflare wildcard routing for `*.orgs.hamlet-ai.co.uk`.
+- [x] Add isolated Worker routing source for `platform.hamlet-ai.co.uk` and wildcard `*.orgs.hamlet-ai.co.uk`.
+- [ ] Provision the isolated staging frontend and verify live host routes, TLS, Firebase Auth domains and custom-token handoff before any production route.
 - Resolve authentication/session design and validate Firebase/OAuth domains.
 - Launch subdomains only after tenant isolation tests pass.
 
@@ -235,16 +237,17 @@ The initial backend foundation is implemented on the feature branch. No producti
 - [x] Add organisation document metadata and separate tenant-aware Storage paths for deal and property files.
 - [x] Add emulator tests for active membership, cross-tenant denial, restricted sharing, creator attribution, role boundaries and file-upload isolation.
 - [ ] Complete the emulator run and review all rule evaluation results before treating this phase as validated.
-- [ ] Build the organisation workspace UI against the new collections; do not expose legacy personal records as shared resources.
-- [ ] Implement explicit opt-in association/migration for existing individual records; never silently transfer ownership.
-- [ ] Add server-side audit event generation, file metadata lifecycle, query indexes and revocation/deletion tests before production.
+- [x] Build the organisation workspace UI against the tenant collections; personal records remain separate and are not exposed as shared resources.
+- [x] Implement explicit, owner-authorised snapshot copies of personal deals/properties into restricted tenant records; originals are not changed, and duplicate copies are prevented.
+- [x] Add trusted deal/property/file audit triggers, callable-managed file deletion, and composite indexes for the implemented directory/resource queries.
+- [ ] Complete emulator and browser validation for the latest changes, including file lifecycle, membership-request review, revocation, and deletion cases before production.
 
 ### Phase 5 — Directory, analytics and enterprise
 
-- Public organisation discovery and safe public profiles.
-- Verification workflow and reporting.
-- Team/organisation analytics.
-- Custom domains, advanced administration, enterprise integrations and licensing.
+- [x] Public organisation discovery and safe, owner/admin-managed public profiles.
+- [x] Manual business-verification requests with private registration details, designated platform review, public status projection and owner/admin decision reports.
+- [x] Owner/admin-only aggregate analytics dashboard for active membership, teams, deal stages and property types.
+- [ ] Custom domains, advanced administration, enterprise integrations and licensing (later enterprise phase; requires external service and product decisions).
 
 ## Acceptance criteria for the first release
 
@@ -302,12 +305,12 @@ Each property/deal resource must include `organisationId`, immutable `createdByU
 
 Owners, admins and managers can manage tenant resources. A member can create and maintain their own resources but cannot alter the sharing policy after creation. Viewers are read-only. Tenant identifiers and creator attribution cannot be changed by clients. Deal history is client-immutable. Tenant documents use `organisationDocuments/{organisationId}/{deal|property}/{resourceId}/{documentId}/{fileName}` and inherit the parent resource's membership/sharing access.
 
-These collections are a new data contract only. Existing `hamletDeals`, `commercialProperties`, `residentialProperties`, public listing projections, and owner-scoped document paths remain unchanged. No existing personal record is automatically shared or migrated. No UI is yet wired to these collections, and no production rules or Storage rules have been deployed. Before production use, add the trusted audit writer, end-to-end document metadata lifecycle, revocation/deletion handling, query indexes, and migration consent workflow.
+These collections preserve the existing individual records: `hamletDeals`, `commercialProperties`, `residentialProperties`, public listing projections, and owner-scoped document paths remain unchanged. Organisation deal, property, file and audit workspaces are wired to the tenant collections. Personal records are copied only after the owner selects a source and destination and confirms the disclosure; the copy is restricted, separate, and does not sync with or alter the source. Production rules, Storage rules, Functions and indexes have not been deployed.
 
 
 ### Storage upload rollout gate — 8 November 2026
 
-Organisation document Storage Rules are deliberately deferred from this branch until the emulator accepts a separately validated ruleset. The feature branch currently retains the clean `main` Storage Rules baseline; organisation document metadata and tenant access remain governed by the Firestore rules. No organisation document upload path is enabled by this change. Do not enable client uploads or deploy organisation Storage permissions until dedicated Storage Emulator tests pass for both deal and property documents, including cross-tenant denial, restricted sharing, inactive membership, MIME/size limits, and delete/update behaviour.
+Organisation document Storage Rules and the upload workspace are implemented in source, with tenant/resource membership checks, MIME/size limits, no-overwrite semantics and role-controlled deletion. Emulator and CI coverage remains a release gate, as does deployment of the matching Storage Rules. These source changes do not enable or deploy production uploads by themselves.
 
 
 ## Authentication handoff and tenant routing implementation — 9 November 2026
@@ -332,7 +335,7 @@ The feature branch `feat/organisations-auth-handoff-routing` adds the first impl
 - Staging can be exercised on the Worker `workers.dev` hostname using `/tenant/{slug}`; a short-lived, HttpOnly, Secure, SameSite=Lax cookie retains the staging tenant route while navigating within the workspace.
 - The Worker proxies tenant-origin paths to the existing Hamlet Pages origin, preserving the tenant browser origin so Firebase's tenant session remains available to tenant workspace pages.
 - The Worker adds no production route declaration and makes no DNS changes. Production wildcard DNS and Worker route binding remain a separately gated release action.
-- The directory hostname `organisations.hamlet-ai.co.uk` remains separate from tenant hostnames.
+- The platform hostname `platform.hamlet-ai.co.uk` remains separate from tenant hostnames.
 
 ### Test and release gates
 

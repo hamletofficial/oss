@@ -1,5 +1,5 @@
 const MAIN_ORIGIN = "https://www.hamlet-ai.co.uk";
-const ORGANISATIONS_HOST = "organisations.hamlet-ai.co.uk";
+const PLATFORM_HOST = "platform.hamlet-ai.co.uk";
 const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","press","public","root","settings","signin","signup","support","www"]);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
@@ -21,11 +21,11 @@ function tenantFromRequest(request, environment) {
   const host = url.hostname.toLowerCase();
   const production = environment === "production";
 
-  if (host === ORGANISATIONS_HOST) {
+  if (host === PLATFORM_HOST) {
     return {kind: "directory"};
   }
 
-  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.organisations\.hamlet-ai\.co\.uk$/);
+  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
   if (tenant) {
     return {kind: "tenant", slug: tenant[1], production, initial: url.pathname === "/"};
   }
@@ -62,7 +62,7 @@ export default {
     if (!route) return new Response("Not found", {status: 404});
 
     if (route.kind === "directory") {
-      const directoryPath = url.pathname === "/" ? "/organisations.html" : url.pathname;
+      const directoryPath = url.pathname === "/" ? "/organisation-directory.html" : url.pathname;
       const target = new URL(directoryPath + url.search, MAIN_ORIGIN);
       const upstream = await fetch(new Request(target.toString(), {
         method: request.method,

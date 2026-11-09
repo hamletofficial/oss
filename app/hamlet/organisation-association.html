@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+  <title>Copy a Personal Record | Hamlet</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Arial,sans-serif}.shell{width:min(800px,calc(100% - 28px));margin:32px auto 64px}.top{display:flex;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)}.top a{color:#bfdbfe;font-weight:700;text-decoration:none}.panel{margin-top:22px;padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}h1{margin:0 0 10px;font-size:clamp(25px,4vw,34px)}p{color:var(--muted);line-height:1.6}.form{display:grid;gap:14px;margin-top:20px}.field{display:grid;gap:6px}.field label{color:#cbd5e1;font-weight:700;font-size:12px}.field select{width:100%;min-height:44px;padding:10px;border:1px solid #40516a;border-radius:8px;background:#0d1728;color:#fff;font:inherit}button{justify-self:start;min-height:42px;padding:10px 14px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.warning{padding:13px;border:1px solid #7c5d1b;border-radius:9px;background:#2b2413;color:#fde68a;line-height:1.55}.status{min-height:1.4em;color:#bfdbfe;line-height:1.5}.status.error{color:#fca5a5}.gate{padding:26px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top"><a href="/app/hamlet/organisations.html">← Organisation workspace</a><a href="/members.html">Members Area</a></header>
+    <section class="panel" id="app" hidden>
+      <h1>Copy a personal record into an organisation</h1>
+      <p>This creates a separate, restricted snapshot in the selected organisation. It does not change or delete your personal record, and future edits will not sync between the two copies.</p>
+      <div class="warning">By copying, you explicitly authorise organisation owners and administrators to access the new snapshot. The copy starts restricted to you and authorised organisation administrators. Property images, documents and personal record links are not copied.</div>
+      <form class="form" id="copyForm">
+        <div class="field"><label for="orgSelect">Destination organisation</label><select id="orgSelect" required></select></div>
+        <div class="field"><label for="sourceSelect">Personal record to copy</label><select id="sourceSelect" required></select></div>
+        <button type="submit" id="copyBtn">Copy selected record</button>
+      </form>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="gate" id="gate"><p id="gateMessage">Checking your verified Hamlet sign-in…</p></section>
+  </main>
+  <script>
+    (function(){
+      'use strict';
+      const $=id=>document.getElementById(id);let auth,db,functions,user,resources=[];
+      const text=(value,fallback)=>String(value||fallback||'').replace(/\s+/g,' ').trim().slice(0,120);
+      function fail(message){$('status').textContent=message;$('status').className='status error';}
+      async function load(){
+        const [deals,commercial,residential]=await Promise.allSettled([
+          db.collection('hamletDeals').where('uid','==',user.uid).get(),
+          db.collection('commercialProperties').where('ownerUid','==',user.uid).get(),
+          db.collection('residentialProperties').where('ownerUid','==',user.uid).get(),
+        ]);
+        if(deals.status==='fulfilled')deals.value.docs.forEach(doc=>{const d=doc.data();resources.push({type:'deal',id:doc.id,label:'Deal · '+text(d.name,'Untitled deal')});});
+        if(commercial.status==='fulfilled')commercial.value.docs.forEach(doc=>{const d=doc.data();resources.push({type:'commercialProperty',id:doc.id,label:'Commercial property · '+text(d.propertyName||d.name||d.address,'Unnamed property')});});
+        if(residential.status==='fulfilled')residential.value.docs.forEach(doc=>{const d=doc.data();resources.push({type:'residentialProperty',id:doc.id,label:'Residential property · '+text(d.propertyName||d.name||d.address,'Unnamed property')});});
+        const source=$('sourceSelect');source.replaceChildren(new Option(resources.length?'Choose a personal record…':'No personal records available',''));
+        resources.forEach((item,index)=>source.add(new Option(item.label,item.type+'|'+item.id)));
+        if(!resources.length)$('status').textContent='No personal deals or properties were found for this account.';
+      }
+      async function init(){
+        if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+        try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('us-central1');}
+        catch(error){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+        auth.onAuthStateChanged(async current=>{
+          if(!current){location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
+          user=current;try{await current.reload();await current.getIdToken(true);}catch(error){}
+          if(current.emailVerified!==true){$('gateMessage').textContent='Verify your email address before copying records.';return;}
+          try{
+            const memberships=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
+            const targets=[];
+            for(const snapshot of memberships.docs){const member=snapshot.data();if(member.role==='viewer')continue;const org=await db.collection('organisations').doc(member.organisationId).get();if(org.exists&&org.data().status==='active')targets.push({id:org.id,name:org.data().name,role:member.role});}
+            $('orgSelect').replaceChildren(...targets.map(item=>new Option(item.name+' · '+item.role,item.id)));
+            if(!targets.length){$('gateMessage').textContent='You need an active organisation role with write access before copying a personal record.';return;}
+            $('gate').hidden=true;$('app').hidden=false;await load();
+          }catch(error){console.error(error);$('gateMessage').textContent='Unable to load your personal records and organisation memberships.';}
+        });
+      }
+      $('copyForm').addEventListener('submit',async event=>{
+        event.preventDefault();const selected=resources.find(item=>item.type+'|'+item.id===$('sourceSelect').value);if(!selected)return;
+        const orgName=$('orgSelect').selectedOptions[0]?.textContent||'the selected organisation';
+        if(!confirm('Copy “'+selected.label+'” to '+orgName+' as a separate restricted snapshot? The original stays unchanged. Organisation owners and administrators can access the copy.'))return;
+        const button=$('copyBtn');button.disabled=true;$('status').textContent='Copying a safe snapshot…';$('status').className='status';
+        try{const result=await functions.httpsCallable('copyPersonalResourceToOrganisation')({organisationId:$('orgSelect').value,sourceType:selected.type,sourceId:selected.id});$('status').textContent=result.data.alreadyImported?'This personal record was already copied to that organisation.':'Personal record copied. It is restricted to you and organisation administrators.';}
+        catch(error){console.error('Personal record copy failed:',error);fail(error.message||'Unable to copy this personal record.');}
+        finally{button.disabled=false;}
+      });
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+    })();
+  </script>
+</body>
+</html>
