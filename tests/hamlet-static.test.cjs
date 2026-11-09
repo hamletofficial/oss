@@ -173,19 +173,19 @@ test('workspace organisation management page JavaScript parses', () => {
 
 
 test('organisation deal workspace is tenant-scoped and uses dedicated deal storage', () => {
-  const blocks = [...organisationDealsHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-    .filter((match) => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+  const blocks = [...organisationDealsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
   assert.ok(blocks.length >= 1, 'expected organisation deal workspace application script');
   for (const [index, block] of blocks.entries()) {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-deals-inline-' + index + '.js' }));
   }
   assert.match(organisationDealsHtml, /name="robots" content="noindex,nofollow"/);
-  assert.match(organisationDealsHtml, /collection\\('organisationDeals'\\)/);
-  assert.match(organisationDealsHtml, /organisationId:activeOrg\\.id/);
-  assert.match(organisationDealsHtml, /createdByUid:previous\\?previous\\.createdByUid:user\\.uid/);
-  assert.match(organisationDealsHtml, /collection\\('organisationMembers'\\)/);
+  assert.match(organisationDealsHtml, /collection\('organisationDeals'\)/);
+  assert.match(organisationDealsHtml, /organisationId:activeOrg\.id/);
+  assert.match(organisationDealsHtml, /createdByUid:previous\?previous\.createdByUid:user\.uid/);
+  assert.match(organisationDealsHtml, /collection\('organisationMembers'\)/);
   assert.match(organisationDealsHtml, /visibility/);
-  assert.doesNotMatch(organisationDealsHtml, /collection\\('hamletDeals'\\)/);
+  assert.doesNotMatch(organisationDealsHtml, /collection\('hamletDeals'\)/);
   assert.match(organisationDealsHtml, /Firestore Rules/);
-  assert.match(appOrganisationsHtml, /href="\\/app\\/hamlet\\/organisation-deals\\.html"/);
+  assert.match(appOrganisationsHtml, /href="\/app\/hamlet\/organisation-deals\.html"/);
 });
