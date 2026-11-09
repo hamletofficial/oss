@@ -877,10 +877,10 @@ service cloud.firestore {
           && (!('address' in data) || (data.address is string && data.address.size() <= 300))
           && (!('city' in data) || (data.city is string && data.city.size() <= 100))
           && (!('postcode' in data) || (data.postcode is string && data.postcode.size() <= 20))
-          && (!('size' in data) || data.size == null || (data.size is number && data.size >= 0 && data.size <= 100000000))
+          && (!('size' in data) || data.size == null || ((data.size is int || data.size is float) && data.size >= 0 && data.size <= 100000000))
           && (!('sizeUnit' in data) || data.sizeUnit in ['sq ft','sq m','acres'])
-          && (!('askingPrice' in data) || data.askingPrice == null || (data.askingPrice is number && data.askingPrice >= 0 && data.askingPrice <= 1000000000000))
-          && (!('askingRent' in data) || data.askingRent == null || (data.askingRent is number && data.askingRent >= 0 && data.askingRent <= 1000000000000))
+          && (!('askingPrice' in data) || data.askingPrice == null || ((data.askingPrice is int || data.askingPrice is float) && data.askingPrice >= 0 && data.askingPrice <= 1000000000000))
+          && (!('askingRent' in data) || data.askingRent == null || ((data.askingRent is int || data.askingRent is float) && data.askingRent >= 0 && data.askingRent <= 1000000000000))
           && (!('sustainabilityStandard' in data) || (data.sustainabilityStandard is string && data.sustainabilityStandard.size() <= 80))
           && (!('description' in data) || (data.description is string && data.description.size() <= 4000));
       }
