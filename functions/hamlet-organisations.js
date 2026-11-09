@@ -167,8 +167,11 @@ exports.createOrganisationInvitation = onCall({
       transaction.get(orgRef),
       transaction.get(actorRef),
     ]);
-    if (!orgSnap.exists || orgSnap.data().status !== "active") {
-      throw new HttpsError("not-found", "The organisation is unavailable.");
+    if (!orgSnap.exists) {
+      throw new HttpsError("not-found", "The organisation was not found.");
+    }
+    if (orgSnap.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "The organisation is not currently active.");
     }
     const actor = actorSnap.exists ? actorSnap.data() : null;
     requireRole(actor, ["owner", "admin"]);
