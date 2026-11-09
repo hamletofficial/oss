@@ -804,13 +804,19 @@ service cloud.firestore {
     }
 
     function isActiveOrganisationMember(orgId) {
+      let memberPath = organisationMemberPath(orgId);
+      let organisationPath = /databases/$(database)/documents/organisations/$(orgId);
+      let memberExists = exists(memberPath);
+      let organisationExists = exists(organisationPath);
+      let member = memberExists ? get(memberPath).data : {};
+      let organisation = organisationExists ? get(organisationPath).data : {};
       return request.auth != null
-        && exists(organisationMemberPath(orgId))
-        && get(organisationMemberPath(orgId)).data.organisationId == orgId
-        && get(organisationMemberPath(orgId)).data.uid == request.auth.uid
-        && get(organisationMemberPath(orgId)).data.status == 'active'
-        && exists(/databases/$(database)/documents/organisations/$(orgId))
-        && get(/databases/$(database)/documents/organisations/$(orgId)).data.status == 'active';
+        && memberExists
+        && member.organisationId == orgId
+        && member.uid == request.auth.uid
+        && member.status == 'active'
+        && organisationExists
+        && organisation.status == 'active';
     }
 
     function canManageOrganisation(orgId) {
