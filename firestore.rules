@@ -921,7 +921,7 @@ service cloud.firestore {
           isOrganisationManager(resource.data.organisationId)
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids', 'teamId'])
         );
-      allow delete: if canWriteOrganisationResource(resource.data, 'deal');
+      allow delete: if canWriteOrganisationResource(resource.data, 'property');
     }
 
     match /organisationDeals/{dealId} {
@@ -930,15 +930,15 @@ service cloud.firestore {
         && request.resource.data.createdByUid == request.auth.uid
         && validOrganisationSharing(request.resource.data)
         && canWriteOrganisationResource(request.resource.data, 'deal');
-      allow update: if canWriteOrganisationResource(resource.data)
+      allow update: if canWriteOrganisationResource(resource.data, 'deal')
         && request.resource.data.organisationId == resource.data.organisationId
         && request.resource.data.createdByUid == resource.data.createdByUid
         && validOrganisationSharing(request.resource.data)
         && (
           isOrganisationManager(resource.data.organisationId)
-          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids', 'teamId'])
         );
-      allow delete: if canWriteOrganisationResource(resource.data);
+      allow delete: if canWriteOrganisationResource(resource.data, 'deal');
     }
 
     // Operational audit events are server-authored and inherit the parent deal's
