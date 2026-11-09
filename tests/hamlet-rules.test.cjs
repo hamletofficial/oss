@@ -646,6 +646,8 @@ test('multi-organisation members can work in each tenant without crossing tenant
     id: 'multi-user-first-property', organisationId: 'org-private',
     createdByUid: 'multi-org-user', visibility: 'organisation',
     sharedWithUids: [], propertyName: 'Created in first organisation',
+    propertyType: 'Commercial', status: 'Draft',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   }));
   await assertFails(setDoc(doc(multi, 'organisationDeals/multi-user-forged-tenant'), {
     id: 'multi-user-forged-tenant', organisationId: 'org-third',
