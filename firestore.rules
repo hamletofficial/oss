@@ -797,6 +797,200 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Hamlet Organisations: membership is authoritative and all lifecycle writes
+    // are performed by trusted Cloud Functions using the Admin SDK.
+    function organisationMemberPath(orgId) {
+      return /databases/$(database)/documents/organisationMembers/$(orgId + '_' + request.auth.uid);
+    }
+
+    function isActiveOrganisationMember(orgId) {
+      return request.auth != null
+        && exists(organisationMemberPath(orgId))
+        && get(organisationMemberPath(orgId)).data.organisationId == orgId
+        && get(organisationMemberPath(orgId)).data.uid == request.auth.uid
+        && get(organisationMemberPath(orgId)).data.status == 'active'
+        && exists(/databases/$(database)/documents/organisations/$(orgId))
+        && get(/databases/$(database)/documents/organisations/$(orgId)).data.status == 'active';
+    }
+
+    function canManageOrganisation(orgId) {
+      return isActiveOrganisationMember(orgId)
+        && get(organisationMemberPath(orgId)).data.role in ['owner', 'admin'];
+    }
+
+    function isOrganisationManager(orgId) {
+      return isActiveOrganisationMember(orgId)
+        && get(organisationMemberPath(orgId)).data.role in ['owner', 'admin', 'manager'];
+    }
+
+    function validOrganisationSharing(data) {
+      return data.visibility in ['organisation', 'restricted']
+        && data.sharedWithUids is list
+        && data.sharedWithUids.size() <= 100;
+    }
+
+    function canReadOrganisationResource(data) {
+      return isActiveOrganisationMember(data.organisationId)
+        && (
+          data.visibility == 'organisation'
+          || data.createdByUid == request.auth.uid
+          || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
+          || isOrganisationManager(data.organisationId)
+        );
+    }
+
+    function canWriteOrganisationResource(data) {
+      return isActiveOrganisationMember(data.organisationId)
+        && (
+          isOrganisationManager(data.organisationId)
+          || (
+            data.createdByUid == request.auth.uid
+            && get(organisationMemberPath(data.organisationId)).data.role == 'member'
+          )
+        );
+    }
+
+    // Tenant-scoped operational resources are separate from legacy individually
+    // owned records. New records carry immutable organisationId/createdByUid and
+    // an explicit organisation-wide or restricted sharing policy.
+    match /organisationProperties/{propertyId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create: if request.resource.data.organisationId is string
+        && request.resource.data.createdByUid == request.auth.uid
+        && validOrganisationSharing(request.resource.data)
+        && canWriteOrganisationResource(request.resource.data);
+      allow update: if canWriteOrganisationResource(resource.data)
+        && request.resource.data.organisationId == resource.data.organisationId
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && validOrganisationSharing(request.resource.data)
+        && (
+          isOrganisationManager(resource.data.organisationId)
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
+        );
+      allow delete: if canWriteOrganisationResource(resource.data);
+    }
+
+    match /organisationDeals/{dealId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create: if request.resource.data.organisationId is string
+        && request.resource.data.createdByUid == request.auth.uid
+        && validOrganisationSharing(request.resource.data)
+        && canWriteOrganisationResource(request.resource.data);
+      allow update: if canWriteOrganisationResource(resource.data)
+        && request.resource.data.organisationId == resource.data.organisationId
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && validOrganisationSharing(request.resource.data)
+        && (
+          isOrganisationManager(resource.data.organisationId)
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
+        );
+      allow delete: if canWriteOrganisationResource(resource.data);
+    }
+
+    // Operational audit events are server-authored and inherit the parent deal's
+    // sharing policy; client-side event forgery and mutation are prohibited.
+    match /organisationDealEvents/{eventId} {
+      allow read: if canReadOrganisationResource(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    // File metadata is tied to a tenant resource. Storage access is separately
+    // checked against the same parent resource and sharing policy.
+    match /organisationDocuments/{documentId} {
+      function parentResource(data) {
+        return get(/databases/$(database)/documents/$(data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(data.resourceId));
+      }
+      function parentExists(data) {
+        return data.resourceType in ['deal', 'property']
+          && exists(/databases/$(database)/documents/$(data.resourceType == 'deal' ? 'organisationDeals' : 'organisationProperties')/$(data.resourceId));
+      }
+      allow read: if request.auth != null
+        && parentExists(resource.data)
+        && canReadOrganisationResource(parentResource(resource.data).data);
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.keys().hasOnly(['id','organisationId','resourceType','resourceId','createdByUid','title','fileName','storagePath','size','contentType','createdAt'])
+        && request.resource.data.id == documentId
+        && request.resource.data.resourceType in ['deal', 'property']
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.fileName is string
+        && request.resource.data.fileName.size() <= 180
+        && request.resource.data.storagePath is string
+        && request.resource.data.storagePath.matches('organisationDocuments/' + request.resource.data.organisationId + '/' + request.resource.data.resourceType + '/' + request.resource.data.resourceId + '/.*')
+        && request.resource.data.size is int
+        && request.resource.data.size > 0
+        && request.resource.data.size <= 15 * 1024 * 1024
+        && request.resource.data.contentType in ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/csv','text/plain','image/png','image/jpeg','image/webp']
+        && request.resource.data.createdAt == request.time
+        && parentExists(request.resource.data)
+        && parentResource(request.resource.data).data.organisationId == request.resource.data.organisationId
+        && parentResource(request.resource.data).data.createdByUid == request.resource.data.createdByUid
+        && canReadOrganisationResource(parentResource(request.resource.data).data)
+        && canWriteOrganisationResource(parentResource(request.resource.data).data);
+      allow update: if false;
+      allow delete: if request.auth != null
+        && parentExists(resource.data)
+        && canWriteOrganisationResource(parentResource(resource.data).data);
+    }
+
+    match /organisations/{organisationId} {
+      allow read: if isActiveOrganisationMember(organisationId);
+      // Creation, settings changes, suspension and deletion are server-controlled.
+      allow create, update, delete: if false;
+    }
+
+    // Slugs are routing identifiers, not credentials. Exact gets are public so
+    // tenant hostnames can resolve; enumeration and client mutation are denied.
+    match /organisationSlugs/{slug} {
+      allow get: if resource.data.status == 'active'
+        && exists(/databases/$(database)/documents/organisations/$(resource.data.organisationId))
+        && get(/databases/$(database)/documents/organisations/$(resource.data.organisationId)).data.status == 'active';
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // A deliberately whitelisted public projection; private organisation data
+    // remains in /organisations and is readable only by active members.
+    match /organisationDirectory/{organisationId} {
+      allow read: if resource.data.status == 'active'
+        && resource.data.isPublic == true
+        && exists(/databases/$(database)/documents/organisations/$(resource.data.organisationId))
+        && get(/databases/$(database)/documents/organisations/$(resource.data.organisationId)).data.status == 'active';
+      allow create, update, delete: if false;
+    }
+
+    match /organisationMembers/{membershipId} {
+      allow read: if request.auth != null
+        && (resource.data.uid == request.auth.uid
+          || canManageOrganisation(resource.data.organisationId));
+      allow create, update, delete: if false;
+    }
+
+    match /organisationInvitations/{invitationId} {
+      allow read: if canManageOrganisation(resource.data.organisationId);
+      allow create, update, delete: if false;
+    }
+
+    match /organisationMembershipRequests/{requestId} {
+      allow read: if request.auth != null
+        && (resource.data.requesterUid == request.auth.uid
+          || canManageOrganisation(resource.data.organisationId));
+      allow create, update, delete: if false;
+    }
+
+    match /organisationTeams/{teamId} {
+      allow read: if isActiveOrganisationMember(resource.data.organisationId);
+      allow create, update, delete: if false;
+    }
+
+    match /organisationActivity/{activityId} {
+      allow read: if isActiveOrganisationMember(resource.data.organisationId);
+      allow create, update, delete: if false;
+    }
+
     // Read-only platform-wide access for the designated Hamlet super administrator.
     // Keep this identity aligned with the administrator configured in admin.html.
     match /{document=**} {

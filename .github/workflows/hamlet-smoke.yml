@@ -5,8 +5,13 @@ on:
     branches: [main]
     paths:
       - 'app/hamlet/index.html'
+      - 'organisations.html'
+      - 'app/hamlet/organisations.html'
       - 'messages.html'
       - 'functions/index.js'
+      - 'functions/hamlet-organisations.js'
+      - 'functions/package.json'
+      - 'functions/test/**'
       - 'firestore.rules'
       - 'storage.rules'
       - 'site-search.js'
@@ -17,10 +22,17 @@ on:
     branches: [main]
     paths:
       - 'app/hamlet/index.html'
+      - 'organisations.html'
+      - 'app/hamlet/organisations.html'
       - 'messages.html'
       - 'functions/index.js'
+      - 'functions/hamlet-organisations.js'
+      - 'functions/package.json'
+      - 'functions/test/**'
       - 'firestore.rules'
       - 'storage.rules'
+      - 'site-search.js'
+      - 'search-index.json'
       - 'tests/**'
       - '.github/workflows/hamlet-smoke.yml'
 
@@ -67,3 +79,21 @@ jobs:
         run: npm install --no-save --ignore-scripts --package-lock=false firebase-tools firebase @firebase/rules-unit-testing
       - name: Test Firestore and Storage rules in emulators
         run: npx firebase-tools emulators:exec --only firestore,storage --project demo-hamlet-rules "node --test tests/hamlet-rules.test.cjs"
+
+  organisation-callables:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Firebase CLI and Functions dependencies
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false firebase-tools
+          npm install --prefix functions --no-save --ignore-scripts --no-package-lock
+      - name: Exercise organisation callable operations against Firestore Emulator
+        run: npx firebase-tools emulators:exec --only firestore --project demo-hamlet-functions "npm --prefix functions run test:organisations"

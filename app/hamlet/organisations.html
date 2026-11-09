@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1120">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Organisation Workspace | Hamlet</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--blue2:#60a5fa}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
+    a{color:#93c5fd}.shell{width:min(1180px,100%);margin:auto;padding:24px clamp(16px,4vw,42px) 64px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0 22px;border-bottom:1px solid var(--line)}
+    .brand{font:800 22px Manrope,sans-serif;letter-spacing:-.8px;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
+    .header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.link{color:#cbd5e1;text-decoration:none;font-weight:700}
+    .hero{padding:34px 0 22px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+    h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:8px 0}h2{font-size:18px;margin:0 0 8px}
+    .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:760px;margin:0}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0 18px;padding:15px 17px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.92)}
+    .org-select{min-width:min(100%,320px);max-width:100%;min-height:42px;padding:9px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:#f8fafc;font:inherit}
+    .role{display:inline-flex;padding:5px 9px;border:1px solid #315b8c;border-radius:999px;background:#1e3a5f;color:#bfdbfe;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .card{display:block;min-width:0;padding:20px;border:1px solid var(--line);border-radius:15px;background:rgba(17,24,39,.96);text-decoration:none;color:var(--text);transition:border-color .18s,transform .18s}
+    .card:hover{border-color:#477bb6;transform:translateY(-2px)}.card .icon{font-size:21px;margin-bottom:13px}.card h2{margin-bottom:7px}.card p{margin:0;color:var(--muted);line-height:1.55}.card .open{display:block;margin-top:15px;color:#93c5fd;font-weight:800;font-size:12px}
+    .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+    .empty{padding:20px;border:1px dashed #40516a;border-radius:12px;color:var(--muted);line-height:1.6}
+    .footnote{font-size:11px;color:#8192aa;line-height:1.55;margin:18px 0 0}
+    #authGate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#0b1120}.gate-card{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}.gate-card p{color:var(--muted);line-height:1.6}
+    .hidden{display:none!important}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}.toolbar{align-items:flex-start}.org-select{width:100%}header{align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div id="authGate"><div class="gate-card"><a class="brand" href="/">hamlet<span>.</span></a><h2 style="margin-top:20px">Secure organisation workspace</h2><p id="gateMessage">Checking your sign-in…</p></div></div>
+  <main class="shell hidden" id="app">
+    <header><a class="brand" href="/app/hamlet/">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/hamlet/">Overview &amp; Pipeline</a><a class="link" href="/members.html">Members Area</a><span class="role" id="userBadge">Signed in</span></div></header>
+    <section class="hero"><div class="eyebrow">Team operations</div><h1 id="pageTitle">Organisation workspace</h1><p id="intro">Choose the organisation you are working with, then open the relevant Hamlet tools. Organisation membership is checked before this page displays your available workspaces.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Loading membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select class="org-select" id="orgSelect" aria-label="Select organisation"><option>Loading…</option></select></div><span class="role" id="roleBadge">Member</span></div>
+    <section class="grid" aria-label="Organisation operational tools">
+      <a class="card" href="/app/hamlet/"><div class="icon" aria-hidden="true">▦</div><h2>Deals &amp; pipeline</h2><p>Review transactions, manage deal stages, coordinate critical-path reminders and work through your pipeline.</p><span class="open">Open deal workspace →</span></a>
+      <a class="card" href="/app/public/live.html"><div class="icon" aria-hidden="true">⌂</div><h2>Live properties</h2><p>Browse available commercial and residential property opportunities across Hamlet.</p><span class="open">Browse live properties →</span></a>
+      <a class="card" href="/app/public/resources.html"><div class="icon" aria-hidden="true">▤</div><h2>Property portfolio</h2><p>Open your property records and portfolio tools. Existing individual ownership remains in place.</p><span class="open">Open property portfolio →</span></a>
+      <a class="card" href="/messages.html"><div class="icon" aria-hidden="true">✉</div><h2>Team communications</h2><p>Coordinate with colleagues and other Hamlet members through direct messages.</p><span class="open">Open messages →</span></a>
+      <a class="card" href="/app/hamlet/ai-assistant.html"><div class="icon" aria-hidden="true">✦</div><h2>AI assistant</h2><p>Use Hamlet's assistant to support research, property workflows and deal preparation.</p><span class="open">Open AI assistant →</span></a>
+      <a class="card" href="/organisations.html"><div class="icon" aria-hidden="true">⚙</div><h2>Organisation administration</h2><p>Manage the organisation profile, membership, invitations and access roles in the Members Area.</p><span class="open">Manage organisation →</span></a>
+    </section>
+    <p class="footnote">Operational tools currently open existing Hamlet modules. Organisation membership does not yet make individually owned deals or properties visible to other members. Shared organisation portfolios, tenant-scoped deal pipelines, team permissions and activity reporting will be enabled only after their data access and security rules are implemented and tested.</p>
+  </main>
+<script>
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  let auth,db,currentUser,organisations=[];
+  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
+  function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
+  function selectOrganisation(id){
+    const org=organisations.find(item=>item.id===id);
+    if(!org)return;
+    $('selectedName').textContent=org.name;
+    $('selectedSlug').textContent='Organisation slug: '+org.slug+' · tenant hostname not yet provisioned';
+    $('roleBadge').textContent=org.role;
+    $('pageTitle').textContent=org.name+' workspace';
+    $('orgSelect').value=org.id;
+    try{sessionStorage.setItem('hamletActiveOrganisationId',org.id);}catch(e){}
+  }
+  async function loadMemberships(){
+    const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
+    const active=snap.docs.map(d=>d.data()).filter(m=>m.status==='active');
+    const records=await Promise.all(active.map(async m=>{
+      const orgSnap=await db.collection('organisations').doc(m.organisationId).get();
+      if(!orgSnap.exists||orgSnap.data().status!=='active')return null;
+      return {...orgSnap.data(),id:orgSnap.id,role:m.role};
+    }));
+    organisations=records.filter(Boolean);
+    const select=$('orgSelect');select.replaceChildren();
+    if(!organisations.length){
+      select.add(new Option('No active memberships',''));
+      $('selectedName').textContent='No organisation selected';
+      $('selectedSlug').textContent='Create or join an organisation to continue.';
+      $('roleBadge').textContent='No membership';
+      $('pageTitle').textContent='Your organisation workspace';
+      $('intro').textContent='You do not currently belong to an active organisation. Organisation creation, invitations and membership administration are available in the Members Area.';
+      $('notice').className='notice show';
+      $('notice').textContent='No active organisation membership was found for this account.';
+      return;
+    }
+    organisations.forEach(org=>select.add(new Option(org.name+' · '+org.role,org.id)));
+    let preferred='';
+    try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
+    const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
+    selectOrganisation(chosen);
+  }
+  $('orgSelect').addEventListener('change',e=>selectOrganisation(e.target.value));
+  function init(){
+    if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
+    try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();
+      auth.onAuthStateChanged(async user=>{
+        if(!user){$('gateMessage').textContent='Sign in is required. Redirecting to secure sign-in…';location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));return;}
+        currentUser=user;showApp();
+        try{await user.reload();await user.getIdToken(true);}catch(e){console.warn('Unable to refresh account state:',e);}
+        if(user.emailVerified!==true){notice('Verify your email address to access organisation workspaces.',true);return;}
+        try{await loadMemberships();}catch(e){notice(e.message||'Unable to load organisation memberships. Please try again later.',true);}
+      });
+    }catch(e){$('gateMessage').textContent='Secure sign-in could not be initialised. Please retry later.';console.error(e);}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+</body>
+</html>

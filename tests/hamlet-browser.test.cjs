@@ -162,3 +162,90 @@ test('signed-in broker can save a deal, save a search and upload a transaction d
     await browser.close();
   }
 });
+
+
+test('authenticated organisation workspace loads only active memberships and switches organisations', async () => {
+  const browser = await chromium.launch({headless: true});
+  try {
+    const page = await browser.newPage();
+    const mockFirebase = `
+      (() => {
+        const user = {
+          uid: 'e2e-org-user',
+          email: 'org-user@example.com',
+          emailVerified: true,
+          async reload() {},
+          async getIdToken() { return 'e2e-token'; }
+        };
+        const organisations = {
+          'org-one': {name: 'Example Organisation', slug: 'example-org', status: 'active'},
+          'org-two': {name: 'Second Organisation', slug: 'second-org', status: 'active'},
+          'org-suspended': {name: 'Suspended Organisation', slug: 'suspended-org', status: 'suspended'}
+        };
+        const memberships = [
+          {uid: user.uid, organisationId: 'org-one', role: 'owner', status: 'active'},
+          {uid: user.uid, organisationId: 'org-two', role: 'member', status: 'active'},
+          {uid: user.uid, organisationId: 'org-suspended', role: 'admin', status: 'active'}
+        ];
+        const db = {
+          collection(name) {
+            if (name === 'organisationMembers') {
+              return {
+                where(field, operator, value) {
+                  return {
+                    async get() {
+                      const rows = memberships.filter(item => item[field] === value);
+                      return {docs: rows.map((item, index) => ({id: 'membership-' + index, data: () => ({...item})}))};
+                    }
+                  };
+                }
+              };
+            }
+            if (name === 'organisations') {
+              return {
+                doc(id) {
+                  return {
+                    async get() {
+                      const data = organisations[id];
+                      return {id, exists: !!data, data: () => data ? ({...data}) : undefined};
+                    }
+                  };
+                }
+              };
+            }
+            throw new Error('Unexpected collection: ' + name);
+          }
+        };
+        const auth = {
+          onAuthStateChanged(callback) { callback(user); return () => {}; }
+        };
+        const firebase = {
+          apps: [],
+          initializeApp(config) { this.apps.push({config}); },
+          auth: () => auth,
+          firestore: () => db
+        };
+        firebase.firestore.FieldValue = {serverTimestamp: () => ({__serverTimestamp: true})};
+        window.firebase = firebase;
+        window.firebaseConfig = {apiKey: 'e2e-test', authDomain: 'localhost', projectId: 'demo-hamlet-e2e'};
+      })();
+    `;
+    await page.route('https://www.gstatic.com/firebasejs/9.22.2/**', route => route.fulfill({status: 200, contentType: 'application/javascript', body: ''}));
+    await page.route('https://fonts.googleapis.com/**', route => route.fulfill({status: 200, contentType: 'text/css', body: ''}));
+    await page.route('https://fonts.gstatic.com/**', route => route.fulfill({status: 200, body: ''}));
+    await page.route('**/firebase-config.js', route => route.fulfill({status: 200, contentType: 'application/javascript', body: mockFirebase}));
+
+    await page.goto(origin + '/app/hamlet/organisations.html', {waitUntil: 'domcontentloaded'});
+    await page.locator('#app').waitFor({state: 'visible', timeout: 10000});
+    await page.getByText('Example Organisation', {exact: true}).first().waitFor({state: 'visible', timeout: 10000});
+    assert.equal(await page.locator('#roleBadge').textContent(), 'owner');
+    assert.equal(await page.locator('#orgSelect option').count(), 2);
+    assert.equal(await page.locator('#selectedSlug').textContent(), 'Organisation slug: example-org · tenant hostname not yet provisioned');
+
+    await page.locator('#orgSelect').selectOption('org-two');
+    assert.equal(await page.locator('#selectedName').textContent(), 'Second Organisation');
+    assert.equal(await page.locator('#roleBadge').textContent(), 'member');
+  } finally {
+    await browser.close();
+  }
+});

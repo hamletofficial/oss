@@ -5,11 +5,14 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
+const organisationsHtml = fs.readFileSync('organisations.html', 'utf8');
+const appOrganisationsHtml = fs.readFileSync('app/hamlet/organisations.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
 const searchIndex = JSON.parse(fs.readFileSync('search-index.json', 'utf8'));
 const firestore = fs.readFileSync('firestore.rules', 'utf8');
 const storage = fs.readFileSync('storage.rules', 'utf8');
 const functions = fs.readFileSync('functions/index.js', 'utf8');
+const organisationFunctions = fs.readFileSync('functions/hamlet-organisations.js', 'utf8');
 
 test('all inline JavaScript blocks parse', () => {
   const blocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -19,6 +22,7 @@ test('all inline JavaScript blocks parse', () => {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'hamlet-inline-' + index + '.js' }));
   }
   assert.doesNotThrow(() => new vm.Script(functions, { filename: 'functions/index.js' }));
+  assert.doesNotThrow(() => new vm.Script(organisationFunctions, { filename: 'functions/hamlet-organisations.js' }));
 });
 
 test('advanced transaction features are present and connected', () => {
@@ -95,4 +99,73 @@ test('public search excludes protected member pages from both its index and resu
     assert.notEqual(filename, 'insights.html', 'protected page must not be published in search-index.json');
     assert.ok(!/^(?:app|functions|public|superuser|admin|account|accounts|auth|authentication)(?:\/|$)/i.test(path), 'private directory must not appear in public search index: ' + path);
   }
+});
+
+
+test('tenant resource rules and storage paths are isolated from legacy individual records', () => {
+  assert.match(firestore, /match \/organisationProperties\/{propertyId}/);
+  assert.match(firestore, /match \/organisationDeals\/{dealId}/);
+  assert.match(firestore, /match \/organisationDocuments\/{documentId}/);
+  assert.match(firestore, /visibility in \['organisation', 'restricted'\]/);
+  assert.match(firestore, /createdByUid == resource\.data\.createdByUid/);
+  // Organisation uploads are intentionally deferred; the catch-all deny remains in force.
+  assert.doesNotMatch(storage, /match \/organisationDocuments\//);
+  assert.match(storage, /match \/\{allPaths=\*\*\}[\s\S]*allow read, write: if false;/);
+  assert.match(firestore, /match \/hamletDeals\/{dealId}/);
+});
+
+test('organisation lifecycle operations are server-controlled and registered', () => {
+  for (const callable of [
+    'createOrganisation',
+    'createOrganisationInvitation',
+    'acceptOrganisationInvitation',
+    'revokeOrganisationInvitation',
+    'changeOrganisationMemberRole',
+    'removeOrganisationMember',
+  ]) {
+    assert.match(organisationFunctions, new RegExp('exports\\.' + callable + ' = onCall'));
+  }
+  assert.match(organisationFunctions, /createHash\("sha256"\)/);
+  assert.match(organisationFunctions, /randomBytes\(32\)/);
+  assert.match(organisationFunctions, /email_verified !== true/);
+  assert.match(functions, /require\("\.\/hamlet-organisations"\)/);
+  assert.ok(firestore.includes('match /organisations/{organisationId}'));
+  assert.match(firestore, /allow create, update, delete: if false;/);
+});
+
+
+test('organisation management page scripts parse and use authenticated callable operations', () => {
+  const blocks = [...organisationsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected organisation management application script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisations-inline-' + index + '.js' }));
+  }
+  assert.match(organisationsHtml, /name="robots" content="noindex,nofollow"/);
+  assert.match(organisationsHtml, /acceptOrganisationInvitation/);
+  assert.match(organisationsHtml, /createOrganisationInvitation/);
+  assert.match(organisationsHtml, /revokeOrganisationInvitation/);
+  assert.match(organisationsHtml, /id="acceptInviteForm"/);
+  assert.match(organisationsHtml, /acceptInviteToken/);
+  assert.doesNotMatch(organisationsHtml, /location\.hash|replaceState|invitationLink/);
+  assert.match(siteSearch, /'organisations\.html'/);
+});
+
+
+test('workspace organisation management page JavaScript parses', () => {
+  const blocks = [...appOrganisationsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected app organisation management script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'app-organisations-inline-' + index + '.js' }));
+  }
+  assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
+  assert.match(appOrganisationsHtml, /Team operations/);
+  assert.match(appOrganisationsHtml, /Deals &amp; pipeline/);
+  assert.match(appOrganisationsHtml, /Property portfolio/);
+  assert.match(appOrganisationsHtml, /Organisation administration/);
+  assert.match(appOrganisationsHtml, /organisationMembers/);
+  assert.doesNotMatch(appOrganisationsHtml, /createOrganisationInvitation|removeOrganisationMember|acceptOrganisationInvitation|revokeOrganisationInvitation/);
+  assert.doesNotMatch(appOrganisationsHtml, /location\.hash|replaceState/);
+  assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
 });
