@@ -2,42 +2,44 @@
 
 This Worker routes the organisation directory and tenant requests to the Hamlet application origin.
 
-## Canonical hostname
+## Hostnames
 
-| Purpose | Hostname | Environment |
+| Purpose | Hostname | Runtime |
 |---|---|---|
-| Organisation platform | `platform.hamlet-ai.co.uk` | Staging first; promote the tested release to production on the same hostname |
-| Tenant workspace | `{slug}.orgs.hamlet-ai.co.uk` | Follows the Worker deployment environment |
-| Staging simulation | Worker `workers.dev` root and `/tenant/{slug}` | Staging only |
+| Organisation directory | `platform.hamlet-ai.co.uk` | Production |
+| Tenant workspace | `{slug}.orgs.hamlet-ai.co.uk` | Production |
+| Worker simulation | Worker `workers.dev` root and `/tenant/{slug}` | Routing simulation |
 
-There is no separate staging hostname. Staging and production use the same platform and tenant hostnames at different points in the release lifecycle. The staging deployment is the active candidate until acceptance checks pass; production promotion changes the deployed environment configuration, not the public URLs.
+The public hostnames stay the same across releases. Production promotion is controlled by the Worker environment binding.
 
 ## Request behaviour
 
-- Canonical platform host root maps to the public `/organisation-directory.html` page.
-- Tenant host root maps to `/app/hamlet/tenant.html?tenantSlug={slug}`.
-- Tenant hostnames use the same `{slug}.orgs.hamlet-ai.co.uk` pattern in both environments.
-- `HAMLET_ORGANISATIONS_ENV` controls whether tenant routes are treated as staging or production. The default is staging; only an explicit `production` value enables production behaviour.
-- Worker `workers.dev/tenant/{slug}` simulates a tenant hostname for staging.
+- The platform host root maps to the public `/organisation-directory.html` page.
+- A tenant host root maps to `/app/hamlet/tenant.html?tenantSlug={slug}`.
+- Tenant hostnames use `{slug}.orgs.hamlet-ai.co.uk`.
+- `HAMLET_ORGANISATIONS_ENV` controls whether tenant routes use production behavior. The default is staging; production requires the explicit value `production`.
+- Worker `workers.dev/tenant/{slug}` exercises tenant routing without changing the public hostname.
 - A short-lived cookie preserves the simulated tenant route for subsequent workspace paths.
 - Reserved or malformed tenant slugs are rejected.
 - Only GET and HEAD requests are proxied.
 - Responses are marked no-store and receive security headers identifying the route and environment.
 
-The Worker does not itself authorise a member or determine whether an organisation is active. Those checks remain in the Firebase handoff and tenant application logic.
+The Worker does not authorize a member or determine whether an organisation is active. Those checks remain in the Firebase handoff and tenant application logic.
 
-## Local tests
+## Cloudflare production state
+
+The production zone currently routes `platform.hamlet-ai.co.uk/*` and `*.orgs.hamlet-ai.co.uk/*` to the script `hamlet-organisations-router-staging`. Its deployed binding is `HAMLET_ORGANISATIONS_ENV=production`. The script proxies to `https://www.hamlet-ai.co.uk`; no isolated staging Firebase project or hosting target is configured.
+
+Cloudflare for SaaS has an active fallback origin at `orgs.hamlet-ai.co.uk`. The hostname `app.hamlet-ai.co.uk` has an active certificate, but it has no organisation metadata or application mapping. The router currently recognizes only the platform host and `{slug}.orgs.hamlet-ai.co.uk`; custom customer domains are not operational until the application has a domain-to-organisation mapping and the router supports it.
+
+## Deployment
+
+The checked-in Wrangler config keeps staging as the safe default and does not manage production DNS, Worker routes, or Cloudflare custom hostnames. For a production deployment, explicitly set `HAMLET_ORGANISATIONS_ENV=production` and verify the target script and route attachments before rollout.
+
+## Local validation
 
 Run:
 
 ```sh
 npm test
 ```
-
-## Deployment boundary
-
-The checked-in Wrangler configuration uses the Worker `workers.dev` subdomain for local staging simulation and does not manage custom domains, DNS records or routes. A Cloudflare API inspection on 9 November 2026 found that `platform.hamlet-ai.co.uk/*` and `*.orgs.hamlet-ai.co.uk/*` are already routed to `hamlet-organisations-router-staging`, with proxied DNS records. The deployed script still proxies to `https://www.hamlet-ai.co.uk`, so this is not an isolated staging frontend. Keep this route classified as a staging candidate and do not promote it or point it at production data until a separate staging Firebase project, hosting target and Auth configuration have passed acceptance checks.
-
-The Worker currently proxies to `https://www.hamlet-ai.co.uk`. This is not an isolated staging frontend. Do not describe the custom hostname or tenant routing as operational until the correct staging frontend, DNS/Worker attachment, Firebase authentication handoff, and tenant-isolation checks have been provisioned and tested.
-
-After staging acceptance, promote the tested release to production on the same canonical hostname by deploying with `HAMLET_ORGANISATIONS_ENV=production`. No hostname migration is required.
