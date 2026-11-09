@@ -45,13 +45,14 @@ test("handoff exchange binds the slug and consumes a code exactly once", async (
   const codeHash = crypto.createHash("sha256").update(issued.code).digest("hex");
   assert.equal((await db.collection("organisationHandoffCodes").doc(codeHash).get()).data().status, "pending");
 
-  const originalAuth = admin.auth;
-  admin.auth = () => ({createCustomToken: async (targetUid, claims) => {
+  const authClient = admin.auth();
+  const originalCreateCustomToken = authClient.createCustomToken;
+  authClient.createCustomToken = async (targetUid, claims) => {
     assert.equal(targetUid, uid);
     assert.equal(claims.hamletOrganisationId, org.organisationId);
     assert.equal(claims.hamletOrganisationSlug, slug);
     return "test-custom-token";
-  }});
+  };
   try {
     const exchanged = await invoke("exchangeOrganisationHandoffCode", {code: issued.code, slug}, null);
     assert.equal(exchanged.customToken, "test-custom-token");
@@ -59,7 +60,7 @@ test("handoff exchange binds the slug and consumes a code exactly once", async (
     assert.equal((await db.collection("organisationHandoffCodes").doc(codeHash).get()).data().status, "exchanged");
     await expectCode(invoke("exchangeOrganisationHandoffCode", {code: issued.code, slug}, null), "failed-precondition");
   } finally {
-    admin.auth = originalAuth;
+    authClient.createCustomToken = originalCreateCustomToken;
   }
 });
 
