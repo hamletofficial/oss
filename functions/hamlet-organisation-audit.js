@@ -156,7 +156,7 @@ exports.recordOrganisationResourceShareActivity = onDocumentWrittenWithAuthConte
     return;
   }
   const action = change.after.exists ? "shared" : "share_revoked";
-  const actor = await resolveActor(event, change.after.exists ? grant.createdByUid : grant.createdByUid);
+  const actor = await resolveActor(event, grant.createdByUid);
   const id = eventDocumentId("share", event.params.shareId || resourceId, event);
   const record = {
     id,

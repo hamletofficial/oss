@@ -171,7 +171,7 @@
     grant.addEventListener('click',async()=>{
       const uid=select.value;if(!uid)return;
       grant.disabled=true;
-      try{const id=activeOrg.id+'_property_'+resource.id+'_'+uid;await db.collection('organisationResourceShares').doc(id).set({organisationId:activeOrg.id,resourceType:'property',resourceId:resource.id,sharedWithUid:uid,createdByUid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotice('Access granted to '+(activeShareMembers.find(m=>m.uid===uid)?.label||'the selected member')+'.');await loadProperties();}
+      try{const id=activeOrg.id+'_property_'+resource.id+'_'+uid;const grantRef=db.collection('organisationResourceShares').doc(id);const existing=await grantRef.get();if(existing.exists){showNotice('This member already has access to the resource.');grant.disabled=false;return;}await grantRef.set({organisationId:activeOrg.id,resourceType:'property',resourceId:resource.id,sharedWithUid:uid,createdByUid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotice('Access granted to '+(activeShareMembers.find(m=>m.uid===uid)?.label||'the selected member')+'.');await loadProperties();}
       catch(error){console.error('Unable to grant resource access:',error);showNotice('Unable to grant access. Confirm active membership and permissions.',true);grant.disabled=false;}
     });row.append(select,grant);box.appendChild(row);
     const list=document.createElement('div');list.className='share-list';list.textContent='Loading current grants…';box.appendChild(list);card.appendChild(box);
