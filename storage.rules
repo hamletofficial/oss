@@ -101,7 +101,9 @@ service firebase.storage {
     // a transaction document they own. Download access remains authenticated.
     match /hamletDocuments/{userId}/{dealId}/{documentId}/{fileName} {
       function ownedDeal() {
-        return firestore.get(/databases/(default)/documents/hamletDeals/$(dealId)).data.uid == userId;
+        let dealPath = /databases/(default)/documents/hamletDeals/$(dealId);
+        return firestore.exists(dealPath)
+          && firestore.get(dealPath).data.uid == userId;
       }
       allow read: if request.auth != null
         && request.auth.uid == userId
