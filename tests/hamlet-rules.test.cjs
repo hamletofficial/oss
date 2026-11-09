@@ -559,6 +559,8 @@ test('organisation document storage is tenant-scoped and follows parent sharing 
   await assertSucceeds(getBytes(ref(colleagueStorage,path)));
   await assertFails(getBytes(ref(outsiderStorage,path)));
   await assertFails(uploadBytes(ref(outsiderStorage,'organisationDocuments/org-private/property/property-shared/forged/file.jpg'),bytes,metadata));
+  // Missing custom metadata must be rejected without evaluating undefined keys.
+  await assertFails(uploadBytes(ref(memberStorage,'organisationDocuments/org-private/property/property-shared/missing-metadata/file.jpg'),bytes,{contentType:'image/jpeg'}));
   await assertFails(uploadBytes(ref(memberStorage,'organisationDocuments/org-private/property/property-shared/oversize/file.exe'),bytes,{contentType:'application/octet-stream',customMetadata:metadata.customMetadata}));
 });
 
