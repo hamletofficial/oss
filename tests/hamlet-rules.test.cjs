@@ -559,6 +559,8 @@ test('organisation document storage is tenant-scoped and follows parent sharing 
   await assertSucceeds(getBytes(ref(colleagueStorage,path)));
   await assertFails(getBytes(ref(outsiderStorage,path)));
   await assertFails(uploadBytes(ref(outsiderStorage,'organisationDocuments/org-private/property/property-shared/forged/file.jpg'),bytes,metadata));
+  // Missing custom metadata must be rejected without evaluating undefined keys.
+  await assertFails(uploadBytes(ref(memberStorage,'organisationDocuments/org-private/property/property-shared/missing-metadata/file.jpg'),bytes,{contentType:'image/jpeg'}));
   await assertFails(uploadBytes(ref(memberStorage,'organisationDocuments/org-private/property/property-shared/oversize/file.exe'),bytes,{contentType:'application/octet-stream',customMetadata:metadata.customMetadata}));
 });
 
@@ -579,4 +581,101 @@ test('organisation document metadata can be created by an authorised manager for
     ...metadata,id:'forged-doc',createdByUid:'outsider',
     storagePath:'organisationDocuments/org-private/property/property-shared/forged-doc/epc.pdf'
   }));
+});
+
+test('multi-organisation members can work in each tenant without crossing tenant boundaries', async () => {
+  await env.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'organisations/org-second'), {
+      id: 'org-second', name: 'Second Organisation', slug: 'second-org',
+      status: 'active', visibility: 'private', ownerUid: 'second-owner',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-second_multi-org-user'), {
+      organisationId: 'org-second', uid: 'multi-org-user', role: 'member', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-private_multi-org-user'), {
+      organisationId: 'org-private', uid: 'multi-org-user', role: 'member', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationMembers/org-second_second-owner'), {
+      organisationId: 'org-second', uid: 'second-owner', role: 'owner', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationTeams/team-second'), {
+      id: 'team-second', organisationId: 'org-second', name: 'Second tenant team',
+      status: 'active', permissions: ['deals.read', 'properties.read'], createdByUid: 'second-owner',
+    });
+    await setDoc(doc(db, 'organisationTeamMembers/team-second_multi-org-user'), {
+      teamId: 'team-second', organisationId: 'org-second', uid: 'multi-org-user', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationDeals/deal-second-restricted'), {
+      id: 'deal-second-restricted', organisationId: 'org-second',
+      createdByUid: 'second-owner', visibility: 'restricted', teamId: 'team-second',
+      sharedWithUids: [], name: 'Second tenant restricted deal',
+    });
+    await setDoc(doc(db, 'organisationProperties/property-second'), {
+      id: 'property-second', organisationId: 'org-second',
+      // The multi-organisation member owns this resource and may upload its files.
+      createdByUid: 'multi-org-user', visibility: 'organisation',
+      sharedWithUids: [], propertyName: 'Second tenant asset',
+    });
+  });
+
+  const multi = env.authenticatedContext('multi-org-user').firestore();
+  const singleTenant = env.authenticatedContext('member').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+
+  // The same identity can access resources in both organisations through
+  // independent active memberships, including a team-restricted resource.
+  await assertSucceeds(getDoc(doc(multi, 'organisations/org-private')));
+  await assertSucceeds(getDoc(doc(multi, 'organisations/org-second')));
+  await assertSucceeds(getDoc(doc(multi, 'organisationDeals/deal-second-restricted')));
+  await assertSucceeds(getDoc(doc(multi, 'organisationProperties/property-second')));
+
+  // A member of the first organisation and a user outside both tenants cannot
+  // use another person's membership to cross the tenant boundary.
+  await assertFails(getDoc(doc(singleTenant, 'organisations/org-second')));
+  await assertFails(getDoc(doc(singleTenant, 'organisationDeals/deal-second-restricted')));
+  await assertFails(getDoc(doc(outsider, 'organisationProperties/property-second')));
+
+  // Resource creation remains explicitly tenant-scoped even when a user has
+  // multiple memberships; the caller cannot forge a third tenant identifier.
+  await assertSucceeds(setDoc(doc(multi, 'organisationDeals/multi-user-second-deal'), {
+    id: 'multi-user-second-deal', organisationId: 'org-second',
+    createdByUid: 'multi-org-user', visibility: 'organisation',
+    sharedWithUids: [], name: 'Created in second organisation',
+  }));
+  await assertSucceeds(setDoc(doc(multi, 'organisationProperties/multi-user-first-property'), {
+    id: 'multi-user-first-property', organisationId: 'org-private',
+    createdByUid: 'multi-org-user', visibility: 'organisation',
+    sharedWithUids: [], propertyName: 'Created in first organisation',
+    propertyType: 'Commercial', status: 'Draft',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  }));
+  await assertFails(setDoc(doc(multi, 'organisationDeals/multi-user-forged-tenant'), {
+    id: 'multi-user-forged-tenant', organisationId: 'org-third',
+    createdByUid: 'multi-org-user', visibility: 'organisation',
+    sharedWithUids: [], name: 'Forged third tenant deal',
+  }));
+
+  // Storage access follows the parent resource's tenant and membership rules.
+  const multiStorage = env.authenticatedContext('multi-org-user').storage();
+  const firstTenantStorage = env.authenticatedContext('member').storage();
+  const secondTenantPath = 'organisationDocuments/org-second/property/property-second/doc-second/brief.pdf';
+  const fileMetadata = {contentType:'application/pdf',customMetadata:{
+    organisationId:'org-second',resourceType:'property',resourceId:'property-second',
+    documentId:'doc-second',uploaderUid:'multi-org-user'
+  }};
+  await assertSucceeds(uploadBytes(ref(multiStorage, secondTenantPath), new Uint8Array([1, 2, 3]), fileMetadata));
+  await assertSucceeds(getBytes(ref(multiStorage, secondTenantPath)));
+  await assertFails(getBytes(ref(firstTenantStorage, secondTenantPath)));
+
+  // Suspension in one organisation is local to that membership; it must not
+  // revoke the user's independent membership in the other organisation.
+  await env.withSecurityRulesDisabled(async (context) => {
+    await updateDoc(doc(context.firestore(), 'organisationMembers/org-second_multi-org-user'), {
+      status: 'suspended',
+    });
+  });
+  await assertFails(getDoc(doc(multi, 'organisations/org-second')));
+  await assertFails(getDoc(doc(multi, 'organisationProperties/property-second')));
+  await assertSucceeds(getDoc(doc(multi, 'organisations/org-private')));
 });

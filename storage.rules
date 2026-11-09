@@ -159,7 +159,10 @@ service firebase.storage {
           || (parentData().createdByUid == request.auth.uid && firestore.get(memberPath()).data.role == 'member'));
       }
       function validFileMetadata() {
-        return request.resource.metadata.organisationId == organisationId
+        return request.resource.metadata.keys().hasAll([
+            'organisationId', 'resourceType', 'resourceId', 'documentId', 'uploaderUid'
+          ])
+          && request.resource.metadata.organisationId == organisationId
           && request.resource.metadata.resourceType == resourceType
           && request.resource.metadata.resourceId == resourceId
           && request.resource.metadata.documentId == documentId
@@ -172,6 +175,9 @@ service firebase.storage {
         && request.resource.name.matches('.*\\.(pdf|doc|docx|xls|xlsx|csv|txt|png|jpg|jpeg|webp)$');
       allow update: if false;
       allow delete: if canWriteParent()
+        && resource.metadata.keys().hasAll([
+          'organisationId', 'resourceType', 'resourceId', 'documentId', 'uploaderUid'
+        ])
         && resource.metadata.organisationId == organisationId
         && resource.metadata.resourceType == resourceType
         && resource.metadata.resourceId == resourceId
