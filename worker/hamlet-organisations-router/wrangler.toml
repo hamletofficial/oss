@@ -4,4 +4,5 @@ account_id = "6905aedcfe714343bcf5a3d3f79af954"
 compatibility_date = "2026-11-09"
 workers_dev = true
 
-# Staging only. Production DNS/Worker routes are intentionally not configured here.
+# Staging is the safe default. Set HAMLET_ORGANISATIONS_ENV=production explicitly
+# for the production release; DNS and route attachments are managed in Cloudflare.
