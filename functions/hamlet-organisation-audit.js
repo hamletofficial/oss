@@ -18,21 +18,12 @@ async function resolveActor(event, fallbackUid) {
   let actorEmail = "";
   if (actorUid) {
     try {
-      const user = await admin.auth().getUser(actorUid);
-      actorName = clean(user.displayName, 160);
-      actorEmail = clean(user.email, 254);
+      const profileSnap = await getDb().collection("publicProfiles").doc(actorUid).get();
+      const profile = profileSnap.exists ? profileSnap.data() || {} : {};
+      actorName = clean([profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.displayName || profile.name, 160);
+      actorEmail = clean(profile.email || profile.emailAddress, 254);
     } catch (err) {
-      // The Auth record may have been deleted; retain the immutable UID.
-    }
-    if (!actorName || !actorEmail) {
-      try {
-        const profileSnap = await getDb().collection("publicProfiles").doc(actorUid).get();
-        const profile = profileSnap.exists ? profileSnap.data() || {} : {};
-        if (!actorName) actorName = clean([profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.displayName || profile.name, 160);
-        if (!actorEmail) actorEmail = clean(profile.email || profile.emailAddress, 254);
-      } catch (err) {
-        console.warn("Unable to resolve organisation audit actor profile:", actorUid, err && err.message);
-      }
+      console.warn("Unable to resolve organisation audit actor profile:", actorUid, err && err.message);
     }
   }
   return {
