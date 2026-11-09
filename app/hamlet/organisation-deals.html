@@ -50,6 +50,8 @@
     .footnote{font-size:11px;color:#8192aa;line-height:1.6;margin:18px 0 0}
     @media(max-width:850px){.layout{grid-template-columns:1fr}.board{grid-template-columns:repeat(4,minmax(230px,1fr))}}
     @media(max-width:520px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.toolbar{align-items:flex-start}.org-select{width:100%}}
+  
+    .share-tools{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);display:grid;gap:7px}.share-tools label{font-size:10px;font-weight:800;color:#cbd5e1}.share-row{display:flex;gap:6px;align-items:center}.share-row select{flex:1;font-size:11px;padding:7px}.share-row button{white-space:nowrap;padding:7px 9px;font-size:10px}.share-list{display:flex;gap:5px;flex-wrap:wrap}.share-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #40516a;border-radius:999px;padding:4px 7px;font-size:10px;color:#bfdbfe}.share-chip button{padding:2px 5px;font-size:9px;border-radius:5px}
   </style>
 </head>
 <body>
@@ -123,6 +125,7 @@
     $('dealVisibility').disabled=!canManage;
     $('dealVisibility').value='organisation';
     $('saveBtn').disabled=activeOrg.role==='viewer';
+    if(canManage){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
     await loadDeals();
   }
   async function queryVisibleDeals(){
@@ -136,8 +139,13 @@
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('createdByUid','==',user.uid),
       collection.where('organisationId','==',activeOrg.id).where('visibility','==','restricted').where('sharedWithUids','array-contains',user.uid)
     ];
-    const snapshots=await Promise.all(queries.map(q=>q.get()));
+    const [snapshots, grants]=await Promise.all([
+      Promise.all(queries.map(q=>q.get())),
+      db.collection('organisationResourceShares').where('sharedWithUid','==',user.uid).where('organisationId','==',activeOrg.id).where('resourceType','==','deal').get()
+    ]);
     const unique=new Map();snapshots.forEach(s=>s.docs.forEach(d=>unique.set(d.id,d)));
+    const granted=await Promise.all(grants.docs.map(g=>collection.doc(g.data().resourceId).get()));
+    granted.filter(d=>d.exists).forEach(d=>unique.set(d.id,d));
     return Array.from(unique.values());
   }
   async function loadDeals(){
@@ -170,6 +178,35 @@
       });
     });
   }
+  let activeShareMembers=[];
+  async function loadShareMembers(){
+    activeShareMembers=[];
+    if(!canManage||!activeOrg)return;
+    const snap=await db.collection('organisationMembers').where('organisationId','==',activeOrg.id).where('status','==','active').get();
+    activeShareMembers=snap.docs.map(doc=>doc.data()).filter(m=>m.uid&&m.uid!==user.uid);
+    const profiles=await Promise.all(activeShareMembers.map(async m=>{try{const p=await db.collection('publicProfiles').doc(m.uid).get();return p.exists?p.data():{};}catch(e){return {};}}));
+    activeShareMembers=activeShareMembers.map((m,i)=>({...m,label:[profiles[i].firstName,profiles[i].lastName].filter(Boolean).join(' ')||profiles[i].displayName||profiles[i].email||m.uid.slice(0,12)}));
+  }
+  async function renderShareTools(card, resource){
+    if(!canManage)return;
+    const box=document.createElement('div');box.className='share-tools';
+    const label=document.createElement('label');label.textContent='Explicit member access';box.appendChild(label);
+    const row=document.createElement('div');row.className='share-row';const select=document.createElement('select');
+    select.add(new Option('Select an active member…',''));
+    activeShareMembers.forEach(m=>select.add(new Option(m.label+' · '+m.role,m.uid)));
+    const grant=document.createElement('button');grant.type='button';grant.textContent='Share';grant.disabled=!activeShareMembers.length;
+    grant.addEventListener('click',async()=>{
+      const uid=select.value;if(!uid)return;
+      grant.disabled=true;
+      try{const id=activeOrg.id+'_deal_'+resource.id+'_'+uid;const grantRef=db.collection('organisationResourceShares').doc(id);const existing=await grantRef.get();if(existing.exists){showNotice('This member already has access to the resource.');grant.disabled=false;return;}await grantRef.set({organisationId:activeOrg.id,resourceType:'deal',resourceId:resource.id,sharedWithUid:uid,createdByUid:user.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotice('Access granted to '+(activeShareMembers.find(m=>m.uid===uid)?.label||'the selected member')+'.');await loadDeals();}
+      catch(error){console.error('Unable to grant resource access:',error);showNotice('Unable to grant access. Confirm active membership and permissions.',true);grant.disabled=false;}
+    });row.append(select,grant);box.appendChild(row);
+    const list=document.createElement('div');list.className='share-list';list.textContent='Loading current grants…';box.appendChild(list);card.appendChild(box);
+    try{const snap=await db.collection('organisationResourceShares').where('organisationId','==',activeOrg.id).where('resourceType','==','deal').where('resourceId','==',resource.id).get();list.replaceChildren();
+      if(!snap.docs.length){list.textContent='No additional members have access.';return;}
+      snap.docs.forEach(doc=>{const data=doc.data(),member=activeShareMembers.find(m=>m.uid===data.sharedWithUid);const chip=document.createElement('span');chip.className='share-chip';const name=document.createTextNode((member?member.label:data.sharedWithUid.slice(0,12))+' · shared');chip.appendChild(name);const revoke=document.createElement('button');revoke.type='button';revoke.className='danger';revoke.textContent='Revoke';revoke.addEventListener('click',async()=>{if(!confirm('Revoke this member’s access to the resource?'))return;revoke.disabled=true;try{await doc.ref.delete();showNotice('Explicit access revoked.');await loadDeals();}catch(error){console.error('Unable to revoke access:',error);showNotice('Unable to revoke access.',true);revoke.disabled=false;}});chip.appendChild(revoke);list.appendChild(chip);});
+    }catch(error){console.error('Unable to load resource shares:',error);list.textContent='Sharing details unavailable.';}
+  }
   function renderDeal(deal){
     const card=document.createElement('article');card.className='deal';
     const title=document.createElement('h3');title.textContent=deal.name||'Untitled deal';card.appendChild(title);
@@ -186,6 +223,7 @@
       const remove=document.createElement('button');remove.type='button';remove.className='danger';remove.textContent='Delete';remove.addEventListener('click',()=>deleteDeal(deal.id));actions.appendChild(remove);
       card.appendChild(actions);
     }
+    renderShareTools(card,deal);
     return card;
   }
   function resetForm(){editingId=null;$('dealForm').reset();$('dealStage').value=stages[0];$('dealVisibility').value='organisation';$('formTitle').textContent='Create an organisation deal';$('saveBtn').textContent='Save organisation deal';$('cancelBtn').classList.add('hidden');$('dealVisibility').disabled=!canManage;status('formStatus','');}

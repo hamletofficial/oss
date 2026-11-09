@@ -13,6 +13,42 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "organisationResourceShares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "organisationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resourceType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sharedWithUid",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "organisationResourceShares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "organisationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resourceType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resourceId",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

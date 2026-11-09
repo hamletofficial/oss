@@ -133,3 +133,52 @@ exports.recordOrganisationPropertyActivity = onDocumentWrittenWithAuthContext({
     ["propertyName", "propertyType", "status", "address", "city", "postcode", "size", "sizeUnit", "askingPrice", "askingRent", "sustainabilityStandard", "description", "visibility", "sharedWithUids"],
     "propertyName");
 });
+
+
+/** Immutable server-authored history for explicit per-member sharing grants. */
+exports.recordOrganisationResourceShareActivity = onDocumentWrittenWithAuthContext({
+  document: "organisationResourceShares/{shareId}",
+  region: "us-central1",
+  timeoutSeconds: 60,
+  memory: "256MiB",
+  retry: true,
+}, async (event) => {
+  const change = event.data;
+  if (!change || (!change.before.exists && !change.after.exists)) return;
+  const grant = change.after.exists ? (change.after.data() || {}) : (change.before.data() || {});
+  const organisationId = clean(grant.organisationId, 128);
+  const resourceId = clean(grant.resourceId, 128);
+  const resourceType = clean(grant.resourceType, 20);
+  const recipientUid = clean(grant.sharedWithUid, 128);
+  if (!organisationId || !resourceId || !recipientUid ||
+      !["deal", "property"].includes(resourceType)) {
+    console.warn("Skipping organisation share audit event with invalid grant identity:", event.params.shareId);
+    return;
+  }
+  const action = change.after.exists ? "shared" : "share_revoked";
+  const actor = await resolveActor(event, grant.createdByUid);
+  const id = eventDocumentId("share", event.params.shareId || resourceId, event);
+  const record = {
+    id,
+    organisationId,
+    actorUid: actor.actorUid,
+    actorName: actor.actorName,
+    actorEmail: actor.actorEmail,
+    actorType: actor.actorType,
+    action: "organisation.resource_" + action,
+    resourceType,
+    resourceId,
+    targetUid: recipientUid,
+    title: "deal" === resourceType ? "Deal access changed" : "Property access changed",
+    summary: action === "shared" ? "Resource shared with an organisation member" : "Resource sharing access revoked",
+    changedFields: ["sharedWithUid"],
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  try {
+    await getDb().collection("organisationActivity").doc(id).create(record);
+  } catch (err) {
+    if (err && (err.code === 6 || err.code === "already-exists")) return;
+    console.error("Unable to record organisation share audit event:", id, err);
+    throw err;
+  }
+});
