@@ -224,7 +224,7 @@ The initial backend foundation is implemented on the feature branch. No producti
 
 - Organisation switcher in the authenticated application.
 - Dedicated workspace shell and tenant resolution.
-- Cloudflare wildcard routing for `*.orgs.hamlet-ai.co.uk`.
+- Cloudflare wildcard routing for `*.platform.hamlet-ai.co.uk`.
 - Resolve authentication/session design and validate Firebase/OAuth domains.
 - Launch subdomains only after tenant isolation tests pass.
 
