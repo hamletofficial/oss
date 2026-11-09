@@ -220,22 +220,22 @@ test('organisation properties and deals enforce tenant membership and explicit s
   await assertSucceeds(getDoc(doc(member, 'organisationDeals/deal-shared')));
   await assertFails(getDoc(doc(outsider, 'organisationDeals/deal-shared')));
 
-  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-created'), {
-    id: 'member-created', organisationId: 'org-private', createdByUid: 'member',
-    visibility: 'organisation', sharedWithUids: [], propertyName: 'New team asset',
-  }));
-  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'), {
-    id: 'forged-tenant', organisationId: 'org-other', createdByUid: 'member',
+  const propertyRecord = (id, creator, overrides = {}) => ({
+    id, organisationId: 'org-private', createdByUid: creator,
     visibility: 'organisation', sharedWithUids: [],
-  }));
-  await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'), {
-    id: 'forged-creator', organisationId: 'org-private', createdByUid: 'owner',
-    visibility: 'organisation', sharedWithUids: [],
-  }));
-  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'), {
-    id: 'member-restricted', organisationId: 'org-private', createdByUid: 'member',
-    visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
-  }));
+    propertyName: 'New team asset', propertyType: 'Commercial', status: 'Available',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...overrides,
+  });
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-created'),
+    propertyRecord('member-created', 'member')));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'),
+    propertyRecord('forged-tenant', 'member', {organisationId: 'org-other'})));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'),
+    propertyRecord('forged-creator', 'owner')));
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'),
+    propertyRecord('member-restricted', 'member', {
+      visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
+    })));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/member-restricted')));
   await assertSucceeds(getDoc(doc(owner, 'organisationProperties/member-restricted')));
   await assertFails(setDoc(doc(member, 'organisationProperties/member-changes-sharing'), {
