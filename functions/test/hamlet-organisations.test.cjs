@@ -305,7 +305,7 @@ test("ownership transfer is atomic, audited and protects the former owner", asyn
   );
   await expectCode(
     governance.transferOrganisationOwnership.run({
-      data: {organisationId: orgId, newOwnerUid: ownerUid},
+      data: {organisationId: orgId, newOwnerUid: nextUid},
       auth: identity(ownerUid, "owner-" + tag + "@example.com"),
     }),
     "permission-denied"
