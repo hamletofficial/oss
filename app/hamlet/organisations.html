@@ -67,7 +67,7 @@
     const org=organisations.find(item=>item.id===id);
     if(!org)return;
     $('selectedName').textContent=org.name;
-    $('selectedSlug').textContent=org.slug+'.orgs.hamlet-ai.co.uk';
+    $('selectedSlug').textContent='Organisation slug: '+org.slug+' · tenant hostname not yet provisioned';
     $('roleBadge').textContent=org.role;
     $('pageTitle').textContent=org.name+' workspace';
     $('orgSelect').value=org.id;
