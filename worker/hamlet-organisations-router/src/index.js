@@ -26,6 +26,9 @@ export default {
     const tenant = tenantFromRequest(request);
     if (!tenant) return new Response("Not found", {status: 404});
     if (!SLUG.test(tenant.slug) || RESERVED.has(tenant.slug)) return new Response("Invalid organisation address", {status: 404});
+    if (url.pathname === "/login.html") {
+      return Response.redirect(MAIN_ORIGIN + "/login.html?next=" + encodeURIComponent("/app/hamlet/organisations.html"), 302);
+    }
 
     let originPath = url.pathname;
     let originQuery = url.search;
