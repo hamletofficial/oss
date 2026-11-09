@@ -6,7 +6,7 @@ const {doc, getDoc, setDoc, deleteDoc, updateDoc, serverTimestamp} = require('fi
 const {ref, uploadBytes, getBytes} = require('firebase/storage');
 
 let env;
-const projectId = 'demo-hamlet-rules';
+const projectId = 'demo-hamlet-functions';
 
 test.before(async () => {
   env = await initializeTestEnvironment({
@@ -48,6 +48,9 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_admin'), {
       organisationId: 'org-private', uid: 'admin', role: 'admin', status: 'active',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_manager'), {
+      organisationId: 'org-private', uid: 'manager', role: 'manager', status: 'active',
+    });
     await setDoc(doc(db, 'organisationMembers/org-private_member'), {
       organisationId: 'org-private', uid: 'member', role: 'member', status: 'active',
     });
@@ -72,6 +75,9 @@ test.beforeEach(async () => {
     });
     await setDoc(doc(db, 'organisationTeamMembers/team-alpha_team-reader'), {
       teamId: 'team-alpha', organisationId: 'org-private', uid: 'team-reader', status: 'active',
+    });
+    await setDoc(doc(db, 'organisationTeamMembers/team-alpha_manager'), {
+      teamId: 'team-alpha', organisationId: 'org-private', uid: 'manager', status: 'active',
     });
     await setDoc(doc(db, 'organisationDeals/deal-team-restricted'), {
       id: 'deal-team-restricted', organisationId: 'org-private', createdByUid: 'owner',
@@ -130,8 +136,13 @@ test.beforeEach(async () => {
 
 test('team capabilities grant access only to active members of assigned teams', async () => {
   const reader = env.authenticatedContext('team-reader').firestore();
+  const manager = env.authenticatedContext('manager').firestore();
   const noRead = env.authenticatedContext('team-no-read').firestore();
   await assertSucceeds(getDoc(doc(reader, 'organisationDeals/deal-team-restricted')));
+  await assertSucceeds(getDoc(doc(manager, 'organisationDeals/deal-team-restricted')));
+  await assertFails(updateDoc(doc(manager, 'organisationDeals/deal-team-restricted'), {
+    notes:'Read-only team access',
+  }));
   await assertFails(getDoc(doc(noRead, 'organisationDeals/deal-team-restricted')));
   // Organisation-wide visibility remains independent of team permissions.
   await assertSucceeds(getDoc(doc(noRead, 'organisationDeals/deal-team-org-wide')));
@@ -245,12 +256,14 @@ test('organisation properties and deals enforce tenant membership and explicit s
   const owner = env.authenticatedContext('owner').firestore();
   const member = env.authenticatedContext('member').firestore();
   const admin = env.authenticatedContext('admin').firestore();
+  const manager = env.authenticatedContext('manager').firestore();
   const outsider = env.authenticatedContext('outsider').firestore();
   const suspended = env.authenticatedContext('suspended').firestore();
 
   await assertSucceeds(getDoc(doc(member, 'organisationProperties/property-shared')));
   await assertSucceeds(getDoc(doc(owner, 'organisationProperties/property-restricted')));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/property-restricted')));
+  await assertFails(getDoc(doc(manager, 'organisationProperties/property-restricted')));
   // The creator retains access to a restricted resource; unlisted peers do not.
   await assertSucceeds(getDoc(doc(member, 'organisationProperties/property-restricted')));
   const colleague = env.authenticatedContext('colleague').firestore();
@@ -258,6 +271,7 @@ test('organisation properties and deals enforce tenant membership and explicit s
   await assertFails(getDoc(doc(outsider, 'organisationProperties/property-shared')));
   await assertFails(getDoc(doc(suspended, 'organisationProperties/property-shared')));
   await assertSucceeds(getDoc(doc(member, 'organisationDeals/deal-shared')));
+  await assertSucceeds(getDoc(doc(manager, 'organisationDeals/deal-shared')));
   await assertFails(getDoc(doc(outsider, 'organisationDeals/deal-shared')));
 
   const propertyRecord = (id, creator, overrides = {}) => ({
@@ -272,12 +286,24 @@ test('organisation properties and deals enforce tenant membership and explicit s
     propertyRecord('forged-tenant', 'member', {organisationId: 'org-other'})));
   await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'),
     propertyRecord('forged-creator', 'owner')));
+  await assertSucceeds(setDoc(doc(manager, 'organisationProperties/manager-created'),
+    propertyRecord('manager-created', 'manager', {propertyName: 'Manager-created asset'})));
+  await assertSucceeds(setDoc(doc(manager, 'organisationProperties/manager-created'), {
+    description: 'Manager can maintain their own resource', updatedAt: serverTimestamp(),
+  }, {merge: true}));
+  await assertFails(setDoc(doc(manager, 'organisationProperties/manager-created'), {
+    visibility: 'restricted', updatedAt: serverTimestamp(),
+  }, {merge: true}));
+  await assertFails(setDoc(doc(manager, 'organisationProperties/manager-created'), {
+    teamId: 'team-alpha', updatedAt: serverTimestamp(),
+  }, {merge: true}));
   await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'),
     propertyRecord('member-restricted', 'member', {
       visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
     })));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/member-restricted')));
   await assertSucceeds(getDoc(doc(owner, 'organisationProperties/member-restricted')));
+  await assertFails(getDoc(doc(manager, 'organisationProperties/member-restricted')));
   await assertFails(setDoc(doc(member, 'organisationProperties/member-changes-sharing'), {
     visibility: 'restricted', sharedWithUids: ['outsider'],
   }, {merge: true}));
@@ -291,10 +317,12 @@ test('organisation properties and deals enforce tenant membership and explicit s
 test('organisation document uploads remain disabled until separately validated', async () => {
   const memberStorage = env.authenticatedContext('member').storage();
   const adminStorage = env.authenticatedContext('admin').storage();
+  const managerStorage = env.authenticatedContext('manager').storage();
   const outsiderStorage = env.authenticatedContext('outsider').storage();
   const restrictedPath = 'organisationDocuments/org-private/property/property-restricted/doc-1/brief.pdf';
   const sharedPath = 'organisationDocuments/org-private/deal/deal-shared/doc-2/brief.pdf';
   await assertFails(uploadBytes(ref(memberStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+  await assertFails(uploadBytes(ref(managerStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(adminStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(memberStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(outsiderStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
@@ -504,7 +532,8 @@ test('organisation property portfolio enforces tenant ownership, field validatio
 test('explicit organisation resource grants are tenant-scoped, recipient-readable and revocable', async () => {
   const creator = env.authenticatedContext('member').firestore();
   const recipient = env.authenticatedContext('colleague').firestore();
-  const manager = env.authenticatedContext('admin').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const manager = env.authenticatedContext('manager').firestore();
   const outsider = env.authenticatedContext('outsider').firestore();
   const suspended = env.authenticatedContext('suspended').firestore();
   const shareId = 'org-private_property_property-restricted_colleague';
@@ -517,9 +546,22 @@ test('explicit organisation resource grants are tenant-scoped, recipient-readabl
     createdAt: serverTimestamp(),
   };
 
-  await assertSucceeds(setDoc(doc(creator, 'organisationResourceShares/' + shareId), grant));
+  await assertFails(setDoc(doc(creator, 'organisationResourceShares/' + shareId), grant));
+  await assertFails(setDoc(doc(manager, 'organisationResourceShares/' + shareId), {...grant, createdByUid:'manager'}));
+  await assertSucceeds(setDoc(doc(admin, 'organisationResourceShares/' + shareId), {...grant, createdByUid:'admin'}));
+  const managerGrantId = 'org-private_property_property-restricted_manager';
+  await assertSucceeds(setDoc(doc(admin, 'organisationResourceShares/' + managerGrantId), {
+    ...grant, sharedWithUid:'manager', createdByUid:'admin',
+  }));
   await assertSucceeds(getDoc(doc(recipient, 'organisationResourceShares/' + shareId)));
-  await assertSucceeds(getDoc(doc(manager, 'organisationResourceShares/' + shareId)));
+  await assertSucceeds(getDoc(doc(admin, 'organisationResourceShares/' + shareId)));
+  await assertFails(getDoc(doc(manager, 'organisationResourceShares/' + shareId)));
+  await assertSucceeds(getDoc(doc(manager, 'organisationResourceShares/' + managerGrantId)));
+  await assertSucceeds(getDoc(doc(manager, 'organisationProperties/property-restricted')));
+  await assertFails(updateDoc(doc(manager, 'organisationProperties/property-restricted'), {
+    description:'Read-only explicit share', updatedAt:serverTimestamp(),
+  }));
+  await assertFails(deleteDoc(doc(manager, 'organisationProperties/property-restricted')));
   await assertFails(getDoc(doc(creator, 'organisationResourceShares/' + shareId)));
   await assertSucceeds(getDoc(doc(recipient, 'organisationProperties/property-restricted')));
   await assertFails(getDoc(doc(outsider, 'organisationProperties/property-restricted')));
@@ -537,7 +579,9 @@ test('explicit organisation resource grants are tenant-scoped, recipient-readabl
     ...grant, sharedWithUid: 'owner',
   }, {merge: true}));
 
-  await assertSucceeds(deleteDoc(doc(creator, 'organisationResourceShares/' + shareId)));
+  await assertFails(deleteDoc(doc(creator, 'organisationResourceShares/' + shareId)));
+  await assertFails(deleteDoc(doc(manager, 'organisationResourceShares/' + shareId)));
+  await assertSucceeds(deleteDoc(doc(admin, 'organisationResourceShares/' + shareId)));
   await assertFails(getDoc(doc(recipient, 'organisationProperties/property-restricted')));
   await assertFails(getDoc(doc(recipient, 'organisationResourceShares/' + shareId)));
   await assertFails(getDoc(doc(suspended, 'organisationResourceShares/' + shareId)));

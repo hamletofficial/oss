@@ -147,16 +147,38 @@ service firebase.storage {
       }
       function parentExists() { return resourceType in ['deal', 'property'] && firestore.exists(parentPath()); }
       function parentData() { return firestore.get(parentPath()).data; }
-      function manager() { return activeMember() && firestore.get(memberPath()).data.role in ['owner', 'admin', 'manager']; }
-      function canReadParent() {
-        return activeMember() && parentExists() && (parentData().visibility == 'organisation'
+      function administrator() { return activeMember() && firestore.get(memberPath()).data.role in ['owner', 'admin']; }
+      function teamHas(permission) {
+        return ('teamId' in parentData())
+          && firestore.exists(/databases/(default)/documents/organisationTeams/$(parentData().teamId))
+          && firestore.get(/databases/(default)/documents/organisationTeams/$(parentData().teamId)).data.organisationId == organisationId
+          && firestore.get(/databases/(default)/documents/organisationTeams/$(parentData().teamId)).data.status == 'active'
+          && permission in firestore.get(/databases/(default)/documents/organisationTeams/$(parentData().teamId)).data.permissions
+          && firestore.exists(/databases/(default)/documents/organisationTeamMembers/$(parentData().teamId + '_' + request.auth.uid))
+          && firestore.get(/databases/(default)/documents/organisationTeamMembers/$(parentData().teamId + '_' + request.auth.uid)).data.status == 'active'
+          && firestore.get(/databases/(default)/documents/organisationTeamMembers/$(parentData().teamId + '_' + request.auth.uid)).data.organisationId == organisationId;
+      }
+      function hasResourceAccess() {
+        return parentData().visibility == 'organisation'
           || parentData().createdByUid == request.auth.uid
           || (parentData().sharedWithUids is list && request.auth.uid in parentData().sharedWithUids)
-          || firestore.exists(sharePath()) || manager());
+          || firestore.exists(sharePath())
+          || teamHas(resourceType == 'deal' ? 'deals.read' : 'properties.read');
+      }
+      function canReadParent() {
+        return activeMember() && parentExists() && (administrator() || hasResourceAccess());
       }
       function canWriteParent() {
-        return activeMember() && parentExists() && (manager()
-          || (parentData().createdByUid == request.auth.uid && firestore.get(memberPath()).data.role == 'member'));
+        return activeMember() && parentExists() && (
+          administrator()
+          || (firestore.get(memberPath()).data.role == 'manager'
+            && (parentData().visibility == 'organisation' || parentData().createdByUid == request.auth.uid
+              || (teamHas(resourceType == 'deal' ? 'deals.read' : 'properties.read')
+                && teamHas(resourceType == 'deal' ? 'deals.write' : 'properties.write'))))
+          || (parentData().createdByUid == request.auth.uid && firestore.get(memberPath()).data.role == 'member')
+          || (teamHas(resourceType == 'deal' ? 'deals.read' : 'properties.read')
+            && teamHas(resourceType == 'deal' ? 'deals.write' : 'properties.write'))
+        );
       }
       function validFileMetadata() {
         return request.resource.metadata.keys().hasAll([
