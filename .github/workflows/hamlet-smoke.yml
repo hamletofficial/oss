@@ -100,7 +100,7 @@ jobs:
       - name: Install isolated Firebase test dependencies
         run: npm install --no-save --ignore-scripts --package-lock=false firebase-tools firebase @firebase/rules-unit-testing
       - name: Test Firestore and Storage rules in emulators
-        run: npx firebase-tools emulators:exec --only firestore,storage --project demo-hamlet-rules "node --test tests/hamlet-rules.test.cjs"
+        run: npx firebase-tools emulators:exec --only firestore,storage --project demo-hamlet-functions "node --test tests/hamlet-rules.test.cjs"
 
   organisation-callables:
     runs-on: ubuntu-latest

@@ -125,7 +125,7 @@ test.beforeEach(async () => {
     });
     await setDoc(doc(db, 'organisationDirectory/org-suspended'), {
       organisationId: 'org-suspended', name: 'Suspended Organisation',
-      slug: 'suspended-org', isPublic: true, status: 'active',
+      slug: 'suspended-org', isPublic: true, status: 'suspended',
     });
     await setDoc(doc(db, 'organisations/org-suspended'), {
       id: 'org-suspended', name: 'Suspended Organisation', slug: 'suspended-org',
