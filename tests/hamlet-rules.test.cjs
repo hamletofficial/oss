@@ -73,9 +73,6 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationTeamMembers/team-alpha_team-reader'), {
       teamId: 'team-alpha', organisationId: 'org-private', uid: 'team-reader', status: 'active',
     });
-    await setDoc(doc(db, 'organisationTeamMembers/team-alpha_team-no-read'), {
-      teamId: 'team-alpha', organisationId: 'org-private', uid: 'team-no-read', status: 'active',
-    });
     await setDoc(doc(db, 'organisationDeals/deal-team-restricted'), {
       id: 'deal-team-restricted', organisationId: 'org-private', createdByUid: 'owner',
       visibility: 'restricted', teamId: 'team-alpha', sharedWithUids: [], name: 'Team restricted deal',
