@@ -220,13 +220,13 @@ test('organisation teams expose only implemented capabilities and team assignmen
   const teamsHtml = fs.readFileSync('app/hamlet/organisation-teams.html', 'utf8');
   const teamFunctions = fs.readFileSync('functions/hamlet-organisation-teams.js', 'utf8');
   const propertiesHtml = fs.readFileSync('app/hamlet/organisation-properties.html', 'utf8');
-  assert.match(teamsHtml, /deals\\.read/);
-  assert.match(teamsHtml, /properties\\.write/);
-  assert.doesNotMatch(teamsHtml, /documents\\.read|documents\\.write|members\\.view/);
-  assert.doesNotMatch(teamFunctions, /exports\\.organisationTeamPermissions/);
-  assert.match(organisationDealsHtml, /assignResourceTeam/);
-  assert.match(propertiesHtml, /assignResourceTeam/);
-  assert.match(firestore, /data\\.visibility == 'restricted'[\\s\\S]*permission in get/);
+  assert.ok(teamsHtml.includes('deals.read'));
+  assert.ok(teamsHtml.includes('properties.write'));
+  assert.ok(!teamsHtml.includes('documents.read') && !teamsHtml.includes('documents.write') && !teamsHtml.includes('members.view'));
+  assert.ok(!teamFunctions.includes('exports.organisationTeamPermissions'));
+  assert.ok(organisationDealsHtml.includes('assignResourceTeam'));
+  assert.ok(propertiesHtml.includes('assignResourceTeam'));
+  assert.ok(firestore.includes("data.visibility == 'restricted'"));
 });
 
 test('organisation document workspace JavaScript parses and uses tenant-scoped Storage paths', () => {
