@@ -7,9 +7,9 @@ This Worker routes organisation directory and tenant requests to the Hamlet appl
 | Purpose | Hostname | Status |
 |---|---|---|
 | Staging directory | `organisations-staging.hamlet-ai.co.uk` | Supported by code; DNS/route not attached |
-| Staging tenant | `{slug}.orgs-staging.hamlet-ai.co.uk` | Supported by code; wildcard DNS/route not attached |
+| Staging tenant | `{slug}.organisations-staging.hamlet-ai.co.uk` | Supported by code; wildcard DNS/route not attached |
 | Production directory | `organisations.hamlet-ai.co.uk` | Supported by code; production activation not authorised |
-| Production tenant | `{slug}.orgs.hamlet-ai.co.uk` | Supported by code; production activation not authorised |
+| Production tenant | `{slug}.organisations.hamlet-ai.co.uk` | Supported by code; production activation not authorised |
 | Staging simulation | Worker `workers.dev` root and `/tenant/{slug}` | Existing staging Worker subdomain enabled |
 
 ## Request behaviour
