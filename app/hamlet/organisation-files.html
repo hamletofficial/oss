@@ -49,13 +49,27 @@ async function selectOrg(id){
  activeOrg=memberships.find(m=>m.organisationId===id);if(!activeOrg)return;
  const org=await db.collection('organisations').doc(id).get();activeOrg={...activeOrg,...org.data()};
  $('resourceSelect').disabled=true;$('resourceSelect').replaceChildren(new Option('Loading resources…',''));
- const [deals,properties]=await Promise.all([
-  db.collection('organisationDeals').where('organisationId','==',id).get(),
-  db.collection('organisationProperties').where('organisationId','==',id).get()
- ]);
- resources=[...deals.docs.map(d=>({id:d.id,resourceType:'deal',...d.data()})),...properties.docs.map(d=>({id:d.id,resourceType:'property',...d.data()}))];
- const visible=resources.filter(r=>r.visibility==='organisation'||r.createdByUid===user.uid||(r.sharedWithUids||[]).includes(user.uid)||['owner','admin','manager'].includes(role(activeOrg)));
- $('resourceSelect').replaceChildren(new Option('Choose a deal or property…',''),...visible.map(r=>new Option(parentLabel(r),r.resourceType+'|'+r.id)));
+ const manager=['owner','admin','manager'].includes(role(activeOrg));
+ const collections=[['deal','organisationDeals'],['property','organisationProperties']];
+ const visible=[];
+ for(const [type,name] of collections){
+  let snaps;
+  if(manager) snaps=[await db.collection(name).where('organisationId','==',id).get()];
+  else snaps=await Promise.all([
+   db.collection(name).where('organisationId','==',id).where('visibility','==','organisation').get(),
+   db.collection(name).where('organisationId','==',id).where('createdByUid','==',user.uid).get()
+  ]);
+  snaps.flatMap(s=>s.docs).forEach(d=>visible.push({id:d.id,resourceType:type,...d.data()}));
+ }
+ const grants=await db.collection('organisationResourceShares').where('organisationId','==',id).where('sharedWithUid','==',user.uid).get();
+ for(const grant of grants.docs){
+  const g=grant.data();const type=g.resourceType;const collection=type==='deal'?'organisationDeals':type==='property'?'organisationProperties':null;
+  if(!collection)continue;
+  const parent=await db.collection(collection).doc(g.resourceId).get();
+  if(parent.exists)visible.push({id:parent.id,resourceType:type,...parent.data()});
+ }
+ resources=Array.from(new Map(visible.map(r=>[r.resourceType+'|'+r.id,r])).values());
+ $('resourceSelect').replaceChildren(new Option('Choose a deal or property…',''),...resources.map(r=>new Option(parentLabel(r),r.resourceType+'|'+r.id)));
  $('resourceSelect').disabled=false;$('fileList').textContent='Select a resource to view its files.';selected=null;$('uploadBtn').disabled=true;
 }
 async function selectResource(value){
