@@ -25,18 +25,18 @@ function tenantFromRequest(request) {
     return {kind: "directory"};
   }
 
-  const production = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.orgs\\.hamlet-ai\\.co\\.uk$/);
+  const production = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
   if (production) {
     return {kind: "tenant", slug: production[1], production: true, initial: url.pathname === "/"};
   }
 
-  const staging = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.orgs-staging\\.hamlet-ai\\.co\\.uk$/);
+  const staging = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs-staging\.hamlet-ai\.co\.uk$/);
   if (staging) {
     return {kind: "tenant", slug: staging[1], production: false, initial: url.pathname === "/"};
   }
 
   if (host.endsWith(".workers.dev")) {
-    const match = url.pathname.match(/^\\/tenant\\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\/?$/);
+    const match = url.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
     if (match) return {kind: "tenant", slug: match[1], production: false, initial: true};
 
     const cookieSlug = readTenantCookie(request);
