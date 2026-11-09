@@ -1,0 +1,7 @@
+name = "hamlet-organisations-router-staging"
+main = "src/index.js"
+account_id = "6905aedcfe714343bcf5a3d3f79af954"
+compatibility_date = "2026-11-09"
+workers_dev = true
+
+# Staging only. Production DNS/Worker routes are intentionally not configured here.
