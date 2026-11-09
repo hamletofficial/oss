@@ -835,21 +835,6 @@ service cloud.firestore {
         && data.sharedWithUids.size() <= 100;
     }
 
-    function hasTeamPermission(data, resourceType, permission) {
-      return request.auth != null
-        && ('teamId' in data)
-        && data.teamId is string
-        && exists(/databases/$(database)/documents/organisationTeams/$(data.teamId))
-        && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.organisationId == data.organisationId
-        && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.status == 'active'
-        && data.visibility == 'restricted'
-        && permission in get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.permissions
-        && exists(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid))
-        && get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data.organisationId == data.organisationId
-        && get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data.status == 'active'
-        && isActiveOrganisationMember(data.organisationId);
-    }
-
     function canReadOrganisationResource(data, resourceType, resourceId) {
       let memberPath = organisationMemberPath(data.organisationId);
       let organisationPath = /databases/$(database)/documents/organisations/$(data.organisationId);
@@ -857,12 +842,10 @@ service cloud.firestore {
       let organisationExists = exists(organisationPath);
       let member = memberExists ? get(memberPath).data : {};
       let organisation = organisationExists ? get(organisationPath).data : {};
-      let teamPath = /databases/$(database)/documents/organisationTeams/$(('teamId' in data) ? data.teamId : '__no_team__');
-      let teamMemberPath = /databases/$(database)/documents/organisationTeamMembers/$(('teamId' in data) ? data.teamId + '_' + request.auth.uid : '__no_team_member__');
-      let teamExists = ('teamId' in data) && exists(teamPath);
-      let teamMemberExists = ('teamId' in data) && exists(teamMemberPath);
-      let team = teamExists ? get(teamPath).data : {};
-      let teamMember = teamMemberExists ? get(teamMemberPath).data : {};
+      let teamExists = ('teamId' in data) && exists(/databases/$(database)/documents/organisationTeams/$(data.teamId));
+      let teamMemberExists = ('teamId' in data) && exists(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid));
+      let team = teamExists ? get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data : {};
+      let teamMember = teamMemberExists ? get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data : {};
       let teamRead = teamExists && teamMemberExists
         && team.organisationId == data.organisationId
         && team.status == 'active'
@@ -894,12 +877,10 @@ service cloud.firestore {
       let organisationExists = exists(organisationPath);
       let member = memberExists ? get(memberPath).data : {};
       let organisation = organisationExists ? get(organisationPath).data : {};
-      let teamPath = /databases/$(database)/documents/organisationTeams/$(('teamId' in data) ? data.teamId : '__no_team__');
-      let teamMemberPath = /databases/$(database)/documents/organisationTeamMembers/$(('teamId' in data) ? data.teamId + '_' + request.auth.uid : '__no_team_member__');
-      let teamExists = ('teamId' in data) && exists(teamPath);
-      let teamMemberExists = ('teamId' in data) && exists(teamMemberPath);
-      let team = teamExists ? get(teamPath).data : {};
-      let teamMember = teamMemberExists ? get(teamMemberPath).data : {};
+      let teamExists = ('teamId' in data) && exists(/databases/$(database)/documents/organisationTeams/$(data.teamId));
+      let teamMemberExists = ('teamId' in data) && exists(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid));
+      let team = teamExists ? get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data : {};
+      let teamMember = teamMemberExists ? get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data : {};
       let teamRead = teamExists && teamMemberExists
         && team.organisationId == data.organisationId
         && team.status == 'active'
