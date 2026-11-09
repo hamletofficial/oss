@@ -873,7 +873,7 @@ service cloud.firestore {
           || (data.sharedWithUids is list && request.auth.uid in data.sharedWithUids)
           || exists(sharePath)
           || teamRead
-          || member.role in ['owner', 'admin', 'manager']
+          || member.role in ['owner', 'admin']
         );
     }
 
@@ -884,8 +884,16 @@ service cloud.firestore {
       let organisationExists = exists(organisationPath);
       let member = memberExists ? get(memberPath).data : {};
       let organisation = organisationExists ? get(organisationPath).data : {};
+      let teamRead = ('teamId' in data)
+        && hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.read' : 'properties.read');
       let teamWrite = ('teamId' in data)
         && hasTeamPermission(data, resourceType, resourceType == 'deal' ? 'deals.write' : 'properties.write');
+      let managerCanWrite = member.role == 'manager'
+        && (
+          data.visibility == 'organisation'
+          || data.createdByUid == request.auth.uid
+          || (teamRead && teamWrite)
+        );
       return request.auth != null
         && memberExists
         && member.organisationId == data.organisationId
@@ -894,8 +902,9 @@ service cloud.firestore {
         && organisationExists
         && organisation.status == 'active'
         && (
-          member.role in ['owner', 'admin', 'manager']
-          || teamWrite
+          member.role in ['owner', 'admin']
+          || managerCanWrite
+          || (teamRead && teamWrite)
           || (data.createdByUid == request.auth.uid && member.role == 'member')
         );
     }
@@ -951,7 +960,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt == request.time
         && (
-          isOrganisationManager(resource.data.organisationId)
+          canManageOrganisation(resource.data.organisationId)
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids', 'teamId'])
         );
       allow delete: if canWriteOrganisationResource(resource.data, 'property');
@@ -968,7 +977,7 @@ service cloud.firestore {
         && request.resource.data.createdByUid == resource.data.createdByUid
         && validOrganisationSharing(request.resource.data)
         && (
-          isOrganisationManager(resource.data.organisationId)
+          canManageOrganisation(resource.data.organisationId)
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids', 'teamId'])
         );
       allow delete: if canWriteOrganisationResource(resource.data, 'deal');
@@ -1001,12 +1010,11 @@ service cloud.firestore {
         return request.auth != null
           && isActiveOrganisationMember(data.organisationId)
           && validParent(data)
-          && (isOrganisationManager(data.organisationId)
-            || get(parentPath(data)).data.createdByUid == request.auth.uid);
+          && canManageOrganisation(data.organisationId);
       }
       allow read: if request.auth != null
         && (resource.data.sharedWithUid == request.auth.uid
-          || isOrganisationManager(resource.data.organisationId));
+          || canManageOrganisation(resource.data.organisationId));
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['organisationId','resourceType','resourceId','sharedWithUid','createdByUid','createdAt'])
         && request.resource.data.keys().hasOnly(['organisationId','resourceType','resourceId','sharedWithUid','createdByUid','createdAt'])
@@ -1018,9 +1026,7 @@ service cloud.firestore {
         && shareId == request.resource.data.organisationId + '_' + request.resource.data.resourceType + '_' + request.resource.data.resourceId + '_' + request.resource.data.sharedWithUid
         && mayManageShare(request.resource.data)
         && targetIsActiveMember(request.resource.data);
-      allow delete: if request.auth != null
-        && (resource.data.sharedWithUid == request.auth.uid
-          || mayManageShare(resource.data));
+      allow delete: if mayManageShare(resource.data);
       allow update: if false;
     }
 
