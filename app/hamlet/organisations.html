@@ -69,7 +69,7 @@
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
   function tenantSlugFromHost(){
-    const match=location.hostname.toLowerCase().match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.platform\\.hamlet-ai\\.co\\.uk$/);
+    const match=location.hostname.toLowerCase().match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.platform\.hamlet-ai\.co\.uk$/);
     return match?match[1]:'';
   }
   const tenantSlug=tenantSlugFromHost();
