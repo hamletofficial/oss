@@ -57,7 +57,8 @@ async function selectOrg(id){
   if(manager) snaps=[await db.collection(name).where('organisationId','==',id).get()];
   else snaps=await Promise.all([
    db.collection(name).where('organisationId','==',id).where('visibility','==','organisation').get(),
-   db.collection(name).where('organisationId','==',id).where('createdByUid','==',user.uid).get()
+   db.collection(name).where('organisationId','==',id).where('createdByUid','==',user.uid).get(),
+   db.collection(name).where('organisationId','==',id).where('sharedWithUids','array-contains',user.uid).get()
   ]);
   snaps.flatMap(s=>s.docs).forEach(d=>visible.push({id:d.id,resourceType:type,...d.data()}));
  }
@@ -98,12 +99,13 @@ async function upload(){
  if(file.size<1||file.size>15*1024*1024){notice('File must be between 1 byte and 15 MB.',true);return;}
  const title=$('fileTitle').value.trim()||file.name;if(title.length>120){notice('Document title must be 120 characters or fewer.',true);return;}
  const id=db.collection('organisationDocuments').doc().id;const fileName=cleanName(file.name);const path='organisationDocuments/'+activeOrg.organisationId+'/'+selected.resourceType+'/'+selected.id+'/'+id+'/'+fileName;
- const btn=$('uploadBtn');btn.disabled=true;$('uploadStatus').textContent='Uploading file securely…';
+ const btn=$('uploadBtn');btn.disabled=true;$('uploadStatus').textContent='Uploading file securely…';let uploadedRef=null;
  try{
-  await storage.ref(path).put(file,{contentType:type,customMetadata:{organisationId:activeOrg.organisationId,resourceType:selected.resourceType,resourceId:selected.id,documentId:id,uploaderUid:user.uid}});
+  uploadedRef=storage.ref(path);
+  await uploadedRef.put(file,{contentType:type,customMetadata:{organisationId:activeOrg.organisationId,resourceType:selected.resourceType,resourceId:selected.id,documentId:id,uploaderUid:user.uid}});
   await db.collection('organisationDocuments').doc(id).set({id,organisationId:activeOrg.organisationId,resourceType:selected.resourceType,resourceId:selected.id,createdByUid:user.uid,title,fileName,storagePath:path,size:file.size,contentType:type,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   $('fileInput').value='';$('fileTitle').value='';$('uploadStatus').textContent='Upload complete.';notice('File added to '+parentLabel(selected)+'.');await loadFiles();
- }catch(error){console.error('Organisation file upload failed:',error);$('uploadStatus').textContent='Upload failed.';notice('Upload failed. Confirm your organisation role and Storage Rules deployment status.',true);}
+ }catch(error){if(uploadedRef){try{await uploadedRef.delete();}catch(cleanupError){console.warn('Unable to clean up an unreferenced organisation upload:',cleanupError);}}console.error('Organisation file upload failed:',error);$('uploadStatus').textContent='Upload failed.';notice('Upload failed. Confirm your organisation role and Storage Rules deployment status.',true);}
  finally{btn.disabled=!canWrite();}
 }
 function init(){
