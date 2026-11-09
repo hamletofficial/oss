@@ -86,7 +86,8 @@
       if(!orgSnap.exists||orgSnap.data().status!=='active')return null;
       return {...orgSnap.data(),id:orgSnap.id,role:m.role};
     }));
-    organisations=records.filter(Boolean);\n    window.__hamletOrganisationChoices=organisations;
+    organisations=records.filter(Boolean);
+    window.__hamletOrganisationChoices=organisations;
     const select=$('orgSelect');select.replaceChildren();
     if(!organisations.length){
       select.add(new Option('No active memberships',''));
