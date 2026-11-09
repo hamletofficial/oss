@@ -24,7 +24,7 @@ function tenantFromRequest(request) {
     return {kind: "directory", simulated: false};
   }
 
-  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.platform\.hamlet-ai\.co\.uk$/);
+  const tenant = host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
   if (tenant) {
     return {kind: "tenant", slug: tenant[1], initial: url.pathname === "/", simulated: false};
   }
