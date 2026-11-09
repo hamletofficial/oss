@@ -9,7 +9,7 @@ function getDb() {
 }
 
 function clean(value, max) {
-  return String(value == null ? "" : value).replace(/[\\r\\n]+/g, " ").trim().slice(0, max);
+  return String(value == null ? "" : value).replace(/[\r\n]+/g, " ").trim().slice(0, max);
 }
 
 async function resolveActor(event, fallbackUid) {
