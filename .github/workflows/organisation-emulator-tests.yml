@@ -1,4 +1,5 @@
 name: Organisation Firestore Emulator Tests
+# Dedicated emulator validation; deliberately does not deploy Hosting previews.
 
 on:
   pull_request:
