@@ -836,6 +836,7 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/organisationTeams/$(data.teamId))
         && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.organisationId == data.organisationId
         && get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.status == 'active'
+        && data.visibility == 'restricted'
         && permission in get(/databases/$(database)/documents/organisationTeams/$(data.teamId)).data.permissions
         && exists(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid))
         && get(/databases/$(database)/documents/organisationTeamMembers/$(data.teamId + '_' + request.auth.uid)).data.organisationId == data.organisationId

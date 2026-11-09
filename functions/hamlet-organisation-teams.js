@@ -5,8 +5,6 @@ const {HttpsError, onCall} = require("firebase-functions/v2/https");
 const TEAM_PERMISSIONS = [
   "deals.read", "deals.write",
   "properties.read", "properties.write",
-  "documents.read", "documents.write",
-  "members.view",
 ];
 const TEAM_NAME_MAX = 80;
 
@@ -127,4 +125,3 @@ exports.archiveOrganisationTeam = onCall({region:"us-central1", timeoutSeconds:3
   return {teamId, status:"archived"};
 });
 
-exports.organisationTeamPermissions = TEAM_PERMISSIONS;

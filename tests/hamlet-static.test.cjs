@@ -216,6 +216,19 @@ test('organisation property portfolio is authenticated, tenant-scoped and separa
 });
 
 
+test('organisation teams expose only implemented capabilities and team assignment controls', () => {
+  const teamsHtml = fs.readFileSync('app/hamlet/organisation-teams.html', 'utf8');
+  const teamFunctions = fs.readFileSync('functions/hamlet-organisation-teams.js', 'utf8');
+  const propertiesHtml = fs.readFileSync('app/hamlet/organisation-properties.html', 'utf8');
+  assert.match(teamsHtml, /deals\\.read/);
+  assert.match(teamsHtml, /properties\\.write/);
+  assert.doesNotMatch(teamsHtml, /documents\\.read|documents\\.write|members\\.view/);
+  assert.doesNotMatch(teamFunctions, /exports\\.organisationTeamPermissions/);
+  assert.match(organisationDealsHtml, /assignResourceTeam/);
+  assert.match(propertiesHtml, /assignResourceTeam/);
+  assert.match(firestore, /data\\.visibility == 'restricted'[\\s\\S]*permission in get/);
+});
+
 test('organisation document workspace JavaScript parses and uses tenant-scoped Storage paths', () => {
   const blocks = [...organisationFilesHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
