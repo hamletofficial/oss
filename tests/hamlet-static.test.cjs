@@ -163,7 +163,7 @@ test('workspace organisation management page JavaScript parses', () => {
   assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
   assert.match(appOrganisationsHtml, /Team operations/);
   assert.match(appOrganisationsHtml, /Shared deals &amp; pipeline/);
-  assert.match(appOrganisationsHtml, /Property portfolio/);
+  assert.match(appOrganisationsHtml, /[Pp]roperty portfolio/);
   assert.match(appOrganisationsHtml, /Organisation administration/);
   assert.match(appOrganisationsHtml, /organisationMembers/);
   assert.doesNotMatch(appOrganisationsHtml, /createOrganisationInvitation|removeOrganisationMember|acceptOrganisationInvitation|revokeOrganisationInvitation/);
@@ -188,4 +188,24 @@ test('organisation deal workspace is tenant-scoped and uses dedicated deal stora
   assert.doesNotMatch(organisationDealsHtml, /collection\('hamletDeals'\)/);
   assert.match(organisationDealsHtml, /Firestore Rules/);
   assert.match(appOrganisationsHtml, /href="\/app\/hamlet\/organisation-deals\.html"/);
+});
+
+
+test('organisation property portfolio is authenticated, tenant-scoped and separate from personal assets', () => {
+  const propertyHtml = fs.readFileSync('app/hamlet/organisation-properties.html', 'utf8');
+  const blocks = [...propertyHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
+  assert.ok(blocks.length >= 1, 'expected organisation property workspace application script');
+  for (const [index, block] of blocks.entries()) {
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-properties-inline-' + index + '.js' }));
+  }
+  assert.match(propertyHtml, /name="robots" content="noindex,nofollow"/);
+  assert.match(propertyHtml, /collection\('organisationProperties'\)/);
+  assert.match(propertyHtml, /organisationId:activeOrg\.id/);
+  assert.match(propertyHtml, /createdByUid:existing\?existing\.createdByUid:user\.uid/);
+  assert.match(propertyHtml, /Firestore Rules|Security boundary/);
+  assert.doesNotMatch(propertyHtml, /collection\('(commercialProperties|residentialProperties|publicProperties|publicResidentialProperties)'\)/);
+  assert.match(firestore, /function validPropertyRecord\(data\)/);
+  assert.match(firestore, /data\.propertyType in \['Commercial','Residential'\]/);
+  assert.match(appOrganisationsHtml, /href="\/app\/hamlet\/organisation-properties\.html"/);
 });

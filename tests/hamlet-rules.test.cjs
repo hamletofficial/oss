@@ -220,22 +220,22 @@ test('organisation properties and deals enforce tenant membership and explicit s
   await assertSucceeds(getDoc(doc(member, 'organisationDeals/deal-shared')));
   await assertFails(getDoc(doc(outsider, 'organisationDeals/deal-shared')));
 
-  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-created'), {
-    id: 'member-created', organisationId: 'org-private', createdByUid: 'member',
-    visibility: 'organisation', sharedWithUids: [], propertyName: 'New team asset',
-  }));
-  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'), {
-    id: 'forged-tenant', organisationId: 'org-other', createdByUid: 'member',
+  const propertyRecord = (id, creator, overrides = {}) => ({
+    id, organisationId: 'org-private', createdByUid: creator,
     visibility: 'organisation', sharedWithUids: [],
-  }));
-  await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'), {
-    id: 'forged-creator', organisationId: 'org-private', createdByUid: 'owner',
-    visibility: 'organisation', sharedWithUids: [],
-  }));
-  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'), {
-    id: 'member-restricted', organisationId: 'org-private', createdByUid: 'member',
-    visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
-  }));
+    propertyName: 'New team asset', propertyType: 'Commercial', status: 'Available',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...overrides,
+  });
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-created'),
+    propertyRecord('member-created', 'member')));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'),
+    propertyRecord('forged-tenant', 'member', {organisationId: 'org-other'})));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-creator'),
+    propertyRecord('forged-creator', 'owner')));
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/member-restricted'),
+    propertyRecord('member-restricted', 'member', {
+      visibility: 'restricted', sharedWithUids: ['admin'], propertyName: 'Restricted team asset',
+    })));
   await assertSucceeds(getDoc(doc(admin, 'organisationProperties/member-restricted')));
   await assertSucceeds(getDoc(doc(owner, 'organisationProperties/member-restricted')));
   await assertFails(setDoc(doc(member, 'organisationProperties/member-changes-sharing'), {
@@ -365,4 +365,79 @@ test('organisation deal writes enforce member ownership, manager controls and vi
   await assertSucceeds(getDoc(doc(admin, 'organisationDeals/member-shared-deal')));
   await assertSucceeds(getDoc(doc(member, 'organisationDeals/member-shared-deal')));
   await assertFails(getDoc(doc(env.authenticatedContext('colleague').firestore(), 'organisationDeals/member-shared-deal')));
+});
+
+
+test('organisation property portfolio enforces tenant ownership, field validation and role permissions', async () => {
+  const owner = env.authenticatedContext('owner').firestore();
+  const member = env.authenticatedContext('member').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const viewer = env.authenticatedContext('viewer').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+  const property = {
+    id: 'org-asset-1',
+    organisationId: 'org-private',
+    createdByUid: 'member',
+    visibility: 'organisation',
+    sharedWithUids: [],
+    propertyName: '25 Bishopsgate',
+    propertyType: 'Commercial',
+    status: 'Available',
+    address: '25 Bishopsgate',
+    city: 'London',
+    postcode: 'EC2N 4AJ',
+    size: 125000,
+    sizeUnit: 'sq ft',
+    askingPrice: 25000000,
+    askingRent: 1250000,
+    sustainabilityStandard: 'BREEAM',
+    description: 'Organisation-owned commercial asset',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/org-asset-1'), property));
+  await assertSucceeds(getDoc(doc(owner, 'organisationProperties/org-asset-1')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationProperties/org-asset-1')));
+  await assertSucceeds(getDoc(doc(member, 'organisationProperties/org-asset-1')));
+  await assertFails(getDoc(doc(outsider, 'organisationProperties/org-asset-1')));
+
+  await assertSucceeds(setDoc(doc(member, 'organisationProperties/org-asset-1'), {
+    description: 'Updated asset description',
+    updatedAt: serverTimestamp(),
+  }, {merge: true}));
+
+  await assertFails(setDoc(doc(member, 'organisationProperties/org-asset-1'), {
+    visibility: 'restricted',
+    sharedWithUids: ['outsider'],
+    updatedAt: serverTimestamp(),
+  }, {merge: true}));
+
+  await assertSucceeds(setDoc(doc(admin, 'organisationProperties/org-asset-1'), {
+    visibility: 'restricted',
+    sharedWithUids: ['admin'],
+    updatedAt: serverTimestamp(),
+  }, {merge: true}));
+
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-tenant'), {
+    ...property,
+    id: 'forged-tenant',
+    organisationId: 'org-other',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }));
+  await assertFails(setDoc(doc(member, 'organisationProperties/forged-type'), {
+    ...property,
+    id: 'forged-type',
+    propertyType: 'Crypto',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }));
+  await assertFails(setDoc(doc(viewer, 'organisationProperties/viewer-asset'), {
+    ...property,
+    id: 'viewer-asset',
+    createdByUid: 'viewer',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }));
 });

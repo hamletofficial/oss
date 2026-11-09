@@ -854,15 +854,51 @@ service cloud.firestore {
     // owned records. New records carry immutable organisationId/createdByUid and
     // an explicit organisation-wide or restricted sharing policy.
     match /organisationProperties/{propertyId} {
+      function validPropertyRecord(data) {
+        return data.keys().hasAll([
+            'id','organisationId','createdByUid','visibility','sharedWithUids',
+            'propertyName','propertyType','status','createdAt','updatedAt'
+          ])
+          && data.keys().hasOnly([
+            'id','organisationId','createdByUid','visibility','sharedWithUids',
+            'propertyName','propertyType','status','address','city','postcode',
+            'size','sizeUnit','askingPrice','askingRent','sustainabilityStandard',
+            'description','createdAt','updatedAt'
+          ])
+          && data.id == propertyId
+          && data.organisationId is string
+          && data.createdByUid is string
+          && data.propertyName is string
+          && data.propertyName.size() >= 1
+          && data.propertyName.size() <= 180
+          && data.propertyType in ['Commercial','Residential']
+          && data.status in ['Available','Draft','Under Offer','Let','Sold','Withdrawn']
+          && validOrganisationSharing(data)
+          && (!('address' in data) || (data.address is string && data.address.size() <= 300))
+          && (!('city' in data) || (data.city is string && data.city.size() <= 100))
+          && (!('postcode' in data) || (data.postcode is string && data.postcode.size() <= 20))
+          && (!('size' in data) || data.size == null || ((data.size is int || data.size is float) && data.size >= 0 && data.size <= 100000000))
+          && (!('sizeUnit' in data) || data.sizeUnit in ['sq ft','sq m','acres'])
+          && (!('askingPrice' in data) || data.askingPrice == null || ((data.askingPrice is int || data.askingPrice is float) && data.askingPrice >= 0 && data.askingPrice <= 1000000000000))
+          && (!('askingRent' in data) || data.askingRent == null || ((data.askingRent is int || data.askingRent is float) && data.askingRent >= 0 && data.askingRent <= 1000000000000))
+          && (!('sustainabilityStandard' in data) || (data.sustainabilityStandard is string && data.sustainabilityStandard.size() <= 80))
+          && (!('description' in data) || (data.description is string && data.description.size() <= 4000));
+      }
+
       allow read: if canReadOrganisationResource(resource.data);
-      allow create: if request.resource.data.organisationId is string
+      allow create: if request.auth != null
+        && validPropertyRecord(request.resource.data)
         && request.resource.data.createdByUid == request.auth.uid
-        && validOrganisationSharing(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
         && canWriteOrganisationResource(request.resource.data);
-      allow update: if canWriteOrganisationResource(resource.data)
+      allow update: if request.auth != null
+        && validPropertyRecord(request.resource.data)
+        && canWriteOrganisationResource(resource.data)
         && request.resource.data.organisationId == resource.data.organisationId
         && request.resource.data.createdByUid == resource.data.createdByUid
-        && validOrganisationSharing(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
         && (
           isOrganisationManager(resource.data.organisationId)
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'sharedWithUids'])
