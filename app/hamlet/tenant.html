@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1120"><meta name="robots" content="noindex,nofollow">
+<title>Organisation Workspace | Hamlet</title>
+<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions-compat.js"></script>
+<script defer src="/firebase-config.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
+main{width:min(900px,100%);margin:auto;padding:clamp(22px,5vw,54px)}.brand{font:800 22px Arial,sans-serif;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
+.card{margin-top:34px;padding:clamp(22px,4vw,36px);border:1px solid var(--line);border-radius:16px;background:rgba(17,24,39,.96)}
+h1{font:800 clamp(27px,4vw,38px) Arial,sans-serif;letter-spacing:-1px;margin:8px 0 12px}.muted{color:var(--muted);line-height:1.65}
+.status{margin-top:20px;padding:13px 15px;border:1px solid #315b8c;background:#142947;border-radius:10px;line-height:1.55}.status.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.links a{color:#93c5fd;text-decoration:none;font-weight:700}
+</style></head>
+<body><main><a class="brand" href="https://www.hamlet-ai.co.uk/">hamlet<span>.</span></a>
+<section class="card"><p class="muted" id="eyebrow">SECURE ORGANISATION WORKSPACE</p><h1 id="title">Connecting to your organisation…</h1><p class="muted" id="intro">Your identity and active organisation membership are verified before workspace access is granted.</p><div class="status" id="status" role="status" aria-live="polite">Waiting for secure sign-in handoff from Hamlet.</div><div class="links"><a href="https://www.hamlet-ai.co.uk/app/hamlet/organisations.html">Return to organisation administration</a><a href="https://www.hamlet-ai.co.uk/login.html">Sign in to Hamlet</a></div></section></main>
+<script>
+(function(){
+'use strict';
+const MAIN_ORIGINS=['https://www.hamlet-ai.co.uk','https://hamlet-ai.co.uk'];
+const $=id=>document.getElementById(id);
+function status(message,error){$('status').textContent=message;$('status').className='status'+(error?' error':'');}
+function tenantSlug(){
+ const params=new URLSearchParams(location.search);const explicit=params.get('tenantSlug');
+ if(explicit&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(explicit))return explicit;
+ const host=location.hostname.toLowerCase();
+ const match=host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs(?:-staging)?\.hamlet-ai\.co\.uk$/);
+ if(match)return match[1];
+ const path=location.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
+ return path?path[1]:'';
+}
+const slug=tenantSlug();
+if(!slug){status('This organisation address is invalid. Return to Hamlet and select an organisation again.',true);throw new Error('Invalid tenant slug');}
+$('title').textContent=slug.replace(/-/g,' ')+' workspace';
+let exchanged=false;
+async function receive(event){
+ if(exchanged||!MAIN_ORIGINS.includes(event.origin)||event.source!==window.opener)return;
+ const data=event.data||{};
+ if(data.type!=='HAMLET_ORGANISATION_HANDOFF'||data.slug!==slug||typeof data.code!=='string')return;
+ exchanged=true;
+ try{
+  if(!window.firebase||!window.firebaseConfig)throw new Error('Firebase could not be initialised.');
+  if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+  const auth=firebase.auth(),functions=firebase.app().functions('us-central1');
+  status('Verifying the single-use sign-in handoff…');
+  const result=await functions.httpsCallable('exchangeOrganisationHandoffCode')({code:data.code,slug});
+  await auth.signInWithCustomToken(result.data.customToken);
+  const user=auth.currentUser;
+  if(!user)throw new Error('The tenant session could not be established.');
+  await user.reload();
+  if(user.emailVerified!==true)throw new Error('A verified email address is required.');
+  const db=firebase.firestore();
+  const member=await db.collection('organisationMembers').doc(result.data.organisationId+'_'+user.uid).get();
+  const org=await db.collection('organisations').doc(result.data.organisationId).get();
+  if(!member.exists||member.data().status!=='active'||member.data().organisationId!==result.data.organisationId||!org.exists||org.data().status!=='active'||org.data().slug!==slug){
+    await auth.signOut();throw new Error('Active membership could not be verified for this organisation.');
+  }
+  $('title').textContent=org.data().name+' workspace';
+  $('intro').textContent='Signed in as '+(user.email||'a Hamlet member')+'. Your current role is '+member.data().role+'.';
+  status('Secure tenant session established. Your organisation membership has been verified.');
+  window.opener.postMessage({type:'HAMLET_ORGANISATION_HANDOFF_COMPLETE',slug},event.origin);
+  const destination='https://www.hamlet-ai.co.uk/app/hamlet/organisations.html';
+  const panel=document.createElement('a');panel.href=destination;panel.textContent='Open organisation tools';panel.style.cssText='display:inline-flex;margin-top:18px;padding:11px 15px;border-radius:9px;background:#1d4ed8;color:#fff;text-decoration:none;font-weight:700';
+  $('status').after(panel);
+ }catch(error){console.error('Organisation sign-in handoff failed:',error);status(error.message||'The secure handoff failed. Return to Hamlet and try again.',true);exchanged=false;}
+}
+window.addEventListener('message',receive);
+if(window.opener){window.opener.postMessage({type:'HAMLET_ORGANISATION_HANDOFF_READY',slug},MAIN_ORIGINS[0]);}
+else{status('Open this organisation workspace from the signed-in Hamlet organisation selector. Direct sign-in is not enabled.',true);}
+})();
+</script></body></html>
