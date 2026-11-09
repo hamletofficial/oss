@@ -1001,3 +1001,4 @@ exports.getSuperAdminAccountMetrics = onCall({
 // Register the broker rankings Firestore trigger.
 Object.assign(exports, require("./hamlet-rankings"));
 Object.assign(exports, require("./hamlet-organisations"));
+Object.assign(exports, require("./hamlet-organisation-audit"));

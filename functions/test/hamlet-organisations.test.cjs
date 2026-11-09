@@ -183,6 +183,72 @@ test("role changes and member removal preserve administrator and owner boundarie
   assert.equal(removed.data().status, "removed");
 });
 
+
+test("trusted organisation deal and property triggers append immutable tenant-scoped audit events", async () => {
+  const tag = suffix();
+  const ownerUid = "audit-owner-" + tag;
+  const organisation = await invoke(
+    "createOrganisation",
+    {name: "Operational Audit Test", slug: "operational-audit-" + tag},
+    identity(ownerUid, "audit-owner@example.com")
+  );
+  const orgId = organisation.organisationId;
+  const dealId = "deal-" + tag;
+  const propertyId = "property-" + tag;
+  const audit = require("../hamlet-organisation-audit");
+
+  const dealRef = db.collection("organisationDeals").doc(dealId);
+  const dealBeforeCreate = await dealRef.get();
+  await dealRef.set({
+    id: dealId, organisationId: orgId, createdByUid: ownerUid,
+    visibility: "organisation", sharedWithUids: [],
+    name: "Audit Deal", stage: "LOI Issued", value: 100000,
+  });
+  const dealAfterCreate = await dealRef.get();
+  await audit.recordOrganisationDealActivity.run({
+    id: "deal-create-" + tag, authId: ownerUid, authType: "USER",
+    params: {dealId}, data: {before: dealBeforeCreate, after: dealAfterCreate},
+  });
+  const dealCreated = await db.collection("organisationActivity")
+    .where("resourceId", "==", dealId).get();
+  assert.equal(dealCreated.size, 1);
+  assert.equal(dealCreated.docs[0].data().action, "organisation.deal_created");
+  assert.equal(dealCreated.docs[0].data().organisationId, orgId);
+  assert.equal(dealCreated.docs[0].data().actorUid, ownerUid);
+
+  const dealBeforeUpdate = await dealRef.get();
+  await dealRef.update({stage: "Due Diligence"});
+  const dealAfterUpdate = await dealRef.get();
+  await audit.recordOrganisationDealActivity.run({
+    id: "deal-update-" + tag, authId: ownerUid, authType: "USER",
+    params: {dealId}, data: {before: dealBeforeUpdate, after: dealAfterUpdate},
+  });
+  const stageEvent = await db.collection("organisationActivity")
+    .where("resourceId", "==", dealId)
+    .where("action", "==", "organisation.deal_stage_changed").get();
+  assert.equal(stageEvent.size, 1);
+  assert.deepEqual(stageEvent.docs[0].data().changedFields, ["stage"]);
+
+  const propertyRef = db.collection("organisationProperties").doc(propertyId);
+  const propertyBefore = await propertyRef.get();
+  await propertyRef.set({
+    id: propertyId, organisationId: orgId, createdByUid: ownerUid,
+    visibility: "organisation", sharedWithUids: [],
+    propertyName: "Audit Property", propertyType: "Commercial",
+    status: "Available", sustainabilityStandard: "Passivhaus",
+  });
+  const propertyAfter = await propertyRef.get();
+  await audit.recordOrganisationPropertyActivity.run({
+    id: "property-create-" + tag, authId: ownerUid, authType: "USER",
+    params: {propertyId}, data: {before: propertyBefore, after: propertyAfter},
+  });
+  const propertyEvent = await db.collection("organisationActivity")
+    .where("resourceId", "==", propertyId).get();
+  assert.equal(propertyEvent.size, 1);
+  assert.equal(propertyEvent.docs[0].data().action, "organisation.property_created");
+  assert.equal(propertyEvent.docs[0].data().resourceType, "property");
+});
+
 test.after(async () => {
   await db.terminate();
 });
