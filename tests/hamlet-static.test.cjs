@@ -217,15 +217,15 @@ test('organisation property portfolio is authenticated, tenant-scoped and separa
 
 
 test('organisation document workspace JavaScript parses and uses tenant-scoped Storage paths', () => {
-  const blocks = [...organisationFilesHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-    .filter((match) => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+  const blocks = [...organisationFilesHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
   assert.ok(blocks.length >= 1, 'expected organisation document workspace application script');
   for (const [index, block] of blocks.entries()) {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-files-inline-' + index + '.js' }));
   }
-  assert.match(organisationFilesHtml, /firebase-storage-compat\\.js/);
-  assert.match(organisationFilesHtml, /organisationDocuments\\/\+activeOrg\\.organisationId/);
+  assert.match(organisationFilesHtml, /firebase-storage-compat\.js/);
+  assert.match(organisationFilesHtml, /organisationDocuments\/\+activeOrg\.organisationId/);
   assert.match(organisationFilesHtml, /organisationResourceShares/);
-  assert.match(organisationFilesHtml, /15\\*1024\\*1024/);
+  assert.match(organisationFilesHtml, /15\*1024\*1024/);
   assert.match(organisationFilesHtml, /getDownloadURL/);
 });
