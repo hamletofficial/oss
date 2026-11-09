@@ -240,7 +240,7 @@ test('authenticated organisation workspace loads only active memberships and swi
     await page.getByText('Example Organisation', {exact: true}).first().waitFor({state: 'visible', timeout: 10000});
     assert.equal(await page.locator('#roleBadge').textContent(), 'owner');
     assert.equal(await page.locator('#orgSelect option').count(), 2);
-    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant address: example-org.platform.hamlet-ai.co.uk');
+    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant address: example-org.orgs.hamlet-ai.co.uk');
 
     await page.locator('#orgSelect').selectOption('org-two');
     assert.equal(await page.locator('#selectedName').textContent(), 'Second Organisation');
@@ -254,7 +254,7 @@ test('authenticated organisation workspace loads only active memberships and swi
 test('tenant hostname locks the workspace to the matching active organisation membership', async () => {
   const browser = await chromium.launch({
     headless: true,
-    args: ['--host-resolver-rules=MAP example-org.platform.hamlet-ai.co.uk 127.0.0.1']
+    args: ['--host-resolver-rules=MAP example-org.orgs.hamlet-ai.co.uk 127.0.0.1']
   });
   try {
     const page = await browser.newPage();
@@ -309,12 +309,12 @@ test('tenant hostname locks the workspace to the matching active organisation me
     await page.route('**/firebase-config.js', route => route.fulfill({status: 200, contentType: 'application/javascript', body: mockFirebase}));
 
     const port = server.address().port;
-    await page.goto('http://example-org.platform.hamlet-ai.co.uk:' + port + '/app/hamlet/organisations.html', {waitUntil: 'domcontentloaded'});
+    await page.goto('http://example-org.orgs.hamlet-ai.co.uk:' + port + '/app/hamlet/organisations.html', {waitUntil: 'domcontentloaded'});
     await page.locator('#app').waitFor({state: 'visible', timeout: 10000});
     await page.getByText('Example Organisation', {exact: true}).first().waitFor({state: 'visible', timeout: 10000});
     assert.equal(await page.locator('#orgSelect option').count(), 1);
     assert.equal(await page.locator('#orgSelect').isDisabled(), true);
-    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant address: example-org.platform.hamlet-ai.co.uk');
+    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant address: example-org.orgs.hamlet-ai.co.uk');
     assert.equal(await page.locator('#roleBadge').textContent(), 'owner');
   } finally {
     await browser.close();
