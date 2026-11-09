@@ -306,3 +306,45 @@ These collections are a new data contract only. Existing `hamletDeals`, `commerc
 ### Storage upload rollout gate — 8 November 2026
 
 Organisation document Storage Rules are deliberately deferred from this branch until the emulator accepts a separately validated ruleset. The feature branch currently retains the clean `main` Storage Rules baseline; organisation document metadata and tenant access remain governed by the Firestore rules. No organisation document upload path is enabled by this change. Do not enable client uploads or deploy organisation Storage permissions until dedicated Storage Emulator tests pass for both deal and property documents, including cross-tenant denial, restricted sharing, inactive membership, MIME/size limits, and delete/update behaviour.
+
+
+## Authentication handoff and tenant routing implementation — 9 November 2026
+
+The feature branch `feat/organisations-auth-handoff-routing` adds the first implementation of the cross-origin session bridge and tenant router.
+
+### Handoff protocol
+
+- The signed-in main-origin page opens the selected tenant hostname in a separate tab.
+- The tenant page sends a readiness message to the exact main Hamlet origin. The main page checks both `event.origin` and `event.source`.
+- A verified main-origin user requests a 256-bit random, single-use handoff code from `createOrganisationHandoffCode`. The callable verifies the organisation is active, the requested slug matches the organisation record, and the caller has active membership.
+- Only a SHA-256 hash of the code is stored in `organisationHandoffCodes`; the raw code is sent to the tenant tab using origin-restricted `postMessage`, never in a URL, cookie, browser storage, or log.
+- `exchangeOrganisationHandoffCode` validates the code, slug, organisation lifecycle and active membership in a Firestore transaction, then consumes the code before returning a Firebase custom token to the tenant tab.
+- The tenant tab signs in using the custom token and independently reloads and verifies the active membership and organisation before continuing.
+- The code expires after 90 seconds. Replays and slug substitution are rejected. Tenant Firestore and Storage rules remain the final access-control boundary; custom claims and the hostname are not sufficient authority.
+- If a tenant session expires, the Worker redirects the user to central Hamlet sign-in. The user then selects the organisation and repeats the handoff.
+
+### Routing implementation
+
+- `worker/hamlet-organisations-router` is an isolated Worker and Wrangler configuration.
+- Production host resolution recognises only `{slug}.orgs.hamlet-ai.co.uk`. Reserved and malformed slugs are rejected.
+- Staging can be exercised on the Worker `workers.dev` hostname using `/tenant/{slug}`; a short-lived, HttpOnly, Secure, SameSite=Lax cookie retains the staging tenant route while navigating within the workspace.
+- The Worker proxies tenant-origin paths to the existing Hamlet Pages origin, preserving the tenant browser origin so Firebase's tenant session remains available to tenant workspace pages.
+- The Worker adds no production route declaration and makes no DNS changes. Production wildcard DNS and Worker route binding remain a separately gated release action.
+- The directory hostname `organisations.hamlet-ai.co.uk` remains separate from tenant hostnames.
+
+### Test and release gates
+
+Automated callable tests are added for verified membership, code hashing, slug binding, expiry, consumption and replay. CI must pass the organisation callable suite, Firestore/Storage rules suites, browser smoke tests and static checks.
+
+Before enabling a production route, perform staging acceptance tests with at least two verified test accounts and two organisations:
+
+1. Main-origin sign-in followed by handoff to the correct tenant; verify the same Firebase UID on both origins.
+2. Member and owner/admin roles; confirm the correct role is displayed and permitted operations match the role.
+3. Wrong-tenant slug substitution, unknown slug, reserved slug, expired code, replayed code and non-member handoff all fail closed.
+4. Remove or suspend a member after issuing a code but before exchange; exchange must fail.
+5. Navigate from tenant root to deals, properties, files, teams and administration; verify the session remains on the tenant origin.
+6. Sign out or expire the session; protected pages must deny access and return the user to central sign-in.
+7. Attempt cross-tenant Firestore reads/writes and Storage reads/writes using the second test account; all must be denied.
+8. Confirm ordinary main-site sign-in, individual deals, personal property records and public listing journeys remain unchanged.
+
+Do not treat a successful Worker preview or a successful custom-token exchange as proof of full tenant isolation. Production launch requires successful staging acceptance, Firebase Auth domain review, live callable deployment verification, and explicit approval for the production DNS/Worker route change.
