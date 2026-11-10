@@ -51,6 +51,10 @@ function sendOrganisationInvitationEmail(invitation) {
     HtmlBody: htmlBody,
     MessageStream: "outbound",
   });
+  const serverToken = postmarkOutboundToken.value();
+  if (!serverToken || !String(serverToken).trim()) {
+    return Promise.reject(new Error("POSTMARK_OUTBOUND_TOKEN is not configured for this function."));
+  }
   return new Promise((resolve, reject) => {
     const req = https.request({
       hostname: "api.postmarkapp.com",
@@ -59,24 +63,31 @@ function sendOrganisationInvitationEmail(invitation) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "X-Postmark-Server-Token": postmarkOutboundToken.value(),
+        "X-Postmark-Server-Token": String(serverToken).trim(),
         "Content-Length": Buffer.byteLength(payload),
       },
     }, (res) => {
       let responseBody = "";
+      res.setEncoding("utf8");
       res.on("data", (chunk) => { responseBody += chunk; });
       res.on("end", () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) resolve();
-        else reject(new Error("Postmark " + res.statusCode + ": " + responseBody));
+        let parsed;
+        try { parsed = responseBody ? JSON.parse(responseBody) : {}; } catch (error) { parsed = {}; }
+        if (res.statusCode >= 200 && res.statusCode < 300 && parsed.ErrorCode === 0) {
+          resolve({messageId: parsed.MessageID || null, submittedAt: parsed.SubmittedAt || null});
+          return;
+        }
+        const providerMessage = String(parsed.Message || responseBody || "No response body").slice(0, 300);
+        const providerCode = parsed.ErrorCode === undefined ? "unknown" : parsed.ErrorCode;
+        reject(new Error("Postmark rejected the invitation (HTTP " + res.statusCode + ", code " + providerCode + "): " + providerMessage));
       });
     });
-    req.setTimeout(10000, () => req.destroy(new Error("Postmark request timed out.")));
+    req.setTimeout(15000, () => req.destroy(new Error("Postmark request timed out after 15 seconds.")));
     req.on("error", reject);
     req.write(payload);
     req.end();
   });
 }
-
 function getDb() {
   try { admin.app(); } catch (err) { admin.initializeApp(); }
   return getFirestore(admin.app());
