@@ -40,6 +40,112 @@ The repository evolves frequently. Treat these paths as a navigational overview 
 
 Feature availability may depend on authentication, verification state, Firebase configuration, deployed functions and external service credentials.
 
+## Hamlet Organisations
+
+**Hamlet Organisations** adds organisation-scoped workspaces for property firms, broker teams and other professional groups. It separates a firm's shared operational records and membership governance from each broker's personal Hamlet account.
+
+### User-facing routes
+
+| Route | Purpose |
+|---|---|
+| `/organisations.html` | Organisation administration: create an organisation, view memberships, manage invitations and roles, and accept an invitation. |
+| `/app/hamlet/organisations.html` | Authenticated organisation workspace and organisation switcher. |
+| `/app/hamlet/organisation-deals.html` | Organisation-owned deal records and shared pipeline. |
+| `/app/hamlet/organisation-properties.html` | Organisation-owned commercial and residential property portfolio. |
+| `/app/hamlet/organisation-files.html` | Documents and assets attached to organisation deals and properties. |
+| `/app/hamlet/organisation-teams.html` | Team creation, assignments and restricted deal/property permissions. |
+| `/app/hamlet/organisation-activity.html` | Administrative audit history for organisation owners and administrators. |
+| `/app/hamlet/organisation-analytics.html` | Aggregate membership, team, deal and property counts and pipeline breakdowns. |
+| `/app/hamlet/organisation-association.html` | Explicitly copy an eligible personal deal or property into an organisation as a restricted snapshot. |
+| `/app/hamlet/tenant.html` | Secure organisation sign-in handoff used by the tenant authentication flow. |
+
+These routes require a valid signed-in Hamlet account and active organisation membership where applicable. Email verification is required for organisation access. Privileged actions are enforced by trusted backend operations and Firebase Security Rules, not by hiding interface controls.
+
+### Firebase callable operations
+
+The organisation backend is implemented in `functions/hamlet-organisations.js` and exports the following Firebase callable functions in the `us-central1` region. They are invoked through Firebase Functions' callable HTTPS transport (the client SDK's `httpsCallable` interface); they are **not** independent REST URL routes.
+
+| Callable function | Purpose |
+|---|---|
+| `createOrganisation` | Create an organisation, reserve its unique slug and establish the creator as owner. |
+| `requestOrganisationMembership` | Submit a request to join an organisation. |
+| `reviewOrganisationMembershipRequest` | Approve or decline a pending membership request. |
+| `createOrganisationInvitation` | Issue an invitation for a specified email address and organisation role. |
+| `acceptOrganisationInvitation` | Accept a valid invitation for the invited account. |
+| `revokeOrganisationInvitation` | Revoke a pending invitation. |
+| `changeOrganisationMemberRole` | Change an active member's organisation role, subject to role and ownership safeguards. |
+| `removeOrganisationMember` | Remove a member and deactivate their active team assignments. |
+| `leaveOrganisation` | Allow a member to leave an organisation, subject to ownership safeguards. |
+| `updateOrganisationProfile` | Update organisation profile fields and its approved public directory projection. |
+| `submitOrganisationVerification` | Submit organisation registration details for review. |
+| `getOrganisationVerificationStatus` | Retrieve the caller's organisation verification status and report where authorised. |
+| `listOrganisationVerificationRequests` | Retrieve the platform verification review queue for authorised platform administrators. |
+| `reviewOrganisationVerification` | Approve or reject an organisation verification submission. |
+| `copyPersonalResourceToOrganisation` | Copy an eligible personal deal or property into the organisation as a restricted snapshot. |
+| `deleteOrganisationDocument` | Delete an organisation document and its associated stored file, subject to resource access checks. |
+| `getOrganisationAnalytics` | Return aggregate organisation membership, team, deal and property metrics for authorised managers. |
+
+The callable functions are the backend operations currently exported by the organisation service. Team administration also uses the callable operations `createOrganisationTeam`, `updateOrganisationTeam`, `setOrganisationTeamMember` and `archiveOrganisationTeam`; those are implemented by the team service in the Functions codebase. Confirm the deployed Functions inventory and target Firebase project before relying on any callable in a live environment.
+
+### Data model and access boundaries
+
+The organisation feature uses dedicated Firestore collections rather than reusing personal CRM records:
+
+| Collection | Purpose |
+|---|---|
+| `organisations` | Private organisation records and lifecycle state. |
+| `organisationSlugs` | Unique organisation URL-name reservations. |
+| `organisationDirectory` | Whitelisted public organisation profile projection. |
+| `organisationMembers` | Organisation membership, role and active status. |
+| `organisationInvitations` | Invitation records and lifecycle state. |
+| `organisationMembershipRequests` | Requests to join an organisation. |
+| `organisationVerificationRequests` | Private business-registration verification submissions and review data. |
+| `organisationDeals` | Organisation-owned deal and pipeline records. |
+| `organisationProperties` | Organisation-owned commercial and residential property records. |
+| `organisationDocuments` | Metadata for files linked to organisation resources. |
+| `organisationTeams` | Organisation teams and their permitted capabilities. |
+| `organisationTeamMembers` | Team membership assignments. |
+| `organisationResourceShares` | Explicit user-level access grants for restricted organisation resources. |
+| `organisationDealEvents` | Deal-related events associated with organisation resources. |
+| `organisationActivity` | Trusted organisation administrative audit events. |
+
+Organisation resource visibility supports organisation-wide and restricted access. Restricted deals and properties can be shared with named members or authorised teams, subject to the applicable resource permissions. Team permissions currently cover assigned deal and property read/write access; document and roster permissions are not enabled as team capabilities.
+
+Documents are stored under the tenant-scoped Storage path:
+
+```text
+organisationDocuments/{organisationId}/{resourceType}/{resourceId}/{documentId}/{fileName}
+```
+
+The organisation slug is reserved for identity and future addressing. A reserved slug does **not** mean that a tenant subdomain has been provisioned or activated.
+
+### Roles and governance
+
+Organisation membership roles include owner, administrator, manager and member-level roles (including viewer access). Owners and administrators manage organisation settings, membership and invitations. Manager/member capabilities are constrained by the resource's sharing policy and Firebase Security Rules. The owner role is protected by lifecycle safeguards; for example, an owner cannot simply leave while the organisation would be left without its required ownership.
+
+The organisation activity history is read-only to clients and restricted to owners and administrators. Trusted backend operations write administrative events. The current audit scope covers organisation creation, invitations, membership administration and verification-related actions; resource-level deal/property change history is a later increment.
+
+### Personal data and organisation separation
+
+- Personal deals and properties remain in their personal collections unless a user explicitly copies an eligible record into an organisation.
+- The copy operation creates a distinct, restricted organisation snapshot; it does not move, mutate or automatically share the source record.
+- Organisation-owned deals and properties are stored in `organisationDeals` and `organisationProperties`, not the personal CRM collections or public listing projections.
+- Organisation files and images are tenant-scoped and do not become public listing media by virtue of upload.
+- The currently implemented slug reservation does not provision a dedicated tenant hostname or subdomain.
+
+### Development and validation
+
+The Functions package defines an organisation test suite:
+
+```bash
+cd functions
+npm run test:organisations
+```
+
+This runs the organisation service and secure handoff tests. Review the package scripts and local Firebase Emulator requirements before running the wider backend test suite. For changes to access control or data structures, inspect and test the corresponding rules in `firestore.rules` and `storage.rules` as well as the client pages and callable functions.
+
+Before deploying, verify the intended Firebase project and Functions codebase. A source file or callable present in this repository does not by itself prove that the corresponding function has been deployed to the target project.
+
 ## Technology and services
 
 The repository includes a largely static HTML/CSS/JavaScript website and uses Firebase services for features such as authentication, Firestore data and file storage. It also contains Firebase Cloud Functions, worker/gateway code, and desktop-related assets. Inspect the relevant subdirectory configuration to confirm the runtime, environment variables and deployment process for a specific component.
