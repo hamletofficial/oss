@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 const {Timestamp, FieldValue} = require("firebase-admin/firestore");
 const {HttpsError, onCall} = require("firebase-functions/v2/https");
 
-const REGION = "us-central1";
+const REGION = "europe-west2";
 const CODE_TTL_MS = 90 * 1000;
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
