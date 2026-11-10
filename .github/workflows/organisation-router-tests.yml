@@ -1,0 +1,28 @@
+name: Organisation Router Tests
+
+on:
+  pull_request:
+    paths:
+      - "worker/hamlet-organisations-router/**"
+      - ".github/workflows/organisation-router-tests.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "worker/hamlet-organisations-router/**"
+
+permissions:
+  contents: read
+
+jobs:
+  router-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker/hamlet-organisations-router
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test

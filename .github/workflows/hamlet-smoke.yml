@@ -6,11 +6,21 @@ on:
     paths:
       - 'app/hamlet/index.html'
       - 'organisations.html'
+      - 'organisation-directory.html'
       - 'app/hamlet/organisations.html'
+      - 'app/hamlet/organisation-files.html'
+      - 'app/hamlet/organisation-association.html'
+      - 'app/hamlet/organisation-activity.html'
+      - 'app/hamlet/organisation-analytics.html'
+      - 'app/hamlet/organisation-verification-admin.html'
+      - 'worker/hamlet-organisations-router/**'
+      - 'firestore.indexes.json'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisation-audit.js'
       - 'app/hamlet/organisation-activity.html'
+      - 'app/hamlet/organisation-analytics.html'
+      - 'app/hamlet/organisation-verification-admin.html'
       - 'app/hamlet/organisation-deals.html'
       - 'app/hamlet/organisation-properties.html'
       - 'functions/hamlet-organisations.js'
@@ -27,7 +37,14 @@ on:
     paths:
       - 'app/hamlet/index.html'
       - 'organisations.html'
+      - 'organisation-directory.html'
       - 'app/hamlet/organisations.html'
+      - 'app/hamlet/organisation-files.html'
+      - 'app/hamlet/organisation-association.html'
+      - 'app/hamlet/organisation-activity.html'
+      - 'app/hamlet/organisation-analytics.html'
+      - 'worker/hamlet-organisations-router/**'
+      - 'firestore.indexes.json'
       - 'messages.html'
       - 'functions/index.js'
       - 'functions/hamlet-organisations.js'
@@ -83,7 +100,7 @@ jobs:
       - name: Install isolated Firebase test dependencies
         run: npm install --no-save --ignore-scripts --package-lock=false firebase-tools firebase @firebase/rules-unit-testing
       - name: Test Firestore and Storage rules in emulators
-        run: npx firebase-tools emulators:exec --only firestore,storage --project demo-hamlet-rules "node --test tests/hamlet-rules.test.cjs"
+        run: npx firebase-tools emulators:exec --only firestore,storage --project demo-hamlet-functions "node --test tests/hamlet-rules.test.cjs"
 
   organisation-callables:
     runs-on: ubuntu-latest

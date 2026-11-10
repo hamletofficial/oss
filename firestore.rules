@@ -1098,9 +1098,7 @@ service cloud.firestore {
     // remains in /organisations and is readable only by active members.
     match /organisationDirectory/{organisationId} {
       allow read: if resource.data.status == 'active'
-        && resource.data.isPublic == true
-        && exists(/databases/$(database)/documents/organisations/$(resource.data.organisationId))
-        && get(/databases/$(database)/documents/organisations/$(resource.data.organisationId)).data.status == 'active';
+        && resource.data.isPublic == true;
       allow create, update, delete: if false;
     }
 
@@ -1120,6 +1118,20 @@ service cloud.firestore {
       allow read: if request.auth != null
         && (resource.data.requesterUid == request.auth.uid
           || canManageOrganisation(resource.data.organisationId));
+      allow create, update, delete: if false;
+    }
+
+    // Business registration evidence is private to organisation managers and
+    // the designated platform super administrator. Trusted callables only.
+    match /organisationVerificationRequests/{organisationId} {
+      allow read: if isSuperAdmin() || canManageOrganisation(resource.data.organisationId);
+      allow create, update, delete: if false;
+    }
+
+    // Provenance links for explicit personal-record copies are private to the
+    // organisation's owners and administrators; source data is never rewritten.
+    match /organisationResourceImports/{importId} {
+      allow read: if canManageOrganisation(resource.data.organisationId);
       allow create, update, delete: if false;
     }
 

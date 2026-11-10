@@ -19,7 +19,7 @@ EXCLUDED_DIRS = {
     "authentication", "app", "functions", "public", "onfido", "oauth",
 }
 EXCLUDED_FILES = {
-    "admin.html", "login.html", "editprofile.html", "invoice.html",
+    "admin.html", "insights.html", "login.html", "editprofile.html", "invoice.html",
     "search.html", "404.html", "archive.html", "dashboard.html",
     "live.html", "portfolio.html", "residential.html", "resi-resources.html",
     "resources.html", "members.html", "directory.html", "profile.html",

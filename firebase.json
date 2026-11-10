@@ -56,11 +56,41 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "public",
+    "public": ".",
     "ignore": [
       "firebase.json",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "storage.rules",
+      "database.rules.json",
+      "remoteconfig.template.json",
+      "apphosting.yaml",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "functions/**",
+      "sagat/**",
+      "ryu/**",
+      "ken/**",
+      "worker/**",
+      "hamlet-ai-gateway/**",
+      "tests/**",
+      "scripts/**",
+      "dataconnect/**",
+      "extensions/**",
+      "desktop/**",
+      "src/**"
+      ,"app/firebase.json"
+      ,"app/.firebaserc"
+      ,"app/.gitignore"
+      ,"app/package.json"
+      ,"app/package-lock.json"
+      ,"app/server.js"
+      ,"app/*.rules"
+      ,"app/*.json"
+      ,"app/*.sql"
+      ,"app/functions/**"
+      ,"app/dataconnect/**"
+      ,"app/node_modules/**"
     ],
     "rewrites": [
       {

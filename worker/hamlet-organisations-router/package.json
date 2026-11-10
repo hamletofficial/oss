@@ -1,0 +1,8 @@
+{
+  "name": "hamlet-organisations-router",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

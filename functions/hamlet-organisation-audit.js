@@ -134,6 +134,53 @@ exports.recordOrganisationPropertyActivity = onDocumentWrittenWithAuthContext({
     "propertyName");
 });
 
+/** Immutable server-authored file lifecycle history; filenames and file contents stay out of audit events. */
+exports.recordOrganisationDocumentActivity = onDocumentWrittenWithAuthContext({
+  document: "organisationDocuments/{documentId}",
+  region: "us-central1",
+  timeoutSeconds: 60,
+  memory: "256MiB",
+  retry: true,
+}, async (event) => {
+  const change = event.data;
+  if (!change || (!change.before.exists && !change.after.exists)) return;
+  const before = change.before.exists ? change.before.data() || {} : {};
+  const after = change.after.exists ? change.after.data() || {} : {};
+  if (change.before.exists && change.after.exists) return;
+  const file = change.after.exists ? after : before;
+  const organisationId = clean(file.organisationId, 128);
+  const resourceId = clean(file.resourceId, 128);
+  const resourceType = clean(file.resourceType, 20);
+  if (!organisationId || !resourceId || !["deal", "property"].includes(resourceType)) return;
+  const action = change.after.exists ? "uploaded" : "deleted";
+  const actor = await resolveActor(event, file.deletionRequestedByUid || file.createdByUid);
+  const id = eventDocumentId("document", event.params.documentId || resourceId, event);
+  const record = {
+    id,
+    organisationId,
+    actorUid: actor.actorUid,
+    actorName: actor.actorName,
+    actorEmail: actor.actorEmail,
+    actorType: actor.actorType,
+    action: "organisation.document_" + action,
+    resourceType: "document",
+    resourceId,
+    parentResourceType: resourceType,
+    documentId: clean(event.params.documentId, 128),
+    title: "Organisation file",
+    summary: action === "uploaded" ? "A document or asset was uploaded" : "A document or asset was deleted",
+    changedFields: ["file_metadata"],
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  try {
+    await getDb().collection("organisationActivity").doc(id).create(record);
+  } catch (err) {
+    if (err && (err.code === 6 || err.code === "already-exists")) return;
+    console.error("Unable to record organisation document activity:", id, err);
+    throw err;
+  }
+});
+
 
 /** Immutable server-authored history for explicit per-member sharing grants. */
 exports.recordOrganisationResourceShareActivity = onDocumentWrittenWithAuthContext({
