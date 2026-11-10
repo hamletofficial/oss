@@ -112,7 +112,7 @@ async function recordOperationalChange(event, resourceType, tracked, titleField)
 
 exports.recordOrganisationDealActivity = onDocumentWrittenWithAuthContext({
   document: "organisationDeals/{dealId}",
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
   retry: true,
@@ -124,7 +124,7 @@ exports.recordOrganisationDealActivity = onDocumentWrittenWithAuthContext({
 
 exports.recordOrganisationPropertyActivity = onDocumentWrittenWithAuthContext({
   document: "organisationProperties/{propertyId}",
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
   retry: true,
@@ -137,7 +137,7 @@ exports.recordOrganisationPropertyActivity = onDocumentWrittenWithAuthContext({
 /** Immutable server-authored file lifecycle history; filenames and file contents stay out of audit events. */
 exports.recordOrganisationDocumentActivity = onDocumentWrittenWithAuthContext({
   document: "organisationDocuments/{documentId}",
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
   retry: true,
@@ -185,7 +185,7 @@ exports.recordOrganisationDocumentActivity = onDocumentWrittenWithAuthContext({
 /** Immutable server-authored history for explicit per-member sharing grants. */
 exports.recordOrganisationResourceShareActivity = onDocumentWrittenWithAuthContext({
   document: "organisationResourceShares/{shareId}",
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
   retry: true,
