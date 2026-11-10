@@ -41,7 +41,7 @@ function auditRef(db, orgId) {
 }
 
 exports.transferOrganisationOwnership = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -96,7 +96,7 @@ exports.transferOrganisationOwnership = onCall({
 });
 
 exports.setOrganisationLifecycleStatus = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
