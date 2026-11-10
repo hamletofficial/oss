@@ -110,7 +110,7 @@
     const org=organisations.find(item=>item.id===id);
     if(!org)return;
     $('selectedName').textContent=org.name;
-    $('selectedSlug').textContent='Organisation slug: '+org.slug+' · tenant hostname not yet provisioned';
+    $('selectedSlug').textContent='Organisation slug: '+org.slug+' · dedicated workspace available through the staging router';
     $('roleBadge').textContent=org.role;
     $('pageTitle').textContent=org.name+' workspace';
     $('orgSelect').value=org.id;

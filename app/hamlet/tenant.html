@@ -26,6 +26,10 @@ h1{font:800 clamp(27px,4vw,38px) Arial,sans-serif;letter-spacing:-1px;margin:8px
 'use strict';
 const MAIN_ORIGINS=['https://www.hamlet-ai.co.uk','https://hamlet-ai.co.uk','https://wale-491805--pr82-feat-organisations-h-gon23gzd.web.app'];
 const $=id=>document.getElementById(id);
+// The tenant page can be opened through a cross-origin Worker proxy. Keep
+// Firebase bootstrap available if the separately hosted config script fails.
+const FIREBASE_CONFIG={apiKey:'AIzaSyChWtcZbStdG0ep7FdL8OG6ESgSXtzDZ1k',authDomain:'wale-491805.firebaseapp.com',projectId:'wale-491805',storageBucket:'wale-491805.firebasestorage.app',messagingSenderId:'753131375199',appId:'1:753131375199:web:87d3eef7edda42d640a9ea'};
+function firebaseConfiguration(){return window.firebaseConfig||FIREBASE_CONFIG;}
 function status(message,error){$('status').textContent=message;$('status').className='status'+(error?' error':'');}
 function tenantSlug(){
  const params=new URLSearchParams(location.search);const explicit=params.get('tenantSlug');
@@ -46,8 +50,8 @@ async function receive(event){
  if(data.type!=='HAMLET_ORGANISATION_HANDOFF'||data.slug!==slug||typeof data.code!=='string')return;
  exchanged=true;
  try{
-  if(!window.firebase||!window.firebaseConfig)throw new Error('Firebase could not be initialised.');
-  if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
+  if(!window.firebase)throw new Error('Firebase SDK could not be loaded. Check the connection and try again.');
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfiguration());
   const auth=firebase.auth(),functions=firebase.app().functions('europe-west2');
   status('Verifying the single-use sign-in handoff…');
   const result=await functions.httpsCallable('exchangeOrganisationHandoffCode')({code:data.code,slug});
