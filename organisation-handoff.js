@@ -36,7 +36,7 @@ function setup(){
    if(!user)throw new Error('Your Hamlet session has expired. Sign in again.');
    await user.reload();
    if(user.emailVerified!==true)throw new Error('Verify your email address before opening an organisation workspace.');
-   const functions=firebase.app().functions('us-central1');
+   const functions=firebase.app().functions('europe-west2');
    const result=await functions.httpsCallable('createOrganisationHandoffCode')({organisationId:pending.org.id,slug:pending.org.slug});
    if(!pending)return;
    pending.popup.postMessage({type:'HAMLET_ORGANISATION_HANDOFF',slug:pending.org.slug,code:result.data.code},pending.origin);
