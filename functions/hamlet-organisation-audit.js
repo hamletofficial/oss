@@ -115,7 +115,7 @@ exports.recordOrganisationDealActivity = onDocumentWrittenWithAuthContext({
   region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
-  retry: true,
+  retry: false,
 }, async (event) => {
   await recordOperationalChange(event, "deal",
     ["name", "type", "stage", "value", "client", "property", "owner", "notes", "visibility", "sharedWithUids"],
