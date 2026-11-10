@@ -130,11 +130,20 @@
   }
   async function loadMemberships(){
     const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
-    const active=snap.docs.map(d=>d.data()).filter(m=>m.status==='active');
-    const records=await Promise.all(active.map(async m=>{
-      const orgSnap=await db.collection('organisations').doc(m.organisationId).get();
-      if(!orgSnap.exists||orgSnap.data().status!=='active')return null;
-      return {...orgSnap.data(),id:orgSnap.id,role:m.role};
+    const active=snap.docs.map(d=>({id:d.id,data:d.data()||{}}))
+      .filter(item=>item.data.status==='active'&&typeof item.data.organisationId==='string'&&item.data.organisationId.trim());
+    const records=await Promise.all(active.map(async item=>{
+      const membership=item.data;
+      try{
+        const orgSnap=await db.collection('organisations').doc(membership.organisationId.trim()).get();
+        if(!orgSnap.exists)return null;
+        const org=orgSnap.data()||{};
+        if(org.status!=='active')return null;
+        return {...org,id:orgSnap.id,role:membership.role||'member'};
+      }catch(error){
+        console.warn('Skipping an inaccessible or invalid organisation membership:',item.id,error);
+        return null;
+      }
     }));
     organisations=records.filter(Boolean);
     window.__hamletOrganisationChoices=organisations;
@@ -147,15 +156,18 @@
       $('pageTitle').textContent='Your organisation workspace';
       $('intro').textContent='You do not currently belong to an active organisation. Organisation creation, invitations and membership administration are available in the Members Area.';
       $('notice').className='notice show';
-      $('notice').textContent='No active organisation membership was found for this account.';
+      $('notice').textContent=active.length
+        ?'No accessible active organisation was found. Refresh your membership or contact Hamlet support if this continues.'
+        :'No active organisation membership was found for this account.';
       return;
     }
-    organisations.forEach(org=>select.add(new Option(org.name+' · '+org.role,org.id)));
+    organisations.forEach(org=>select.add(new Option((org.name||'Organisation')+' · '+org.role,org.id)));
     let preferred='';
     try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
     const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
     selectOrganisation(chosen);
   }
+
   $('profileForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const org=organisations.find(item=>item.id===$('orgSelect').value);
