@@ -511,37 +511,25 @@
             var data = result.data || {};
             var panel = document.getElementById("inviteResult");
             panel.replaceChildren();
-            addText(panel, "div", "org-row-title", "Invitation created for " + data.email + ".");
-            addText(panel, "p", "org-muted", "Copy this one-time token and send it privately to the invited colleague. It expires in seven days. The token is not placed in a URL or browser storage.");
-            var tokenInput = document.createElement("input");
-            tokenInput.type = "text";
-            tokenInput.readOnly = true;
-            tokenInput.autocomplete = "off";
-            tokenInput.spellcheck = false;
-            tokenInput.value = data.token;
-            tokenInput.setAttribute("aria-label", "One-time invitation token");
-            tokenInput.style.width = "100%";
-            tokenInput.style.marginTop = "8px";
-            panel.appendChild(tokenInput);
-            var copy = document.createElement("button");
-            copy.type = "button";
-            copy.className = "org-btn secondary";
-            copy.textContent = "Copy one-time token";
-            copy.style.marginTop = "10px";
-            copy.addEventListener("click", async function () {
-              try {
-                await navigator.clipboard.writeText(data.token);
-                status("inviteStatus", "One-time invitation token copied.", "success");
-              } catch (error) {
-                tokenInput.focus();
-                tokenInput.select();
-                status("inviteStatus", "Clipboard access was blocked. The token is selected so you can copy it manually.", "error");
-              }
-            });
-            panel.appendChild(copy);
+            if (data.deliveryStatus === "emulated" && data.token) {
+              addText(panel, "div", "org-row-title", "Invitation created in the emulator (email delivery is disabled).");
+              addText(panel, "p", "org-muted", "Use this one-time token to exercise the acceptance flow. It expires in seven days.");
+              var emulatorToken = document.createElement("input");
+              emulatorToken.type = "text";
+              emulatorToken.readOnly = true;
+              emulatorToken.autocomplete = "off";
+              emulatorToken.spellcheck = false;
+              emulatorToken.value = data.token;
+              emulatorToken.setAttribute("aria-label", "Emulator invitation token");
+              emulatorToken.style.width = "100%";
+              panel.appendChild(emulatorToken);
+            } else {
+              addText(panel, "div", "org-row-title", "Invitation emailed to " + data.email + ".");
+              addText(panel, "p", "org-muted", "The invitation expires in seven days. The recipient must sign in with this verified email address and enter the one-time token from the email on this page.");
+            }
             panel.hidden = false;
             document.getElementById("inviteEmail").value = "";
-            status("inviteStatus", "Invitation created. Send the private link to the intended recipient.", "success");
+            status("inviteStatus", data.deliveryStatus === "emulated" ? "Invitation created in emulator mode." : "Invitation sent by email.", "success");
             await loadInvitations();
           } catch (error) {
             console.error("Organisation invitation creation failed:", error);

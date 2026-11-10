@@ -1,6 +1,8 @@
 const crypto = require("crypto");
+const https = require("https");
 const admin = require("firebase-admin");
 const {getFirestore, Timestamp, FieldValue} = require("firebase-admin/firestore");
+const {defineSecret} = require("firebase-functions/params");
 const {getStorage} = require("firebase-admin/storage");
 const {HttpsError, onCall} = require("firebase-functions/v2/https");
 
@@ -13,6 +15,67 @@ const RESERVED_SLUGS = new Set([
   "www",
 ]);
 const HAMLET_SUPER_ADMIN_UID = "6epDJRISlBbRPWKosDZZWuiGQzK2";
+const postmarkOutboundToken = defineSecret("POSTMARK_OUTBOUND_TOKEN");
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>\"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;",
+  })[character]);
+}
+
+function sendOrganisationInvitationEmail(invitation) {
+  const organisationName = String(invitation.organisationName || "your organisation");
+  const acceptUrl = "https://hamlet-ai.co.uk/organisations.html";
+  const roleName = invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1);
+  const textBody = [
+    "You have been invited to join " + organisationName + " on Hamlet.",
+    "",
+    "Your organisation role will be " + roleName + ".",
+    "",
+    "Sign in to Hamlet with this verified email address, then open " + acceptUrl + ". Paste the one-time invitation token into the invitation form:",
+    "",
+    invitation.token,
+    "",
+    "This invitation expires in seven days and can only be accepted by the verified email address it was sent to. The token is single-use; keep this message private.",
+  ].join("\n");
+  const htmlBody = "<p>You have been invited to join <strong>" + escapeHtml(organisationName) +
+    "</strong> on Hamlet.</p><p>Your organisation role will be " + escapeHtml(roleName) +
+    ".</p><p>Sign in to Hamlet with this verified email address, then open <a href=\"" + acceptUrl +
+    "\">Hamlet Organisations</a>. Paste the one-time invitation token into the invitation form:</p><p><code>" +
+    escapeHtml(invitation.token) + "</code></p><p>This invitation expires in seven days and can only be accepted by the verified email address it was sent to. The token is single-use; keep this message private.</p>";
+  const payload = JSON.stringify({
+    From: "admin-messages@ibrecruitment.com",
+    To: invitation.email,
+    Subject: "Invitation to join " + organisationName + " on Hamlet",
+    TextBody: textBody,
+    HtmlBody: htmlBody,
+    MessageStream: "outbound",
+  });
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: "api.postmarkapp.com",
+      path: "/email",
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": postmarkOutboundToken.value(),
+        "Content-Length": Buffer.byteLength(payload),
+      },
+    }, (res) => {
+      let responseBody = "";
+      res.on("data", (chunk) => { responseBody += chunk; });
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve();
+        else reject(new Error("Postmark " + res.statusCode + ": " + responseBody));
+      });
+    });
+    req.setTimeout(10000, () => req.destroy(new Error("Postmark request timed out.")));
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 function getDb() {
   try { admin.app(); } catch (err) { admin.initializeApp(); }
@@ -501,6 +564,7 @@ exports.createOrganisationInvitation = onCall({
   region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
+  secrets: [postmarkOutboundToken],
 }, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
@@ -518,6 +582,7 @@ exports.createOrganisationInvitation = onCall({
   const orgRef = db.collection("organisations").doc(orgId);
   const actorRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
   const inviteRef = db.collection("organisationInvitations").doc(tokenHash);
+  let organisationName = "";
   const now = Timestamp.now();
   const expiresAt = Timestamp.fromMillis(now.toMillis() + 7 * 24 * 60 * 60 * 1000);
 
@@ -532,6 +597,7 @@ exports.createOrganisationInvitation = onCall({
     if (orgSnap.data().status !== "active") {
       throw new HttpsError("failed-precondition", "The organisation is not currently active.");
     }
+    organisationName = String(orgSnap.data().name || "your organisation");
     const actor = actorSnap.exists ? actorSnap.data() : null;
     requireRole(actor, ["owner", "admin"]);
     if (role === "admin" && actor.role !== "owner") {
@@ -557,8 +623,45 @@ exports.createOrganisationInvitation = onCall({
     });
   });
 
-  // The raw token is returned once. Only its SHA-256 hash is persisted.
-  return {invitationId: tokenHash, token, expiresAt: expiresAt.toDate().toISOString(), email, role};
+  const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
+  try {
+    // Keep emulator tests isolated from the live Postmark account. The token is
+    // returned only by the emulator so the invitation acceptance flow remains testable.
+    if (!isEmulator) await sendOrganisationInvitationEmail({email, token, role, organisationName});
+  } catch (error) {
+    console.error("Unable to send organisation invitation through Postmark:", error);
+    try {
+      await db.runTransaction(async (transaction) => {
+        const inviteSnap = await transaction.get(inviteRef);
+        if (inviteSnap.exists && inviteSnap.data().status === "pending") {
+          transaction.update(inviteRef, {
+            status: "revoked",
+            revokedAt: FieldValue.serverTimestamp(),
+            revocationReason: "email_delivery_failed",
+          });
+          transaction.create(activityRef(db, orgId), {
+            organisationId: orgId,
+            actorUid: user.uid,
+            action: "organisation.invitation_delivery_failed",
+            invitationEmail: email,
+            createdAt: FieldValue.serverTimestamp(),
+          });
+        }
+      });
+    } catch (cleanupError) {
+      console.error("Unable to revoke undelivered organisation invitation:", cleanupError);
+    }
+    throw new HttpsError("unavailable", "The invitation could not be emailed. No active invitation was left behind; try again later.");
+  }
+
+  return {
+    invitationId: tokenHash,
+    expiresAt: expiresAt.toDate().toISOString(),
+    email,
+    role,
+    deliveryStatus: isEmulator ? "emulated" : "sent",
+    ...(isEmulator ? {token} : {}),
+  };
 });
 
 exports.acceptOrganisationInvitation = onCall({
