@@ -122,7 +122,7 @@
     $('verificationStatus').textContent='Status: '+verificationStatus+'.';
     $('verificationReport').textContent='';
     ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=!editable||verificationStatus==='pending'||verificationStatus==='verified');
-    if(editable)firebase.app().functions('us-central1').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
+    if(editable)firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
     $('leaveOrganisationBtn').hidden=org.role==='owner';
     $('membershipRequestPanel').classList.toggle('hidden',!editable);
     if(editable)loadMembershipRequests(org.id);
@@ -163,7 +163,7 @@
     const button=$('saveProfileBtn');button.disabled=true;$('profileStatus').textContent='Saving organisation profile…';
     try{
       if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-      const result=await firebase.app().functions('us-central1').httpsCallable('updateOrganisationProfile')({
+      const result=await firebase.app().functions('europe-west2').httpsCallable('updateOrganisationProfile')({
         organisationId:org.id,name:$('profileName').value,industry:$('profileIndustry').value,
         website:$('profileWebsite').value,publicLocation:$('profileLocation').value,
         description:$('profileDescription').value,visibility:$('profileVisibility').value
@@ -182,7 +182,7 @@
     if(!$('verificationAttestation').checked)return;
     const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
     try{
-      const result=await firebase.app().functions('us-central1').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
+      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
       org.verificationStatus=result.data.status;
       $('verificationStatus').textContent='Status: pending.';$('verificationReport').textContent='Your request is awaiting review by Hamlet.';
       ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
@@ -202,7 +202,7 @@
         const actions=document.createElement('div');actions.className='request-actions';
         [[true,'Approve'],[false,'Decline']].forEach(([approve,label])=>{
           const button=document.createElement('button');button.type='button';button.textContent=label;if(!approve)button.className='secondary';
-          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('us-central1').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
+          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west2').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
           actions.appendChild(button);
         });
         row.append(detail,actions);root.appendChild(row);
@@ -214,7 +214,7 @@
     if(!org||org.role==='owner'||!confirm('Leave '+org.name+'? Your membership and team access will be removed. You will need a new invitation to rejoin.'))return;
     const button=$('leaveOrganisationBtn');button.disabled=true;
     try{
-      await firebase.app().functions('us-central1').httpsCallable('leaveOrganisation')({organisationId:org.id});
+      await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:org.id});
       notice('You have left '+org.name+'.');
       if(organisations.length<=1){location.replace('/organisations.html');return;}
       await loadMemberships();
