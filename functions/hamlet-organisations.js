@@ -51,6 +51,10 @@ function sendOrganisationInvitationEmail(invitation) {
     HtmlBody: htmlBody,
     MessageStream: "outbound",
   });
+  const serverToken = postmarkOutboundToken.value();
+  if (!serverToken || !String(serverToken).trim()) {
+    return Promise.reject(new Error("POSTMARK_OUTBOUND_TOKEN is not configured for this function."));
+  }
   return new Promise((resolve, reject) => {
     const req = https.request({
       hostname: "api.postmarkapp.com",
@@ -59,24 +63,34 @@ function sendOrganisationInvitationEmail(invitation) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "X-Postmark-Server-Token": postmarkOutboundToken.value(),
+        "X-Postmark-Server-Token": String(serverToken).trim(),
         "Content-Length": Buffer.byteLength(payload),
       },
     }, (res) => {
       let responseBody = "";
+      res.setEncoding("utf8");
       res.on("data", (chunk) => { responseBody += chunk; });
       res.on("end", () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) resolve();
-        else reject(new Error("Postmark " + res.statusCode + ": " + responseBody));
+        let parsed = {};
+        try { parsed = responseBody ? JSON.parse(responseBody) : {}; } catch (error) {
+          reject(new Error("Postmark returned an unreadable response (HTTP " + res.statusCode + ")."));
+          return;
+        }
+        if (res.statusCode >= 200 && res.statusCode < 300 && parsed.ErrorCode === 0 && parsed.MessageID) {
+          resolve({messageId: parsed.MessageID, submittedAt: parsed.SubmittedAt || null});
+          return;
+        }
+        const providerMessage = String(parsed.Message || responseBody || "No response body").slice(0, 300);
+        const providerCode = parsed.ErrorCode === undefined ? "unknown" : parsed.ErrorCode;
+        reject(new Error("Postmark rejected the invitation (HTTP " + res.statusCode + ", code " + providerCode + "): " + providerMessage));
       });
     });
-    req.setTimeout(10000, () => req.destroy(new Error("Postmark request timed out.")));
+    req.setTimeout(15000, () => req.destroy(new Error("Postmark request timed out after 15 seconds.")));
     req.on("error", reject);
     req.write(payload);
     req.end();
   });
 }
-
 function getDb() {
   try { admin.app(); } catch (err) { admin.initializeApp(); }
   return getFirestore(admin.app());
@@ -624,10 +638,20 @@ exports.createOrganisationInvitation = onCall({
   });
 
   const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
+  let delivery = null;
   try {
-    // Keep emulator tests isolated from the live Postmark account. The token is
-    // returned only by the emulator so the invitation acceptance flow remains testable.
-    if (!isEmulator) await sendOrganisationInvitationEmail({email, token, role, organisationName});
+    // Emulator tests deliberately avoid sending real email and expose the token
+    // only to the local test environment.
+    if (!isEmulator) {
+      delivery = await sendOrganisationInvitationEmail({email, token, role, organisationName});
+      if (delivery && delivery.messageId) {
+        await inviteRef.update({
+          deliveryStatus: "submitted",
+          postmarkMessageId: delivery.messageId,
+          emailSubmittedAt: FieldValue.serverTimestamp(),
+        });
+      }
+    }
   } catch (error) {
     console.error("Unable to send organisation invitation through Postmark:", error);
     try {
@@ -651,7 +675,7 @@ exports.createOrganisationInvitation = onCall({
     } catch (cleanupError) {
       console.error("Unable to revoke undelivered organisation invitation:", cleanupError);
     }
-    throw new HttpsError("unavailable", "The invitation could not be emailed. No active invitation was left behind; try again later.");
+    throw new HttpsError("unavailable", "The invitation could not be emailed. No active invitation was left behind; check the function logs for the Postmark response and try again.");
   }
 
   return {
@@ -663,7 +687,6 @@ exports.createOrganisationInvitation = onCall({
     ...(isEmulator ? {token} : {}),
   };
 });
-
 exports.acceptOrganisationInvitation = onCall({
   region: "europe-west2",
   timeoutSeconds: 30,
