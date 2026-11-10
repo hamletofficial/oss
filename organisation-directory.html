@@ -73,7 +73,7 @@
         if(!window.firebase||!window.firebaseConfig){$('status').textContent='Organisation profiles are temporarily unavailable.';return;}
         try{
           if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-          auth=firebase.auth();functions=firebase.app().functions('us-central1');
+          auth=firebase.auth();functions=firebase.app().functions('europe-west2');
           const snapshot=await firebase.firestore().collection('organisationDirectory').where('isPublic','==',true).where('status','==','active').orderBy('name').limit(200).get();
           profiles=snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(item=>item.isPublic===true&&item.status==='active');
           const industries=[...new Set(profiles.map(item=>item.industry).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
