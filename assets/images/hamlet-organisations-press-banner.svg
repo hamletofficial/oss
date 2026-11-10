@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">hamlet Organisations — One organisation. A more connected way to work.</title>
+<desc id="desc">A premium navy and royal-blue illustration of connected office workspaces, representing organisation teams, role-based access and secure invitations.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071d4a"/><stop offset=".55" stop-color="#0b1120"/><stop offset="1" stop-color="#101d3c"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#2563eb" stop-opacity=".55"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></radialGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#60a5fa" stop-opacity=".28"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".04"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1600" height="900" rx="34" fill="url(#bg)"/>
+<circle cx="1190" cy="365" r="430" fill="url(#glow)"/>
+<path d="M0 720 400 530 700 650 1080 420 1600 620V900H0Z" fill="#0f244b" opacity=".5"/>
+<!-- abstract connected office architecture -->
+<g stroke="#60a5fa" stroke-opacity=".45" stroke-width="3" fill="url(#glass)">
+ <path d="M850 255h185v390H850z"/><path d="M1055 180h190v465h-190z"/><path d="M1265 290h160v355h-160z"/>
+ <path d="M875 300h135M875 365h135M875 430h135M875 495h135M875 560h135"/>
+ <path d="M1080 235h140M1080 305h140M1080 375h140M1080 445h140M1080 515h140M1080 585h140"/>
+ <path d="M1290 345h110M1290 410h110M1290 475h110M1290 540h110"/>
+</g>
+<g fill="none" stroke="#67e8f9" stroke-width="3" opacity=".8">
+ <path d="M790 675 960 565 1160 630 1355 520"/><circle cx="790" cy="675" r="9" fill="#67e8f9"/><circle cx="960" cy="565" r="9" fill="#67e8f9"/><circle cx="1160" cy="630" r="9" fill="#67e8f9"/><circle cx="1355" cy="520" r="9" fill="#67e8f9"/>
+</g>
+<g transform="translate(120 142)">
+ <text x="0" y="0" fill="#bfdbfe" font-family="Arial,sans-serif" font-size="27" font-weight="700" letter-spacing="7">HAMLET · WORKSPACE UPDATE</text>
+ <text x="0" y="160" fill="#fff" font-family="Arial,sans-serif" font-size="104" font-weight="800" letter-spacing="-5">hamlet</text>
+ <text x="0" y="275" fill="#fff" font-family="Arial,sans-serif" font-size="104" font-weight="800" letter-spacing="-5">Organisations</text>
+ <rect x="0" y="325" width="95" height="7" rx="3.5" fill="#67e8f9"/>
+ <text x="0" y="405" fill="#dbeafe" font-family="Arial,sans-serif" font-size="39" font-weight="500">One organisation. A more</text>
+ <text x="0" y="455" fill="#dbeafe" font-family="Arial,sans-serif" font-size="39" font-weight="500">connected way to work.</text>
+ <g transform="translate(0 535)" font-family="Arial,sans-serif" font-size="23" font-weight="700">
+  <rect width="270" height="55" rx="27" fill="#172554" stroke="#60a5fa"/><text x="135" y="36" text-anchor="middle" fill="#dbeafe">Team workspaces</text>
+  <rect x="285" width="290" height="55" rx="27" fill="#172554" stroke="#60a5fa"/><text x="430" y="36" text-anchor="middle" fill="#dbeafe">Role-based access</text>
+  <rect x="590" width="255" height="55" rx="27" fill="#172554" stroke="#60a5fa"/><text x="717" y="36" text-anchor="middle" fill="#dbeafe">Secure invitations</text>
+ </g>
+</g>
+<g opacity=".5" fill="#93c5fd"><circle cx="1450" cy="145" r="3"/><circle cx="1500" cy="220" r="5"/><circle cx="1390" cy="105" r="2"/><circle cx="730" cy="180" r="3"/><circle cx="680" cy="730" r="4"/></g>
+</svg>
