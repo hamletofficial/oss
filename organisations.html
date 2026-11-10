@@ -601,7 +601,7 @@
           return;
         }
         db = firebase.firestore();
-        functions = firebase.app().functions("us-central1");
+        functions = firebase.app().functions("europe-west2");
 
         firebase.auth().onAuthStateChanged(async function (user) {
           currentUser = user || null;
