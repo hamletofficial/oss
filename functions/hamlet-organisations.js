@@ -90,7 +90,7 @@ function activityRef(db, orgId) {
 }
 
 exports.createOrganisation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -159,7 +159,7 @@ exports.createOrganisation = onCall({
 });
 
 exports.requestOrganisationMembership = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -212,7 +212,7 @@ exports.requestOrganisationMembership = onCall({
 });
 
 exports.reviewOrganisationMembershipRequest = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -261,7 +261,7 @@ exports.reviewOrganisationMembershipRequest = onCall({
 });
 
 exports.updateOrganisationProfile = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -329,7 +329,7 @@ exports.updateOrganisationProfile = onCall({
   return {organisationId: orgId, ...fields};
 });
 
-exports.submitOrganisationVerification = onCall({region:"us-central1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const legalName = readString(request.data && request.data.legalName, "registered legal name", 2, 160);
@@ -374,7 +374,7 @@ exports.submitOrganisationVerification = onCall({region:"us-central1", timeoutSe
   return result;
 });
 
-exports.getOrganisationVerificationStatus = onCall({region:"us-central1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const db = getDb();
@@ -386,14 +386,14 @@ exports.getOrganisationVerificationStatus = onCall({region:"us-central1", timeou
   return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || ""};
 });
 
-exports.listOrganisationVerificationRequests = onCall({region:"us-central1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.listOrganisationVerificationRequests = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const snapshot = await getDb().collection("organisationVerificationRequests").where("status", "==", "pending").orderBy("submittedAt", "asc").limit(100).get();
   return {requests:snapshot.docs.map(doc => ({id:doc.id, ...doc.data(), submittedAt:doc.data().submittedAt && doc.data().submittedAt.toDate().toISOString()}))};
 });
 
-exports.reviewOrganisationVerification = onCall({region:"us-central1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.reviewOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
@@ -420,7 +420,7 @@ exports.reviewOrganisationVerification = onCall({region:"us-central1", timeoutSe
 });
 
 exports.deleteOrganisationDocument = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 60,
   memory: "256MiB",
 }, async (request) => {
@@ -498,7 +498,7 @@ exports.deleteOrganisationDocument = onCall({
 });
 
 exports.createOrganisationInvitation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -562,7 +562,7 @@ exports.createOrganisationInvitation = onCall({
 });
 
 exports.acceptOrganisationInvitation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -630,7 +630,7 @@ exports.acceptOrganisationInvitation = onCall({
 });
 
 exports.changeOrganisationMemberRole = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -684,7 +684,7 @@ exports.changeOrganisationMemberRole = onCall({
 });
 
 exports.removeOrganisationMember = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -747,7 +747,7 @@ exports.removeOrganisationMember = onCall({
 });
 
 exports.leaveOrganisation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -787,7 +787,7 @@ exports.leaveOrganisation = onCall({
 });
 
 exports.getOrganisationAnalytics = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -817,7 +817,7 @@ exports.getOrganisationAnalytics = onCall({
 });
 
 exports.copyPersonalResourceToOrganisation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -921,7 +921,7 @@ exports.copyPersonalResourceToOrganisation = onCall({
 
 
 exports.revokeOrganisationInvitation = onCall({
-  region: "us-central1",
+  region: "europe-west2",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
