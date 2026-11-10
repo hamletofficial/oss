@@ -51,7 +51,7 @@
       }
       async function init(){
         if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
-        try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('us-central1');}
+        try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('europe-west2');}
         catch(error){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
         auth.onAuthStateChanged(async current=>{
           if(!current){location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
