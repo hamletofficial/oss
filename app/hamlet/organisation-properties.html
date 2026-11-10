@@ -116,7 +116,7 @@
   }
   async function selectOrganisation(orgId){
     activeOrg=memberships.find(m=>m.id===orgId)||null;if(!activeOrg)return;
-    $('orgSelect').value=orgId;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Organisation slug: '+activeOrg.slug+' · tenant hostname not provisioned';$('roleBadge').textContent=activeOrg.role;
+    $('orgSelect').value=orgId;$('selectedName').textContent=activeOrg.name;$('selectedSlug').textContent='Tenant workspace: '+activeOrg.slug+'.orgs.hamlet-ai.co.uk';$('roleBadge').textContent=activeOrg.role;
     try{sessionStorage.setItem('hamletActiveOrganisationId',orgId);}catch(e){}
     canManage=['owner','admin','manager'].includes(activeOrg.role);
     canManageSharing=['owner','admin'].includes(activeOrg.role);
