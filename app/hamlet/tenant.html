@@ -48,7 +48,7 @@ async function receive(event){
  try{
   if(!window.firebase||!window.firebaseConfig)throw new Error('Firebase could not be initialised.');
   if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-  const auth=firebase.auth(),functions=firebase.app().functions('us-central1');
+  const auth=firebase.auth(),functions=firebase.app().functions('europe-west2');
   status('Verifying the single-use sign-in handoff…');
   const result=await functions.httpsCallable('exchangeOrganisationHandoffCode')({code:data.code,slug});
   await auth.signInWithCustomToken(result.data.customToken);
