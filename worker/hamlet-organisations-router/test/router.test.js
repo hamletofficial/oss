@@ -56,12 +56,13 @@ test("canonical orgs tenant hostname opens tenant handoff in staging by default"
 });
 
 test("canonical tenant hostname switches to production only with explicit environment", async () => {
-  const {response} = await route(
+  const {response, upstreamUrl} = await route(
     "https://acme-group.orgs.hamlet-ai.co.uk/",
     {},
     {HAMLET_ORGANISATIONS_ENV: "production"}
   );
   assert.equal(response.status, 200);
+  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
   assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "production");
   assert.equal(response.headers.get("Set-Cookie"), null);
 });

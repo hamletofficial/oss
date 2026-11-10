@@ -22,16 +22,6 @@ function tenantFromRequest(request, environment) {
   const production = environment === "production";
 
   if (host === PLATFORM_HOST) {
-    const tenantPath = url.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
-    if (tenantPath) {
-      return {kind: "tenant", slug: tenantPath[1], production, initial: true, tenantCookie: true};
-    }
-
-    const cookieSlug = readTenantCookie(request);
-    if (SLUG.test(cookieSlug) && !RESERVED.has(cookieSlug)) {
-      return {kind: "tenant", slug: cookieSlug, production, initial: false, tenantCookie: true};
-    }
-
     return {kind: "directory"};
   }
 
@@ -116,9 +106,7 @@ export default {
     headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     headers.set("X-Hamlet-Tenant-Route", route.slug);
     headers.set("X-Hamlet-Organisation-Environment", environment);
-    if (route.initial && (!route.production || route.tenantCookie)) {
-      headers.append("Set-Cookie", tenantCookie(route.slug));
-    }
+    if (route.initial && !route.production) headers.append("Set-Cookie", tenantCookie(route.slug));
 
     return new Response(upstream.body, {
       status: upstream.status,

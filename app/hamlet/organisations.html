@@ -110,7 +110,7 @@
     const org=organisations.find(item=>item.id===id);
     if(!org)return;
     $('selectedName').textContent=org.name;
-    $('selectedSlug').textContent='Tenant workspace: platform.hamlet-ai.co.uk/tenant/'+org.slug;
+    $('selectedSlug').textContent='Tenant workspace: '+org.slug+'.orgs.hamlet-ai.co.uk';
     $('roleBadge').textContent=org.role;
     $('pageTitle').textContent=org.name+' workspace';
     $('orgSelect').value=org.id;

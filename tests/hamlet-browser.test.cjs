@@ -240,7 +240,7 @@ test('authenticated organisation workspace loads only active memberships and swi
     await page.getByText('Example Organisation', {exact: true}).first().waitFor({state: 'visible', timeout: 10000});
     assert.equal(await page.locator('#roleBadge').textContent(), 'owner');
     assert.equal(await page.locator('#orgSelect option').count(), 2);
-    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant workspace: platform.hamlet-ai.co.uk/tenant/example-org');
+    assert.equal(await page.locator('#selectedSlug').textContent(), 'Tenant workspace: example-org.orgs.hamlet-ai.co.uk');
 
     await page.locator('#orgSelect').selectOption('org-two');
     assert.equal(await page.locator('#selectedName').textContent(), 'Second Organisation');

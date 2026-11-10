@@ -57,7 +57,7 @@
           if(meta.childNodes.length)card.appendChild(meta);
           const actions=document.createElement('div');actions.className='actions';
           if(typeof item.website==='string'&&/^https:\/\//i.test(item.website)){const website=document.createElement('a');website.href=item.website;website.target='_blank';website.rel='noopener noreferrer';website.textContent='Organisation website';actions.appendChild(website);}
-          if(typeof item.slug==='string'&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(item.slug)){const workspace=document.createElement('a');workspace.href='https://platform.hamlet-ai.co.uk/tenant/'+encodeURIComponent(item.slug);workspace.textContent='Open Hamlet workspace';actions.appendChild(workspace);}
+          if(typeof item.slug==='string'&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(item.slug)){const workspace=document.createElement('a');workspace.href='https://'+item.slug+'.orgs.hamlet-ai.co.uk/';workspace.textContent='Open Hamlet workspace';actions.appendChild(workspace);}
           const requestButton=document.createElement('button');requestButton.type='button';requestButton.textContent='Request to join';requestButton.className='request-join';requestButton.addEventListener('click',async()=>{
             const user=auth.currentUser;
             if(!user){location.href='/login.html?next='+encodeURIComponent('/organisation-directory.html');return;}
