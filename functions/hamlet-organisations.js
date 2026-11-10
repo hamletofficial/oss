@@ -70,18 +70,20 @@ function sendOrganisationInvitationEmail(invitation) {
       let responseBody = "";
       res.setEncoding("utf8");
       res.on("data", (chunk) => { responseBody += chunk; });
-      res.setEncoding("utf8");
-    res.on("end", () => {
-      let parsed;
-      try { parsed = responseBody ? JSON.parse(responseBody) : {}; } catch (error) { parsed = {}; }
-      if (res.statusCode >= 200 && res.statusCode < 300 && parsed.ErrorCode === 0) {
-        resolve({messageId: parsed.MessageID || null, submittedAt: parsed.SubmittedAt || null});
-        return;
-      }
-      const providerMessage = String(parsed.Message || responseBody || "No response body").slice(0, 300);
-      const providerCode = parsed.ErrorCode === undefined ? "unknown" : parsed.ErrorCode;
-      reject(new Error("Postmark rejected the invitation (HTTP " + res.statusCode + ", code " + providerCode + "): " + providerMessage));
-    });;
+      res.on("end", () => {
+        let parsed = {};
+        try { parsed = responseBody ? JSON.parse(responseBody) : {}; } catch (error) {
+          reject(new Error("Postmark returned an unreadable response (HTTP " + res.statusCode + ")."));
+          return;
+        }
+        if (res.statusCode >= 200 && res.statusCode < 300 && parsed.ErrorCode === 0 && parsed.MessageID) {
+          resolve({messageId: parsed.MessageID, submittedAt: parsed.SubmittedAt || null});
+          return;
+        }
+        const providerMessage = String(parsed.Message || responseBody || "No response body").slice(0, 300);
+        const providerCode = parsed.ErrorCode === undefined ? "unknown" : parsed.ErrorCode;
+        reject(new Error("Postmark rejected the invitation (HTTP " + res.statusCode + ", code " + providerCode + "): " + providerMessage));
+      });
     });
     req.setTimeout(15000, () => req.destroy(new Error("Postmark request timed out after 15 seconds.")));
     req.on("error", reject);
