@@ -117,6 +117,10 @@ export default {
       return new Response("Invalid organisation address", {status: 404});
     }
 
+    if (!isTenantWorkspacePath(url.pathname)) {
+      return new Response("Not found", {status: 404, headers: {"Cache-Control": "no-store, max-age=0"}});
+    }
+
     try {
       const resolverUrl = new URL(TENANT_RESOLVER);
       resolverUrl.searchParams.set("slug", route.slug);
@@ -138,10 +142,6 @@ export default {
         status: 503,
         headers: {"Cache-Control": "no-store, max-age=0", "Retry-After": "60"},
       });
-    }
-
-    if (!isTenantWorkspacePath(url.pathname)) {
-      return new Response("Not found", {status: 404, headers: {"Cache-Control": "no-store, max-age=0"}});
     }
 
     if (url.pathname === "/login.html") {
