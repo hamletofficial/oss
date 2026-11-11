@@ -63,9 +63,21 @@ function isPlatformPath(path) {
 }
 
 function isTenantWorkspacePath(path) {
-  const organisationPage = path.startsWith("/app/hamlet/organisation-") && path.endsWith(".html");
-  return path === "/login.html" || path === "/app/hamlet/tenant.html" ||
-    path === "/app/hamlet/organisation.html" || path === "/app/hamlet/organisations.html" || organisationPage || isSharedAsset(path);
+  const pages = new Set([
+    "/app/hamlet/tenant.html",
+    "/app/hamlet/organisation.html",
+    "/app/hamlet/organisations.html",
+    "/app/hamlet/organisation-dashboard.html",
+    "/app/hamlet/organisation-deals.html",
+    "/app/hamlet/organisation-properties.html",
+    "/app/hamlet/organisation-files.html",
+    "/app/hamlet/organisation-teams.html",
+    "/app/hamlet/organisation-association.html",
+    "/app/hamlet/organisation-activity.html",
+    "/app/hamlet/organisation-analytics.html",
+    "/app/hamlet/organisation-verification-admin.html"
+  ]);
+  return path === "/login.html" || pages.has(path) || isSharedAsset(path);
 }
 
 export default {
