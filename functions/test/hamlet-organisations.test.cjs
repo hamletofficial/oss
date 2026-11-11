@@ -3,10 +3,6 @@ const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const https = require("node:https");
 const {EventEmitter} = require("node:events");
-process.env.POSTMARK_OUTBOUND_TOKEN ||= "test-postmark-token";
-https.request = (_options, callback) => {
-  const request = new EventEmitter();
-  request.setTimeout = () => {};
   request.write = () => {};
   request.end = () => {
     const response = new EventEmitter();
@@ -21,6 +17,7 @@ https.request = (_options, callback) => {
   request.destroy = (error) => request.emit("error", error);
   return request;
 };
+process.env.FUNCTIONS_EMULATOR ||= "true";
 const admin = require("firebase-admin");
 const {getFirestore, Timestamp} = require("firebase-admin/firestore");
 
