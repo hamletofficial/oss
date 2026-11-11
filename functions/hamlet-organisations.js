@@ -179,12 +179,42 @@ exports.createOrganisation = onCall({
   const slugRef = db.collection("organisationSlugs").doc(slug);
   const memberRef = db.collection("organisationMembers").doc(membershipId(orgRef.id, user.uid));
   const directoryRef = db.collection("organisationDirectory").doc(orgRef.id);
+  const emulatorBypass = process.env.FUNCTIONS_EMULATOR === "true";
+  const checkoutSessionId = String(request.data && request.data.orgCheckoutSessionId || "");
+  if (!emulatorBypass && !/^cs_(test|live)_[A-Za-z0-9]+$/.test(checkoutSessionId)) {
+    throw new HttpsError("failed-precondition", "Complete the organisation subscription checkout before creating an organisation.");
+  }
+  const checkoutRef = checkoutSessionId ? db.collection("organisationCheckoutSessions").doc(checkoutSessionId) : null;
   const now = FieldValue.serverTimestamp();
 
   await db.runTransaction(async (transaction) => {
-    const slugSnap = await transaction.get(slugRef);
+    const reads = [transaction.get(slugRef)];
+    if (!emulatorBypass) reads.push(transaction.get(checkoutRef));
+    const snapshots = await Promise.all(reads);
+    const slugSnap = snapshots[0];
     if (slugSnap.exists) {
       throw new HttpsError("already-exists", "That organisation URL name is already in use.");
+    }
+    let checkout = null;
+    let subscriptionRef = null;
+    if (!emulatorBypass) {
+      checkout = snapshots[1].exists ? snapshots[1].data() : null;
+      if (!checkout || checkout.firebaseUid !== user.uid || checkout.paymentStatus !== "paid" || !checkout.subscriptionId || checkout.organisationId) {
+        throw new HttpsError("failed-precondition", "A completed, unused organisation subscription is required.");
+      }
+      subscriptionRef = db.collection("organisationStripeSubscriptions").doc(checkout.subscriptionId);
+      const subscriptionSnap = await transaction.get(subscriptionRef);
+      const subscription = subscriptionSnap.exists ? subscriptionSnap.data() : null;
+      if (!subscription || subscription.firebaseUid !== user.uid || !["active", "trialing"].includes(subscription.status) || subscription.organisationId) {
+        throw new HttpsError("failed-precondition", "The organisation subscription is not active or has already been used.");
+      }
+      transaction.update(checkoutRef, {organisationId: orgRef.id, consumedAt: now});
+      transaction.set(subscriptionRef, {organisationId: orgRef.id}, {merge: true});
+      transaction.create(db.collection("organisationBilling").doc(orgRef.id), {
+        organisationId: orgRef.id, ownerUid: user.uid, subscriptionId: checkout.subscriptionId,
+        customerId: checkout.customerId || null, status: subscription.status,
+        createdAt: now, updatedAt: now,
+      });
     }
     transaction.create(orgRef, {
       id: orgRef.id,
@@ -195,6 +225,7 @@ exports.createOrganisation = onCall({
       verificationStatus: "unverified",
       ownerUid: user.uid,
       createdByUid: user.uid,
+      ...(checkout ? {billingStatus: "active"} : {}),
       createdAt: now,
       updatedAt: now,
     });

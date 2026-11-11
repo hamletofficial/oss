@@ -4,7 +4,12 @@ import worker from "../src/index.js";
 
 async function route(url, options = {}, env = {}) {
   let upstreamUrl = "";
+  let resolverUrl = "";
   globalThis.fetch = async request => {
+    if (String(request.url || request).includes("resolveOrganisationTenant")) {
+      resolverUrl = String(request.url || request);
+      return new Response(null, {status: options.resolverStatus || 204});
+    }
     upstreamUrl = request.url;
     return new Response("upstream", {
       status: 200,
@@ -12,8 +17,27 @@ async function route(url, options = {}, env = {}) {
     });
   };
   const response = await worker.fetch(new Request(url, options), env);
-  return {response, upstreamUrl};
+  return {response, upstreamUrl, resolverUrl};
 }
+
+test("inactive tenant addresses are not proxied", async () => {
+  const {response, upstreamUrl, resolverUrl} = await route(
+    "https://acme-group.orgs.hamlet-ai.co.uk/",
+    {resolverStatus: 404}
+  );
+  assert.equal(response.status, 404);
+  assert.equal(upstreamUrl, "");
+  assert.match(resolverUrl, /resolveOrganisationTenant\?slug=acme-group/);
+});
+
+test("tenant resolver failures fail closed", async () => {
+  const {response, upstreamUrl} = await route(
+    "https://acme-group.orgs.hamlet-ai.co.uk/",
+    {resolverStatus: 503}
+  );
+  assert.equal(response.status, 503);
+  assert.equal(upstreamUrl, "");
+});
 
 test("workers.dev root serves the organisation directory in staging", async () => {
   const {response, upstreamUrl} = await route("https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/");

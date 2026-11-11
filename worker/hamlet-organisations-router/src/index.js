@@ -1,5 +1,6 @@
 const MAIN_ORIGIN = "https://www.hamlet-ai.co.uk";
 const PLATFORM_HOST = "platform.hamlet-ai.co.uk";
+const TENANT_RESOLVER = "https://europe-west2-wale-491805.cloudfunctions.net/resolveOrganisationTenant";
 const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","press","public","root","settings","signin","signup","support","www"]);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
@@ -80,6 +81,29 @@ export default {
 
     if (!SLUG.test(route.slug) || RESERVED.has(route.slug)) {
       return new Response("Invalid organisation address", {status: 404});
+    }
+
+    try {
+      const resolverUrl = new URL(TENANT_RESOLVER);
+      resolverUrl.searchParams.set("slug", route.slug);
+      const resolution = await fetch(resolverUrl.toString(), {method: "GET"});
+      if (resolution.status === 404) {
+        return new Response("Organisation address is inactive", {
+          status: 404,
+          headers: {"Cache-Control": "no-store, max-age=0"},
+        });
+      }
+      if (!resolution.ok) {
+        return new Response("Organisation address is temporarily unavailable", {
+          status: 503,
+          headers: {"Cache-Control": "no-store, max-age=0", "Retry-After": "60"},
+        });
+      }
+    } catch (_) {
+      return new Response("Organisation address is temporarily unavailable", {
+        status: 503,
+        headers: {"Cache-Control": "no-store, max-age=0", "Retry-After": "60"},
+      });
     }
 
     if (url.pathname === "/login.html") {

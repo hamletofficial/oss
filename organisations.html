@@ -106,6 +106,12 @@
 
       <div class="org-grid">
         <section class="org-card" aria-labelledby="createOrgHeading">
+          <div id="organisationPaywall" class="org-panel">
+            <h2>Start an organisation</h2>
+            <p class="org-muted">An organisation subscription is required before a new workspace can be created. One subscription covers one organisation.</p>
+            <a class="org-btn" href="/invoice.html?organisation=1">View organisation subscription</a>
+          </div>
+          <div id="createOrgFields" hidden>
           <h2 id="createOrgHeading">Create an organisation</h2>
           <p class="org-muted">The creator becomes the initial owner. Organisation names and URL slugs are reserved securely by Hamlet.</p>
           <form id="createOrgForm" class="org-form">
@@ -121,6 +127,7 @@
             <button class="org-btn" id="createOrgBtn" type="submit">Create Organisation</button>
           </form>
           <p class="org-status" id="createOrgStatus" role="status" aria-live="polite"></p>
+          </div>
           <div class="org-panel">
             <h2>Accept an invitation</h2>
             <p class="org-muted">Paste the one-time invitation token shared with you. You must be signed in with the same verified email address to which it was issued.</p>
@@ -217,6 +224,8 @@
         var memberList = document.getElementById("memberList");
         var invitationList = document.getElementById("invitationList");
         var createOrgForm = document.getElementById("createOrgForm");
+        var createOrgFields = document.getElementById("createOrgFields");
+        var organisationPaywall = document.getElementById("organisationPaywall");
         var inviteForm = document.getElementById("inviteForm");
         var acceptInviteForm = document.getElementById("acceptInviteForm");
         var currentUser = null;
@@ -227,6 +236,31 @@
         var functions = null;
         var db = null;
         var acceptingInvitation = false;
+        var checkoutSessionId = new URLSearchParams(window.location.search).get("orgCheckoutSessionId") || "";
+        var invitationFlow = new URLSearchParams(window.location.search).get("acceptInvitation") === "1";
+
+        async function preparePaidOrganisationCreation() {
+          if (!checkoutSessionId) return false;
+          status("orgListStatus", "Confirming your organisation subscription…");
+          for (var attempt = 0; attempt < 12; attempt++) {
+            var result = await makeCallable("getOrganisationCheckoutStatus")({sessionId:checkoutSessionId});
+            if (result.data && result.data.ready && !result.data.consumed) {
+              createOrgFields.hidden = false;
+              organisationPaywall.hidden = true;
+              status("orgListStatus", "Subscription confirmed. Complete the form to create your organisation.", "success");
+              return true;
+            }
+            if (result.data && result.data.consumed) throw new Error("This subscription has already been used to create an organisation.");
+            await new Promise(function (resolve) { window.setTimeout(resolve, 2500); });
+          }
+          status("orgListStatus", "Stripe is still confirming the subscription. Refresh this page in a moment to continue.", "error");
+          return false;
+        }
+
+        function openTenantDashboard(organisation) {
+          if (!organisation || !organisation.slug) return;
+          window.location.replace("/app/hamlet/organisation-dashboard.html?tenantSlug=" + encodeURIComponent(organisation.slug));
+        }
 
         function status(id, message, kind) {
           var element = document.getElementById(id);
@@ -289,6 +323,11 @@
               }
             }));
             memberships = resolved.filter(Boolean);
+            if (memberships.length && !checkoutSessionId && !invitationFlow) {
+              var destination = memberships.find(function (item) { return item.organisation.id === preferredOrganisationId; }) || memberships[0];
+              openTenantDashboard(destination.organisation);
+              return;
+            }
             organisationSelect.replaceChildren();
             if (!memberships.length) {
               var empty = document.createElement("option");
@@ -482,11 +521,12 @@
           try {
             var result = await makeCallable("createOrganisation")({
               name:document.getElementById("orgName").value.trim(),
-              slug:document.getElementById("orgSlug").value.trim().toLowerCase()
+              slug:document.getElementById("orgSlug").value.trim().toLowerCase(),
+              orgCheckoutSessionId:checkoutSessionId
             });
             createOrgForm.reset();
             status("createOrgStatus", "Organisation created. You are its owner.", "success");
-            await loadMemberships(result.data && result.data.organisationId);
+            if (result.data && result.data.slug) openTenantDashboard({slug:result.data.slug});
           } catch (error) {
             console.error("Organisation creation failed:", error);
             status("createOrgStatus", error.message || "Unable to create this organisation.", "error");
@@ -552,7 +592,13 @@
             });
             acceptInviteForm.reset();
             status("acceptInviteStatus", "Invitation accepted. You joined as " + roleLabel(result.data && result.data.role) + ".", "success");
-            await loadMemberships(result.data && result.data.organisationId);
+            var joinedOrganisationId = result.data && result.data.organisationId;
+            var joinedOrganisation = joinedOrganisationId ? await db.collection("organisations").doc(joinedOrganisationId).get() : null;
+            if (joinedOrganisation && joinedOrganisation.exists) {
+              openTenantDashboard(joinedOrganisation.data());
+            } else {
+              await loadMemberships(joinedOrganisationId);
+            }
           } catch (error) {
             console.error("Organisation invitation acceptance failed:", error);
             status("acceptInviteStatus", error.message || "Unable to accept this invitation. Check the token and your verified email address.", "error");
@@ -613,6 +659,8 @@
             console.warn("Unable to refresh Firebase identity before organisation access:", error);
           }
           if (user.emailVerified !== true) {
+            createOrgFields.hidden = true;
+            organisationPaywall.hidden = false;
             createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
             acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
             status("orgListStatus", "Verify your email address before creating an organisation or accepting an invitation.", "error");
@@ -622,6 +670,13 @@
           }
           createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
           acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
+          if (checkoutSessionId) {
+            try { await preparePaidOrganisationCreation(); }
+            catch (error) {
+              console.error("Unable to verify organisation subscription:", error);
+              status("orgListStatus", error.message || "The organisation subscription could not be verified.", "error");
+            }
+          }
           await loadMemberships();
         });
       });
