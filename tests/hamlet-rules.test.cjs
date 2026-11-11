@@ -67,6 +67,17 @@ test.beforeEach(async () => {
     await setDoc(doc(db, 'organisationMembers/org-private_suspended'), {
       organisationId: 'org-private', uid: 'suspended', role: 'member', status: 'suspended',
     });
+    await setDoc(doc(db, 'organisationMembers/org-private_removed'), {
+      organisationId: 'org-private', uid: 'removed', role: 'member', status: 'removed',
+    });
+    await setDoc(doc(db, 'organisationResourceShares/org-private_deal_deal-shared_colleague'), {
+      organisationId: 'org-private', resourceType: 'deal', resourceId: 'deal-shared',
+      sharedWithUid: 'colleague', createdByUid: 'owner', createdAt: new Date(),
+    });
+    await setDoc(doc(db, 'organisationResourceShares/org-private_deal_deal-shared_removed'), {
+      organisationId: 'org-private', resourceType: 'deal', resourceId: 'deal-shared',
+      sharedWithUid: 'removed', createdByUid: 'owner', createdAt: new Date(),
+    });
     await setDoc(doc(db, 'organisationMembers/org-private_team-reader'), {
       organisationId: 'org-private', uid: 'team-reader', role: 'member', status: 'active',
     });
@@ -330,6 +341,18 @@ test('organisation document uploads remain disabled until separately validated',
   await assertFails(uploadBytes(ref(adminStorage, restrictedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(memberStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
   await assertFails(uploadBytes(ref(outsiderStorage, sharedPath), new Uint8Array([1, 2, 3]), {contentType: 'application/pdf'}));
+});
+
+test('resource-share metadata is visible only to current tenant members and authorised administrators', async () => {
+  const recipient = env.authenticatedContext('colleague').firestore();
+  const removedRecipient = env.authenticatedContext('removed').firestore();
+  const admin = env.authenticatedContext('admin').firestore();
+  const outsider = env.authenticatedContext('outsider').firestore();
+
+  await assertSucceeds(getDoc(doc(recipient, 'organisationResourceShares/org-private_deal_deal-shared_colleague')));
+  await assertFails(getDoc(doc(removedRecipient, 'organisationResourceShares/org-private_deal_deal-shared_removed')));
+  await assertSucceeds(getDoc(doc(admin, 'organisationResourceShares/org-private_deal_deal-shared_colleague')));
+  await assertFails(getDoc(doc(outsider, 'organisationResourceShares/org-private_deal_deal-shared_colleague')));
 });
 
 test('organisation documents are readable only by active members of that organisation', async () => {
