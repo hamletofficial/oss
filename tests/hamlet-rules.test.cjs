@@ -768,8 +768,13 @@ test('multi-organisation members can work in each tenant without crossing tenant
     organisationId:'org-private',resourceType:'property',resourceId:'property-second',
     documentId:'doc-cross-tenant',uploaderUid:'multi-org-user'
   }};
-  await assertSucceeds(uploadBytes(ref(multiStorage, crossTenantReadPath), new Uint8Array([1, 2, 3]), crossTenantReadMetadata));
+  // Seed a legacy/misplaced object as emulator admin so the read denial is
+  // tested independently of the create denial.
+  await env.withSecurityRulesDisabled(async (context) => {
+    await uploadBytes(ref(context.storage(), crossTenantReadPath), new Uint8Array([1, 2, 3]), crossTenantReadMetadata);
+  });
   await assertFails(getBytes(ref(firstTenantStorage, crossTenantReadPath)));
+  await assertFails(uploadBytes(ref(multiStorage, crossTenantReadPath), new Uint8Array([1, 2, 3]), crossTenantReadMetadata));
 
   // Managers must not be able to upload into a tenant path backed by a
   // different organisation's parent record either.
