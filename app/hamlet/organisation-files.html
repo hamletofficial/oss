@@ -28,6 +28,11 @@
 <script>
 (function(){
 'use strict';
+  const tenantHost=location.hostname.toLowerCase();
+  const tenantSuffix='.orgs.hamlet-ai.co.uk';
+  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):'';
+  if(tenantSlug&&!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(tenantSlug)){document.body.textContent='Invalid organisation tenant address.';throw new Error('Invalid tenant hostname');}
+
 const $=id=>document.getElementById(id);let auth,db,storage,user,memberships=[],activeOrg=null,resources=[],selected=null,files=[];
 const allowed={'application/pdf':'pdf','application/msword':'doc','application/vnd.openxmlformats-officedocument.wordprocessingml.document':'docx','application/vnd.ms-excel':'xls','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','text/csv':'csv','text/plain':'txt','image/png':'png','image/jpeg':'jpg','image/webp':'webp'};
 const cleanName=s=>String(s||'file').normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,100)||'file';
@@ -40,7 +45,7 @@ async function loadMemberships(){
  const snap=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
  memberships=snap.docs.map(d=>({id:d.id,...d.data()}));
  const options=[];
- for(const m of memberships){const org=await db.collection('organisations').doc(m.organisationId).get();if(org.exists&&org.data().status==='active')options.push({id:m.organisationId,name:org.data().name||'Organisation',slug:org.data().slug||'',role:role(m)});}
+ for(const m of memberships){const org=await db.collection('organisations').doc(m.organisationId).get();if(org.exists&&org.data().status==='active'&&(!tenantSlug||org.data().slug===tenantSlug))options.push({id:m.organisationId,name:org.data().name||'Organisation',slug:org.data().slug||'',role:role(m)});}
  $('orgSelect').replaceChildren(...options.map(o=>new Option(o.name+' · '+o.role,o.id)));
  if(!options.length){notice('No active organisation memberships were found.',true);return;}
  $('orgSelect').value=options[0].id;await selectOrg(options[0].id);
