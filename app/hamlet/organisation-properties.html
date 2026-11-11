@@ -92,6 +92,11 @@
 <script>
 (function(){
   'use strict';
+  const tenantHost=location.hostname.toLowerCase();
+  const tenantSuffix='.orgs.hamlet-ai.co.uk';
+  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):'';
+  if(tenantSlug&&!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(tenantSlug)){document.body.textContent='Invalid organisation tenant address.';throw new Error('Invalid tenant hostname');}
+
   const $=id=>document.getElementById(id);
   let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,canManageSharing=false,activeTeams=[];
   const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -107,7 +112,7 @@
       if(!snap.exists||snap.data().status!=='active')return null;
       return {id:snap.id,name:snap.data().name,slug:snap.data().slug,role:m.role};
     }));
-    memberships=resolved.filter(Boolean);
+    memberships=resolved.filter(m=>m&&(!tenantSlug||m.slug===tenantSlug));
     const select=$('orgSelect');select.replaceChildren();
     if(!memberships.length){select.add(new Option('No active organisation',''));activeOrg=null;showNotice('You do not have an active organisation membership. Create or join one in Organisation Administration.',true);$('selectedName').textContent='No organisation selected';$('selectedSlug').textContent='No active membership';$('roleBadge').textContent='No role';$('propertyCards').replaceChildren();$('portfolioMeta').textContent='No active organisation';$('saveBtn').disabled=true;return;}
     memberships.forEach(m=>select.add(new Option(m.name+' · '+m.role,m.id)));
