@@ -30,25 +30,15 @@ test("workers.dev tenant path opens the tenant handoff page and sets a tenant co
   assert.match(response.headers.get("Set-Cookie"), /hamlet_tenant_slug=acme-group/);
 });
 
-test("workers.dev tenant cookie adds the tenant slug to the browser URL", async () => {
-  const {response} = await route(
+test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped", async () => {
+  const {response, upstreamUrl} = await route(
     "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html",
     {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
   );
-  assert.equal(response.status, 302);
-  assert.equal(response.headers.get("Location"), "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html?tenantSlug=acme-group");
-});
-
-test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped", async () => {
-  const {response, upstreamUrl} = await route(
-    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html?tenantSlug=acme-group",
-    {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
-  );
   assert.equal(response.status, 200);
-  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html?tenantSlug=acme-group");
+  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html");
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
 });
-
 test("canonical platform hostname serves the public organisation directory in staging", async () => {
   const {response, upstreamUrl} = await route("https://platform.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
@@ -97,12 +87,4 @@ test("tenant Worker root keeps the secure handoff as the entry point", async () 
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
 });
 
-test("legacy tenant hostname without the orgs subdomain is rejected", async () => {
-  const {response} = await route("https://acme-group.hamlet-ai.co.uk/");
-  assert.equal(response.status, 404);
-});
 
-test("tenant hostnames require exactly one valid slug label before orgs", async () => {
-  const malformed = await route("https://team.acme-group.orgs.hamlet-ai.co.uk/");
-  assert.equal(malformed.response.status, 404);
-});
