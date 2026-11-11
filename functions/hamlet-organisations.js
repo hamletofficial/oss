@@ -289,7 +289,7 @@ exports.requestOrganisationMembership = onCall({
 });
 
 exports.reviewOrganisationMembershipRequest = onCall({
-  region: "europe-west1",
+  region: ["us-central1", "europe-west1"],
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
