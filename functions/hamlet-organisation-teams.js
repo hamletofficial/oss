@@ -33,10 +33,12 @@ function cleanPermissions(value) {
   if (unique.some(permission => !TEAM_PERMISSIONS.includes(permission))) throw new HttpsError("invalid-argument", "One or more team permissions are not supported.");
   return unique;
 }
-async function loadManager(dbRef, orgId, uid) {
+async function loadManager(transaction, dbRef, orgId, uid) {
+  // Read the actor's tenant and membership inside the same transaction as the
+  // protected write, preventing a role-revocation time-of-check/time-of-use gap.
   const [org, member] = await Promise.all([
-    dbRef.collection("organisations").doc(orgId).get(),
-    dbRef.collection("organisationMembers").doc(memberId(orgId, uid)).get(),
+    transaction.get(dbRef.collection("organisations").doc(orgId)),
+    transaction.get(dbRef.collection("organisationMembers").doc(memberId(orgId, uid))),
   ]);
   if (!org.exists || org.data().status !== "active") throw new HttpsError("not-found", "The active organisation was not found.");
   const data = member.exists ? member.data() : null;
@@ -56,9 +58,9 @@ exports.createOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:3
   const name = text(request.data && request.data.name, "Team name", TEAM_NAME_MAX);
   const permissions = cleanPermissions(request.data && request.data.permissions || []);
   const dbRef = db();
-  await loadManager(dbRef, orgId, user.uid);
   const teamRef = dbRef.collection("organisationTeams").doc();
   await dbRef.runTransaction(async tx => {
+    await loadManager(tx, dbRef, orgId, user.uid);
     tx.create(teamRef, {id:teamRef.id, organisationId:orgId, name, status:"active", permissions, createdByUid:user.uid, createdAt:FieldValue.serverTimestamp(), updatedAt:FieldValue.serverTimestamp()});
     tx.create(dbRef.collection("organisationActivity").doc(), {organisationId:orgId, actorUid:user.uid, action:"organisation.team_created", teamId:teamRef.id, teamName:name, createdAt:FieldValue.serverTimestamp()});
   });
@@ -72,9 +74,9 @@ exports.updateOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:3
   const name = text(request.data && request.data.name, "Team name", TEAM_NAME_MAX);
   const permissions = cleanPermissions(request.data && request.data.permissions || []);
   const dbRef = db();
-  await loadManager(dbRef, orgId, user.uid);
   const ref = dbRef.collection("organisationTeams").doc(teamId);
   await dbRef.runTransaction(async tx => {
+    await loadManager(tx, dbRef, orgId, user.uid);
     const snap = await tx.get(ref);
     if (!snap.exists || snap.data().organisationId !== orgId || snap.data().status !== "active") throw new HttpsError("not-found", "The active team was not found.");
     tx.update(ref, {name, permissions, updatedAt:FieldValue.serverTimestamp()});
@@ -91,11 +93,11 @@ exports.setOrganisationTeamMember = onCall({region:"europe-west2", timeoutSecond
   const active = request.data && request.data.active;
   if (typeof active !== "boolean") throw new HttpsError("invalid-argument", "active must be true or false.");
   const dbRef = db();
-  await loadManager(dbRef, orgId, user.uid);
   const teamRef = dbRef.collection("organisationTeams").doc(teamId);
   const memberRef = dbRef.collection("organisationMembers").doc(memberId(orgId, targetUid));
   const assignmentRef = dbRef.collection("organisationTeamMembers").doc(teamId + "_" + targetUid);
   await dbRef.runTransaction(async tx => {
+    await loadManager(tx, dbRef, orgId, user.uid);
     const [team, member, existing] = await Promise.all([tx.get(teamRef), tx.get(memberRef), tx.get(assignmentRef)]);
     if (!team.exists || team.data().organisationId !== orgId || team.data().status !== "active") throw new HttpsError("not-found", "The active team was not found.");
     if (!member.exists || member.data().status !== "active" || member.data().organisationId !== orgId || member.data().uid !== targetUid) throw new HttpsError("failed-precondition", "Only active members of this organisation can be assigned to a team.");
@@ -114,9 +116,9 @@ exports.archiveOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:
   const orgId = text(request.data && request.data.organisationId, "organisationId", 128);
   const teamId = text(request.data && request.data.teamId, "teamId", 128);
   const dbRef = db();
-  await loadManager(dbRef, orgId, user.uid);
   const ref = dbRef.collection("organisationTeams").doc(teamId);
   await dbRef.runTransaction(async tx => {
+    await loadManager(tx, dbRef, orgId, user.uid);
     const snap = await tx.get(ref);
     if (!snap.exists || snap.data().organisationId !== orgId || snap.data().status !== "active") throw new HttpsError("not-found", "The active team was not found.");
     tx.update(ref, {status:"archived", archivedByUid:user.uid, archivedAt:FieldValue.serverTimestamp(), updatedAt:FieldValue.serverTimestamp()});
