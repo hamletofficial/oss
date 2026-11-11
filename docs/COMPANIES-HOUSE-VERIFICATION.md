@@ -32,7 +32,7 @@ The `submitOrganisationVerification` callable is deployed in `europe-west2` and 
 - It compares a normalised submitted legal name with the registry name and checks that the registry status is `active`.
 - The registry result, source, registered name/number, status, type, incorporation date and check timestamp are stored on the private `organisationVerificationRequests/{organisationId}` record.
 - A successful match remains **pending** until a Hamlet platform administrator reviews and approves it. A name mismatch or non-active company is flagged for manual review; it is not automatically rejected.
-- API failures and invalid credentials fail closed: the request is not submitted.
+- Each organisation can initiate one registry lookup per minute, including failed attempts, to protect the Companies House API quota.\n- API failures and invalid credentials fail closed: the request is not submitted.
 
 A registry match confirms that the public register returns the submitted company identity and active status. It does not establish that the submitting user is authorised to represent the company. Hamlet's reviewer must still assess representative authority before approval.
 
