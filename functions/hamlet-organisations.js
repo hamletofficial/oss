@@ -455,7 +455,13 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const db = getDb();
-  const memberSnap = await db.collection("organisationMembers").doc(membershipId(orgId, user.uid)).get();
+  const [orgSnap, memberSnap] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(),
+    db.collection("organisationMembers").doc(membershipId(orgId, user.uid)).get(),
+  ]);
+  if (!orgSnap.exists || orgSnap.data().status !== "active") {
+    throw new HttpsError("not-found", "Active organisation not found.");
+  }
   requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
   const verificationSnap = await db.collection("organisationVerificationRequests").doc(orgId).get();
   if (!verificationSnap.exists) return {status:"unverified", report:""};
