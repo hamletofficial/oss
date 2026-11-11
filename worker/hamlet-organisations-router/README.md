@@ -14,9 +14,9 @@ The public hostnames stay the same across releases. Production promotion is cont
 
 ## Request behaviour
 
-- The platform host root maps to the public `/organisation-directory.html` page.
+- The platform host root maps to the public `/organisation-directory.html` page. The platform host is allow-listed to that directory, sign-in handoff, and shared static assets; unrelated main-site pages return 404.
 - A tenant host root maps to `/app/hamlet/tenant.html?tenantSlug={slug}`. After the single-use Firebase sign-in handoff succeeds and active membership is verified, the handoff redirects to `/app/hamlet/organisation-dashboard.html`.
-- Tenant hostnames use `{slug}.orgs.hamlet-ai.co.uk`.
+- Tenant hostnames use `{slug}.orgs.hamlet-ai.co.uk`. Tenant hosts proxy only the tenant handoff, organisation workspace HTML pages, sign-in handoff, and shared static assets. Unrelated main-site paths (for example `/about.html`, `/members.html` or `/pricing.html`) return 404 rather than mirroring the main website.
 - `HAMLET_ORGANISATIONS_ENV` controls whether tenant routes use production behavior. The default is staging; production requires the explicit value `production`.
 - Worker `workers.dev/tenant/{slug}` exercises tenant routing without changing the public hostname.
 - A short-lived cookie preserves the simulated tenant route for subsequent workspace paths.
@@ -26,7 +26,7 @@ The public hostnames stay the same across releases. Production promotion is cont
 
 The Worker serves `robots.txt` directly on every `{slug}.orgs.hamlet-ai.co.uk` hostname with `Disallow: /` and an `X-Robots-Tag: noindex, nofollow, noarchive` header. This prevents compliant crawlers from indexing tenant workspaces; it is not an access-control mechanism. The main website's `robots.txt` cannot control tenant hostnames, so the tenant policy must be served on each tenant host.
 
-The Worker does not authorize a member or determine whether an organisation is active. Those checks remain in the Firebase handoff and tenant application logic.
+The Worker does not authorize a member or determine whether an organisation is active. The route allow-list limits which application pages are exposed on these hostnames; Firebase authentication, tenant membership checks and backend authorization remain authoritative. Those checks remain in the Firebase handoff and tenant application logic.
 
 ## Cloudflare production state
 
