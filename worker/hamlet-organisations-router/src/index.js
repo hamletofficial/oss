@@ -82,6 +82,12 @@ export default {
       return new Response("Invalid organisation address", {status: 404});
     }
 
+    if (!route.initial && url.hostname.endsWith(".workers.dev") && url.searchParams.get("tenantSlug") !== route.slug) {
+      const tenantUrl = new URL(request.url);
+      tenantUrl.searchParams.set("tenantSlug", route.slug);
+      return Response.redirect(tenantUrl.toString(), 302);
+    }
+
     if (url.pathname === "/login.html") {
       return Response.redirect(MAIN_ORIGIN + "/login.html?next=" +
         encodeURIComponent("/app/hamlet/organisations.html"), 302);
