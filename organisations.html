@@ -92,14 +92,14 @@
     </header>
 
     <section id="loginSection" class="org-auth" hidden>
-      <h1>Sign in to Hamlet Organisations</h1>
+      <h1>Sign in to hamlet. / workspace</h1>
       <p id="loginMessage">Sign in to create an organisation, manage memberships or accept an invitation.</p>
       <a class="org-btn" href="/login.html?next=%2Forganisations.html">Go to Sign In</a>
     </section>
 
     <main id="orgShell" class="org-main" hidden>
       <section class="org-hero">
-        <div class="eyebrow">Hamlet Organisations</div>
+        <div class="eyebrow">hamlet. / workspace</div>
         <h1>Work together. Keep every organisation distinct.</h1>
         <p>Create an organisation workspace, invite colleagues and assign access roles. Your individual Hamlet account and privately owned deals and properties remain separate.</p>
       </section>
@@ -372,7 +372,15 @@
           selectedRole = role;
           document.getElementById("currentOrgRole").textContent = roleLabel(role);
           document.getElementById("currentOrgName").textContent = item.organisation.name;
-          document.getElementById("currentOrgSlug").textContent = "URL name: " + item.organisation.slug;
+          var slugLabel = document.getElementById("currentOrgSlug");
+          slugLabel.replaceChildren();
+          slugLabel.appendChild(document.createTextNode("Tenant workspace: "));
+          var tenantLink = document.createElement("a");
+          tenantLink.href = "https://" + item.organisation.slug + ".orgs.hamlet-ai.co.uk/";
+          tenantLink.textContent = item.organisation.slug + ".orgs.hamlet-ai.co.uk";
+          tenantLink.target = "_blank";
+          tenantLink.rel = "noopener noreferrer";
+          slugLabel.appendChild(tenantLink);
           document.getElementById("currentOrgStatus").textContent = "Active";
           organisationDetail.hidden = false;
           var canManage = role === "owner" || role === "admin";
