@@ -25,7 +25,7 @@ test("every tenant hostname serves a restrictive robots policy without resolving
   assert.equal(response.status, 200);
   assert.match(response.headers.get("Content-Type"), /text\/plain/);
   assert.match(response.headers.get("X-Robots-Tag"), /noindex/);
-  assert.equal(await response.text(), "User-agent: *\\nDisallow: /\\n");
+  assert.equal(await response.text(), ["User-agent: *", "Disallow: /", ""].join("\n"));
   assert.equal(upstreamUrl, "");
   assert.equal(resolverUrl, "");
 });
