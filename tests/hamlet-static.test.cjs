@@ -172,7 +172,7 @@ test('workspace organisation management page JavaScript parses', () => {
     assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'app-organisations-inline-' + index + '.js' }));
   }
   assert.match(appOrganisationsHtml, /name="robots" content="noindex,nofollow"/);
-  assert.match(appOrganisationsHtml, /Team operations/);
+  assert.match(appOrganisationsHtml, /Organisation verification/);
   assert.match(appOrganisationsHtml, /Shared deals &amp; pipeline/);
   assert.match(appOrganisationsHtml, /[Pp]roperty portfolio/);
   assert.match(appOrganisationsHtml, /Organisation administration/);

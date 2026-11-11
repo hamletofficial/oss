@@ -16,6 +16,7 @@ const RESERVED_SLUGS = new Set([
 ]);
 const HAMLET_SUPER_ADMIN_UID = "6epDJRISlBbRPWKosDZZWuiGQzK2";
 const postmarkOutboundToken = defineSecret("POSTMARK_OUTBOUND_TOKEN");
+const companiesHouseApiKey = defineSecret("COMPANIES_HOUSE_API_KEY");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>\"']/g, (character) => ({
@@ -146,6 +147,54 @@ function normaliseSlug(value) {
     throw new HttpsError("invalid-argument", "Choose an available organisation URL name using letters, numbers and single hyphens.");
   }
   return slug;
+}
+
+
+function normaliseCompanyName(value) {
+  return String(value || "").normalize("NFKC").toLowerCase()
+    .replace(/&/g, " and ").replace(/\b(the|limited|ltd|public limited company|plc)\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+}
+
+function normaliseCompanyNumber(value) {
+  const number = String(value || "").toUpperCase().replace(/[\s-]/g, "");
+  if (!/^(?:[0-9]{8}|[A-Z]{2}[0-9]{6}|[A-Z]{2}[0-9]{5}[A-Z])$/.test(number)) {
+    throw new HttpsError("invalid-argument", "Enter a valid UK Companies House registration number.");
+  }
+  return number;
+}
+
+async function lookupCompaniesHouseCompany(companyNumber) {
+  const apiKey = String(companiesHouseApiKey.value() || "").trim();
+  if (!apiKey) throw new HttpsError("failed-precondition", "Companies House verification is not configured. Please contact Hamlet support.");
+  let response;
+  try {
+    response = await fetch("https://api.company-information.service.gov.uk/company/" + encodeURIComponent(companyNumber), {
+      method: "GET",
+      headers: {Accept: "application/json", Authorization: "Basic " + Buffer.from(apiKey + ":").toString("base64")},
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch (error) {
+    console.error("Companies House lookup failed:", error);
+    throw new HttpsError("unavailable", "Companies House could not be reached. Your verification request has not been submitted; please retry shortly.");
+  }
+  if (response.status === 404) throw new HttpsError("not-found", "Companies House could not find that registration number. Check the number and try again.");
+  if (response.status === 401 || response.status === 403) {
+    console.error("Companies House rejected the configured API credentials (HTTP " + response.status + ").");
+    throw new HttpsError("failed-precondition", "Hamlet could not authenticate with Companies House. Please contact support.");
+  }
+  if (response.status === 429 || response.status >= 500) {
+    throw new HttpsError("unavailable", "Companies House is temporarily unavailable. Your verification request has not been submitted; please retry shortly.");
+  }
+  if (!response.ok) throw new HttpsError("internal", "Companies House returned an unexpected response. Please contact Hamlet support.");
+  let profile;
+  try { profile = await response.json(); } catch (error) {
+    throw new HttpsError("internal", "Companies House returned an unreadable company record.");
+  }
+  if (!profile || typeof profile.company_name !== "string" || typeof profile.company_number !== "string") {
+    throw new HttpsError("internal", "Companies House returned an incomplete company record.");
+  }
+  return profile;
 }
 
 function membershipId(orgId, uid) {
@@ -437,26 +486,63 @@ exports.updateOrganisationProfile = onCall({
   return {organisationId: orgId, ...fields};
 });
 
-exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB", secrets:[companiesHouseApiKey]}, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const legalName = readString(request.data && request.data.legalName, "registered legal name", 2, 160);
-  const registrationNumber = readString(request.data && request.data.registrationNumber, "registration number", 2, 80);
+  const registrationNumber = normaliseCompanyNumber(readString(request.data && request.data.registrationNumber, "registration number", 2, 80));
   if (!request.data || request.data.attested !== true) throw new HttpsError("failed-precondition", "Confirm you are authorised and the submitted details are accurate.");
-  const evidenceUrl = readString(request.data && request.data.evidenceUrl, "official registry or evidence URL", 8, 500);
-  let parsed;
-  try { parsed = new URL(evidenceUrl); } catch (error) {
-    throw new HttpsError("invalid-argument", "Enter a valid HTTPS official registry or evidence URL.");
-  }
-  if (parsed.protocol !== "https:" || !parsed.hostname || parsed.username || parsed.password) {
-    throw new HttpsError("invalid-argument", "Enter a valid HTTPS official registry or evidence URL.");
-  }
+
+  // Derive the evidence URL ourselves; never fetch a caller-supplied URL (SSRF protection).
+  const evidenceUrl = "https://find-and-update.company-information.service.gov.uk/company/" + registrationNumber;
   const db = getDb();
+  // Authorise the caller before consuming external API quota.
+  const lookupRef = db.collection("organisationVerificationLookups").doc(orgId);
+  await db.runTransaction(async (tx) => {
+    const [preflightOrg, preflightMember, preflightRequest, lookupSnap] = await Promise.all([
+      tx.get(db.collection("organisations").doc(orgId)),
+      tx.get(db.collection("organisationMembers").doc(membershipId(orgId, user.uid))),
+      tx.get(db.collection("organisationVerificationRequests").doc(orgId)),
+      tx.get(lookupRef),
+    ]);
+    if (!preflightOrg.exists || preflightOrg.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
+    requireRole(preflightMember.exists ? preflightMember.data() : null, ["owner", "admin"]);
+    if (preflightOrg.data().verificationStatus === "verified") throw new HttpsError("failed-precondition", "This organisation is already verified.");
+    if (preflightRequest.exists && preflightRequest.data().status === "pending") throw new HttpsError("already-exists", "A verification request is already awaiting review.");
+    const lastLookupAt = lookupSnap.exists ? lookupSnap.data().lastLookupAt : null;
+    if (lastLookupAt && typeof lastLookupAt.toMillis === "function" && Date.now() - lastLookupAt.toMillis() < 60000) {
+      throw new HttpsError("resource-exhausted", "A Companies House lookup was attempted recently. Please wait a minute before retrying.");
+    }
+    tx.set(lookupRef, {
+      organisationId: orgId,
+      lastLookupAt: Timestamp.now(),
+      lastRequestedByUid: user.uid,
+    });
+  });
+
+  const registryProfile = await lookupCompaniesHouseCompany(registrationNumber);
+  const registryNumber = normaliseCompanyNumber(registryProfile.company_number);
+  if (registryNumber !== registrationNumber) throw new HttpsError("internal", "Companies House returned a record for a different registration number.");
+  const registryName = String(registryProfile.company_name || "").trim();
+  const nameMatch = normaliseCompanyName(legalName) === normaliseCompanyName(registryName);
+  const activeStatus = String(registryProfile.company_status || "").toLowerCase() === "active";
+  const registryMatch = nameMatch && activeStatus;
+  const registryCheck = {
+    provider: "companies-house-public-data-api",
+    result: registryMatch ? "matched" : "review_required",
+    nameMatch,
+    activeStatus,
+    registeredName: registryName,
+    registeredNumber: registryNumber,
+    companyStatus: String(registryProfile.company_status || "unknown"),
+    companyType: String(registryProfile.type || "unknown"),
+    dateOfCreation: String(registryProfile.date_of_creation || ""),
+    checkedAt: FieldValue.serverTimestamp(),
+  };
   const orgRef = db.collection("organisations").doc(orgId);
   const memberRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
   const directoryRef = db.collection("organisationDirectory").doc(orgId);
   const verificationRef = db.collection("organisationVerificationRequests").doc(orgId);
-  let result;
   await db.runTransaction(async (tx) => {
     const [orgSnap, memberSnap, verificationSnap, directorySnap] = await Promise.all([
       tx.get(orgRef), tx.get(memberRef), tx.get(verificationRef), tx.get(directoryRef),
@@ -464,22 +550,19 @@ exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutS
     if (!orgSnap.exists || orgSnap.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
     requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
     if (orgSnap.data().verificationStatus === "verified") throw new HttpsError("failed-precondition", "This organisation is already verified.");
-    if (verificationSnap.exists && verificationSnap.data().status === "pending") {
-      throw new HttpsError("already-exists", "A verification request is already awaiting review.");
-    }
+    if (verificationSnap.exists && verificationSnap.data().status === "pending") throw new HttpsError("already-exists", "A verification request is already awaiting review.");
     if (!directorySnap.exists) throw new HttpsError("failed-precondition", "The organisation directory projection is unavailable.");
     const now = FieldValue.serverTimestamp();
     tx.set(verificationRef, {
       organisationId: orgId, organisationName: orgSnap.data().name,
       legalName, registrationNumber, evidenceUrl, submittedByUid: user.uid,
-      attested: true, status: "pending", submittedAt: now, updatedAt: now,
+      attested: true, status: "pending", registryCheck, submittedAt: now, updatedAt: now,
     });
     tx.update(orgRef, {verificationStatus:"pending", updatedAt:now});
     tx.update(directoryRef, {verificationStatus:"pending", updatedAt:now});
-    tx.create(activityRef(db, orgId), {organisationId:orgId, actorUid:user.uid, action:"organisation.verification_requested", createdAt:now});
-    result = {organisationId:orgId, status:"pending"};
+    tx.create(activityRef(db, orgId), {organisationId:orgId, actorUid:user.uid, action:"organisation.verification_requested", verificationResult:registryCheck.result, createdAt:now});
   });
-  return result;
+  return {organisationId:orgId, status:"pending", registryCheck:{result:registryCheck.result, nameMatch, activeStatus, registeredName:registryName, registeredNumber:registryNumber, companyStatus:registryCheck.companyStatus, evidenceUrl}};
 });
 
 exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
@@ -498,7 +581,8 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
     requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
     if (!verificationSnap.exists) return {status:"unverified", report:""};
     const verification = verificationSnap.data();
-    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || ""};
+    const registryCheck = verification.registryCheck ? {...verification.registryCheck, checkedAt:verification.registryCheck.checkedAt && verification.registryCheck.checkedAt.toDate ? verification.registryCheck.checkedAt.toDate().toISOString() : null} : null;
+    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || "", evidenceUrl:verification.evidenceUrl || "", registryCheck};
   });
 });
 
@@ -506,7 +590,7 @@ exports.listOrganisationVerificationRequests = onCall({region:"europe-west2", ti
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const snapshot = await getDb().collection("organisationVerificationRequests").where("status", "==", "pending").orderBy("submittedAt", "asc").limit(100).get();
-  return {requests:snapshot.docs.map(doc => ({id:doc.id, ...doc.data(), submittedAt:doc.data().submittedAt && doc.data().submittedAt.toDate().toISOString()}))};
+  return {requests:snapshot.docs.map(doc => {const data=doc.data();const registryCheck=data.registryCheck ? {...data.registryCheck, checkedAt:data.registryCheck.checkedAt && data.registryCheck.checkedAt.toDate ? data.registryCheck.checkedAt.toDate().toISOString() : null} : null;return {id:doc.id, ...data, registryCheck, submittedAt:data.submittedAt && data.submittedAt.toDate().toISOString()};})};
 });
 
 exports.reviewOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {

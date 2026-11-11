@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
+process.env.FUNCTIONS_EMULATOR = "true";
 const admin = require("firebase-admin");
 const {getFirestore, Timestamp} = require("firebase-admin/firestore");
 

@@ -72,13 +72,13 @@
     </section>
     <section class="profile-panel" aria-labelledby="verificationHeading">
       <h2 id="verificationHeading">Organisation verification</h2>
-      <p class="muted">Hamlet reviews the registered legal name and registration number against the official registry or evidence URL. Do not submit identity documents here. Verification status is shown in the public directory.</p>
+      <p class="muted">Hamlet checks UK company registration details directly against the live Companies House register. A successful registry match is evidence for review, not automatic approval. Do not submit identity documents here.</p>
       <p id="verificationStatus" role="status" aria-live="polite">Status: unverified.</p>
       <p id="verificationReport" class="profile-hint"></p>
       <form class="profile-form" id="verificationForm">
         <label>Registered legal name<input id="verificationLegalName" maxlength="160" minlength="2" required></label>
         <label>Company / organisation registration number<input id="verificationRegistrationNumber" maxlength="80" minlength="2" required></label>
-        <label class="wide">Official registry or evidence page (HTTPS)<input id="verificationEvidenceUrl" type="url" maxlength="500" placeholder="https://find-and-update.company-information.service.gov.uk/" required></label>
+        <label class="wide">Companies House company record<input id="verificationEvidenceUrl" type="url" maxlength="500" readonly aria-readonly="true" placeholder="Generated automatically from the company number" required></label>
         <label class="wide" style="display:flex;align-items:flex-start;gap:9px"><input id="verificationAttestation" type="checkbox" required style="width:auto;margin-top:2px">I confirm that I am authorised to submit this information and that it accurately identifies this organisation.</label>
         <button id="submitVerificationBtn" type="submit">Submit for verification</button>
       </form>
@@ -122,7 +122,7 @@
     $('verificationStatus').textContent='Status: '+verificationStatus+'.';
     $('verificationReport').textContent='';
     ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=!editable||verificationStatus==='pending'||verificationStatus==='verified');
-    if(editable)firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
+    if(editable)firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;if(result.data.evidenceUrl)$('verificationEvidenceUrl').value=result.data.evidenceUrl;if(result.data.registryCheck){const check=result.data.registryCheck;$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'.';}['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
     $('leaveOrganisationBtn').hidden=org.role==='owner';
     $('membershipRequestPanel').classList.toggle('hidden',!editable);
     if(editable)loadMembershipRequests(org.id);
@@ -187,6 +187,10 @@
     }catch(error){console.error('Organisation profile update failed:',error);$('profileStatus').textContent=error.message||'Unable to save the organisation profile.';}
     finally{button.disabled=false;}
   });
+  $('verificationRegistrationNumber').addEventListener('input',()=>{
+    const number=$('verificationRegistrationNumber').value.toUpperCase().replace(/[\s-]/g,'');
+    $('verificationEvidenceUrl').value=/^(?:[0-9]{8}|[A-Z]{2}[0-9]{6}|[A-Z]{2}[0-9]{5}[A-Z])$/.test(number)?'https://find-and-update.company-information.service.gov.uk/company/'+number:'';
+  });
   $('verificationForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const org=organisations.find(item=>item.id===$('orgSelect').value);
@@ -194,9 +198,9 @@
     if(!$('verificationAttestation').checked)return;
     const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
     try{
-      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
+      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,attested:$('verificationAttestation').checked});
       org.verificationStatus=result.data.status;
-      $('verificationStatus').textContent='Status: pending.';$('verificationReport').textContent='Your request is awaiting review by Hamlet.';
+      $('verificationStatus').textContent='Status: pending.';const check=result.data.registryCheck||{};$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'registered name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'. Your request is awaiting Hamlet approval.';
       ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
       notice('Verification request submitted.');
     }catch(error){console.error('Organisation verification request failed:',error);$('verificationReport').textContent=error.message||'Unable to submit verification request.';button.disabled=false;}
