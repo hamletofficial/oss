@@ -1007,4 +1007,6 @@ Object.assign(exports, require("./hamlet-organisation-teams"));
 
 Object.assign(exports, require("./hamlet-organisation-handoff"));
 
+Object.assign(exports, require("./hamlet-organisation-billing"));
+
 Object.assign(exports, require("./hamlet-organisation-governance"));

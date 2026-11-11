@@ -27,6 +27,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
   <script defer src="/firebase-config.js"></script>
   <script defer src="/header-profile.js?v=20261020-1"></script>
   <style>
@@ -323,6 +324,15 @@
 		<div class="stripe-box" id="stripePricingTableContainer"></div>
 		<p class="payment-note">No charge amount or currency is hard-coded on this page. Quoted prices are in GBP and link to a Stripe checkout used for taking payments. Card details are entered on Stripe-hosted checkout; this site does not handle or store card numbers.</p>
 	  </section>
+
+      <section id="organisationSubscriptionCard" class="payment-card" aria-labelledby="organisationSubscriptionTitle" style="margin-top:22px">
+        <span class="payment-kicker">Hamlet Organisations</span>
+        <h2 id="organisationSubscriptionTitle" style="margin:16px 0 10px;font-size:clamp(1.45rem,3vw,2rem);line-height:1.2">Organisation subscription</h2>
+        <p class="payment-intro">One subscription covers one organisation workspace. Complete secure checkout to create an organisation; active owners, administrators and members enter through their tenant dashboard.</p>
+        <p class="payment-note">The subscription price and renewal terms are shown on Stripe’s hosted checkout page.</p>
+        <button class="payment-button" id="organisationCheckoutButton" type="button" style="margin-top:14px">Continue to organisation checkout</button>
+        <p id="organisationCheckoutStatus" class="payment-note" role="status" aria-live="polite"></p>
+      </section>
 	</div>
   </main>
 
@@ -341,6 +351,31 @@
 	  var signOutBtn = document.getElementById('signOutBtn');
 
 	  if (!signOutBtn) return;
+
+      var organisationCheckoutButton = document.getElementById('organisationCheckoutButton');
+      var organisationCheckoutStatus = document.getElementById('organisationCheckoutStatus');
+      if (organisationCheckoutButton) {
+        organisationCheckoutButton.addEventListener('click', async function () {
+          var user = window.firebase && firebase.auth && firebase.auth().currentUser;
+          if (!user) {
+            window.location.assign('/login.html?next=' + encodeURIComponent('/invoice.html?organisation=1'));
+            return;
+          }
+          organisationCheckoutButton.disabled = true;
+          if (organisationCheckoutStatus) organisationCheckoutStatus.textContent = 'Preparing secure checkout…';
+          try {
+            await user.reload();
+            if (user.emailVerified !== true) throw new Error('Verify your email address before starting an organisation subscription.');
+            var result = await firebase.app().functions('europe-west2').httpsCallable('createOrganisationCheckoutSession')({});
+            if (!result.data || !result.data.url) throw new Error('Stripe did not return a checkout link.');
+            window.location.assign(result.data.url);
+          } catch (error) {
+            console.error('Unable to start organisation checkout:', error);
+            if (organisationCheckoutStatus) organisationCheckoutStatus.textContent = error.message || 'Secure checkout could not be started. Please try again.';
+            organisationCheckoutButton.disabled = false;
+          }
+        });
+      }
 
 	  if (!window.firebase || !window.firebaseConfig) {
         var signInLink = document.getElementById('signInLink');
