@@ -23,6 +23,7 @@
     .hero{padding:34px 0 22px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
     h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:8px 0}h2{font-size:18px;margin:0 0 8px}
     .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:760px;margin:0}
+    .tenant-link{display:inline-flex;align-items:center;gap:6px;margin-top:5px;color:#93c5fd;font-weight:700;text-decoration:underline;text-decoration-color:#477bb6;text-underline-offset:3px;overflow-wrap:anywhere}.tenant-link:hover,.tenant-link:focus-visible{color:#dbeafe;text-decoration-color:currentColor}.tenant-link:focus-visible{outline:2px solid #93c5fd;outline-offset:3px;border-radius:3px}
     .toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0 18px;padding:15px 17px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.92)}
     .org-select{min-width:min(100%,320px);max-width:100%;min-height:42px;padding:9px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:#f8fafc;font:inherit}
     .role{display:inline-flex;padding:5px 9px;border:1px solid #315b8c;border-radius:999px;background:#1e3a5f;color:#bfdbfe;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
@@ -122,7 +123,16 @@
             return;
           }
           $('selectedName').textContent=activeOrganisation.name||'Organisation';
-          $('selectedSlug').textContent='Tenant workspace: '+slug+TENANT_SUFFIX;
+          const tenantUrl='https://'+slug+TENANT_SUFFIX;
+          const tenantLink=document.createElement('a');
+          tenantLink.className='tenant-link';
+          tenantLink.href=tenantUrl;
+          tenantLink.textContent=tenantUrl;
+          tenantLink.setAttribute('aria-label','Open tenant workspace at '+tenantUrl);
+          tenantLink.setAttribute('rel','noopener noreferrer');
+          const tenantLabel=document.createElement('span');
+          tenantLabel.textContent='Tenant workspace:';
+          $('selectedSlug').replaceChildren(tenantLabel,document.createElement('br'),tenantLink);
           $('roleBadge').textContent=activeOrganisation.role;
           $('pageTitle').textContent=(activeOrganisation.name||'Organisation')+' dashboard';
           $('intro').textContent='Your organisation workspace, tools and records. This session is bound to '+slug+TENANT_SUFFIX+' and your verified active membership.';
