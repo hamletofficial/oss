@@ -35,9 +35,9 @@ function tenantSlug(){
  const params=new URLSearchParams(location.search);const explicit=params.get('tenantSlug');
  if(explicit&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(explicit))return explicit;
  const host=location.hostname.toLowerCase();
- const match=host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.orgs\\.hamlet-ai\\.co\\.uk$/);
+ const match=host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
  if(match)return match[1];
- const path=location.pathname.match(/^\\/tenant\\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\/?$/);
+ const path=location.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
  return path?path[1]:'';
 }
 const slug=tenantSlug();
