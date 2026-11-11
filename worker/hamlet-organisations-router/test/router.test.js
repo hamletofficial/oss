@@ -20,6 +20,16 @@ async function route(url, options = {}, env = {}) {
   return {response, upstreamUrl, resolverUrl};
 }
 
+test("every tenant hostname serves a restrictive robots policy without resolving tenant data", async () => {
+  const {response, upstreamUrl, resolverUrl} = await route("https://acme-group.orgs.hamlet-ai.co.uk/robots.txt");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("Content-Type"), /text\/plain/);
+  assert.match(response.headers.get("X-Robots-Tag"), /noindex/);
+  assert.equal(await response.text(), "User-agent: *\\nDisallow: /\\n");
+  assert.equal(upstreamUrl, "");
+  assert.equal(resolverUrl, "");
+});
+
 test("inactive tenant addresses are not proxied", async () => {
   const {response, upstreamUrl, resolverUrl} = await route(
     "https://acme-group.orgs.hamlet-ai.co.uk/",
