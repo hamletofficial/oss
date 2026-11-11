@@ -5,6 +5,9 @@ const {defineSecret} = require("firebase-functions/params");
 const {HttpsError, onCall} = require("firebase-functions/v2/https");
 const {onDocumentCreated, onDocumentWrittenWithAuthContext} = require("firebase-functions/v2/firestore");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {setGlobalOptions} = require("firebase-functions/v2");
+
+setGlobalOptions({region: "europe-west1"});
 
 const postmarkOutboundToken = defineSecret("POSTMARK_OUTBOUND_TOKEN");
 const linkedInClientSecret = defineSecret("LINKEDIN_CLIENT_SECRET");
