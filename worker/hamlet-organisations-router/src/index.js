@@ -82,12 +82,6 @@ export default {
       return new Response("Invalid organisation address", {status: 404});
     }
 
-    if (!route.initial && url.hostname.endsWith(".workers.dev") && url.searchParams.get("tenantSlug") !== route.slug) {
-      const tenantUrl = new URL(request.url);
-      tenantUrl.searchParams.set("tenantSlug", route.slug);
-      return Response.redirect(tenantUrl.toString(), 302);
-    }
-
     if (url.pathname === "/login.html") {
       return Response.redirect(MAIN_ORIGIN + "/login.html?next=" +
         encodeURIComponent("/app/hamlet/organisations.html"), 302);
@@ -98,12 +92,6 @@ export default {
     if (route.initial) {
       originPath = "/app/hamlet/tenant.html";
       originQuery = "?tenantSlug=" + encodeURIComponent(route.slug);
-    }
-
-    if (!route.initial && url.hostname.endsWith(".workers.dev")) {
-      const tenantParams = new URLSearchParams(originQuery);
-      tenantParams.set("tenantSlug", route.slug);
-      originQuery = "?" + tenantParams.toString();
     }
 
     const target = new URL(originPath + originQuery, MAIN_ORIGIN);
