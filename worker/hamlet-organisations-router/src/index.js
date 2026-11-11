@@ -51,6 +51,23 @@ function tenantCookie(slug) {
     "; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=28800";
 }
 
+function isSharedAsset(path) {
+  return path.startsWith("/assets/") ||
+    ["/firebase-config.js", "/index.css", "/theme.css", "/mobile-compat.css",
+      "/page-transition.css", "/hamlet-workspace.css", "/hamlet-workspace.js",
+      "/organisation-handoff.js", "/favicon.ico"].includes(path);
+}
+
+function isPlatformPath(path) {
+  return path === "/" || path === "/organisation-directory.html" || isSharedAsset(path);
+}
+
+function isTenantWorkspacePath(path) {
+  const organisationPage = path.startsWith("/app/hamlet/organisation-") && path.endsWith(".html");
+  return path === "/login.html" || path === "/app/hamlet/tenant.html" ||
+    path === "/app/hamlet/organisations.html" || organisationPage || isSharedAsset(path);
+}
+
 export default {
   async fetch(request, env = {}) {
     const url = new URL(request.url);
@@ -77,6 +94,9 @@ export default {
     }
 
     if (route.kind === "directory") {
+      if (!isPlatformPath(url.pathname)) {
+        return new Response("Not found", {status: 404, headers: {"Cache-Control": "no-store, max-age=0"}});
+      }
       const directoryPath = url.pathname === "/" ? "/organisation-directory.html" : url.pathname;
       const target = new URL(directoryPath + url.search, MAIN_ORIGIN);
       const upstream = await fetch(new Request(target.toString(), {
@@ -118,6 +138,10 @@ export default {
         status: 503,
         headers: {"Cache-Control": "no-store, max-age=0", "Retry-After": "60"},
       });
+    }
+
+    if (!isTenantWorkspacePath(url.pathname)) {
+      return new Response("Not found", {status: 404, headers: {"Cache-Control": "no-store, max-age=0"}});
     }
 
     if (url.pathname === "/login.html") {
