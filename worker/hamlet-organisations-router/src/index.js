@@ -62,6 +62,20 @@ export default {
     const route = tenantFromRequest(request, environment);
     if (!route) return new Response("Not found", {status: 404});
 
+    // Each tenant hostname must publish its own robots policy. A rule on the main
+    // website cannot govern crawling on a different host such as acme.orgs.hamlet-ai.co.uk.
+    if (route.kind === "tenant" && url.pathname === "/robots.txt") {
+      return new Response("User-agent: *\\nDisallow: /\\n", {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store, max-age=0",
+          "X-Content-Type-Options": "nosniff",
+          "X-Robots-Tag": "noindex, nofollow, noarchive",
+        },
+      });
+    }
+
     if (route.kind === "directory") {
       const directoryPath = url.pathname === "/" ? "/organisation-directory.html" : url.pathname;
       const target = new URL(directoryPath + url.search, MAIN_ORIGIN);
