@@ -214,7 +214,7 @@
         const actions=document.createElement('div');actions.className='request-actions';
         [[true,'Approve'],[false,'Decline']].forEach(([approve,label])=>{
           const button=document.createElement('button');button.type='button';button.textContent=label;if(!approve)button.className='secondary';
-          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west2').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
+          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west1').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
           actions.appendChild(button);
         });
         row.append(detail,actions);root.appendChild(row);
