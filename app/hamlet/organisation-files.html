@@ -45,7 +45,7 @@ async function loadMemberships(){
  const snap=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
  memberships=snap.docs.map(d=>({id:d.id,...d.data()}));
  const options=[];
- for(const m of memberships){const org=await db.collection('organisations').doc(m.organisationId).get();if(org.exists&&org.data().status==='active'&&(!tenantSlug||org.data().slug===tenantSlug))options.push({id:m.organisationId,name:org.data().name||'Organisation',slug:org.data().slug||'',role:role(m)});}
+ for(const m of memberships){const org=await db.collection('organisations').doc(m.organisationId).get();if(org.exists&&org.data().status==='active')options.push({id:m.organisationId,name:org.data().name||'Organisation',slug:org.data().slug||'',role:role(m)});}
  $('orgSelect').replaceChildren(...options.map(o=>new Option(o.name+' · '+o.role,o.id)));
  if(!options.length){notice('No active organisation memberships were found.',true);return;}
  $('orgSelect').value=options[0].id;await selectOrg(options[0].id);
