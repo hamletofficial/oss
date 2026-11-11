@@ -137,7 +137,7 @@ exports.recordOrganisationPropertyActivity = onDocumentWrittenWithAuthContext({
 /** Immutable server-authored file lifecycle history; filenames and file contents stay out of audit events. */
 exports.recordOrganisationDocumentActivity = onDocumentWrittenWithAuthContext({
   document: "organisationDocuments/{documentId}",
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 60,
   memory: "256MiB",
   retry: true,
