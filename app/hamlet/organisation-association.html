@@ -33,11 +33,6 @@
   <script>
     (function(){
       'use strict';
-  const tenantHost=location.hostname.toLowerCase();
-  const tenantSuffix='.orgs.hamlet-ai.co.uk';
-  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):(new URLSearchParams(location.search).get('tenantSlug')||'');
-  if(tenantSlug&&!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(tenantSlug)){document.body.textContent='Invalid organisation tenant address.';throw new Error('Invalid tenant hostname');}
-
       const $=id=>document.getElementById(id);let auth,db,functions,user,resources=[];
       const text=(value,fallback)=>String(value||fallback||'').replace(/\s+/g,' ').trim().slice(0,120);
       function fail(message){$('status').textContent=message;$('status').className='status error';}
@@ -65,7 +60,7 @@
           try{
             const memberships=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
             const targets=[];
-            for(const snapshot of memberships.docs){const member=snapshot.data();if(member.role==='viewer')continue;const org=await db.collection('organisations').doc(member.organisationId).get();if(org.exists&&org.data().status==='active'&&(!tenantSlug||org.data().slug===tenantSlug))targets.push({id:org.id,name:org.data().name,role:member.role});}
+            for(const snapshot of memberships.docs){const member=snapshot.data();if(member.role==='viewer')continue;const org=await db.collection('organisations').doc(member.organisationId).get();if(org.exists&&org.data().status==='active')targets.push({id:org.id,name:org.data().name,role:member.role});}
             $('orgSelect').replaceChildren(...targets.map(item=>new Option(item.name+' · '+item.role,item.id)));
             if(!targets.length){$('gateMessage').textContent='You need an active organisation role with write access before copying a personal record.';return;}
             $('gate').hidden=true;$('app').hidden=false;await load();
