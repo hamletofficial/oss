@@ -94,6 +94,12 @@ export default {
       originQuery = "?tenantSlug=" + encodeURIComponent(route.slug);
     }
 
+    if (!route.initial && url.hostname.endsWith(".workers.dev")) {
+      const tenantParams = new URLSearchParams(originQuery);
+      tenantParams.set("tenantSlug", route.slug);
+      originQuery = "?" + tenantParams.toString();
+    }
+
     const target = new URL(originPath + originQuery, MAIN_ORIGIN);
     const upstream = await fetch(new Request(target.toString(), {
       method: request.method,
