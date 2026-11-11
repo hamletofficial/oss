@@ -24,6 +24,8 @@ The public hostnames stay the same across releases. Production promotion is cont
 - Only GET and HEAD requests are proxied.
 - Responses are marked no-store and receive security headers identifying the route and environment.
 
+The Worker serves `robots.txt` directly on every `{slug}.orgs.hamlet-ai.co.uk` hostname with `Disallow: /` and an `X-Robots-Tag: noindex, nofollow, noarchive` header. This prevents compliant crawlers from indexing tenant workspaces; it is not an access-control mechanism. The main website's `robots.txt` cannot control tenant hostnames, so the tenant policy must be served on each tenant host.
+
 The Worker does not authorize a member or determine whether an organisation is active. Those checks remain in the Firebase handoff and tenant application logic.
 
 ## Cloudflare production state
