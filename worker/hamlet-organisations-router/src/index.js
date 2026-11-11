@@ -59,13 +59,13 @@ function isSharedAsset(path) {
 }
 
 function isPlatformPath(path) {
-  return path === "/" || path === "/organisation-directory.html" || isSharedAsset(path);
+  return path === "/" || path === "/organisation-directory.html" || path === "/login.html" || isSharedAsset(path);
 }
 
 function isTenantWorkspacePath(path) {
   const organisationPage = path.startsWith("/app/hamlet/organisation-") && path.endsWith(".html");
   return path === "/login.html" || path === "/app/hamlet/tenant.html" ||
-    path === "/app/hamlet/organisations.html" || organisationPage || isSharedAsset(path);
+    path === "/app/hamlet/organisation.html" || path === "/app/hamlet/organisations.html" || organisationPage || isSharedAsset(path);
 }
 
 export default {
