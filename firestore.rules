@@ -1012,7 +1012,11 @@ service cloud.firestore {
           && validParent(data)
           && canManageOrganisation(data.organisationId);
       }
+      // A stale share must not remain discoverable after membership removal.
+      // Validate current tenant membership and the live parent before exposing metadata.
       allow read: if request.auth != null
+        && isActiveOrganisationMember(resource.data.organisationId)
+        && validParent(resource.data)
         && (resource.data.sharedWithUid == request.auth.uid
           || canManageOrganisation(resource.data.organisationId));
       allow create: if request.auth != null

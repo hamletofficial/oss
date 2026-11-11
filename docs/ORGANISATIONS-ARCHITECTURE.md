@@ -173,6 +173,10 @@ The Firebase project's authorised domains, OAuth redirect domains, cookie scope,
 
 Custom organisation domains (for example `workspace.company.com`) are a later enterprise capability, requiring domain ownership verification, certificate issuance, tenant mapping, and protection against domain takeover.
 
+## Mandatory tenant-isolation release gate
+
+Tenant isolation is a mandatory production release requirement, not optional hardening. The normative security controls, adversarial test matrix, CI gates, and release evidence are defined in [Hamlet Tenant-Isolation Release Gate](./HAMLET-TENANT-ISOLATION-RELEASE-GATE.md). No production release should proceed while a cross-tenant access finding or required security check remains unresolved.
+
 ## Security requirements
 
 - Default deny for all new organisation collections.

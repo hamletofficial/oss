@@ -82,3 +82,21 @@ test("expired handoff codes cannot be exchanged", async () => {
   });
   await expectCode(invoke("exchangeOrganisationHandoffCode", {code: raw, slug: "expired-" + tag}, null), "failed-precondition");
 });
+ 
+test("handoff exchange rechecks membership after the code has been issued", async () => {
+  const tag = suffix(), uid = "revoked-handoff-" + tag, slug = "revoked-" + tag;
+  const org = await organisations.createOrganisation.run({
+    data: {name: "Revoked Handoff", slug},
+    auth: identity(uid, "revoked-owner@example.com"),
+  });
+  const issued = await invoke("createOrganisationHandoffCode", {
+    organisationId: org.organisationId, slug,
+  }, identity(uid, "revoked-owner@example.com"));
+  await db.collection("organisationMembers").doc(org.organisationId + "_" + uid).update({
+    status: "removed",
+  });
+  await expectCode(
+    invoke("exchangeOrganisationHandoffCode", {code: issued.code, slug}, null),
+    "permission-denied"
+  );
+});

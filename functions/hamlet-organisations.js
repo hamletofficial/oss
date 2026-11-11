@@ -455,12 +455,20 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const db = getDb();
-  const memberSnap = await db.collection("organisationMembers").doc(membershipId(orgId, user.uid)).get();
-  requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
-  const verificationSnap = await db.collection("organisationVerificationRequests").doc(orgId).get();
-  if (!verificationSnap.exists) return {status:"unverified", report:""};
-  const verification = verificationSnap.data();
-  return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || ""};
+  return db.runTransaction(async (transaction) => {
+    const [orgSnap, memberSnap, verificationSnap] = await Promise.all([
+      transaction.get(db.collection("organisations").doc(orgId)),
+      transaction.get(db.collection("organisationMembers").doc(membershipId(orgId, user.uid))),
+      transaction.get(db.collection("organisationVerificationRequests").doc(orgId)),
+    ]);
+    if (!orgSnap.exists || orgSnap.data().status !== "active") {
+      throw new HttpsError("not-found", "Active organisation not found.");
+    }
+    requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
+    if (!verificationSnap.exists) return {status:"unverified", report:""};
+    const verification = verificationSnap.data();
+    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || ""};
+  });
 });
 
 exports.listOrganisationVerificationRequests = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
@@ -939,6 +947,14 @@ exports.getOrganisationAnalytics = onCall({
     Promise.all(stages.map(async (stage) => [stage, await count("organisationDeals", [["stage", "==", stage]])])),
     Promise.all(["Commercial", "Residential"].map(async (type) => [type, await count("organisationProperties", [["propertyType", "==", type]])])),
   ]);
+  // Revalidate after the aggregate reads so a concurrent removal/suspension
+  // cannot leave a former administrator with a stale analytics response.
+  const [latestOrg, latestMember] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(),
+    memberRef.get(),
+  ]);
+  if (!latestOrg.exists || latestOrg.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
+  requireRole(latestMember.exists ? latestMember.data() : null, ["owner", "admin"]);
   return {organisationId: orgId, members, teams, deals, properties, dealsByStage: Object.fromEntries(dealsByStage), propertiesByType: Object.fromEntries(propertiesByType)};
 });
 

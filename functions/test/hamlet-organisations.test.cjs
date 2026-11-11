@@ -596,3 +596,25 @@ test("organisation lifecycle transitions are owner-only, audited and irreversibl
     .where("action", "==", "organisation.lifecycle_status_changed").get();
   assert.equal(events.size, 3);
 });
+
+test("suspended organisations do not expose verification metadata through callables", async () => {
+  const tag = suffix();
+  const ownerUid = "suspended-verification-owner-" + tag;
+  const organisation = await invoke("createOrganisation", {
+    name: "Suspended Verification", slug: "suspended-verification-" + tag,
+  }, identity(ownerUid, "suspended-owner@example.com"));
+  await db.collection("organisationVerificationRequests").doc(organisation.organisationId).set({
+    organisationId: organisation.organisationId,
+    status: "pending",
+    legalName: "Confidential Legal Entity Ltd",
+    registrationNumber: "CONFIDENTIAL-123",
+  });
+  await governance.setOrganisationLifecycleStatus.run({
+    data: {organisationId: organisation.organisationId, status: "suspended"},
+    auth: identity(ownerUid, "suspended-owner@example.com"),
+  });
+  await expectCode(
+    invoke("getOrganisationVerificationStatus", {organisationId: organisation.organisationId}, identity(ownerUid, "suspended-owner@example.com")),
+    "not-found"
+  );
+});
