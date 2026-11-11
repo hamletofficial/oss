@@ -13,6 +13,7 @@ on:
       - "firestore.indexes.json"
       - "tests/**"
       - "firebase.json"
+      - "docs/**"
       - ".github/workflows/organisation-emulator-tests.yml"
       - ".github/workflows/firebase-hosting-pull-request.yml"
   workflow_dispatch:
