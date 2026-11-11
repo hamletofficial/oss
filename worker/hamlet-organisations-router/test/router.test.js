@@ -30,9 +30,18 @@ test("workers.dev tenant path opens the tenant handoff page and sets a tenant co
   assert.match(response.headers.get("Set-Cookie"), /hamlet_tenant_slug=acme-group/);
 });
 
+test("workers.dev tenant cookie adds the tenant slug to the browser URL", async () => {
+  const {response} = await route(
+    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html",
+    {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
+  );
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("Location"), "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html?tenantSlug=acme-group");
+});
+
 test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped", async () => {
   const {response, upstreamUrl} = await route(
-    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html",
+    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html?tenantSlug=acme-group",
     {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
   );
   assert.equal(response.status, 200);
