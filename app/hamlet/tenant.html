@@ -33,12 +33,11 @@ function firebaseConfiguration(){return window.firebaseConfig||FIREBASE_CONFIG;}
 function status(message,error){$('status').textContent=message;$('status').className='status'+(error?' error':'');}
 function tenantSlug(){
  const params=new URLSearchParams(location.search);const explicit=params.get('tenantSlug');
- const valid=value=>typeof value==='string'&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(value);
+ if(explicit&&/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(explicit))return explicit;
  const host=location.hostname.toLowerCase();
- const match=host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\.orgs\.hamlet-ai\.co\.uk$/);
- if(match)return valid(explicit)&&explicit===match[1]?match[1]:(explicit?'':match[1]);
- if(explicit)return valid(explicit)?explicit:'';
- const path=location.pathname.match(/^\/tenant\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\/?$/);
+ const match=host.match(/^([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\.orgs\\.hamlet-ai\\.co\\.uk$/);
+ if(match)return match[1];
+ const path=location.pathname.match(/^\\/tenant\\/([a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?)\\/?$/);
  return path?path[1]:'';
 }
 const slug=tenantSlug();
