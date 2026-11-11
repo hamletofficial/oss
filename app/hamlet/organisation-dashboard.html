@@ -118,7 +118,6 @@
           if(user.emailVerified!==true){fail('Verify your email address before accessing this organisation.');return;}
           activeOrganisation=await loadTenantOrganisation(slug);
           if(!activeOrganisation){
-            await auth.signOut();
             fail('Your account does not have an active membership in this tenant organisation. Access has been denied.');
             return;
           }
