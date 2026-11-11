@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1120"><meta name="robots" content="noindex,nofollow">
+<title>Organisation Dashboard | Hamlet</title>
+<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/organisation-handoff.js?v=tenant-host-20261110"></script>
+<style>
+    :root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--raised:#172338;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb;--blue2:#60a5fa}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px 'DM Sans',Arial,sans-serif}
+    a{color:#93c5fd}.shell{width:min(1180px,100%);margin:auto;padding:24px clamp(16px,4vw,42px) 64px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0 22px;border-bottom:1px solid var(--line)}
+    .brand{font:800 22px Manrope,sans-serif;letter-spacing:-.8px;color:#fff;text-decoration:none}.brand span{color:#60a5fa}
+    .header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.link{color:#cbd5e1;text-decoration:none;font-weight:700}
+    .hero{padding:34px 0 22px}.eyebrow{color:#7dd3fc;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+    h1,h2,h3{font-family:Manrope,'DM Sans',sans-serif}h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:8px 0}h2{font-size:18px;margin:0 0 8px}
+    .hero p,.muted{color:var(--muted);line-height:1.6}.hero p{max-width:760px;margin:0}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0 18px;padding:15px 17px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.92)}
+    .org-select{min-width:min(100%,320px);max-width:100%;min-height:42px;padding:9px 12px;border:1px solid #40516a;border-radius:9px;background:#0d1728;color:#f8fafc;font:inherit}
+    .role{display:inline-flex;padding:5px 9px;border:1px solid #315b8c;border-radius:999px;background:#1e3a5f;color:#bfdbfe;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .card{display:block;min-width:0;padding:20px;border:1px solid var(--line);border-radius:15px;background:rgba(17,24,39,.96);text-decoration:none;color:var(--text);transition:border-color .18s,transform .18s}
+    .card:hover{border-color:#477bb6;transform:translateY(-2px)}.card .icon{font-size:21px;margin-bottom:13px}.card h2{margin-bottom:7px}.card p{margin:0;color:var(--muted);line-height:1.55}.card .open{display:block;margin-top:15px;color:#93c5fd;font-weight:800;font-size:12px}
+    .notice{display:none;padding:12px 14px;border:1px solid #315b8c;background:#142947;border-radius:9px;color:#dbeafe;line-height:1.5;margin:0 0 14px}.notice.show{display:block}.notice.error{border-color:#7f1d1d;background:#351a25;color:#fecaca}
+    .empty{padding:20px;border:1px dashed #40516a;border-radius:12px;color:var(--muted);line-height:1.6}
+    .profile-panel{margin:0 0 16px;padding:18px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.96)}.profile-panel h2{margin:0 0 8px}.profile-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.profile-form label{display:grid;gap:5px;color:#cbd5e1;font-size:11px;font-weight:800}.profile-form input,.profile-form select,.profile-form textarea{width:100%;min-width:0;padding:10px 11px;border:1px solid #40516a;border-radius:8px;background:#0d1728;color:var(--text);font:inherit}.profile-form textarea{min-height:90px;resize:vertical}.profile-form .wide{grid-column:1/-1}.profile-form button{justify-self:start;min-height:40px;padding:9px 13px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:white;font:700 12px inherit;cursor:pointer}.profile-form button:disabled{opacity:.55;cursor:not-allowed}.profile-hint{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+    .requests-panel{margin:0 0 16px;padding:18px;border:1px solid var(--line);border-radius:13px;background:rgba(17,24,39,.96)}.request-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.request-row:first-child{border-top:0}.request-detail{min-width:0;overflow-wrap:anywhere}.request-detail small{display:block;color:var(--muted);margin-top:4px}.request-actions{display:flex;gap:7px;flex-wrap:wrap}.request-actions button{min-height:36px;padding:8px 10px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer}.request-actions button.secondary{border-color:#475569;background:#172338;color:#dbeafe}
+    .leave-bar{display:flex;justify-content:flex-end;margin:-6px 0 14px}.leave-bar button{min-height:36px;padding:8px 11px;border:1px solid #7f1d1d;border-radius:8px;background:#3a1c2a;color:#fecaca;font:700 12px inherit;cursor:pointer}.leave-bar button:disabled{opacity:.55;cursor:not-allowed}
+    .footnote{font-size:11px;color:#8192aa;line-height:1.55;margin:18px 0 0}
+    #authGate{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#0b1120}.gate-card{width:min(420px,100%);padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}.gate-card p{color:var(--muted);line-height:1.6}
+    .hidden{display:none!important}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}.toolbar{align-items:flex-start}.org-select{width:100%}header{align-items:flex-start}}
+  </style>
+</head>
+<body>
+<div id="authGate"><div class="gate-card"><a class="brand" href="/">hamlet<span>.</span></a><h2 style="margin-top:20px">Secure organisation dashboard</h2><p id="gateMessage">Checking your sign-in…</p></div></div>
+<main class="shell hidden" id="app">
+<header><a class="brand" href="/app/public/dashboard.html">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/public/dashboard.html">Individual Dashboard</a><a class="link" href="/members.html">Members Area</a><span class="role" id="userBadge">Signed in</span></div></header>
+<section class="hero"><div class="eyebrow">Hamlet Organisations</div><h1 id="pageTitle">Organisation dashboard</h1><p id="intro">Your organisation workspaces, tools and records. Access is restricted to active organisation memberships and scoped to the selected organisation.</p></section>
+<div id="notice" class="notice" role="status" aria-live="polite"></div>
+<div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Verifying tenant address…</div></div><span class="role" id="roleBadge">Member</span></div>
+<div class="leave-bar"><button type="button" id="leaveOrganisationBtn" hidden>Leave organisation</button></div>
+<section class="grid" aria-label="Organisation modules">
+<a class="card" href="/app/hamlet/organisations.html"><div class="icon">🏢</div><h2>Organisation management</h2><p>Manage the organisation profile, members, invitations, governance and verification.</p><span class="open">Manage organisation →</span></a>
+<a class="card" href="/app/hamlet/organisation-deals.html"><div class="icon">⇄</div><h2>Organisation deals</h2><p>Access organisation-owned deal records and shared transaction pipelines.</p><span class="open">Open deal pipeline →</span></a>
+<a class="card" href="/app/hamlet/organisation-properties.html"><div class="icon">⌂</div><h2>Organisation properties</h2><p>Manage the organisation's commercial and residential property portfolio.</p><span class="open">Open property portfolio →</span></a>
+<a class="card" href="/app/hamlet/organisation-files.html"><div class="icon">▤</div><h2>Organisation files</h2><p>Access documents and assets attached to organisation deals and properties.</p><span class="open">Manage organisation files →</span></a>
+<a class="card" href="/app/hamlet/organisation-teams.html"><div class="icon">👥</div><h2>Organisation teams</h2><p>Manage teams and their delegated operational permissions.</p><span class="open">Manage teams →</span></a>
+<a class="card" href="/app/hamlet/organisation-association.html"><div class="icon">↗</div><h2>Personal resource association</h2><p>Copy eligible personal resources into an organisation as restricted snapshots.</p><span class="open">Associate a resource →</span></a>
+<a class="card" href="/app/hamlet/organisation-activity.html"><div class="icon">≋</div><h2>Organisation activity</h2><p>Review administrative activity and organisation audit history.</p><span class="open">View activity →</span></a>
+<a class="card" href="/app/hamlet/organisation-analytics.html"><div class="icon">▥</div><h2>Organisation analytics</h2><p>Review aggregate membership, team, deal and property metrics.</p><span class="open">View analytics →</span></a>
+</section>
+<p class="footnote">Modules enforce their own organisation-scoped role permissions. The dashboard does not grant permissions by itself.</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const SLUG=/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
+  const TENANT_SUFFIX='.orgs.hamlet-ai.co.uk';
+  let auth,db,currentUser,activeOrganisation;
+  function notice(message,error){
+    const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');
+  }
+  function fail(message){
+    $('gateMessage').textContent=message;
+    $('authGate').classList.remove('hidden');
+    $('app').classList.add('hidden');
+  }
+  function tenantSlug(){
+    const querySlug=new URLSearchParams(location.search).get('tenantSlug');
+    const host=location.hostname.toLowerCase();
+    const hostMatch=host.endsWith(TENANT_SUFFIX)?host.slice(0,-TENANT_SUFFIX.length):'';
+    if(hostMatch && (!SLUG.test(hostMatch)||hostMatch.includes('.'))) return '';
+    if(querySlug && !SLUG.test(querySlug)) return '';
+    if(hostMatch && querySlug && hostMatch!==querySlug) return '';
+    return hostMatch||querySlug||'';
+  }
+  async function loadTenantOrganisation(slug){
+    const snapshot=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
+    const memberships=snapshot.docs.map(doc=>doc.data()||{}).filter(m=>
+      m.status==='active' && typeof m.organisationId==='string' && m.organisationId.trim()
+    );
+    for(const membership of memberships){
+      const organisation=await db.collection('organisations').doc(membership.organisationId.trim()).get();
+      if(!organisation.exists) continue;
+      const data=organisation.data()||{};
+      if(data.status==='active' && data.slug===slug){
+        return {...data,id:organisation.id,role:membership.role||'member'};
+      }
+    }
+    return null;
+  }
+  async function init(){
+    const slug=tenantSlug();
+    if(!slug){fail('This page must be opened through a valid {slug}.orgs.hamlet-ai.co.uk tenant address.');return;}
+    if(!window.firebase||!window.firebaseConfig){fail('Secure sign-in could not be initialised. Please retry later.');return;}
+    try{
+      if(!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+      auth=firebase.auth();db=firebase.firestore();
+      auth.onAuthStateChanged(async user=>{
+        if(!user){
+          location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));
+          return;
+        }
+        currentUser=user;
+        try{
+          await user.reload();
+          await user.getIdToken(true);
+          if(user.emailVerified!==true){fail('Verify your email address before accessing this organisation.');return;}
+          activeOrganisation=await loadTenantOrganisation(slug);
+          if(!activeOrganisation){
+            fail('Your account does not have an active membership in this tenant organisation. Access has been denied.');
+            return;
+          }
+          $('selectedName').textContent=activeOrganisation.name||'Organisation';
+          $('selectedSlug').textContent='Tenant workspace: '+slug+TENANT_SUFFIX;
+          $('roleBadge').textContent=activeOrganisation.role;
+          $('pageTitle').textContent=(activeOrganisation.name||'Organisation')+' dashboard';
+          $('intro').textContent='Your organisation workspace, tools and records. This session is bound to '+slug+TENANT_SUFFIX+' and your verified active membership.';
+          $('userBadge').textContent=user.email||'Signed in';
+          $('authGate').classList.add('hidden');
+          $('app').classList.remove('hidden');
+          try{sessionStorage.setItem('hamletActiveOrganisationId',activeOrganisation.id);}catch(e){}
+          $('leaveOrganisationBtn').hidden=activeOrganisation.role==='owner';
+        }catch(error){
+          console.error('Tenant organisation access check failed:',error);
+          fail(error.message||'Unable to verify your organisation membership.');
+        }
+      });
+      $('leaveOrganisationBtn').addEventListener('click',async()=>{
+        if(!activeOrganisation||activeOrganisation.role==='owner') return;
+        if(!confirm('Leave '+activeOrganisation.name+'? You will lose access to this organisation workspace.')) return;
+        const button=$('leaveOrganisationBtn');button.disabled=true;
+        try{
+          await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:activeOrganisation.id});
+          await auth.signOut();
+          fail('You have left this organisation. Sign in again or contact an organisation administrator for access.');
+        }catch(error){
+          console.error('Unable to leave organisation:',error);
+          notice(error.message||'Unable to leave this organisation.',true);
+          button.disabled=false;
+        }
+      });
+    }catch(error){
+      console.error('Organisation dashboard initialisation failed:',error);
+      fail('Secure sign-in could not be initialised. Please retry later.');
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();
+</script>
+</body></html>

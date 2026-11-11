@@ -39,7 +39,6 @@ test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped",
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html");
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
 });
-
 test("canonical platform hostname serves the public organisation directory in staging", async () => {
   const {response, upstreamUrl} = await route("https://platform.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
@@ -81,3 +80,11 @@ test("legacy staging hostname is not accepted", async () => {
   const {response} = await route("https://organisations-staging.hamlet-ai.co.uk/");
   assert.equal(response.status, 404);
 });
+
+test("tenant Worker root keeps the secure handoff as the entry point", async () => {
+  const {response, upstreamUrl} = await route("https://acme-group.orgs.hamlet-ai.co.uk/");
+  assert.equal(response.status, 200);
+  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
+});
+
+
