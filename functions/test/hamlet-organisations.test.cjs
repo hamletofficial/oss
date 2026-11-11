@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 
-process.env.FUNCTIONS_EMULATOR ||= "true";
+process.env.FUNCTIONS_EMULATOR = "true";
 process.env.COMPANIES_HOUSE_API_KEY ||= "test-companies-house-key";
 global.fetch = async (url, options) => {
   assert.match(String(url), /^https:\/\/api\.company-information\.service\.gov\.uk\/company\//);
