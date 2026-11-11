@@ -188,7 +188,7 @@
     finally{button.disabled=false;}
   });
   $('verificationRegistrationNumber').addEventListener('input',()=>{
-    const number=$('verificationRegistrationNumber').value.toUpperCase().replace(/[\\s-]/g,'');
+    const number=$('verificationRegistrationNumber').value.toUpperCase().replace(/[\s-]/g,'');
     $('verificationEvidenceUrl').value=/^(?:[0-9]{8}|[A-Z]{2}[0-9]{6}|[A-Z]{2}[0-9]{5}[A-Z])$/.test(number)?'https://find-and-update.company-information.service.gov.uk/company/'+number:'';
   });
   $('verificationForm').addEventListener('submit',async event=>{
