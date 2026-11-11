@@ -557,7 +557,7 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
     requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
     if (!verificationSnap.exists) return {status:"unverified", report:""};
     const verification = verificationSnap.data();
-    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || ""};
+    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || "", evidenceUrl:verification.evidenceUrl || "", registryCheck:verification.registryCheck || null};
   });
 });
 
