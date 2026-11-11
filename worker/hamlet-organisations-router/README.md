@@ -15,7 +15,7 @@ The public hostnames stay the same across releases. Production promotion is cont
 ## Request behaviour
 
 - The platform host root maps to the public `/organisation-directory.html` page.
-- A tenant host root maps to `/app/hamlet/tenant.html?tenantSlug={slug}`.
+- A tenant host root maps to `/app/hamlet/tenant.html?tenantSlug={slug}`. After the single-use Firebase sign-in handoff succeeds and active membership is verified, the handoff redirects to `/app/hamlet/organisation-dashboard.html`.
 - Tenant hostnames use `{slug}.orgs.hamlet-ai.co.uk`.
 - `HAMLET_ORGANISATIONS_ENV` controls whether tenant routes use production behavior. The default is staging; production requires the explicit value `production`.
 - Worker `workers.dev/tenant/{slug}` exercises tenant routing without changing the public hostname.
