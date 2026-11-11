@@ -35,7 +35,7 @@
       'use strict';
   const tenantHost=location.hostname.toLowerCase();
   const tenantSuffix='.orgs.hamlet-ai.co.uk';
-  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):'';
+  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):(new URLSearchParams(location.search).get('tenantSlug')||'');
   if(tenantSlug&&!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(tenantSlug)){document.body.textContent='Invalid organisation tenant address.';throw new Error('Invalid tenant hostname');}
 
       const $=id=>document.getElementById(id);let auth,db,functions,user,resources=[];
