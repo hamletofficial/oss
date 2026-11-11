@@ -112,7 +112,7 @@
       if(!snap.exists||snap.data().status!=='active')return null;
       return {id:snap.id,name:snap.data().name,slug:snap.data().slug,role:m.role};
     }));
-    memberships=resolved.filter(m=>m&&(!tenantSlug||m.slug===tenantSlug));
+    memberships=resolved.filter(Boolean);
     const select=$('orgSelect');select.replaceChildren();
     if(!memberships.length){select.add(new Option('No active organisation',''));activeOrg=null;showNotice('You do not have an active organisation membership. Create or join one in Organisation Administration.',true);$('selectedName').textContent='No organisation selected';$('selectedSlug').textContent='No active membership';$('roleBadge').textContent='No role';$('propertyCards').replaceChildren();$('portfolioMeta').textContent='No active organisation';$('saveBtn').disabled=true;return;}
     memberships.forEach(m=>select.add(new Option(m.name+' · '+m.role,m.id)));
