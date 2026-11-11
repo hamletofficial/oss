@@ -80,6 +80,19 @@ test("canonical platform hostname serves the public organisation directory in st
   assert.equal(response.headers.get("X-Hamlet-Organisation-Environment"), "staging");
 });
 
+test("platform hostname does not expose unrelated main-site pages", async () => {
+  const {response, upstreamUrl} = await route("https://platform.hamlet-ai.co.uk/about.html");
+  assert.equal(response.status, 404);
+  assert.equal(upstreamUrl, "");
+});
+
+test("tenant hostname does not proxy unrelated main-site pages", async () => {
+  const {response, upstreamUrl, resolverUrl} = await route("https://acme-group.orgs.hamlet-ai.co.uk/about.html");
+  assert.equal(response.status, 404);
+  assert.equal(upstreamUrl, "");
+  assert.equal(resolverUrl, "");
+});
+
 test("canonical orgs tenant hostname opens tenant handoff in staging by default", async () => {
   const {response, upstreamUrl} = await route("https://acme-group.orgs.hamlet-ai.co.uk/");
   assert.equal(response.status, 200);
