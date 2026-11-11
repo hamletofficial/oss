@@ -1,22 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
-const https = require("node:https");
-const {EventEmitter} = require("node:events");
-  request.write = () => {};
-  request.end = () => {
-    const response = new EventEmitter();
-    response.statusCode = 200;
-    response.setEncoding = () => {};
-    callback(response);
-    queueMicrotask(() => {
-      response.emit("data", JSON.stringify({ErrorCode: 0, MessageID: "test-message-id", SubmittedAt: new Date().toISOString()}));
-      response.emit("end");
-    });
-  };
-  request.destroy = (error) => request.emit("error", error);
-  return request;
-};
+
 process.env.FUNCTIONS_EMULATOR ||= "true";
 const admin = require("firebase-admin");
 const {getFirestore, Timestamp} = require("firebase-admin/firestore");
