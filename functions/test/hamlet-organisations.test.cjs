@@ -3,6 +3,12 @@ const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 
 process.env.FUNCTIONS_EMULATOR ||= "true";
+process.env.COMPANIES_HOUSE_API_KEY ||= "test-companies-house-key";
+global.fetch = async (url, options) => {
+  assert.match(String(url), /^https:\/\/api\.company-information\.service\.gov\.uk\/company\//);
+  assert.equal(options.headers.Authorization, "Basic " + Buffer.from("test-companies-house-key:").toString("base64"));
+  return {status:200, ok:true, json:async()=>({company_name:"Verified Legal Ltd",company_number:"01234567",company_status:"active",type:"ltd",date_of_creation:"2001-01-01"})};
+};
 const admin = require("firebase-admin");
 const {getFirestore, Timestamp} = require("firebase-admin/firestore");
 
@@ -156,14 +162,19 @@ test("organisation verification is owner-submitted and platform-reviewed with a 
   }, identity(ownerUid, "verify-owner@example.com"));
   await expectCode(invoke("submitOrganisationVerification", {
     organisationId: organisation.organisationId, legalName: "Verified Legal Ltd",
-    registrationNumber: "01234567", evidenceUrl: "javascript:alert(1)", attested:true,
+    registrationNumber: "not-a-company-number", attested:true,
   }, identity(ownerUid, "verify-owner@example.com")), "invalid-argument");
   await invoke("submitOrganisationVerification", {
     organisationId: organisation.organisationId, legalName: "Verified Legal Ltd",
-    registrationNumber: "01234567", evidenceUrl: "https://find-and-update.company-information.service.gov.uk/company/01234567", attested:true,
+    registrationNumber: "01234567", attested:true,
   }, identity(ownerUid, "verify-owner@example.com"));
   const pending = await db.collection("organisations").doc(organisation.organisationId).get();
   assert.equal(pending.data().verificationStatus, "pending");
+  const submittedVerification = await db.collection("organisationVerificationRequests").doc(organisation.organisationId).get();
+  assert.equal(submittedVerification.data().registryCheck.result, "matched");
+  assert.equal(submittedVerification.data().registryCheck.nameMatch, true);
+  assert.equal(submittedVerification.data().registryCheck.activeStatus, true);
+  assert.equal(submittedVerification.data().evidenceUrl, "https://find-and-update.company-information.service.gov.uk/company/01234567");
   await expectCode(invoke("listOrganisationVerificationRequests", {}, identity(ownerUid, "verify-owner@example.com")), "permission-denied");
   const platformAdmin = identity("6epDJRISlBbRPWKosDZZWuiGQzK2", "admin@example.com");
   const queue = await invoke("listOrganisationVerificationRequests", {}, platformAdmin);
