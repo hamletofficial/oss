@@ -497,15 +497,28 @@ exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutS
   const evidenceUrl = "https://find-and-update.company-information.service.gov.uk/company/" + registrationNumber;
   const db = getDb();
   // Authorise the caller before consuming external API quota.
-  const [preflightOrg, preflightMember, preflightRequest] = await Promise.all([
-    db.collection("organisations").doc(orgId).get(),
-    db.collection("organisationMembers").doc(membershipId(orgId, user.uid)).get(),
-    db.collection("organisationVerificationRequests").doc(orgId).get(),
-  ]);
-  if (!preflightOrg.exists || preflightOrg.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
-  requireRole(preflightMember.exists ? preflightMember.data() : null, ["owner", "admin"]);
-  if (preflightOrg.data().verificationStatus === "verified") throw new HttpsError("failed-precondition", "This organisation is already verified.");
-  if (preflightRequest.exists && preflightRequest.data().status === "pending") throw new HttpsError("already-exists", "A verification request is already awaiting review.");
+  const lookupRef = db.collection("organisationVerificationLookups").doc(orgId);
+  await db.runTransaction(async (tx) => {
+    const [preflightOrg, preflightMember, preflightRequest, lookupSnap] = await Promise.all([
+      tx.get(db.collection("organisations").doc(orgId)),
+      tx.get(db.collection("organisationMembers").doc(membershipId(orgId, user.uid))),
+      tx.get(db.collection("organisationVerificationRequests").doc(orgId)),
+      tx.get(lookupRef),
+    ]);
+    if (!preflightOrg.exists || preflightOrg.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
+    requireRole(preflightMember.exists ? preflightMember.data() : null, ["owner", "admin"]);
+    if (preflightOrg.data().verificationStatus === "verified") throw new HttpsError("failed-precondition", "This organisation is already verified.");
+    if (preflightRequest.exists && preflightRequest.data().status === "pending") throw new HttpsError("already-exists", "A verification request is already awaiting review.");
+    const lastLookupAt = lookupSnap.exists ? lookupSnap.data().lastLookupAt : null;
+    if (lastLookupAt && typeof lastLookupAt.toMillis === "function" && Date.now() - lastLookupAt.toMillis() < 60000) {
+      throw new HttpsError("resource-exhausted", "A Companies House lookup was attempted recently. Please wait a minute before retrying.");
+    }
+    tx.set(lookupRef, {
+      organisationId: orgId,
+      lastLookupAt: Timestamp.now(),
+      lastRequestedByUid: user.uid,
+    });
+  });
 
   const registryProfile = await lookupCompaniesHouseCompany(registrationNumber);
   const registryNumber = normaliseCompanyNumber(registryProfile.company_number);
