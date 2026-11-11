@@ -71,7 +71,7 @@ async function receive(event){
   $('intro').textContent='Signed in as '+(user.email||'a Hamlet member')+'. Your current role is '+member.data().role+'.';
   status('Secure tenant session established. Your organisation membership has been verified.');
   window.opener.postMessage({type:'HAMLET_ORGANISATION_HANDOFF_COMPLETE',slug},event.origin);
-  window.setTimeout(()=>window.location.replace('/app/hamlet/organisation-dashboard.html'+location.search),900);
+  window.setTimeout(()=>window.location.replace('/app/hamlet/organisation-dashboard.html?tenantSlug='+encodeURIComponent(slug)),900);
  }catch(error){console.error('Organisation sign-in handoff failed:',error);status(error.message||'The secure handoff failed. Return to Hamlet and try again.',true);exchanged=false;}
 }
 window.addEventListener('message',receive);
