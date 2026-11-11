@@ -36,7 +36,7 @@ test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped",
     {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
   );
   assert.equal(response.status, 200);
-  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html");
+  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html?tenantSlug=acme-group");
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
 });
 
