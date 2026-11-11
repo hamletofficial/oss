@@ -87,3 +87,13 @@ test("tenant Worker root keeps the secure handoff as the entry point", async () 
   assert.equal(response.status, 200);
   assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/tenant.html?tenantSlug=acme-group");
 });
+
+test("legacy tenant hostname without the orgs subdomain is rejected", async () => {
+  const {response} = await route("https://acme-group.hamlet-ai.co.uk/");
+  assert.equal(response.status, 404);
+});
+
+test("tenant hostnames require exactly one valid slug label before orgs", async () => {
+  const malformed = await route("https://team.acme-group.orgs.hamlet-ai.co.uk/");
+  assert.equal(malformed.response.status, 404);
+});
