@@ -52,6 +52,11 @@
 <script>
 (function(){
   'use strict';
+  const tenantHost=location.hostname.toLowerCase();
+  const tenantSuffix='.orgs.hamlet-ai.co.uk';
+  const tenantSlug=tenantHost.endsWith(tenantSuffix)?tenantHost.slice(0,-tenantSuffix.length):'';
+  if(tenantSlug&&!/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(tenantSlug)){document.body.textContent='Invalid organisation tenant address.';throw new Error('Invalid tenant hostname');}
+
   const $=id=>document.getElementById(id);
   let auth,db,user,organisations=[],activeOrg=null,allEvents=[];
   const labels={
@@ -87,7 +92,7 @@
       const os=await db.collection('organisations').doc(m.organisationId).get();
       return os.exists&&os.data().status==='active'?{id:os.id,name:os.data().name,slug:os.data().slug,role:m.role}:null;
     }));
-    organisations=rows.filter(Boolean);
+    organisations=rows.filter(o=>o&&(!tenantSlug||o.slug===tenantSlug));
     const select=$('orgSelect');select.replaceChildren();
     if(!organisations.length){select.add(new Option('No active organisation',''));notice('No active organisation membership was found.',true);return;}
     const preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';
