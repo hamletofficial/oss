@@ -495,6 +495,18 @@ exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutS
 
   // Derive the evidence URL ourselves; never fetch a caller-supplied URL (SSRF protection).
   const evidenceUrl = "https://find-and-update.company-information.service.gov.uk/company/" + registrationNumber;
+  const db = getDb();
+  // Authorise the caller before consuming external API quota.
+  const [preflightOrg, preflightMember, preflightRequest] = await Promise.all([
+    db.collection("organisations").doc(orgId).get(),
+    db.collection("organisationMembers").doc(membershipId(orgId, user.uid)).get(),
+    db.collection("organisationVerificationRequests").doc(orgId).get(),
+  ]);
+  if (!preflightOrg.exists || preflightOrg.data().status !== "active") throw new HttpsError("not-found", "Active organisation not found.");
+  requireRole(preflightMember.exists ? preflightMember.data() : null, ["owner", "admin"]);
+  if (preflightOrg.data().verificationStatus === "verified") throw new HttpsError("failed-precondition", "This organisation is already verified.");
+  if (preflightRequest.exists && preflightRequest.data().status === "pending") throw new HttpsError("already-exists", "A verification request is already awaiting review.");
+
   const registryProfile = await lookupCompaniesHouseCompany(registrationNumber);
   const registryNumber = normaliseCompanyNumber(registryProfile.company_number);
   if (registryNumber !== registrationNumber) throw new HttpsError("internal", "Companies House returned a record for a different registration number.");
@@ -514,7 +526,6 @@ exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutS
     dateOfCreation: String(registryProfile.date_of_creation || ""),
     checkedAt: FieldValue.serverTimestamp(),
   };
-  const db = getDb();
   const orgRef = db.collection("organisations").doc(orgId);
   const memberRef = db.collection("organisationMembers").doc(membershipId(orgId, user.uid));
   const directoryRef = db.collection("organisationDirectory").doc(orgId);
@@ -557,7 +568,8 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
     requireRole(memberSnap.exists ? memberSnap.data() : null, ["owner", "admin"]);
     if (!verificationSnap.exists) return {status:"unverified", report:""};
     const verification = verificationSnap.data();
-    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || "", evidenceUrl:verification.evidenceUrl || "", registryCheck:verification.registryCheck || null};
+    const registryCheck = verification.registryCheck ? {...verification.registryCheck, checkedAt:verification.registryCheck.checkedAt && verification.registryCheck.checkedAt.toDate ? verification.registryCheck.checkedAt.toDate().toISOString() : null} : null;
+    return {status:verification.status, report:verification.reviewReport || "", legalName:verification.legalName || "", registrationNumber:verification.registrationNumber || "", evidenceUrl:verification.evidenceUrl || "", registryCheck};
   });
 });
 
@@ -565,7 +577,7 @@ exports.listOrganisationVerificationRequests = onCall({region:"europe-west2", ti
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const snapshot = await getDb().collection("organisationVerificationRequests").where("status", "==", "pending").orderBy("submittedAt", "asc").limit(100).get();
-  return {requests:snapshot.docs.map(doc => ({id:doc.id, ...doc.data(), submittedAt:doc.data().submittedAt && doc.data().submittedAt.toDate().toISOString()}))};
+  return {requests:snapshot.docs.map(doc => {const data=doc.data();const registryCheck=data.registryCheck ? {...data.registryCheck, checkedAt:data.registryCheck.checkedAt && data.registryCheck.checkedAt.toDate ? data.registryCheck.checkedAt.toDate().toISOString() : null} : null;return {id:doc.id, ...data, registryCheck, submittedAt:data.submittedAt && data.submittedAt.toDate().toISOString()};})};
 });
 
 exports.reviewOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
