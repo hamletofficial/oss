@@ -145,7 +145,13 @@ service firebase.storage {
           && firestore.exists(organisationPath())
           && firestore.get(organisationPath()).data.status == 'active';
       }
-      function parentExists() { return resourceType in ['deal', 'property'] && firestore.exists(parentPath()); }
+      function parentExists() {
+        return resourceType in ['deal', 'property']
+          && firestore.exists(parentPath())
+          // The parent must belong to the tenant named in the Storage path.
+          // Otherwise a member could substitute another tenant's resource ID.
+          && firestore.get(parentPath()).data.organisationId == organisationId;
+      }
       function parentData() { return firestore.get(parentPath()).data; }
       function administrator() { return activeMember() && firestore.get(memberPath()).data.role in ['owner', 'admin']; }
       function teamHas(permission) {
