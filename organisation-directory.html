@@ -74,8 +74,12 @@
         try{
           if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
           auth=firebase.auth();functions=firebase.app().functions('europe-west2');
-          const snapshot=await firebase.firestore().collection('organisationDirectory').where('isPublic','==',true).where('status','==','active').orderBy('name').limit(200).get();
-          profiles=snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(item=>item.isPublic===true&&item.status==='active');
+          const snapshot=await firebase.firestore().collection('organisationDirectory').where('isPublic','==',true).where('status','==','active').get();
+          // Sort the small public projection client-side. Avoid requiring a composite
+          // orderBy index for the directory to load after a fresh Firestore deployment.
+          profiles=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))
+            .filter(item=>item.isPublic===true&&item.status==='active'&&item.organisationId)
+            .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
           const industries=[...new Set(profiles.map(item=>item.industry).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
           industries.forEach(value=>$('industry').add(new Option(value,value)));
           $('status').textContent=profiles.length+' public organisation'+(profiles.length===1?'':'s');render();
