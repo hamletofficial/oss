@@ -63,7 +63,7 @@ These routes require a valid signed-in Hamlet account and active organisation me
 
 ### Firebase callable operations
 
-The organisation backend is implemented in `functions/hamlet-organisations.js` and exports the following Firebase callable functions in the `europe-west2` (London) region. They are invoked through Firebase Functions' callable HTTPS transport (the client SDK's `httpsCallable` interface); they are **not** independent REST URL routes.
+The organisation backend is implemented in `functions/hamlet-organisations.js`. The `reviewOrganisationMembershipRequest` callable runs in `europe-west1` (Belgium); the other callable functions listed below run in `europe-west2` (London). They are invoked through Firebase Functions' callable HTTPS transport (the client SDK's `httpsCallable` interface); they are **not** independent REST URL routes.
 
 | Callable function | Purpose |
 |---|---|
