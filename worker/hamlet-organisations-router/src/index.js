@@ -65,7 +65,7 @@ export default {
     // Each tenant hostname must publish its own robots policy. A rule on the main
     // website cannot govern crawling on a different host such as acme.orgs.hamlet-ai.co.uk.
     if (route.kind === "tenant" && url.pathname === "/robots.txt") {
-      return new Response("User-agent: *\\nDisallow: /\\n", {
+      return new Response(["User-agent: *", "Disallow: /", ""].join("\n"), {
         status: 200,
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
