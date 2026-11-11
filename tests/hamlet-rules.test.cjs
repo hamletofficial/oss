@@ -761,6 +761,26 @@ test('multi-organisation members can work in each tenant without crossing tenant
   await assertSucceeds(getBytes(ref(multiStorage, secondTenantPath)));
   await assertFails(getBytes(ref(firstTenantStorage, secondTenantPath)));
 
+  // A valid member of org-private must not substitute a resource ID belonging
+  // to org-second while keeping org-private in the Storage path.
+  const crossTenantReadPath = 'organisationDocuments/org-private/property/property-second/doc-cross-tenant/brief.pdf';
+  const crossTenantReadMetadata = {contentType:'application/pdf',customMetadata:{
+    organisationId:'org-private',resourceType:'property',resourceId:'property-second',
+    documentId:'doc-cross-tenant',uploaderUid:'multi-org-user'
+  }};
+  await assertSucceeds(uploadBytes(ref(multiStorage, crossTenantReadPath), new Uint8Array([1, 2, 3]), crossTenantReadMetadata));
+  await assertFails(getBytes(ref(firstTenantStorage, crossTenantReadPath)));
+
+  // Managers must not be able to upload into a tenant path backed by a
+  // different organisation's parent record either.
+  const managerStorage = env.authenticatedContext('manager').storage();
+  const crossTenantWritePath = 'organisationDocuments/org-private/property/property-second/doc-cross-tenant-manager/brief.pdf';
+  const crossTenantWriteMetadata = {contentType:'application/pdf',customMetadata:{
+    organisationId:'org-private',resourceType:'property',resourceId:'property-second',
+    documentId:'doc-cross-tenant-manager',uploaderUid:'manager'
+  }};
+  await assertFails(uploadBytes(ref(managerStorage, crossTenantWritePath), new Uint8Array([1, 2, 3]), crossTenantWriteMetadata));
+
   // Suspension in one organisation is local to that membership; it must not
   // revoke the user's independent membership in the other organisation.
   await env.withSecurityRulesDisabled(async (context) => {
