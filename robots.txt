@@ -1,6 +1,8 @@
 User-agent: *
 # Public pages are crawlable. Robots rules are not access controls.
 # Keep known authenticated, workspace, and administrative routes out of crawler discovery.
+# Tenant-host crawler rules are served separately by the Organisations Worker on each *.orgs.hamlet-ai.co.uk hostname.
+# A robots.txt file cannot impose rules on a different hostname.
 Disallow: /superuser/
 Disallow: /app/hamlet/
 Disallow: /app/public/dashboard.html
