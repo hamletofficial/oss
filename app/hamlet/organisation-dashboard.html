@@ -46,7 +46,7 @@
 <header><a class="brand" href="/app/public/dashboard.html">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/public/dashboard.html">Individual Dashboard</a><a class="link" href="/members.html">Members Area</a><span class="role" id="userBadge">Signed in</span></div></header>
 <section class="hero"><div class="eyebrow">Hamlet Organisations</div><h1 id="pageTitle">Organisation dashboard</h1><p id="intro">Your organisation workspaces, tools and records. Access is restricted to active organisation memberships and scoped to the selected organisation.</p></section>
 <div id="notice" class="notice" role="status" aria-live="polite"></div>
-<div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Loading membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select class="org-select" id="orgSelect" aria-label="Select organisation"><option>Loading…</option></select></div><span class="role" id="roleBadge">Member</span></div>
+<div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Verifying tenant address…</div></div><span class="role" id="roleBadge">Member</span></div>
 <div class="leave-bar"><button type="button" id="leaveOrganisationBtn" hidden>Leave organisation</button></div>
 <section class="grid" aria-label="Organisation modules">
 <a class="card" href="/app/hamlet/organisations.html"><div class="icon">🏢</div><h2>Organisation management</h2><p>Manage the organisation profile, members, invitations, governance and verification.</p><span class="open">Manage organisation →</span></a>
@@ -64,150 +64,100 @@
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
-  let auth,db,currentUser,organisations=[];
-  const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
-  function showApp(){$('authGate').classList.add('hidden');$('app').classList.remove('hidden');$('userBadge').textContent=currentUser.email||'Signed in';}
-  function selectOrganisation(id){
-    const org=organisations.find(item=>item.id===id);
-    if(!org)return;
-    $('selectedName').textContent=org.name;
-    $('selectedSlug').textContent='Tenant workspace: '+org.slug+'.orgs.hamlet-ai.co.uk';
-    $('roleBadge').textContent=org.role;
-    $('pageTitle').textContent=org.name+' workspace';
-    $('orgSelect').value=org.id;
-    $('profileName').value=org.name||'';$('profileIndustry').value=org.industry||'';$('profileWebsite').value=org.website||'';$('profileLocation').value=org.publicLocation||'';$('profileDescription').value=org.description||'';$('profileVisibility').value=org.visibility==='public'?'public':'private';
-    const editable=['owner','admin'].includes(org.role);
-    ['profileName','profileIndustry','profileWebsite','profileLocation','profileDescription','profileVisibility','saveProfileBtn'].forEach(id=>$(id).disabled=!editable);
-    $('profileStatus').textContent=editable?'Only owners and administrators can edit this profile.':'Profile editing is restricted to organisation owners and administrators.';
-    const verificationStatus=org.verificationStatus||'unverified';
-    $('verificationStatus').textContent='Status: '+verificationStatus+'.';
-    $('verificationReport').textContent='';
-    ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=!editable||verificationStatus==='pending'||verificationStatus==='verified');
-    if(editable)firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
-    $('leaveOrganisationBtn').hidden=org.role==='owner';
-    $('membershipRequestPanel').classList.toggle('hidden',!editable);
-    if(editable)loadMembershipRequests(org.id);
-    try{sessionStorage.setItem('hamletActiveOrganisationId',org.id);}catch(e){}
+  const SLUG=/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
+  const TENANT_SUFFIX='.orgs.hamlet-ai.co.uk';
+  let auth,db,currentUser,activeOrganisation;
+  function notice(message,error){
+    const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');
   }
-  async function loadMemberships(){
-    const snap=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
-    const active=snap.docs.map(d=>({id:d.id,data:d.data()||{}}))
-      .filter(item=>item.data.status==='active'&&typeof item.data.organisationId==='string'&&item.data.organisationId.trim());
-    const records=await Promise.all(active.map(async item=>{
-      const membership=item.data;
-      try{
-        const orgSnap=await db.collection('organisations').doc(membership.organisationId.trim()).get();
-        if(!orgSnap.exists)return null;
-        const org=orgSnap.data()||{};
-        if(org.status!=='active')return null;
-        return {...org,id:orgSnap.id,role:membership.role||'member'};
-      }catch(error){
-        console.warn('Skipping an inaccessible or invalid organisation membership:',item.id,error);
-        return null;
+  function fail(message){
+    $('gateMessage').textContent=message;
+    $('authGate').classList.remove('hidden');
+    $('app').classList.add('hidden');
+  }
+  function tenantSlug(){
+    const querySlug=new URLSearchParams(location.search).get('tenantSlug');
+    const host=location.hostname.toLowerCase();
+    const hostMatch=host.endsWith(TENANT_SUFFIX)?host.slice(0,-TENANT_SUFFIX.length):'';
+    if(hostMatch && (!SLUG.test(hostMatch)||hostMatch.includes('.'))) return '';
+    if(querySlug && !SLUG.test(querySlug)) return '';
+    if(hostMatch && querySlug && hostMatch!==querySlug) return '';
+    return hostMatch||querySlug||'';
+  }
+  async function loadTenantOrganisation(slug){
+    const snapshot=await db.collection('organisationMembers').where('uid','==',currentUser.uid).get();
+    const memberships=snapshot.docs.map(doc=>doc.data()||{}).filter(m=>
+      m.status==='active' && typeof m.organisationId==='string' && m.organisationId.trim()
+    );
+    for(const membership of memberships){
+      const organisation=await db.collection('organisations').doc(membership.organisationId.trim()).get();
+      if(!organisation.exists) continue;
+      const data=organisation.data()||{};
+      if(data.status==='active' && data.slug===slug){
+        return {...data,id:organisation.id,role:membership.role||'member'};
       }
-    }));
-    organisations=records.filter(Boolean);
-    window.__hamletOrganisationChoices=organisations;
-    const select=$('orgSelect');select.replaceChildren();
-    if(!organisations.length){
-      select.add(new Option('No active memberships',''));
-      $('selectedName').textContent='No organisation selected';
-      $('selectedSlug').textContent='Create or join an organisation to continue.';
-      $('roleBadge').textContent='No membership';
-      $('pageTitle').textContent='Your organisation workspace';
-      $('intro').textContent='You do not currently belong to an active organisation. Organisation creation, invitations and membership administration are available in the Members Area.';
-      $('notice').className='notice show';
-      $('notice').textContent=active.length
-        ?'No accessible active organisation was found. Refresh your membership or contact Hamlet support if this continues.'
-        :'No active organisation membership was found for this account.';
-      return;
     }
-    organisations.forEach(org=>select.add(new Option((org.name||'Organisation')+' · '+org.role,org.id)));
-    let preferred='';
-    try{preferred=sessionStorage.getItem('hamletActiveOrganisationId')||'';}catch(e){}
-    const chosen=organisations.some(o=>o.id===preferred)?preferred:organisations[0].id;
-    selectOrganisation(chosen);
+    return null;
   }
-
-  $('profileForm').addEventListener('submit',async event=>{
-    event.preventDefault();
-    const org=organisations.find(item=>item.id===$('orgSelect').value);
-    if(!org||!['owner','admin'].includes(org.role))return;
-    const button=$('saveProfileBtn');button.disabled=true;$('profileStatus').textContent='Saving organisation profile…';
+  async function init(){
+    const slug=tenantSlug();
+    if(!slug){fail('This page must be opened through a valid {slug}.orgs.hamlet-ai.co.uk tenant address.');return;}
+    if(!window.firebase||!window.firebaseConfig){fail('Secure sign-in could not be initialised. Please retry later.');return;}
     try{
-      if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-      const result=await firebase.app().functions('europe-west2').httpsCallable('updateOrganisationProfile')({
-        organisationId:org.id,name:$('profileName').value,industry:$('profileIndustry').value,
-        website:$('profileWebsite').value,publicLocation:$('profileLocation').value,
-        description:$('profileDescription').value,visibility:$('profileVisibility').value
-      });
-      Object.assign(org,result.data);
-      $('selectedName').textContent=org.name;$('pageTitle').textContent=org.name+' workspace';
-      $('profileStatus').textContent='Organisation profile saved.';
-      notice(org.visibility==='public'?'Profile saved and listed in the public directory.':'Profile saved and hidden from the public directory.');
-    }catch(error){console.error('Organisation profile update failed:',error);$('profileStatus').textContent=error.message||'Unable to save the organisation profile.';}
-    finally{button.disabled=false;}
-  });
-  $('verificationForm').addEventListener('submit',async event=>{
-    event.preventDefault();
-    const org=organisations.find(item=>item.id===$('orgSelect').value);
-    if(!org||!['owner','admin'].includes(org.role))return;
-    if(!$('verificationAttestation').checked)return;
-    const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
-    try{
-      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
-      org.verificationStatus=result.data.status;
-      $('verificationStatus').textContent='Status: pending.';$('verificationReport').textContent='Your request is awaiting review by Hamlet.';
-      ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
-      notice('Verification request submitted.');
-    }catch(error){console.error('Organisation verification request failed:',error);$('verificationReport').textContent=error.message||'Unable to submit verification request.';button.disabled=false;}
-  });
-  async function loadMembershipRequests(orgId){
-    const root=$('membershipRequestList');root.textContent='Loading requests…';
-    try{
-      const snapshot=await db.collection('organisationMembershipRequests').where('organisationId','==',orgId).where('status','==','pending').orderBy('createdAt','desc').limit(100).get();
-      root.replaceChildren();
-      if(snapshot.empty){root.textContent='No pending membership requests.';return;}
-      snapshot.docs.forEach(doc=>{
-        const data=doc.data(),row=document.createElement('div');row.className='request-row';
-        const detail=document.createElement('div');detail.className='request-detail';detail.textContent=data.email||'Verified Hamlet member';
-        const meta=document.createElement('small');meta.textContent='Requested membership as a standard member';detail.appendChild(meta);
-        const actions=document.createElement('div');actions.className='request-actions';
-        [[true,'Approve'],[false,'Decline']].forEach(([approve,label])=>{
-          const button=document.createElement('button');button.type='button';button.textContent=label;if(!approve)button.className='secondary';
-          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west2').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
-          actions.appendChild(button);
-        });
-        row.append(detail,actions);root.appendChild(row);
-      });
-    }catch(error){console.error('Membership request list unavailable:',error);root.textContent='Membership requests could not be loaded.';}
-  }
-  $('leaveOrganisationBtn').addEventListener('click',async()=>{
-    const org=organisations.find(item=>item.id===$('orgSelect').value);
-    if(!org||org.role==='owner'||!confirm('Leave '+org.name+'? Your membership and team access will be removed. You will need a new invitation to rejoin.'))return;
-    const button=$('leaveOrganisationBtn');button.disabled=true;
-    try{
-      await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:org.id});
-      notice('You have left '+org.name+'.');
-      if(organisations.length<=1){location.replace('/organisations.html');return;}
-      await loadMemberships();
-    }catch(error){console.error('Unable to leave organisation:',error);notice(error.message||'Unable to leave this organisation.',true);button.disabled=false;}
-  });
-  $('orgSelect').addEventListener('change',e=>selectOrganisation(e.target.value));
-  function init(){
-    if(!window.firebase||!window.firebaseConfig){$('gateMessage').textContent='Secure sign-in could not be initialised.';return;}
-    try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();
+      if(!firebase.apps.length) firebase.initializeApp(window.firebaseConfig);
+      auth=firebase.auth();db=firebase.firestore();
       auth.onAuthStateChanged(async user=>{
-        if(!user){$('gateMessage').textContent='Sign in is required. Redirecting to secure sign-in…';location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));return;}
-        currentUser=user;showApp();
-        try{await user.reload();await user.getIdToken(true);}catch(e){console.warn('Unable to refresh account state:',e);}
-        if(user.emailVerified!==true){notice('Verify your email address to access organisation workspaces.',true);return;}
-        try{await loadMemberships();}catch(e){notice(e.message||'Unable to load organisation memberships. Please try again later.',true);}
+        if(!user){
+          location.replace('/login.html?next='+encodeURIComponent(location.pathname+location.search));
+          return;
+        }
+        currentUser=user;
+        try{
+          await user.reload();
+          await user.getIdToken(true);
+          if(user.emailVerified!==true){fail('Verify your email address before accessing this organisation.');return;}
+          activeOrganisation=await loadTenantOrganisation(slug);
+          if(!activeOrganisation){
+            await auth.signOut();
+            fail('Your account does not have an active membership in this tenant organisation. Access has been denied.');
+            return;
+          }
+          $('selectedName').textContent=activeOrganisation.name||'Organisation';
+          $('selectedSlug').textContent='Tenant workspace: '+slug+TENANT_SUFFIX;
+          $('roleBadge').textContent=activeOrganisation.role;
+          $('pageTitle').textContent=(activeOrganisation.name||'Organisation')+' dashboard';
+          $('intro').textContent='Your organisation workspace, tools and records. This session is bound to '+slug+TENANT_SUFFIX+' and your verified active membership.';
+          $('userBadge').textContent=user.email||'Signed in';
+          $('authGate').classList.add('hidden');
+          $('app').classList.remove('hidden');
+          try{sessionStorage.setItem('hamletActiveOrganisationId',activeOrganisation.id);}catch(e){}
+          $('leaveOrganisationBtn').hidden=activeOrganisation.role==='owner';
+        }catch(error){
+          console.error('Tenant organisation access check failed:',error);
+          fail(error.message||'Unable to verify your organisation membership.');
+        }
       });
-    }catch(e){$('gateMessage').textContent='Secure sign-in could not be initialised. Please retry later.';console.error(e);}
+      $('leaveOrganisationBtn').addEventListener('click',async()=>{
+        if(!activeOrganisation||activeOrganisation.role==='owner') return;
+        if(!confirm('Leave '+activeOrganisation.name+'? You will lose access to this organisation workspace.')) return;
+        const button=$('leaveOrganisationBtn');button.disabled=true;
+        try{
+          await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:activeOrganisation.id});
+          await auth.signOut();
+          fail('You have left this organisation. Sign in again or contact an organisation administrator for access.');
+        }catch(error){
+          console.error('Unable to leave organisation:',error);
+          notice(error.message||'Unable to leave this organisation.',true);
+          button.disabled=false;
+        }
+      });
+    }catch(error){
+      console.error('Organisation dashboard initialisation failed:',error);
+      fail('Secure sign-in could not be initialised. Please retry later.');
+    }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
 })();
 </script>
 </body></html>
