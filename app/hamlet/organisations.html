@@ -138,7 +138,7 @@
         $('verificationReport').textContent=verification.report||'';
         if(verification.legalName)$('verificationLegalName').value=verification.legalName;
         if(verification.registrationNumber){
-          const number=verification.registrationNumber.toUpperCase().replace(/[\\s-]/g,'');
+          const number=verification.registrationNumber.toUpperCase().replace(/[\s-]/g,'');
           $('verificationRegistrationNumber').value=number;
           $('verificationEvidenceUrl').value=verification.evidenceUrl||(/^(?:[0-9]{8}|[A-Z]{2}[0-9]{6}|[A-Z]{2}[0-9]{5}[A-Z])$/.test(number)?'https://find-and-update.company-information.service.gov.uk/company/'+number:'');
         }else if(verification.evidenceUrl){
