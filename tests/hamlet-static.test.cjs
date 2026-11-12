@@ -149,10 +149,10 @@ test('organisation lifecycle operations are server-controlled and registered', (
 
 
 test('legacy plural organisation endpoints redirect to their singular canonical paths', () => {
-  assert.match(legacyOrganisationsHtml, /url=\\/organisation\\.html/);
-  assert.match(legacyOrganisationsHtml, /location\\.replace\\("\\/organisation\\.html"/);
-  assert.match(legacyAppOrganisationsHtml, /url=\\/app\\/hamlet\\/organisation\\.html/);
-  assert.match(legacyAppOrganisationsHtml, /location\\.replace\\("\\/app\\/hamlet\\/organisation\\.html"/);
+  assert.ok(legacyOrganisationsHtml.includes('url=/organisation.html'));
+  assert.ok(legacyOrganisationsHtml.includes('window.location.replace("/organisation.html"'));
+  assert.ok(legacyAppOrganisationsHtml.includes('url=/app/hamlet/organisation.html'));
+  assert.ok(legacyAppOrganisationsHtml.includes('window.location.replace("/app/hamlet/organisation.html"'));
 });
 
 test('organisation management page scripts parse and use authenticated callable operations', () => {
