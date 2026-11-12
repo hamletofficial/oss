@@ -66,7 +66,7 @@ function isTenantWorkspacePath(path) {
   const pages = new Set([
     "/app/hamlet/tenant.html",
     "/app/hamlet/organisation.html",
-    "/app/hamlet/organisations.html",
+    "/app/hamlet/organisation.html",
     "/app/hamlet/organisation-dashboard.html",
     "/app/hamlet/organisation-deals.html",
     "/app/hamlet/organisation-properties.html",
@@ -158,7 +158,7 @@ export default {
 
     if (url.pathname === "/login.html") {
       return Response.redirect(MAIN_ORIGIN + "/login.html?next=" +
-        encodeURIComponent("/app/hamlet/organisations.html"), 302);
+        encodeURIComponent("/app/hamlet/organisation.html"), 302);
     }
 
     let originPath = url.pathname;
