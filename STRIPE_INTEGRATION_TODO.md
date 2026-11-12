@@ -34,7 +34,7 @@ Set each with `firebase functions:secrets:set SECRET_NAME` from the repository r
 | `saved_payment_method_options.payment_method_save` | `enabled` |
 | `integration_identifier` | `hosted_mobile_app_0002` |
 | `origin_context` | `mobile_app` |
-| `success_url` | `https://www.hamlet-ai.co.uk/organisations.html?orgCheckoutSessionId={CHECKOUT_SESSION_ID}` |
+| `success_url` | `https://www.hamlet-ai.co.uk/organisation.html?orgCheckoutSessionId={CHECKOUT_SESSION_ID}` |
 | `cancel_url` | `https://www.hamlet-ai.co.uk/invoice.html?organisation=1&checkout=cancelled` |
 | `line_items[0].price` | Firebase secret `STRIPE_ORGANISATION_PRICE_ID` |
 | `line_items[0].quantity` | `1` |
