@@ -52,7 +52,7 @@ Hamlet Organisations is an important step in the platform's evolution: it introd
 > **Alfred Anate Bodurin Mayaki**  
 > Founder and Managing Director, Impact in Business Recruitment Group Limited
 
-Hamlet Organisations forms part of the continuing development of Hamlet by Impact in Business Recruitment Group Limited. Further information is available at [hamlet-ai.co.uk](https://hamlet-ai.co.uk) and on the [Hamlet Organisations page](https://hamlet-ai.co.uk/organisations.html).
+Hamlet Organisations forms part of the continuing development of Hamlet by Impact in Business Recruitment Group Limited. Further information is available at [hamlet-ai.co.uk](https://hamlet-ai.co.uk) and on the [Hamlet Organisations page](https://hamlet-ai.co.uk/organisation.html).
 
 ---
 
