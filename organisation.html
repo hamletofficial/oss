@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#071D4A">
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <title>hamlet. / workspace</title>
+  <link rel="stylesheet" href="/index.css?v=20261015-5">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261016-2">
+  <script src="/theme.js"></script>
+  <style>
+    :root { color-scheme: dark; --org-bg:#0b1120; --org-card:#111827; --org-raised:#1f2937; --org-border:#374151; --org-text:#f3f4f6; --org-muted:#cbd5e1; --org-blue:#2563eb; }
+    * { box-sizing:border-box; }
+    html,body { min-height:100%; background:var(--org-bg); color:var(--org-text); }
+    body { margin:0; font-family:'Open Sans',Arial,sans-serif; }
+    .page-wrapper { min-height:100vh; background:var(--org-bg); }
+    .resource-nav { background:#071D4A!important; border-bottom:1px solid #1e3a8a!important; }
+    .org-main { width:min(1120px,calc(100% - 32px)); margin:34px auto 64px; }
+    .org-hero { padding:28px; border:1px solid var(--org-border); border-radius:18px; background:linear-gradient(135deg,#111827 0%,#14213a 100%); }
+    .eyebrow { color:#93c5fd; text-transform:uppercase; letter-spacing:.12em; font-size:.72rem; font-weight:800; }
+    h1 { margin:.45rem 0 .65rem; font-size:clamp(1.7rem,4vw,2.4rem); letter-spacing:-.035em; }
+    .org-hero p { max-width:760px; color:var(--org-muted); line-height:1.6; margin:0; }
+    .org-grid { display:grid; grid-template-columns:minmax(260px,.85fr) minmax(0,1.6fr); gap:18px; margin-top:18px; align-items:start; }
+    .org-card { min-width:0; padding:20px; border:1px solid var(--org-border); border-radius:14px; background:var(--org-card); }
+    .org-card h2 { margin:0 0 14px; font-size:1.05rem; }
+    .org-card h3 { margin:18px 0 10px; font-size:.95rem; }
+    .org-muted { color:var(--org-muted); font-size:.9rem; line-height:1.5; }
+    .org-form { display:grid; gap:10px; }
+    .org-form label { display:block; color:#e5e7eb; font-size:.85rem; font-weight:700; margin-bottom:5px; }
+    .org-form input,.org-form select { width:100%; min-height:43px; padding:10px 12px; border:1px solid #475569; border-radius:8px; background:#0b1120; color:#f3f4f6; font:inherit; }
+    .org-form input::placeholder { color:#94a3b8; }
+    .org-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:9px 14px; border:1px solid #3b82f6; border-radius:9px; background:#1d4ed8; color:#fff!important; font:inherit; font-size:.88rem; font-weight:750; text-decoration:none; cursor:pointer; }
+    .org-btn.secondary { border-color:#475569; background:#1f2937; color:#e5e7eb!important; }
+    .org-btn.danger { border-color:#7f1d1d; background:#451a1a; color:#fecaca!important; }
+    .org-btn:disabled { opacity:.55; cursor:not-allowed; }
+    .org-status { min-height:1.4em; margin:10px 0 0; color:#bfdbfe; font-size:.86rem; line-height:1.45; overflow-wrap:anywhere; }
+    .org-status.error { color:#fca5a5; }
+    .org-status.success { color:#86efac; }
+    .org-select-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .org-select-row select { flex:1 1 220px; min-height:42px; padding:8px 10px; border:1px solid #475569; border-radius:8px; background:#0b1120; color:#f3f4f6; }
+    .org-detail { margin-top:16px; }
+    .org-meta { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 14px; }
+    .org-chip { display:inline-flex; align-items:center; padding:4px 9px; border:1px solid #334155; border-radius:999px; color:#bfdbfe; background:#172338; font-size:.75rem; font-weight:700; }
+    .org-list { display:grid; gap:8px; }
+    .org-row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 12px; border:1px solid #374151; border-radius:9px; background:#0f172a; min-width:0; }
+    .org-row-main { min-width:0; }
+    .org-row-title { color:#f3f4f6; font-weight:700; overflow-wrap:anywhere; }
+    .org-row-sub { color:#94a3b8; font-size:.78rem; margin-top:3px; overflow-wrap:anywhere; }
+    .org-row-actions { display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .org-row-actions select { max-width:125px; min-height:34px; border:1px solid #475569; border-radius:7px; background:#111827; color:#f3f4f6; padding:5px; }
+    .org-empty { padding:14px; border:1px dashed #475569; border-radius:9px; color:#94a3b8; font-size:.88rem; }
+    .org-panel { margin-top:16px; }
+    .org-panel[hidden], [hidden] { display:none!important; }
+    .org-invite-result { margin-top:12px; padding:12px; border:1px solid #334155; border-radius:9px; background:#172338; overflow-wrap:anywhere; }
+    .org-invite-result a { color:#93c5fd; }
+    .org-auth { max-width:620px; margin:38px auto; padding:26px; border:1px solid var(--org-border); border-radius:14px; background:var(--org-card); text-align:center; }
+    .org-auth h1 { font-size:1.35rem; }
+    .org-auth p { color:var(--org-muted); line-height:1.55; }
+    .org-footer { padding:24px 16px; color:#94a3b8; text-align:center; font-size:.82rem; border-top:1px solid #1f2937; }
+    @media(max-width:760px) {
+      .org-main { width:min(100% - 22px,1120px); margin:18px auto 42px; }
+      .org-hero { padding:21px; }
+      .org-grid { grid-template-columns:1fr; }
+      .org-card { padding:16px; }
+      .org-row { align-items:flex-start; flex-direction:column; }
+      .org-row-actions { justify-content:flex-start; width:100%; }
+      .org-row-actions select { flex:1 1 110px; }
+    }
+  </style>
+</head>
+<body class="auth-pending">
+  <div class="page-wrapper">
+    <header class="resource-nav hamlet-404-header" role="banner">
+      <div class="container container-nav">
+        <div class="logo" style="display:flex;align-items:center;gap:12px">
+          <a class="site-title" href="/index.html" aria-label="hamlet home">hamlet</a>
+        </div>
+        <div class="user-menu" style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <div class="auth-profile-chip" data-auth-profile>
+            <img class="auth-profile-photo" data-auth-photo src="/assets/images/dark-hamlet.png" alt="Profile photo">
+            <span class="auth-profile-name" data-auth-name></span>
+          </div>
+          <a class="btn btn-outline" href="/login.html?next=%2Forganisations.html" id="signInLink">Sign In</a>
+          <button class="btn btn-outline" id="signOutBtn" type="button" hidden>Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="loginSection" class="org-auth" hidden>
+      <h1>Sign in to hamlet. / workspace</h1>
+      <p id="loginMessage">Sign in to create an organisation, manage memberships or accept an invitation.</p>
+      <a class="org-btn" href="/login.html?next=%2Forganisations.html">Go to Sign In</a>
+    </section>
+
+    <main id="orgShell" class="org-main" hidden>
+      <section class="org-hero">
+        <div class="eyebrow">hamlet. / workspace</div>
+        <h1>Work together. Keep every organisation distinct.</h1>
+        <p>Create an organisation workspace, invite colleagues and assign access roles. Your individual Hamlet account and privately owned deals and properties remain separate.</p>
+      </section>
+
+      <div class="org-grid">
+        <section class="org-card" aria-labelledby="createOrgHeading">
+          <div id="organisationPaywall" class="org-panel">
+            <h2>Start an organisation</h2>
+            <p class="org-muted">An organisation subscription is required before a new workspace can be created. One subscription covers one organisation.</p>
+            <a class="org-btn" href="/invoice.html?organisation=1">View organisation subscription</a>
+          </div>
+          <div id="createOrgFields" hidden>
+          <h2 id="createOrgHeading">Create an organisation</h2>
+          <p class="org-muted">The creator becomes the initial owner. Organisation names and URL slugs are reserved securely by Hamlet.</p>
+          <form id="createOrgForm" class="org-form">
+            <div>
+              <label for="orgName">Organisation name</label>
+              <input id="orgName" name="name" maxlength="120" minlength="2" required autocomplete="organization" placeholder="e.g. Example Property Group">
+            </div>
+            <div>
+              <label for="orgSlug">Organisation URL name</label>
+              <input id="orgSlug" name="slug" maxlength="48" minlength="3" required pattern="[a-zA-Z0-9]+([a-zA-Z0-9-]*[a-zA-Z0-9])?" autocomplete="off" placeholder="example-property-group">
+              <p class="org-muted" style="margin:5px 0 0">Lowercase letters, numbers and single hyphens. This reserves a future Hamlet organisation address; it does not activate a subdomain.</p>
+            </div>
+            <button class="org-btn" id="createOrgBtn" type="submit">Create Organisation</button>
+          </form>
+          <p class="org-status" id="createOrgStatus" role="status" aria-live="polite"></p>
+          </div>
+          <div class="org-panel">
+            <h2>Accept an invitation</h2>
+            <p class="org-muted">Paste the one-time invitation token shared with you. You must be signed in with the same verified email address to which it was issued.</p>
+            <form id="acceptInviteForm" class="org-form">
+              <div>
+                <label for="acceptInviteToken">One-time invitation token</label>
+                <input id="acceptInviteToken" type="text" minlength="32" maxlength="128" required autocomplete="off" spellcheck="false" placeholder="Paste invitation token">
+              </div>
+              <button class="org-btn secondary" id="acceptInviteBtn" type="submit">Accept Invitation</button>
+            </form>
+            <p class="org-status" id="acceptInviteStatus" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="org-card" aria-labelledby="yourOrgsHeading">
+          <h2 id="yourOrgsHeading">Your organisations</h2>
+          <p class="org-muted">A member can belong to more than one organisation.</p>
+          <div class="org-select-row">
+            <select id="organisationSelect" aria-label="Choose an organisation">
+              <option value="">Loading organisations…</option>
+            </select>
+            <button class="org-btn secondary" id="refreshOrgsBtn" type="button">Refresh</button>
+          </div>
+          <div id="organisationDetail" class="org-detail" hidden>
+            <div class="org-meta">
+              <span class="org-chip" id="currentOrgRole"></span>
+              <span class="org-chip" id="currentOrgStatus">Active</span>
+            </div>
+            <div class="org-row">
+              <div class="org-row-main">
+                <div class="org-row-title" id="currentOrgName"></div>
+                <div class="org-row-sub" id="currentOrgSlug"></div>
+              </div>
+            </div>
+            <section id="memberManagement" class="org-panel" hidden>
+              <h3>Members</h3>
+              <div id="memberList" class="org-list"><div class="org-empty">Select an organisation to view members.</div></div>
+              <h3>Invite a colleague</h3>
+              <form id="inviteForm" class="org-form">
+                <div>
+                  <label for="inviteEmail">Colleague's verified email address</label>
+                  <input id="inviteEmail" type="email" maxlength="254" required autocomplete="email" placeholder="colleague@example.com">
+                </div>
+                <div>
+                  <label for="inviteRole">Organisation role</label>
+                  <select id="inviteRole">
+                    <option value="viewer">Viewer — read only</option>
+                    <option value="member">Member — standard access</option>
+                    <option value="manager">Manager — workspace coordination</option>
+                    <option value="admin">Administrator — membership administration</option>
+                  </select>
+                </div>
+                <button class="org-btn" id="inviteBtn" type="submit">Create Invitation</button>
+              </form>
+              <p class="org-status" id="inviteStatus" role="status" aria-live="polite"></p>
+              <div id="inviteResult" class="org-invite-result" hidden></div>
+              <h3>Pending invitations</h3>
+              <div id="invitationList" class="org-list"><div class="org-empty">No pending invitations.</div></div>
+            </section>
+            <p id="memberReadOnlyNote" class="org-muted" hidden>You have member access. An organisation owner or administrator manages invitations and membership roles.</p>
+          </div>
+          <p class="org-status" id="orgListStatus" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+      <p class="org-muted" style="margin:18px 4px 0">Organisation workspaces are being introduced in stages. Existing personal deal and property records are not automatically shared with an organisation.</p>
+    </main>
+
+    <footer class="org-footer">
+      © 2026 Impact in Business Recruitment Group Limited · Hamlet
+    </footer>
+  </div>
+
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+  <script defer src="/firebase-config.js"></script>
+  <script defer src="/header-profile.js?v=20261020-1"></script>
+  <script defer src="/profile-service.js?v=20261010-2"></script>
+  <script defer src="/mobile-compat.js"></script>
+  <script defer src="/page-transition.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      document.addEventListener("DOMContentLoaded", function () {
+        var loginSection = document.getElementById("loginSection");
+        var orgShell = document.getElementById("orgShell");
+        var signInLink = document.getElementById("signInLink");
+        var signOutBtn = document.getElementById("signOutBtn");
+        var organisationSelect = document.getElementById("organisationSelect");
+        var organisationDetail = document.getElementById("organisationDetail");
+        var memberManagement = document.getElementById("memberManagement");
+        var memberReadOnlyNote = document.getElementById("memberReadOnlyNote");
+        var memberList = document.getElementById("memberList");
+        var invitationList = document.getElementById("invitationList");
+        var createOrgForm = document.getElementById("createOrgForm");
+        var createOrgFields = document.getElementById("createOrgFields");
+        var organisationPaywall = document.getElementById("organisationPaywall");
+        var inviteForm = document.getElementById("inviteForm");
+        var acceptInviteForm = document.getElementById("acceptInviteForm");
+        var currentUser = null;
+        var memberships = [];
+        var selectedOrganisationId = "";
+        var selectedOrganisation = null;
+        var selectedRole = "";
+        var functions = null;
+        var db = null;
+        var acceptingInvitation = false;
+        var checkoutSessionId = new URLSearchParams(window.location.search).get("orgCheckoutSessionId") || "";
+        var invitationFlow = new URLSearchParams(window.location.search).get("acceptInvitation") === "1";
+
+        async function preparePaidOrganisationCreation() {
+          status("orgListStatus", "Checking your organisation subscription…");
+          var result = null;
+          if (checkoutSessionId) {
+            for (var attempt = 0; attempt < 12; attempt++) {
+              result = await makeCallable("getOrganisationCheckoutStatus")({sessionId:checkoutSessionId});
+              if (result.data && result.data.ready) break;
+              if (result.data && result.data.consumed) {
+                status("orgListStatus", "This subscription is already linked to an organisation. Opening your workspace…", "success");
+                return false;
+              }
+              await new Promise(function (resolve) { window.setTimeout(resolve, 2500); });
+            }
+          }
+          if (!result || !result.data || !result.data.ready) {
+            result = await makeCallable("getMyOrganisationSubscription")({});
+          }
+          if (result.data && result.data.ready && result.data.sessionId) {
+            checkoutSessionId = result.data.sessionId;
+            createOrgFields.hidden = false;
+            organisationPaywall.hidden = true;
+            status("orgListStatus", "Subscription confirmed. Your organisation workspace is ready to be created.", "success");
+            return true;
+          }
+          if (checkoutSessionId) {
+            status("orgListStatus", "Your payment is recorded, but subscription activation is still being confirmed. Use Refresh in a moment; you will not be charged again.", "error");
+          }
+          return false;
+        }
+
+        function openTenantDashboard(organisation) {
+          if (!organisation || !organisation.slug) return;
+          window.location.replace("/app/hamlet/organisation-dashboard.html?tenantSlug=" + encodeURIComponent(organisation.slug));
+        }
+
+        function status(id, message, kind) {
+          var element = document.getElementById(id);
+          if (!element) return;
+          element.textContent = message || "";
+          element.className = "org-status" + (kind ? " " + kind : "");
+        }
+
+        function setBusy(button, busy, label) {
+          if (!button) return;
+          if (busy) {
+            button.dataset.originalLabel = button.textContent;
+            button.textContent = label || "Working…";
+            button.disabled = true;
+          } else {
+            button.textContent = button.dataset.originalLabel || button.textContent;
+            button.disabled = false;
+          }
+        }
+
+        function makeCallable(name) {
+          return functions.httpsCallable(name);
+        }
+
+        function roleLabel(role) {
+          return ({owner:"Owner",admin:"Administrator",manager:"Manager",member:"Member",viewer:"Viewer"})[role] || "Member";
+        }
+
+        function addText(parent, tag, className, value) {
+          var element = document.createElement(tag);
+          if (className) element.className = className;
+          element.textContent = value == null ? "" : String(value);
+          parent.appendChild(element);
+          return element;
+        }
+
+        function addEmpty(container, message) {
+          container.replaceChildren();
+          addText(container, "div", "org-empty", message);
+        }
+
+        async function loadMemberships(preferredOrganisationId) {
+          status("orgListStatus", "Loading your organisations…");
+          organisationDetail.hidden = true;
+          memberships = [];
+          try {
+            var snapshot = await db.collection("organisationMembers").where("uid", "==", currentUser.uid).get();
+            var active = snapshot.docs.filter(function (item) { return item.data().status === "active"; });
+            var resolved = await Promise.all(active.map(async function (item) {
+              var membership = item.data();
+              try {
+                var orgSnap = await db.collection("organisations").doc(membership.organisationId).get();
+                if (!orgSnap.exists) return null;
+                var organisation = orgSnap.data();
+                if (organisation.status !== "active") return null;
+                return {membership:membership, organisation:organisation};
+              } catch (error) {
+                console.warn("Organisation is not currently accessible:", membership.organisationId, error);
+                return null;
+              }
+            }));
+            memberships = resolved.filter(Boolean);
+            if (memberships.length && !invitationFlow) {
+              var destination = memberships.find(function (item) { return item.organisation.id === preferredOrganisationId; }) || memberships[0];
+              openTenantDashboard(destination.organisation);
+              return;
+            }
+            if (memberships.length && checkoutSessionId) {
+              status("orgListStatus", "Your subscription return is being matched to your existing organisation. Opening its workspace…", "success");
+              var existingOwner = memberships.find(function (item) { return item.membership.role === "owner"; });
+              if (existingOwner) openTenantDashboard(existingOwner.organisation);
+              return;
+            }
+            organisationSelect.replaceChildren();
+            if (!memberships.length) {
+              var empty = document.createElement("option");
+              empty.value = "";
+              empty.textContent = "No active organisations yet";
+              organisationSelect.appendChild(empty);
+              selectedOrganisationId = "";
+              selectedOrganisation = null;
+              addEmpty(memberList, "Create your first organisation to get started.");
+              addEmpty(invitationList, "No organisation selected.");
+              status("orgListStatus", "You do not belong to an active organisation yet.");
+              return;
+            }
+            memberships.forEach(function (item) {
+              var option = document.createElement("option");
+              option.value = item.organisation.id;
+              option.textContent = item.organisation.name + " · " + roleLabel(item.membership.role);
+              organisationSelect.appendChild(option);
+            });
+            var nextId = preferredOrganisationId || selectedOrganisationId;
+            if (!memberships.some(function (item) { return item.organisation.id === nextId; })) {
+              nextId = memberships[0].organisation.id;
+            }
+            organisationSelect.value = nextId;
+            status("orgListStatus", memberships.length + " active organisation membership(s) loaded.", "success");
+            await selectOrganisation(nextId);
+          } catch (error) {
+            console.error("Unable to load organisation memberships:", error);
+            status("orgListStatus", "Unable to load your organisation memberships. Please refresh and try again.", "error");
+          }
+        }
+
+        async function selectOrganisation(orgId) {
+          selectedOrganisationId = orgId;
+          var item = memberships.find(function (entry) { return entry.organisation.id === orgId; });
+          if (!item) {
+            organisationDetail.hidden = true;
+            return;
+          }
+          selectedOrganisation = item.organisation;
+          var role = item.membership.role;
+          selectedRole = role;
+          document.getElementById("currentOrgRole").textContent = roleLabel(role);
+          document.getElementById("currentOrgName").textContent = item.organisation.name;
+          var slugLabel = document.getElementById("currentOrgSlug");
+          slugLabel.replaceChildren();
+          slugLabel.appendChild(document.createTextNode("Tenant workspace: "));
+          var tenantLink = document.createElement("a");
+          tenantLink.href = "https://" + item.organisation.slug + ".orgs.hamlet-ai.co.uk/";
+          tenantLink.textContent = item.organisation.slug + ".orgs.hamlet-ai.co.uk";
+          tenantLink.target = "_blank";
+          tenantLink.rel = "noopener noreferrer";
+          slugLabel.appendChild(tenantLink);
+          document.getElementById("currentOrgStatus").textContent = "Active";
+          organisationDetail.hidden = false;
+          var canManage = role === "owner" || role === "admin";
+          var adminRoleOption = document.querySelector("#inviteRole option[value='admin']");
+          if (adminRoleOption) adminRoleOption.hidden = role !== "owner";
+          if (role !== "owner" && document.getElementById("inviteRole").value === "admin") {
+            document.getElementById("inviteRole").value = "member";
+          }
+          memberManagement.hidden = !canManage;
+          memberReadOnlyNote.hidden = canManage;
+          if (canManage) await Promise.all([loadMembers(), loadInvitations()]);
+          else {
+            addEmpty(memberList, "Membership roster is available to organisation administrators.");
+            addEmpty(invitationList, "Invitation management is available to organisation administrators.");
+          }
+        }
+
+        async function loadMembers() {
+          addEmpty(memberList, "Loading members…");
+          try {
+            var snapshot = await db.collection("organisationMembers")
+              .where("organisationId", "==", selectedOrganisationId).get();
+            var rows = snapshot.docs.map(function (item) { return Object.assign({documentId:item.id}, item.data()); })
+              .filter(function (member) { return member.status === "active"; });
+            memberList.replaceChildren();
+            if (!rows.length) { addEmpty(memberList, "No active members were found."); return; }
+            rows.forEach(function (member) {
+              var row = document.createElement("div");
+              row.className = "org-row";
+              var main = document.createElement("div");
+              main.className = "org-row-main";
+              addText(main, "div", "org-row-title", member.email || member.uid);
+              addText(main, "div", "org-row-sub", roleLabel(member.role) + " · " + member.status);
+              row.appendChild(main);
+              var actions = document.createElement("div");
+              actions.className = "org-row-actions";
+              if (member.role !== "owner" && member.uid !== currentUser.uid &&
+                  (selectedRole === "owner" || member.role !== "admin")) {
+                var select = document.createElement("select");
+                select.setAttribute("aria-label", "Change role for " + (member.email || member.uid));
+                ["admin","manager","member","viewer"].forEach(function (role) {
+                  if (role === "admin" && selectedRole !== "owner") return;
+                  var option = document.createElement("option");
+                  option.value = role;
+                  option.textContent = roleLabel(role);
+                  option.selected = member.role === role;
+                  select.appendChild(option);
+                });
+                select.addEventListener("change", async function () {
+                  select.disabled = true;
+                  try {
+                    await makeCallable("changeOrganisationMemberRole")({
+                      organisationId:selectedOrganisationId, memberUid:member.uid, role:select.value
+                    });
+                    status("orgListStatus", "Member role updated.", "success");
+                    await loadMembers();
+                  } catch (error) {
+                    console.error("Organisation role change failed:", error);
+                    status("orgListStatus", error.message || "Unable to update this member's role.", "error");
+                    select.disabled = false;
+                  }
+                });
+                actions.appendChild(select);
+                var remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "org-btn danger";
+                remove.textContent = "Remove";
+                remove.addEventListener("click", async function () {
+                  if (!window.confirm("Remove " + (member.email || "this member") + " from " + selectedOrganisation.name + "?")) return;
+                  remove.disabled = true;
+                  try {
+                    await makeCallable("removeOrganisationMember")({
+                      organisationId:selectedOrganisationId, memberUid:member.uid
+                    });
+                    status("orgListStatus", "Member removed from the organisation.", "success");
+                    await loadMembers();
+                  } catch (error) {
+                    console.error("Organisation member removal failed:", error);
+                    status("orgListStatus", error.message || "Unable to remove this member.", "error");
+                    remove.disabled = false;
+                  }
+                });
+                actions.appendChild(remove);
+              }
+              row.appendChild(actions);
+              memberList.appendChild(row);
+            });
+          } catch (error) {
+            console.error("Unable to load organisation roster:", error);
+            addEmpty(memberList, "The member roster could not be loaded.");
+          }
+        }
+
+        async function loadInvitations() {
+          addEmpty(invitationList, "Loading invitations…");
+          try {
+            var snapshot = await db.collection("organisationInvitations")
+              .where("organisationId", "==", selectedOrganisationId).get();
+            var rows = snapshot.docs.map(function (item) { return Object.assign({documentId:item.id}, item.data()); })
+              .filter(function (invite) { return invite.status === "pending"; });
+            invitationList.replaceChildren();
+            if (!rows.length) { addEmpty(invitationList, "No pending invitations."); return; }
+            rows.forEach(function (invite) {
+              var row = document.createElement("div");
+              row.className = "org-row";
+              var main = document.createElement("div");
+              main.className = "org-row-main";
+              addText(main, "div", "org-row-title", invite.email);
+              addText(main, "div", "org-row-sub", roleLabel(invite.role) + " · expires " + (invite.expiresAt && invite.expiresAt.toDate ? invite.expiresAt.toDate().toLocaleDateString() : "in seven days"));
+              row.appendChild(main);
+              var actions = document.createElement("div");
+              actions.className = "org-row-actions";
+              var revoke = document.createElement("button");
+              revoke.type = "button";
+              revoke.className = "org-btn danger";
+              revoke.textContent = "Revoke";
+              revoke.addEventListener("click", async function () {
+                if (!window.confirm("Revoke the invitation for " + invite.email + "?")) return;
+                revoke.disabled = true;
+                try {
+                  await makeCallable("revokeOrganisationInvitation")({invitationId:invite.documentId});
+                  status("orgListStatus", "Invitation revoked.", "success");
+                  await loadInvitations();
+                } catch (error) {
+                  console.error("Invitation revocation failed:", error);
+                  status("orgListStatus", error.message || "Unable to revoke this invitation.", "error");
+                  revoke.disabled = false;
+                }
+              });
+              actions.appendChild(revoke);
+              row.appendChild(actions);
+              invitationList.appendChild(row);
+            });
+          } catch (error) {
+            console.error("Unable to load organisation invitations:", error);
+            addEmpty(invitationList, "Pending invitations could not be loaded.");
+          }
+        }
+
+        createOrgForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!createOrgForm.reportValidity()) return;
+          var button = document.getElementById("createOrgBtn");
+          setBusy(button, true, "Creating…");
+          status("createOrgStatus", "Creating your organisation…");
+          try {
+            var result = await makeCallable("createOrganisation")({
+              name:document.getElementById("orgName").value.trim(),
+              slug:document.getElementById("orgSlug").value.trim().toLowerCase(),
+              orgCheckoutSessionId:checkoutSessionId
+            });
+            createOrgForm.reset();
+            status("createOrgStatus", "Organisation created. You are its owner.", "success");
+            if (result.data && result.data.slug) openTenantDashboard({slug:result.data.slug});
+          } catch (error) {
+            console.error("Organisation creation failed:", error);
+            status("createOrgStatus", error.message || "Unable to create this organisation.", "error");
+          } finally {
+            setBusy(button, false);
+          }
+        });
+
+        inviteForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!selectedOrganisationId || !inviteForm.reportValidity()) return;
+          var button = document.getElementById("inviteBtn");
+          setBusy(button, true, "Creating…");
+          document.getElementById("inviteResult").hidden = true;
+          status("inviteStatus", "Creating a secure invitation…");
+          try {
+            var result = await makeCallable("createOrganisationInvitation")({
+              organisationId:selectedOrganisationId,
+              email:document.getElementById("inviteEmail").value.trim(),
+              role:document.getElementById("inviteRole").value
+            });
+            var data = result.data || {};
+            var panel = document.getElementById("inviteResult");
+            panel.replaceChildren();
+            if (data.deliveryStatus === "emulated" && data.token) {
+              addText(panel, "div", "org-row-title", "Invitation created in the emulator (email delivery is disabled).");
+              addText(panel, "p", "org-muted", "Use this one-time token to exercise the acceptance flow. It expires in seven days.");
+              var emulatorToken = document.createElement("input");
+              emulatorToken.type = "text";
+              emulatorToken.readOnly = true;
+              emulatorToken.autocomplete = "off";
+              emulatorToken.spellcheck = false;
+              emulatorToken.value = data.token;
+              emulatorToken.setAttribute("aria-label", "Emulator invitation token");
+              emulatorToken.style.width = "100%";
+              panel.appendChild(emulatorToken);
+            } else {
+              addText(panel, "div", "org-row-title", "Invitation emailed to " + data.email + ".");
+              addText(panel, "p", "org-muted", "The invitation expires in seven days. The recipient must sign in with this verified email address and enter the one-time token from the email on this page.");
+            }
+            panel.hidden = false;
+            document.getElementById("inviteEmail").value = "";
+            status("inviteStatus", data.deliveryStatus === "emulated" ? "Invitation created in emulator mode." : "Invitation sent by email.", "success");
+            await loadInvitations();
+          } catch (error) {
+            console.error("Organisation invitation creation failed:", error);
+            status("inviteStatus", error.message || "Unable to create this invitation.", "error");
+          } finally {
+            setBusy(button, false);
+          }
+        });
+
+        acceptInviteForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!acceptInviteForm.reportValidity()) return;
+          var button = document.getElementById("acceptInviteBtn");
+          setBusy(button, true, "Accepting…");
+          status("acceptInviteStatus", "Validating your invitation…");
+          try {
+            await currentUser.getIdToken(true);
+            var result = await makeCallable("acceptOrganisationInvitation")({
+              token: document.getElementById("acceptInviteToken").value.trim()
+            });
+            acceptInviteForm.reset();
+            status("acceptInviteStatus", "Invitation accepted. You joined as " + roleLabel(result.data && result.data.role) + ".", "success");
+            var joinedOrganisationId = result.data && result.data.organisationId;
+            var joinedOrganisation = joinedOrganisationId ? await db.collection("organisations").doc(joinedOrganisationId).get() : null;
+            if (joinedOrganisation && joinedOrganisation.exists) {
+              openTenantDashboard(joinedOrganisation.data());
+            } else {
+              await loadMemberships(joinedOrganisationId);
+            }
+          } catch (error) {
+            console.error("Organisation invitation acceptance failed:", error);
+            status("acceptInviteStatus", error.message || "Unable to accept this invitation. Check the token and your verified email address.", "error");
+          } finally {
+            setBusy(button, false);
+          }
+        });
+
+        organisationSelect.addEventListener("change", function () {
+          if (organisationSelect.value) selectOrganisation(organisationSelect.value);
+        });
+        document.getElementById("refreshOrgsBtn").addEventListener("click", function () {
+          loadMemberships(selectedOrganisationId);
+        });
+        signOutBtn.addEventListener("click", async function () {
+          signOutBtn.disabled = true;
+          try { await firebase.auth().signOut(); }
+          catch (error) { status("orgListStatus", "Unable to sign out right now.", "error"); }
+          finally { signOutBtn.disabled = false; }
+        });
+
+        if (!window.firebase || !window.firebaseConfig) {
+          loginSection.hidden = false;
+          document.getElementById("loginMessage").textContent = "Hamlet could not initialise Firebase. Refresh the page or try again later.";
+          document.body.classList.remove("auth-pending");
+          return;
+        }
+        try { if (!firebase.apps.length) firebase.initializeApp(window.firebaseConfig); }
+        catch (error) { console.error("Firebase initialisation failed:", error); }
+        if (!firebase.apps.length || !firebase.firestore || !firebase.functions) {
+          loginSection.hidden = false;
+          document.getElementById("loginMessage").textContent = "The authentication services could not be loaded. Refresh the page and try again.";
+          document.body.classList.remove("auth-pending");
+          return;
+        }
+        db = firebase.firestore();
+        functions = firebase.app().functions("europe-west2");
+
+        firebase.auth().onAuthStateChanged(async function (user) {
+          currentUser = user || null;
+          if (!user) {
+            orgShell.hidden = true;
+            loginSection.hidden = false;
+            signInLink.hidden = false;
+            signOutBtn.hidden = true;
+            document.body.classList.remove("auth-pending");
+            return;
+          }
+          loginSection.hidden = true;
+          signInLink.hidden = true;
+          signOutBtn.hidden = false;
+          orgShell.hidden = false;
+          document.body.classList.remove("auth-pending");
+          try {
+            await user.reload();
+            await user.getIdToken(true);
+          } catch (error) {
+            console.warn("Unable to refresh Firebase identity before organisation access:", error);
+          }
+          if (user.emailVerified !== true) {
+            createOrgFields.hidden = true;
+            organisationPaywall.hidden = false;
+            createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
+            acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = true; });
+            status("orgListStatus", "Verify your email address before creating an organisation or accepting an invitation.", "error");
+            organisationSelect.replaceChildren();
+            addText(organisationSelect, "option", "", "Email verification required");
+            return;
+          }
+          createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
+          acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
+          try {
+            await preparePaidOrganisationCreation();
+          } catch (error) {
+            console.error("Unable to verify organisation subscription:", error);
+            status("orgListStatus", error.message || "The organisation subscription could not be verified.", "error");
+          }
+          await loadMemberships();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
