@@ -94,7 +94,7 @@
       <a class="card" href="/app/hamlet/organisation-teams.html"><div class="icon" aria-hidden="true">⚑</div><h2>Teams & permissions</h2><p>Create teams, assign colleagues and configure access to restricted deals and properties.</p><span class="open">Manage teams →</span></a>
       <a class="card" href="/app/hamlet/organisation-activity.html"><div class="icon" aria-hidden="true">◷</div><h2>Audit history</h2><p>Review organisation creation, invitations and membership administration events. Available to owners and administrators.</p><span class="open">View audit history →</span></a>
       <a class="card" href="/app/hamlet/organisation-analytics.html"><div class="icon" aria-hidden="true">◧</div><h2>Organisation analytics</h2><p>Review aggregate membership, team, deal pipeline and property portfolio counts. Available to owners and administrators.</p><span class="open">View analytics →</span></a>
-      <a class="card" href="https://www.hamlet-ai.co.uk/organisations.html"><div class="icon" aria-hidden="true">⚙</div><h2>Organisation administration</h2><p>Manage the organisation profile, membership, invitations and access roles in the Members Area.</p><span class="open">Manage organisation →</span></a>
+      <a class="card" href="https://www.hamlet-ai.co.uk/organisation.html"><div class="icon" aria-hidden="true">⚙</div><h2>Organisation administration</h2><p>Manage the organisation profile, membership, invitations and access roles in the Members Area.</p><span class="open">Manage organisation →</span></a>
     </section>
     <p class="footnote">The shared deal pipeline and property portfolio use separate organisation-owned collections. Audit history is restricted to organisation owners and administrators; events are written by trusted backend operations and cannot be forged or altered by clients. Resource-level deal and property change history will be added in a later increment.</p>
   </main>
@@ -266,7 +266,7 @@
     try{
       await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:org.id});
       notice('You have left '+org.name+'.');
-      if(organisations.length<=1){location.replace('/organisations.html');return;}
+      if(organisations.length<=1){location.replace('/organisation.html');return;}
       await loadMemberships();
     }catch(error){console.error('Unable to leave organisation:',error);notice(error.message||'Unable to leave this organisation.',true);button.disabled=false;}
   });
