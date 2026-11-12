@@ -157,7 +157,7 @@ exports.createOrganisationCheckoutSession = onCall({
     payment_method_collection: "always",
     "consent_collection[terms_of_service]": "required",
     "saved_payment_method_options[payment_method_save]": "enabled",
-    success_url: SITE_ORIGIN + "/organisations.html?orgCheckoutSessionId={CHECKOUT_SESSION_ID}",
+    success_url: SITE_ORIGIN + "/organisation.html?orgCheckoutSessionId={CHECKOUT_SESSION_ID}",
     cancel_url: SITE_ORIGIN + "/invoice.html?organisation=1&checkout=cancelled",
     "line_items[0][price]": priceId,
     "line_items[0][quantity]": "1",
