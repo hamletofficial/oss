@@ -209,7 +209,7 @@ Tenant isolation is a mandatory production release requirement, not optional har
 - [x] Add Firestore Emulator coverage for member isolation, cross-tenant denial, suspended-member denial, roster visibility, public/private directory projection and client-write denial.
 - [x] Run the static, browser and Firestore/Storage Emulator CI suites successfully on functional-code commit `36fd3c1e6809efe51d64792fdd60a95cfbfe9271`.
 - [x] Confirm the production Firebase CLI configuration: the user has confirmed root `firebase.json` is authoritative. It targets project `wale-491805`, Firestore `(default)` in `nam5`, and root `firestore.rules` / `firestore.indexes.json`.
-- [x] Build the authenticated organisation registration, invitation and membership management page at `/organisations.html`, linked from the Members Area and excluded from public search.
+- [x] Build the authenticated organisation registration, invitation and membership management page at `/organisation.html`, linked from the Members Area and excluded from public search.
 - [x] Add owner/admin organisation profile editing and public/private visibility controls through a trusted callable; sync a whitelisted public projection transactionally.
 
 The organisation backend and authenticated resource workspaces are implemented on the feature branch. No production Functions or Firestore Rules have been deployed.
@@ -273,7 +273,7 @@ This plan is a product/architecture baseline, not a production deployment instru
 
 ## User-facing foundation — 8 November 2026
 
-- [x] Add authenticated `/app/hamlet/organisations.html` workspace page on the feature branch.
+- [x] Add authenticated `/app/hamlet/organisation.html` workspace page on the feature branch.
 - [x] Connect organisation creation, invitation creation/acceptance backend contract, role changes, member removal and invitation revocation callables.
 - [x] Display the signed-in user's active organisation memberships and organisation administration panel.
 - [x] Add the Organisations destination to the authenticated Hamlet workspace navigation.
