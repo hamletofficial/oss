@@ -50,7 +50,7 @@ The organisation experience is presented as **hamlet. / workspace**. The Members
 
 | Route | Purpose |
 |---|---|
-| `/organisations.html` | Members Area administration: view memberships, create an organisation after subscription entitlement, invite colleagues, accept invitations and manage member roles. |
+| `/organisation.html` | Members Area administration: view memberships, create an organisation after subscription entitlement, invite colleagues, accept invitations and manage member roles. |
 | `/invoice.html?organisation=1` | Organisation subscription checkout entry point. Checkout entitlement is confirmed by trusted backend state before organisation creation is enabled. |
 | `/app/hamlet/organisations.html` | Authenticated organisation workspace overview, organisation selector, profile and verification, membership requests, and links to operational modules. |
 | `/app/hamlet/organisation-deals.html` | Organisation-owned deals and shared deal pipeline. |
