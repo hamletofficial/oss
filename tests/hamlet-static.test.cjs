@@ -6,6 +6,8 @@ const vm = require('node:vm');
 const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
 const organisationsHtml = fs.readFileSync('organisation.html', 'utf8');
+const legacyOrganisationsHtml = fs.readFileSync('organisations.html', 'utf8');
+const legacyAppOrganisationsHtml = fs.readFileSync('app/hamlet/organisations.html', 'utf8');
 const appOrganisationsHtml = fs.readFileSync('app/hamlet/organisation.html', 'utf8');
 const organisationDirectoryHtml = fs.readFileSync('organisation-directory.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
@@ -145,6 +147,13 @@ test('organisation lifecycle operations are server-controlled and registered', (
   assert.match(firestore, /allow create, update, delete: if false;/);
 });
 
+
+test('legacy plural organisation endpoints redirect to their singular canonical paths', () => {
+  assert.match(legacyOrganisationsHtml, /url=\\/organisation\\.html/);
+  assert.match(legacyOrganisationsHtml, /location\\.replace\\("\\/organisation\\.html"/);
+  assert.match(legacyAppOrganisationsHtml, /url=\\/app\\/hamlet\\/organisation\\.html/);
+  assert.match(legacyAppOrganisationsHtml, /location\\.replace\\("\\/app\\/hamlet\\/organisation\\.html"/);
+});
 
 test('organisation management page scripts parse and use authenticated callable operations', () => {
   const blocks = [...organisationsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
