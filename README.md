@@ -52,7 +52,7 @@ The organisation experience is presented as **hamlet. / workspace**. The Members
 |---|---|
 | `/organisation.html` | Members Area administration: view memberships, create an organisation after subscription entitlement, invite colleagues, accept invitations and manage member roles. |
 | `/invoice.html?organisation=1` | Organisation subscription checkout entry point. Checkout entitlement is confirmed by trusted backend state before organisation creation is enabled. |
-| `/app/hamlet/organisations.html` | Authenticated organisation workspace overview, organisation selector, profile and verification, membership requests, and links to operational modules. |
+| `/app/hamlet/organisation.html` | Authenticated organisation workspace overview, organisation selector, profile and verification, membership requests, and links to operational modules. |
 | `/app/hamlet/organisation-deals.html` | Organisation-owned deals and shared deal pipeline. |
 | `/app/hamlet/organisation-properties.html` | Organisation-owned commercial and residential property portfolio. |
 | `/app/hamlet/organisation-files.html` | Organisation-scoped files and assets for permitted resources. |
