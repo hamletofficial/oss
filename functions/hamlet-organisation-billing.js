@@ -151,7 +151,9 @@ exports.createOrganisationCheckoutSession = onCall({
     billing_address_collection: "auto",
     "phone_number_collection[enabled]": "false",
     "automatic_tax[enabled]": "false",
-    allow_promotion_codes: "false",
+    // Only this organisation subscription Checkout flow exposes promotion codes.
+    // Stripe validates each code's active state, redemption limit and restrictions.
+    allow_promotion_codes: "true",
     payment_method_collection: "always",
     "consent_collection[terms_of_service]": "required",
     "saved_payment_method_options[payment_method_save]": "enabled",
