@@ -5,7 +5,7 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync('app/hamlet/index.html', 'utf8');
 const messagesHtml = fs.readFileSync('messages.html', 'utf8');
-const organisationsHtml = fs.readFileSync('organisations.html', 'utf8');
+const organisationsHtml = fs.readFileSync('organisation.html', 'utf8');
 const appOrganisationsHtml = fs.readFileSync('app/hamlet/organisations.html', 'utf8');
 const organisationDirectoryHtml = fs.readFileSync('organisation-directory.html', 'utf8');
 const siteSearch = fs.readFileSync('site-search.js', 'utf8');
@@ -151,7 +151,7 @@ test('organisation management page scripts parse and use authenticated callable 
     .filter((match) => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
   assert.ok(blocks.length >= 1, 'expected organisation management application script');
   for (const [index, block] of blocks.entries()) {
-    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisations-inline-' + index + '.js' }));
+    assert.doesNotThrow(() => new vm.Script(block[2], { filename: 'organisation-inline-' + index + '.js' }));
   }
   assert.match(organisationsHtml, /name="robots" content="noindex,nofollow"/);
   assert.match(organisationsHtml, /acceptOrganisationInvitation/);
@@ -160,7 +160,7 @@ test('organisation management page scripts parse and use authenticated callable 
   assert.match(organisationsHtml, /id="acceptInviteForm"/);
   assert.match(organisationsHtml, /acceptInviteToken/);
   assert.doesNotMatch(organisationsHtml, /location\.hash|replaceState|invitationLink/);
-  assert.match(siteSearch, /'organisations\.html'/);
+  assert.match(siteSearch, /'organisation\.html'/);
 });
 
 
