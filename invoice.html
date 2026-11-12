@@ -409,6 +409,24 @@
             stripeScript.async = true;
             document.head.appendChild(stripeScript);
           }
+          var organisationCard = document.getElementById('organisationSubscriptionCard');
+          if (organisationCard) {
+            // Keep checkout available unless the trusted backend confirms an active entitlement.
+            organisationCard.hidden = false;
+            if (isAuthenticated && user.emailVerified === true) {
+              try {
+                var entitlementResult = await firebase.app().functions('europe-west2')
+                  .httpsCallable('getMyOrganisationSubscription')({});
+                var hasActiveEntitlement = !!(
+                  entitlementResult.data &&
+                  entitlementResult.data.hasActiveOrganisationEntitlement
+                );
+                organisationCard.hidden = hasActiveEntitlement;
+              } catch (entitlementError) {
+                console.warn('Unable to verify organisation subscription; keeping checkout card visible.', entitlementError);
+              }
+            }
+          }
           if (isAuthenticated) {
 			signOutBtn.textContent = 'Sign out';
 			signOutBtn.disabled = false;
