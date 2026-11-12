@@ -340,6 +340,12 @@
               openTenantDashboard(destination.organisation);
               return;
             }
+            if (memberships.length && checkoutSessionId) {
+              status("orgListStatus", "Your subscription return is being matched to your existing organisation. Opening its workspace…", "success");
+              var existingOwner = memberships.find(function (item) { return item.membership.role === "owner"; });
+              if (existingOwner) openTenantDashboard(existingOwner.organisation);
+              return;
+            }
             organisationSelect.replaceChildren();
             if (!memberships.length) {
               var empty = document.createElement("option");
