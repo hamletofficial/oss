@@ -37,7 +37,15 @@ async function stripeFetch(path, options) {
   });
   const body = await response.json();
   if (!response.ok) {
-    console.error("Stripe API request failed:", response.status, body && body.error && body.error.type);
+    const stripeError = body && body.error || {};
+    console.error("Stripe API request failed:", {
+      status: response.status,
+      requestId: response.headers.get("request-id") || null,
+      type: stripeError.type || null,
+      code: stripeError.code || null,
+      parameter: stripeError.param || null,
+      message: stripeError.message || null,
+    });
     throw new HttpsError("unavailable", "Secure checkout is temporarily unavailable. Please try again later.");
   }
   return body;
@@ -145,11 +153,8 @@ exports.createOrganisationCheckoutSession = onCall({
     "automatic_tax[enabled]": "false",
     allow_promotion_codes: "false",
     payment_method_collection: "always",
-    submit_type: "auto",
     "consent_collection[terms_of_service]": "required",
     "saved_payment_method_options[payment_method_save]": "enabled",
-    integration_identifier: "hosted_mobile_app_0002",
-    origin_context: "mobile_app",
     success_url: SITE_ORIGIN + "/organisations.html?orgCheckoutSessionId={CHECKOUT_SESSION_ID}",
     cancel_url: SITE_ORIGIN + "/invoice.html?organisation=1&checkout=cancelled",
     "line_items[0][price]": priceId,
