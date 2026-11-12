@@ -232,7 +232,7 @@
     if(!$('verificationAttestation').checked)return;
     const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
     try{
-      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,attested:$('verificationAttestation').checked});
+      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
       org.verificationStatus=result.data.status;
       $('verificationStatus').textContent='Status: pending.';const check=result.data.registryCheck||{};$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'registered name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'. Your request is awaiting Hamlet approval.';
       ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
