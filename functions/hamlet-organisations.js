@@ -26,7 +26,7 @@ function escapeHtml(value) {
 
 function sendOrganisationInvitationEmail(invitation) {
   const organisationName = String(invitation.organisationName || "your organisation");
-  const acceptUrl = "https://hamlet-ai.co.uk/organisations.html";
+  const acceptUrl = "https://hamlet-ai.co.uk/organisation.html";
   const roleName = invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1);
   const textBody = [
     "You have been invited to join " + organisationName + " on Hamlet.",
