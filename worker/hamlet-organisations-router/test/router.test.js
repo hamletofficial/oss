@@ -66,11 +66,11 @@ test("workers.dev tenant path opens the tenant handoff page and sets a tenant co
 
 test("workers.dev tenant cookie keeps subsequent workspace paths tenant-scoped", async () => {
   const {response, upstreamUrl} = await route(
-    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisations.html",
+    "https://hamlet-organisations-router-staging.alfred-mayaki.workers.dev/app/hamlet/organisation.html",
     {headers: {Cookie: "hamlet_tenant_slug=acme-group"}}
   );
   assert.equal(response.status, 200);
-  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisations.html");
+  assert.equal(upstreamUrl, "https://www.hamlet-ai.co.uk/app/hamlet/organisation.html");
   assert.equal(response.headers.get("X-Hamlet-Tenant-Route"), "acme-group");
 });
 test("canonical platform hostname serves the public organisation directory in staging", async () => {
