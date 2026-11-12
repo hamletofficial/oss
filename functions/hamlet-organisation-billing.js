@@ -188,27 +188,63 @@ exports.getMyOrganisationSubscription = onCall({
   const snapshot = await database.collection("organisationStripeSubscriptions")
     .where("firebaseUid", "==", user.uid)
     .get();
-  const eligible = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))
-    .filter((item) => ACTIVE_SUBSCRIPTION_STATUSES.has(item.status) && !item.organisationId)
+  const subscriptions = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+  const activeSubscriptions = subscriptions.filter((item) =>
+    ACTIVE_SUBSCRIPTION_STATUSES.has(item.status) && !item.pausedCollection
+  );
+
+  // An active subscription remains an entitlement after it has been attached
+  // to an organisation. Check the tenant's authoritative billing state too.
+  for (const subscription of activeSubscriptions) {
+    if (!subscription.organisationId) continue;
+    const [organisationSnap, billingSnap] = await Promise.all([
+      database.collection("organisations").doc(subscription.organisationId).get(),
+      database.collection("organisationBilling").doc(subscription.organisationId).get(),
+    ]);
+    const organisation = organisationSnap.exists ? organisationSnap.data() || {} : {};
+    const billing = billingSnap.exists ? billingSnap.data() || {} : {};
+    if (organisation.status === "active" &&
+        billing.status === "active" &&
+        billing.subscriptionId === subscription.id) {
+      return {ready: false, consumed: true, hasActiveOrganisationEntitlement: true};
+    }
+  }
+
+  const eligible = activeSubscriptions
+    .filter((item) => !item.organisationId)
     .sort((a, b) => {
       const aTime = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
       const bTime = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
       return bTime - aTime;
     });
-  if (!eligible.length) return {ready: false, consumed: false};
+  if (!eligible.length) {
+    return {ready: false, consumed: false, hasActiveOrganisationEntitlement: false};
+  }
+
   const subscription = eligible[0];
   const checkoutSnapshot = await database.collection("organisationCheckoutSessions")
     .where("subscriptionId", "==", subscription.id)
     .where("firebaseUid", "==", user.uid)
     .limit(1)
     .get();
-  if (checkoutSnapshot.empty) return {ready: false, consumed: false};
+  if (checkoutSnapshot.empty) {
+    return {ready: false, consumed: false, hasActiveOrganisationEntitlement: false};
+  }
   const checkout = checkoutSnapshot.docs[0];
   const checkoutData = checkout.data() || {};
   if (checkoutData.paymentStatus !== "paid" || checkoutData.organisationId) {
-    return {ready: false, consumed: !!checkoutData.organisationId};
+    return {
+      ready: false,
+      consumed: !!checkoutData.organisationId,
+      hasActiveOrganisationEntitlement: false,
+    };
   }
-  return {ready: true, consumed: false, sessionId: checkout.id};
+  return {
+    ready: true,
+    consumed: false,
+    sessionId: checkout.id,
+    hasActiveOrganisationEntitlement: true,
+  };
 });
 
 exports.getOrganisationCheckoutStatus = onCall({

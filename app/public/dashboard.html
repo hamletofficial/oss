@@ -348,7 +348,7 @@
         <p class="panel-intro">Listings connected to your authenticated member profile.</p>
         <div class="resource-list" id="resourceList" aria-live="polite" aria-busy="true"><div class="empty">Loading your property resources…</div></div>
       </section>
-      <a class="broker-rankings-button" href="/invoice.html#organisationSubscriptionCard" aria-label="Upgrade to Organisations">Upgrade to Organisations</a>
+      <a class="broker-rankings-button" id="organisationUpgradeButton" href="/invoice.html#organisationSubscriptionCard" aria-label="Upgrade to Organisations">Upgrade to Organisations</a>
     </main>
   </div>
 
@@ -462,10 +462,24 @@
       initAddressAutocomplete();
       function esc(value){return String(value??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]})}
       function showUnauthenticated(){
+        const upgradeButton=document.getElementById('organisationUpgradeButton');
+        if(upgradeButton){upgradeButton.hidden=false;upgradeButton.style.display='inline-flex';}
         currentUser=null;  document.body.classList.remove('auth-pending','is-authenticated'); document.body.classList.add('auth-signed-out');
         redirectPanel.hidden=false; resourceShell.style.display='none'; authActionBtn.hidden=false; authActionBtn.textContent='Sign In'; authActionBtn.onclick=function(){window.location.href='/login.html?next=%2Fapp%2Fpublic%2Fdashboard.html';}; profileChip.hidden=true;
       }
+      async function updateOrganisationUpgradeVisibility(user){
+        const button=document.getElementById('organisationUpgradeButton');
+        if(!button)return;
+        button.hidden=false;button.style.display='inline-flex';
+        if(!user||!user.emailVerified||!firebase.app().functions)return;
+        try{
+          const result=await firebase.app().functions('europe-west2').httpsCallable('getMyOrganisationSubscription')({});
+          const entitled=!!(result.data&&result.data.hasActiveOrganisationEntitlement);
+          button.hidden=entitled;button.style.display=entitled?'none':'inline-flex';
+        }catch(error){console.warn('Organisation subscription status could not be confirmed; retaining upgrade link.',error);}
+      }
       function showAuthenticated(user){
+        updateOrganisationUpgradeVisibility(user);
         currentUser=user; document.body.classList.remove('auth-pending','auth-signed-out'); document.body.classList.add('is-authenticated');
         redirectPanel.hidden=true; resourceShell.style.display='block'; authActionBtn.hidden=false; authActionBtn.textContent='Sign Out'; authActionBtn.onclick=async function(){authActionBtn.disabled=true;try{await auth.signOut();}finally{authActionBtn.disabled=false;}}; profileChip.hidden=false;
         
