@@ -240,20 +240,32 @@
         var invitationFlow = new URLSearchParams(window.location.search).get("acceptInvitation") === "1";
 
         async function preparePaidOrganisationCreation() {
-          if (!checkoutSessionId) return false;
-          status("orgListStatus", "Confirming your organisation subscription…");
-          for (var attempt = 0; attempt < 12; attempt++) {
-            var result = await makeCallable("getOrganisationCheckoutStatus")({sessionId:checkoutSessionId});
-            if (result.data && result.data.ready && !result.data.consumed) {
-              createOrgFields.hidden = false;
-              organisationPaywall.hidden = true;
-              status("orgListStatus", "Subscription confirmed. Complete the form to create your organisation.", "success");
-              return true;
+          status("orgListStatus", "Checking your organisation subscription…");
+          var result = null;
+          if (checkoutSessionId) {
+            for (var attempt = 0; attempt < 12; attempt++) {
+              result = await makeCallable("getOrganisationCheckoutStatus")({sessionId:checkoutSessionId});
+              if (result.data && result.data.ready) break;
+              if (result.data && result.data.consumed) {
+                status("orgListStatus", "This subscription is already linked to an organisation. Opening your workspace…", "success");
+                return false;
+              }
+              await new Promise(function (resolve) { window.setTimeout(resolve, 2500); });
             }
-            if (result.data && result.data.consumed) throw new Error("This subscription has already been used to create an organisation.");
-            await new Promise(function (resolve) { window.setTimeout(resolve, 2500); });
           }
-          status("orgListStatus", "Stripe is still confirming the subscription. Refresh this page in a moment to continue.", "error");
+          if (!result || !result.data || !result.data.ready) {
+            result = await makeCallable("getMyOrganisationSubscription")({});
+          }
+          if (result.data && result.data.ready && result.data.sessionId) {
+            checkoutSessionId = result.data.sessionId;
+            createOrgFields.hidden = false;
+            organisationPaywall.hidden = true;
+            status("orgListStatus", "Subscription confirmed. Your organisation workspace is ready to be created.", "success");
+            return true;
+          }
+          if (checkoutSessionId) {
+            status("orgListStatus", "Your payment is recorded, but subscription activation is still being confirmed. Use Refresh in a moment; you will not be charged again.", "error");
+          }
           return false;
         }
 
@@ -323,9 +335,15 @@
               }
             }));
             memberships = resolved.filter(Boolean);
-            if (memberships.length && !checkoutSessionId && !invitationFlow) {
+            if (memberships.length && !invitationFlow) {
               var destination = memberships.find(function (item) { return item.organisation.id === preferredOrganisationId; }) || memberships[0];
               openTenantDashboard(destination.organisation);
+              return;
+            }
+            if (memberships.length && checkoutSessionId) {
+              status("orgListStatus", "Your subscription return is being matched to your existing organisation. Opening its workspace…", "success");
+              var existingOwner = memberships.find(function (item) { return item.membership.role === "owner"; });
+              if (existingOwner) openTenantDashboard(existingOwner.organisation);
               return;
             }
             organisationSelect.replaceChildren();
@@ -678,12 +696,11 @@
           }
           createOrgForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
           acceptInviteForm.querySelectorAll("input,button").forEach(function (element) { element.disabled = false; });
-          if (checkoutSessionId) {
-            try { await preparePaidOrganisationCreation(); }
-            catch (error) {
-              console.error("Unable to verify organisation subscription:", error);
-              status("orgListStatus", error.message || "The organisation subscription could not be verified.", "error");
-            }
+          try {
+            await preparePaidOrganisationCreation();
+          } catch (error) {
+            console.error("Unable to verify organisation subscription:", error);
+            status("orgListStatus", error.message || "The organisation subscription could not be verified.", "error");
           }
           await loadMemberships();
         });
