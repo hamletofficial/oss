@@ -235,7 +235,7 @@ test('authenticated organisation workspace loads only active memberships and swi
     await page.route('https://fonts.gstatic.com/**', route => route.fulfill({status: 200, body: ''}));
     await page.route('**/firebase-config.js', route => route.fulfill({status: 200, contentType: 'application/javascript', body: mockFirebase}));
 
-    await page.goto(origin + '/app/hamlet/organisations.html', {waitUntil: 'domcontentloaded'});
+    await page.goto(origin + '/app/hamlet/organisation.html', {waitUntil: 'domcontentloaded'});
     await page.locator('#app').waitFor({state: 'visible', timeout: 10000});
     await page.getByText('Example Organisation', {exact: true}).first().waitFor({state: 'visible', timeout: 10000});
     assert.equal(await page.locator('#roleBadge').textContent(), 'owner');
