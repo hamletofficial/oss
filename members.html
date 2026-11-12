@@ -459,7 +459,7 @@
       <div class="create-brief-footer" style="display:flex;justify-content:center;margin:2rem 0 1rem;padding:1.25rem 0 0;border-top:1px solid #dbe3ee;">
         <a class="btn btn-primary guide-action" href="/requests.html" aria-label="Create New Brief" style="display:inline-flex;align-items:center;justify-content:center;gap:.55rem;min-height:48px;padding:.8rem 1.4rem;border-radius:10px;font-size:1rem;font-weight:700;text-align:center;box-shadow:0 6px 18px rgba(2,132,199,.18);">📝 Draft New Brief</a>
       </div>
-      <a class="verify-corner-btn" href="/invoice.html#organisationSubscriptionCard" aria-label="Upgrade to Organisations">Upgrade to Organisations</a>
+      <a class="verify-corner-btn" id="organisationUpgradeButton" href="/invoice.html#organisationSubscriptionCard" aria-label="Upgrade to Organisations">Upgrade to Organisations</a>
     </main>
     <footer class="resource-footer" role="contentinfo">
       <div class="container" style="text-align:center">
@@ -518,6 +518,8 @@
         document.body.classList.remove('auth-pending', 'has-sidebar');
         document.getElementById('loginSection').style.display = 'block';
         document.getElementById('membersShell').style.display = 'none';
+        var upgradeButton = document.getElementById('organisationUpgradeButton');
+        if (upgradeButton) { upgradeButton.hidden = false; upgradeButton.style.display = 'inline-flex'; }
         document.getElementById('signInLink').style.display = 'inline-flex';
         document.getElementById('signOutBtn').style.display = 'none';
         var name = document.getElementById('memberName');
@@ -525,8 +527,26 @@
         try { sessionStorage.removeItem('ibr_auth_transition'); } catch (error) {}
       }
 
+      async function updateOrganisationUpgradeVisibility(user) {
+        var button = document.getElementById('organisationUpgradeButton');
+        if (!button) return;
+        button.hidden = false;
+        button.style.display = 'inline-flex';
+        if (!user || !user.emailVerified || !firebase.app().functions) return;
+        try {
+          var result = await firebase.app().functions('europe-west2')
+            .httpsCallable('getMyOrganisationSubscription')({});
+          var entitled = !!(result.data && result.data.hasActiveOrganisationEntitlement);
+          button.hidden = entitled;
+          button.style.display = entitled ? 'none' : 'inline-flex';
+        } catch (error) {
+          console.warn('Organisation subscription status could not be confirmed; retaining upgrade link.', error);
+        }
+      }
+
       function showSignedIn(user) {
         document.body.classList.remove('auth-pending');
+        updateOrganisationUpgradeVisibility(user);
         document.body.classList.add('has-sidebar');
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('membersShell').style.display = 'block';
