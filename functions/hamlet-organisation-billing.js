@@ -178,6 +178,39 @@ exports.createOrganisationCheckoutSession = onCall({
   return {url: session.url};
 });
 
+exports.getMyOrganisationSubscription = onCall({
+  region: REGION,
+  timeoutSeconds: 15,
+  memory: "256MiB",
+}, async (request) => {
+  const user = requireVerifiedUser(request);
+  const database = db();
+  const snapshot = await database.collection("organisationStripeSubscriptions")
+    .where("firebaseUid", "==", user.uid)
+    .get();
+  const eligible = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))
+    .filter((item) => ACTIVE_SUBSCRIPTION_STATUSES.has(item.status) && !item.organisationId)
+    .sort((a, b) => {
+      const aTime = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
+      const bTime = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
+      return bTime - aTime;
+    });
+  if (!eligible.length) return {ready: false, consumed: false};
+  const subscription = eligible[0];
+  const checkoutSnapshot = await database.collection("organisationCheckoutSessions")
+    .where("subscriptionId", "==", subscription.id)
+    .where("firebaseUid", "==", user.uid)
+    .limit(1)
+    .get();
+  if (checkoutSnapshot.empty) return {ready: false, consumed: false};
+  const checkout = checkoutSnapshot.docs[0];
+  const checkoutData = checkout.data() || {};
+  if (checkoutData.paymentStatus !== "paid" || checkoutData.organisationId) {
+    return {ready: false, consumed: !!checkoutData.organisationId};
+  }
+  return {ready: true, consumed: false, sessionId: checkout.id};
+});
+
 exports.getOrganisationCheckoutStatus = onCall({
   region: REGION,
   timeoutSeconds: 15,
