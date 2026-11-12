@@ -118,11 +118,45 @@
     const editable=['owner','admin'].includes(org.role);
     ['profileName','profileIndustry','profileWebsite','profileLocation','profileDescription','profileVisibility','saveProfileBtn'].forEach(id=>$(id).disabled=!editable);
     $('profileStatus').textContent=editable?'Only owners and administrators can edit this profile.':'Profile editing is restricted to organisation owners and administrators.';
-    const verificationStatus=org.verificationStatus||'unverified';
-    $('verificationStatus').textContent='Status: '+verificationStatus+'.';
+    const verificationFieldIds=['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'];
+    const setVerificationFieldsDisabled=disabled=>verificationFieldIds.forEach(id=>$(id).disabled=disabled);
+    $('verificationLegalName').value='';
+    $('verificationRegistrationNumber').value='';
+    $('verificationEvidenceUrl').value='';
+    $('verificationAttestation').checked=false;
+    $('verificationStatus').textContent=editable?'Status: loading…':'Status: '+(org.verificationStatus||'unverified')+'.';
     $('verificationReport').textContent='';
-    ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=!editable||verificationStatus==='pending'||verificationStatus==='verified');
-    if(editable)firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:org.id}).then(result=>{if($('orgSelect').value!==org.id)return;org.verificationStatus=result.data.status;$('verificationStatus').textContent='Status: '+result.data.status+'.';$('verificationReport').textContent=result.data.report||'';if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;if(result.data.evidenceUrl)$('verificationEvidenceUrl').value=result.data.evidenceUrl;if(result.data.registryCheck){const check=result.data.registryCheck;$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'.';}['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation','submitVerificationBtn'].forEach(id=>$(id).disabled=result.data.status==='pending'||result.data.status==='verified');if(result.data.legalName)$('verificationLegalName').value=result.data.legalName;if(result.data.registrationNumber)$('verificationRegistrationNumber').value=result.data.registrationNumber;}).catch(error=>console.warn('Verification status unavailable:',error));
+    setVerificationFieldsDisabled(true);
+    if(editable){
+      const selectedOrganisationId=org.id;
+      firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:selectedOrganisationId}).then(result=>{
+        if($('orgSelect').value!==selectedOrganisationId)return;
+        const verification=result.data||{};
+        const status=verification.status||'unverified';
+        org.verificationStatus=status;
+        $('verificationStatus').textContent='Status: '+status+'.';
+        $('verificationReport').textContent=verification.report||'';
+        if(verification.legalName)$('verificationLegalName').value=verification.legalName;
+        if(verification.registrationNumber){
+          const number=verification.registrationNumber.toUpperCase().replace(/[\s-]/g,'');
+          $('verificationRegistrationNumber').value=number;
+          $('verificationEvidenceUrl').value=verification.evidenceUrl||(/^(?:[0-9]{8}|[A-Z]{2}[0-9]{6}|[A-Z]{2}[0-9]{5}[A-Z])$/.test(number)?'https://find-and-update.company-information.service.gov.uk/company/'+number:'');
+        }else if(verification.evidenceUrl){
+          $('verificationEvidenceUrl').value=verification.evidenceUrl;
+        }
+        if(verification.registryCheck){
+          const check=verification.registryCheck;
+          $('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'.';
+        }
+        setVerificationFieldsDisabled(status==='pending'||status==='verified');
+      }).catch(error=>{
+        if($('orgSelect').value!==selectedOrganisationId)return;
+        console.warn('Verification status unavailable:',error);
+        $('verificationStatus').textContent='Status: unavailable.';
+        $('verificationReport').textContent='Saved verification details could not be loaded. Refresh the page and try again before submitting.';
+        setVerificationFieldsDisabled(true);
+      });
+    }
     $('leaveOrganisationBtn').hidden=org.role==='owner';
     $('membershipRequestPanel').classList.toggle('hidden',!editable);
     if(editable)loadMembershipRequests(org.id);
@@ -198,7 +232,7 @@
     if(!$('verificationAttestation').checked)return;
     const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
     try{
-      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,attested:$('verificationAttestation').checked});
+      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
       org.verificationStatus=result.data.status;
       $('verificationStatus').textContent='Status: pending.';const check=result.data.registryCheck||{};$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'registered name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'. Your request is awaiting Hamlet approval.';
       ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
