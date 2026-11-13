@@ -50,7 +50,7 @@
   <div id="authGate"><div class="gate-card"><a class="brand" href="https://www.hamlet-ai.co.uk/">hamlet<span>.</span></a><h2 style="margin-top:20px">hamlet. / workspace</h2><p id="gateMessage">Checking your sign-in…</p></div></div>
   <main class="shell hidden" id="app">
     <header><a class="brand" href="https://www.hamlet-ai.co.uk/app/hamlet/">hamlet<span>.</span></a><div class="header-actions"><a class="link" href="/app/hamlet/">Overview &amp; Pipeline</a><a class="link" href="https://www.hamlet-ai.co.uk/members.html">Members Area</a><span class="role" id="userBadge">Signed in</span></div></header>
-    <section class="hero"><div class="eyebrow">hamlet. / workspace</div><h1 id="pageTitle">Organisation workspace</h1><p id="intro">Choose the organisation you are working with, then open the relevant Hamlet tools. Organisation membership is checked before this page displays your available workspaces.</p></section>
+    <section class="hero"><div class="eyebrow">hamlet. / workspace</div><h1 id="pageTitle">Organisation workspace <span id="workspaceVerifiedTag" class="x-verified-badge hidden" role="img" aria-label="Verified organisation" title="Organisation verification approved"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#eab308" d="M12 1.8l2.7 1.1 2.9-.1 1.4 2.5 2.5 1.4-.1 2.9 1.1 2.7-1.1 2.7.1 2.9-2.5 1.4-1.4 2.5-2.9-.1-2.7 1.1-2.7-1.1-2.9.1-1.4-2.5-2.5-1.4.1-2.9L1.5 12l1.1-2.7-.1-2.9L5 5l1.4-2.5 2.9.1z"/><path fill="#111827" d="M10.2 15.9 6.8 12.5l1.5-1.5 1.9 1.9 5.5-5.5 1.5 1.5z"/></svg></span></h1><p id="intro">Choose the organisation you are working with, then open the relevant Hamlet tools. Organisation membership is checked before this page displays your available workspaces.</p></section>
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
     <div class="toolbar"><div><strong id="selectedName">Your organisation</strong><div class="muted" id="selectedSlug">Loading membership…</div></div><div><label class="muted" for="orgSelect" style="display:block;margin-bottom:5px">Switch organisation</label><select class="org-select" id="orgSelect" aria-label="Select organisation"><option>Loading…</option></select></div><span class="role" id="roleBadge">Member</span></div>
     <div class="leave-bar"><button type="button" id="leaveOrganisationBtn" hidden>Leave organisation</button></div>
@@ -108,7 +108,9 @@
   let auth,db,currentUser,organisations=[];
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
+  function renderWorkspaceVerifiedTag(status){$('workspaceVerifiedTag').classList.toggle('hidden',status!=='verified');}
   function renderVerificationStatus(status){
+    renderWorkspaceVerifiedTag(status);
     const el=$('verificationStatus');
     el.replaceChildren(document.createTextNode('Status: '+status+'.'));
     if(status==='verified'){
@@ -143,7 +145,7 @@
     renderVerificationStatus(editable?'loading…':(org.verificationStatus||'unverified'));
     $('verificationReport').textContent='';
     setVerificationFieldsDisabled(true);
-    if(editable){
+    {
       const selectedOrganisationId=org.id;
       firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:selectedOrganisationId}).then(result=>{
         if($('orgSelect').value!==selectedOrganisationId)return;
@@ -164,7 +166,7 @@
           const check=verification.registryCheck;
           $('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'.';
         }
-        setVerificationFieldsDisabled(status==='pending'||status==='verified');
+        setVerificationFieldsDisabled(!editable||status==='pending'||status==='verified');
       }).catch(error=>{
         if($('orgSelect').value!==selectedOrganisationId)return;
         console.warn('Verification status unavailable:',error);
