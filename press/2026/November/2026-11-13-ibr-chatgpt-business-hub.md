@@ -11,9 +11,9 @@
 
 **The London-focused company welcomes a new route for businesses to manage their presence and participate in AI-enabled business discovery, while continuing to expand the Hamlet proposition for organisations.**
 
-![Hamlet and OpenAI branding above a London skyline and a laptop displaying ChatGPT Business Hub, illustrating IBR's registration as a business entity.](/assets/images/hamlet-chatgpt-business-hub-press-banner.svg)
+![Banner showing Hamlet and OpenAI branding, the words “Strategic Technology Partnership,” a London skyline and a laptop displaying ChatGPT Business Hub.](/assets/images/hamlet-chatgpt-business-hub-press-banner.png)
 
-*Hamlet's registration on ChatGPT Business Hub. The visual does not indicate a formal partnership or OpenAI endorsement.*
+*Hamlet's registration on ChatGPT Business Hub. The banner says “Strategic Technology Partnership”; IBR registration does not indicate a formal partnership or OpenAI endorsement.*
 
 **LONDON, United Kingdom — 13 November 2026** — Impact in Business Recruitment Group Limited (IBR), the company behind the Hamlet technology platform, is delighted to announce that it has joined OpenAI's ChatGPT Business Hub as a registered business entity.
 
