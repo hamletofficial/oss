@@ -242,6 +242,56 @@
       outline: none;
     }
 
+    /* Keep the Live page's AI assistant preview card consistently light, including the human-reviewed pill. */
+    body .hamlet-ai-assistant,
+    body .hamlet-ai-assistant[data-variant="listing"],
+    body .hamlet-ai-assistant[data-variant="pipeline"] {
+      background: #ffffff !important;
+      border: 1px solid #d1d5db !important;
+      color: #111827 !important;
+    }
+    body .hamlet-ai-assistant :is(.hamlet-ai-eyebrow,.hamlet-ai-title,.hamlet-ai-desc,.hamlet-ai-pill,.hamlet-ai-field label,.hamlet-ai-status,.hamlet-ai-output,.hamlet-ai-output-head,.hamlet-ai-output-model) {
+      color: #111827 !important;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-pill {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      white-space: normal;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-field textarea,
+    body .hamlet-ai-assistant[data-variant="listing"] .hamlet-ai-field textarea,
+    body .hamlet-ai-assistant[data-variant="pipeline"] .hamlet-ai-field textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 190px !important;
+      height: 190px;
+      overflow-y: auto;
+      resize: vertical;
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #111827 !important;
+      caret-color: #111827 !important;
+      color-scheme: light !important;
+      scrollbar-color: #cbd5e1 #f8fafc;
+      scrollbar-width: thin;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-field textarea::placeholder {
+      color: #64748b !important;
+      opacity: 1;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-field textarea::-webkit-scrollbar {
+      width: 10px;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-field textarea::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    body .hamlet-ai-assistant .hamlet-ai-field textarea::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border: 2px solid #f8fafc;
+      border-radius: 8px;
+    }
+
     /* Match the selectable review stars to the 1.65rem Member ratings display. */
     #reviewPanel .star-rating button {
       font-size: 1.65rem !important;
