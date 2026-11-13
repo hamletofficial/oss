@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="description" content="Discover Hamlet Organisations: dedicated workspaces for property firms to coordinate teams, deals, property portfolios, documents and performance.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hamlet for Organisations | Connected property workspaces">
+  <meta property="og:description" content="Bring your property team, deals, portfolios and governance into one organisation workspace.">
+  <meta property="og:url" content="https://hamlet-ai.co.uk/orgs.html">
+  <meta property="og:image" content="https://hamlet-ai.co.uk/assets/images/grade-ii-listed-london.jfif">
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/homepage.css?v=20261107-1">
+  <title>For Organisations | hamlet</title>
+  <style>
+    :root{--org-bg:#0b1120;--org-card:#111827;--org-border:#26364d;--org-muted:#cbd5e1;--org-blue:#2563eb}
+    body{background:var(--org-bg);color:#f8fafc}
+    .org-page{width:min(1160px,calc(100% - 36px));margin:0 auto}
+    .org-nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 0}
+    .org-brand{display:inline-flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:850;font-size:1.55rem;letter-spacing:-.05em}
+    .org-brand img{width:32px;height:32px}
+    .org-nav-links{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .org-nav-links a{color:#dbeafe;text-decoration:none;font-size:.9rem;font-weight:650}
+    .org-nav-links a:hover{color:#93c5fd}
+    .org-hero{padding:clamp(44px,8vw,94px) 0 58px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:42px;align-items:center}
+    .org-eyebrow{color:#93c5fd;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;font-weight:850}
+    .org-hero h1{font-size:clamp(2.35rem,5.5vw,4.5rem);line-height:1.04;letter-spacing:-.055em;margin:15px 0 20px}
+    .org-hero h1 span{color:#93c5fd}
+    .org-hero p{max-width:680px;color:var(--org-muted);font-size:1.08rem;line-height:1.75}
+    .org-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+    .org-cta{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 18px;border-radius:9px;background:#2563eb;color:#fff!important;text-decoration:none;font-weight:800;border:1px solid #3b82f6}
+    .org-cta.secondary{background:#172338;border-color:#475569;color:#e5e7eb!important}
+    .org-visual{padding:22px;border:1px solid var(--org-border);border-radius:18px;background:linear-gradient(145deg,#14213a,#111827);box-shadow:0 24px 70px #0005}
+    .visual-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:17px;border-bottom:1px solid #334155;color:#e2e8f0;font-size:.85rem}
+    .visual-tag{font-size:.68rem;letter-spacing:.1em;color:#93c5fd;font-weight:800}
+    .visual-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+    .visual-metric{padding:14px;border:1px solid #334155;border-radius:10px;background:#0b1120}
+    .visual-metric strong{display:block;font-size:1.35rem;color:#fff}
+    .visual-metric span{display:block;color:#94a3b8;font-size:.76rem;margin-top:5px}
+    .visual-list{display:grid;gap:9px;margin-top:15px}
+    .visual-row{display:flex;justify-content:space-between;gap:12px;padding:11px 12px;background:#172338;border-radius:8px;color:#e2e8f0;font-size:.82rem}
+    .visual-row span:last-child{color:#93c5fd}
+    .org-section{padding:58px 0}
+    .org-section-head{max-width:740px;margin-bottom:26px}
+    .org-section h2{font-size:clamp(1.7rem,3.5vw,2.5rem);letter-spacing:-.04em;margin:10px 0}
+    .org-section-head p,.org-card p,.org-note{color:var(--org-muted);line-height:1.65}
+    .org-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .org-card{padding:22px;border:1px solid var(--org-border);border-radius:13px;background:var(--org-card);min-width:0}
+    .org-icon{font-size:1.35rem;margin-bottom:12px}
+    .org-card h3{font-size:1.02rem;margin:0 0 9px}
+    .org-card p{font-size:.9rem;margin:0}
+    .org-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .org-panel{padding:24px;border:1px solid var(--org-border);border-radius:14px;background:linear-gradient(145deg,#111827,#14213a)}
+    .org-panel h3{margin:0 0 10px}
+    .org-panel p,.org-panel li{color:var(--org-muted);line-height:1.65}
+    .org-panel ul{padding-left:20px;margin-bottom:0}
+    .org-faq{border-top:1px solid var(--org-border);padding:18px 0}
+    .org-faq h3{font-size:1rem;margin:0 0 7px}
+    .org-faq p{color:var(--org-muted);line-height:1.65;margin:0}
+    .org-final{margin:38px 0 60px;padding:clamp(24px,5vw,48px);text-align:center;border:1px solid #31517c;border-radius:18px;background:linear-gradient(135deg,#14213a,#111827)}
+    .org-final p{color:var(--org-muted);line-height:1.65;max-width:650px;margin:0 auto}
+    .org-footer{border-top:1px solid var(--org-border);padding:24px 18px;text-align:center;color:#94a3b8;font-size:.82rem}
+    @media(max-width:800px){.org-hero{grid-template-columns:1fr;gap:28px;padding-top:48px}.org-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.org-page{width:min(100% - 26px,1160px)}.org-nav{align-items:flex-start;flex-direction:column}.org-nav-links{gap:14px}.org-grid,.org-two-col{grid-template-columns:1fr}.org-section{padding:40px 0}.org-hero{padding-top:36px}}
+  </style>
+</head>
+<body>
+  <header class="org-page org-nav">
+    <a class="org-brand" href="/" aria-label="hamlet home"><img src="/assets/images/hamlet-icon.svg" alt="" width="32" height="32">hamlet<span style="color:#60a5fa">.</span></a>
+    <nav class="org-nav-links" aria-label="Organisation navigation">
+      <a href="/orgs.html" aria-current="page">For Organisations</a>
+      <a href="/app/public/live.html">Live Properties</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/login.html">Sign in</a>
+    </nav>
+  </header>
+  <main>
+    <section class="org-page org-hero">
+      <div>
+        <div class="org-eyebrow">Hamlet Organisations</div>
+        <h1>Your firm.<br><span>One connected workspace.</span></h1>
+        <p>Bring your property team, shared deals, portfolios and working documents into a dedicated organisation environment. Hamlet Organisations extends the individual broker workspace with clearer team coordination, role-based access and organisation-level oversight.</p>
+        <div class="org-actions">
+          <a class="org-cta" href="/organisation.html">Explore organisation access</a>
+          <a class="org-cta secondary" href="/contact.html">Speak to IBR</a>
+        </div>
+      </div>
+      <aside class="org-visual" aria-label="Illustrative organisation workspace">
+        <div class="visual-top"><strong>hamlet. / workspace</strong><span class="visual-tag">ORGANISATION</span></div>
+        <div class="visual-metrics">
+          <div class="visual-metric"><strong>Teams</strong><span>Role-based membership</span></div>
+          <div class="visual-metric"><strong>Deals</strong><span>Shared pipeline records</span></div>
+          <div class="visual-metric"><strong>Portfolio</strong><span>Organisation-owned assets</span></div>
+          <div class="visual-metric"><strong>Insights</strong><span>Aggregate workspace metrics</span></div>
+        </div>
+        <div class="visual-list">
+          <div class="visual-row"><span>Deal progression</span><span>Coordinated</span></div>
+          <div class="visual-row"><span>Team permissions</span><span>Configured</span></div>
+          <div class="visual-row"><span>Activity history</span><span>Auditable</span></div>
+        </div>
+        <p class="org-note" style="font-size:.72rem;margin:14px 0 0">Illustrative product representation, not live customer or performance data.</p>
+      </aside>
+    </section>
+
+    <section class="org-page org-section">
+      <div class="org-section-head">
+        <div class="org-eyebrow">A workspace built for firms</div>
+        <h2>Coordinate the work behind every property opportunity.</h2>
+        <p>Give colleagues a shared operating environment while retaining clear ownership boundaries and permissions across your organisation.</p>
+      </div>
+      <div class="org-grid">
+        <article class="org-card"><div class="org-icon">🏢</div><h3>Dedicated organisation workspace</h3><p>Establish a distinct workspace for your firm, with its own organisation identity, membership and operational records.</p></article>
+        <article class="org-card"><div class="org-icon">👥</div><h3>Team and membership management</h3><p>Invite colleagues and assign supported roles including viewer, member, manager, administrator and owner.</p></article>
+        <article class="org-card"><div class="org-icon">↗</div><h3>Shared deal pipeline</h3><p>Maintain organisation-owned deal records and coordinate progression, responsibilities and follow-up across the team.</p></article>
+        <article class="org-card"><div class="org-icon">⌂</div><h3>Property portfolio</h3><p>Manage organisation-owned commercial and residential property records separately from individual member portfolios.</p></article>
+        <article class="org-card"><div class="org-icon">▤</div><h3>Documents and resources</h3><p>Keep supported organisation documents and resource files within an access-controlled workspace structure.</p></article>
+        <article class="org-card"><div class="org-icon">◷</div><h3>Activity and audit history</h3><p>Give authorised owners and administrators access to read-only organisation activity records and operational history.</p></article>
+        <article class="org-card"><div class="org-icon">▥</div><h3>Organisation analytics</h3><p>Review aggregate membership, team, deal and property metrics available to authorised organisation managers.</p></article>
+        <article class="org-card"><div class="org-icon">🔐</div><h3>Role-based access controls</h3><p>Use explicit membership and supported team permissions to govern access to organisation deals and properties.</p></article>
+        <article class="org-card"><div class="org-icon">🌱</div><h3>Sustainability-aware property work</h3><p>Keep energy performance and sustainability credentials in view as your team reviews property information and supporting evidence.</p></article>
+      </div>
+    </section>
+
+    <section class="org-page org-section">
+      <div class="org-section-head"><div class="org-eyebrow">Designed around clear boundaries</div><h2>Personal accounts remain personal.</h2><p>Joining an organisation does not automatically transfer an individual's records or grant unrestricted access to their personal workspace.</p></div>
+      <div class="org-two-col">
+        <article class="org-panel"><h3>Personal and organisation records are distinct</h3><p>Each colleague retains their own Hamlet account. Personal deals and properties remain in personal collections unless the owner explicitly chooses to copy an eligible record into an organisation.</p></article>
+        <article class="org-panel"><h3>Access is governed, not assumed</h3><p>Membership status, assigned roles and supported resource permissions determine access. Organisation governance and protected operations are enforced by trusted backend services and security rules.</p></article>
+      </div>
+    </section>
+
+    <section class="org-page org-section">
+      <div class="org-section-head"><div class="org-eyebrow">Getting started</div><h2>From subscription to team workspace.</h2></div>
+      <div class="org-two-col">
+        <article class="org-panel"><h3>1. Start an organisation subscription</h3><p>One subscription covers one organisation. The current subscription price and renewal terms are presented securely through Stripe-hosted checkout rather than being hard-coded on this page.</p></article>
+        <article class="org-panel"><h3>2. Create and configure your workspace</h3><p>Sign in to a verified Hamlet account, complete organisation creation and establish the initial owner membership.</p></article>
+        <article class="org-panel"><h3>3. Invite your colleagues</h3><p>Invite colleagues using their verified email addresses and assign the appropriate organisation roles.</p></article>
+        <article class="org-panel"><h3>4. Build your shared workspace</h3><p>Manage organisation deals, properties, teams, documents and available analytics in the dedicated workspace.</p></article>
+      </div>
+    </section>
+
+    <section class="org-page org-section">
+      <div class="org-section-head"><div class="org-eyebrow">Frequently asked questions</div><h2>Organisation package: key details.</h2></div>
+      <div class="org-faq"><h3>How many organisations does a subscription cover?</h3><p>One organisation subscription covers one organisation workspace.</p></div>
+      <div class="org-faq"><h3>Can a person belong to more than one organisation?</h3><p>Yes. A member can belong to more than one organisation, subject to the membership and access rules of each workspace.</p></div>
+      <div class="org-faq"><h3>Are personal deals automatically shared with the firm?</h3><p>No. Personal records remain separate. An eligible record can be explicitly copied into an organisation as a distinct snapshot; it is not silently moved or automatically synchronised.</p></div>
+      <div class="org-faq"><h3>How is the subscription price displayed?</h3><p>The current price and renewal terms are shown on Stripe's hosted checkout page before payment is confirmed.</p></div>
+      <div class="org-faq"><h3>Does organisation verification happen automatically?</h3><p>No. Company registration information may be submitted for review. A registry match is evidence for review, not automatic verification or a substitute for an authorised decision.</p></div>
+      <div class="org-faq"><h3>Are all organisation features available to every member?</h3><p>No. Access depends on membership status, role, team assignment and the permissions associated with each resource. Some governance and analytics features are restricted to authorised roles.</p></div>
+    </section>
+
+    <section class="org-page org-final">
+      <div class="org-eyebrow">Bring your team together</div>
+      <h2>Make your organisation's property work more connected.</h2>
+      <p>Explore the organisation access area to review membership, start a subscription or manage an existing organisation workspace.</p>
+      <div class="org-actions" style="justify-content:center">
+        <a class="org-cta" href="/organisation.html">Go to Hamlet Organisations</a>
+        <a class="org-cta secondary" href="/invoice.html?organisation=1">Organisation subscription</a>
+      </div>
+    </section>
+  </main>
+  <footer class="org-footer">© 2026 Impact in Business Recruitment Group Limited · hamlet · <a href="/legals/terms.html" style="color:#bfdbfe">Terms</a> · <a href="/contact.html" style="color:#bfdbfe">Contact</a></footer>
+</body>
+</html>
