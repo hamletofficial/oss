@@ -264,6 +264,48 @@
     body .resource-footer a {
       color: #475569 !important;
     }
+
+    /* Current Listings is a dedicated light-surface element, independent of ERP dark defaults. */
+    #currentListingsPanel {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      color: #111827 !important;
+      border: 1px solid #d1d5db !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .09) !important;
+    }
+    #currentListingsPanel h2,
+    #currentListingsPanel h3,
+    #currentListingsPanel label {
+      color: #111827 !important;
+    }
+    #currentListingsPanel .panel-intro,
+    #currentListingsPanel .listing-tools-actions,
+    #currentListingsPanel #listingResultCount,
+    #currentListingsPanel #listingStatus {
+      color: #475569 !important;
+    }
+    #currentListingsPanel .listing-search,
+    #currentListingsPanel .listing-filters select,
+    #currentListingsPanel .listing-tools-actions input,
+    #currentListingsPanel .listing-tools-actions select {
+      background: #ffffff !important;
+      color: #111827 !important;
+      border-color: #cbd5e1 !important;
+    }
+    #currentListingsPanel .listing-search::placeholder,
+    #currentListingsPanel .listing-tools-actions input::placeholder {
+      color: #64748b !important;
+      opacity: 1;
+    }
+    #currentListingsPanel .listing-saved-toggle {
+      color: #111827 !important;
+    }
+    #currentListingsPanel .empty {
+      background: #f8fafc !important;
+      color: #475569 !important;
+      border-color: #d1d5db !important;
+    }
   </style>
 </head>
 <body class="auth-pending">
@@ -276,7 +318,7 @@
 <section class="auth-shell" id="authPanel" aria-live="polite"><h1>Member sign-in required</h1><p>This live commercial property listing service is available to authenticated members. Please sign in to view current listings.</p><a class="btn btn-primary" href="/login.html?next=%2Fapp%2Fpublic%2Flive.html">Continue to Sign In</a></section>
 <main class="resource-shell" id="resourceShell">
 <section class="hero"><div class="hero-heading"><div class="hero-copy"><h1>Live Commercial Property Listings</h1><p>Explore commercial properties proposed by authenticated members across the broker community. Listings are drawn from the shared commercial property resource and are available to signed-in members.</p></div><aside class="hero-member-reference" id="heroMemberReference" aria-label="Member identity and Entrust verification" hidden><div><span class="hero-reference-label">Member UID</span><code id="heroMaskedUid">••••••••</code></div><div class="hero-verification" id="heroEntrustStatus" data-verified="false"><span class="hero-reference-label">Entrust identity</span><strong id="heroEntrustText">Checking verification…</strong></div></aside></div><div class="hero-actions"><a class="btn btn-primary" href="/app/public/resources.html">Manage My Resources</a><a class="btn btn-primary" href="/app/public/dashboard.html">Advertise a New Property</a><a class="btn btn-outline fraud-report-btn" href="mailto:support@ibrecruitment.com?subject=Suspected%20Fraud%20Report%20-%20Commercial%20Property">Report Suspected Fraud</a></div></section>
-<section class="panel"><h2>Current Listings</h2><p class="panel-intro">All active property resources submitted by authenticated members are shown below.</p><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input class="listing-search" id="listingSearch" type="search" placeholder="Search names, locations, sizes or details…" aria-label="Search live commercial property listings"></div>
+<section class="panel current-listings-panel" id="currentListingsPanel"><h2>Current Listings</h2><p class="panel-intro">All active property resources submitted by authenticated members are shown below.</p><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input class="listing-search" id="listingSearch" type="search" placeholder="Search names, locations, sizes or details…" aria-label="Search live commercial property listings"></div>
 <div class="listing-filters" role="group" aria-label="Filter commercial properties">
 <label>Property type<select id="listingTypeFilter"><option value="">All types</option></select></label>
 <label>Availability<select id="listingAvailabilityFilter"><option value="">All availability</option></select></label>
