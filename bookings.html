@@ -29,12 +29,6 @@
     .booking-back:hover, .booking-back:focus-visible { text-decoration: underline; }
     @media (max-width: 520px) { .booking-page { width: calc(100% - 1rem); margin: 1rem auto 2rem; } .booking-card { border-radius: 16px; } .timify-button { width: 100%; } }
   </style>
-  <script async
-    id="timify-widget"
-    src="https://reserve.timify.com/widget/widget.min.js"
-    data-position="custom"
-    data-overlay-color="#111827"
-    data-modal-border-radius="extra-large"></script>
 </head>
 <body>
   <main class="booking-page">
@@ -45,7 +39,7 @@
       <div class="booking-panel">
         <h2>Choose a time to speak with us</h2>
         <p>Our online booking calendar will guide you through the available times and appointment details.</p>
-        <button class="timify-button" type="button" data-id="60996e0106234611834f3f23">Reserve a call</button>
+        <a class="timify-button" href="https://reserve.timify.com/60996e0106234611834f3f23" target="_blank" rel="noopener noreferrer">Reserve a call</a>
       </div>
       <a class="booking-back" href="/contact.html">← Back to Contact</a>
     </section>
