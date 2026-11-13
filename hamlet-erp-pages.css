@@ -1,310 +1,49 @@
-/* Hamlet Classic ERP Theme — presentation layer only.
-   Loaded only by in-scope Hamlet product pages. The Deal Pipeline is intentionally excluded. */
-:root{
-  --hamlet-erp-bg:#0b1120;--hamlet-erp-shell:#101a2b;--hamlet-erp-panel:#111c2d;
-  --hamlet-erp-panel-alt:#172438;--hamlet-erp-header:#071d4a;--hamlet-erp-line:#304158;
-  --hamlet-erp-text:#edf2f8;--hamlet-erp-muted:#a8b5c7;--hamlet-erp-blue:#3978d8;
-  --hamlet-erp-blue-hover:#2d67bd;--hamlet-erp-radius:5px;
-}
-html{color-scheme:dark;background:var(--hamlet-erp-bg)}
-body{
-  background:var(--hamlet-erp-bg)!important;color:var(--hamlet-erp-text)!important;
-  font-family:"Segoe UI",Arial,sans-serif!important;line-height:1.5;
-  font-size:14px;letter-spacing:0;
-}
-body :is(h1,h2,h3,h4){font-family:"Segoe UI",Arial,sans-serif!important;letter-spacing:-.015em}
-body h1{font-size:clamp(24px,2.7vw,32px);font-weight:700;line-height:1.2}
-body h2{font-size:18px;font-weight:650}
-body h3{font-size:14px;font-weight:650}
-body p{line-height:1.55}
-body :is(.shell,.wrap,.container,.page-wrapper,.members-shell,.settings-shell){
-  max-width:1480px;
-}
-body :is(header.site-header,header.resource-nav,.site-header,.resource-nav,.hamlet-header,.topbar){
-  background:var(--hamlet-erp-header)!important;background-image:none!important;
-  border-bottom:1px solid #29466f!important;box-shadow:none!important;
-}
-body :is(.hamlet-primary-nav,nav.workspace-nav,.workspace-nav,.sidebar-menu-shell){
-  background:#0c1a30!important;border-color:var(--hamlet-erp-line)!important;
-}
-body :is(.hamlet-nav-link,.workspace-nav-link,.sidebar-menu-link){
-  font-size:12px!important;font-weight:650!important;letter-spacing:.01em;
-}
-body main,body .page-content,body .workspace-content{min-width:0}
-body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.member-guide-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card){
-  background:var(--hamlet-erp-panel)!important;background-image:none!important;
-  color:var(--hamlet-erp-text)!important;border:1px solid var(--hamlet-erp-line)!important;
-  border-radius:var(--hamlet-erp-radius)!important;box-shadow:none!important;
-}
-body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card){
-  padding:16px;
-}
-body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card) :is(h2,h3){
-  color:#f2f6fc!important;
-}
-body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card) p,
-body :is(.muted,.text-muted,.description,.subtitle,.helper-text,.meta){color:var(--hamlet-erp-muted)!important}
-body :is(.card,.listing-card,.resource-card,.profile-card,.dash-card,.dashboard-card):hover{
-  border-color:#58769e!important;box-shadow:0 2px 8px rgba(0,0,0,.16)!important;
-}
-body :is(table,.table){width:100%;border-collapse:collapse;color:var(--hamlet-erp-text)}
-body :is(thead th,.table thead th){
-  background:#172943!important;color:#c4d7ef!important;border-bottom:1px solid #49617e!important;
-  font-size:11px!important;font-weight:750!important;letter-spacing:.055em;text-transform:uppercase;
-  padding:11px 12px!important;text-align:left;
-}
-body :is(tbody td,.table tbody td){
-  padding:11px 12px!important;border-bottom:1px solid #293b52!important;
-  color:var(--hamlet-erp-text);font-size:13px;
-}
-body tbody tr:nth-child(even){background:rgba(255,255,255,.018)}
-body tbody tr:hover{background:rgba(57,120,216,.09)}
-body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){
-  background:#0b1728!important;color:var(--hamlet-erp-text)!important;
-  border:1px solid #40536d!important;border-radius:4px!important;
-  min-height:37px;padding:8px 10px!important;font:inherit;
-}
-body :is(input,select,textarea)::placeholder{color:#8495aa!important;opacity:1}
-body :is(label,.form-label,.field-label){color:#c2cedd!important;font-size:12px;font-weight:650}
-body :is(button,.btn,.button,input[type=button],input[type=submit]){
-  border-radius:4px!important;box-shadow:none!important;font:600 12px/1.3 "Segoe UI",Arial,sans-serif;
-  min-height:35px;padding:8px 13px;
-}
-body :is(.btn-primary,.button-primary,button.primary,button[type=submit],input[type=submit]){
-  background:var(--hamlet-erp-blue)!important;border:1px solid #5a91e0!important;color:#fff!important;
-}
-body :is(.btn-primary,.button-primary,button.primary,button[type=submit],input[type=submit]):hover{
-  background:var(--hamlet-erp-blue-hover)!important;
-}
-body :is(.btn-outline,.btn-secondary,.button-secondary,button.secondary){
-  background:#1a2a40!important;border:1px solid #526985!important;color:#dce8f7!important;
-}
-body :is(a:not(.btn):not(.button)){text-underline-offset:3px}
-body :is(.badge,.pill,.tag,.role,.status-pill){
-  border-radius:3px!important;font-size:10px!important;font-weight:750;letter-spacing:.035em;
-}
-body :is(.toolbar,.filters,.filter-bar,.search-bar,.table-toolbar){
-  background:var(--hamlet-erp-panel)!important;border:1px solid var(--hamlet-erp-line)!important;
-  border-radius:var(--hamlet-erp-radius)!important;box-shadow:none!important;
-}
-body :is(.eyebrow,.section-label,.kicker){font-size:10px!important;letter-spacing:.12em!important;font-weight:800!important}
-body :is(.notice,.alert,[role=alert]){border-radius:4px!important;box-shadow:none!important}
-body :focus-visible{outline:2px solid #8db9ff!important;outline-offset:2px}
-body :is(.table-wrap,.table-responsive,.table-container){max-width:100%;overflow-x:auto}
-@media(max-width:760px){
- body :is(.shell,.wrap,.container,.page-wrapper,.members-shell,.settings-shell){padding-left:14px;padding-right:14px}
- body :is(.toolbar,.filters,.filter-bar){align-items:stretch}
- body :is(table,.table){min-width:620px}
-}
-@media(prefers-reduced-motion:reduce){body *,body *:before,body *:after{transition:none!important;scroll-behavior:auto!important}}
+/* Hamlet ERP ergonomic refinements.
+   This is an additive presentation layer. Individual workspace pages retain
+   ownership of their colour palette, surfaces, borders, navigation and layout.
+   Do not add page-theme, background, card, table or semantic-colour overrides here.
+*/
 
+/* A restrained shared type scale without imposing a new colour scheme. */
+:where(body) {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
-/* -------------------------------------------------------------------------
-   ERP page mode lock — all pages loading this file use one complete dark
-   palette. Page-specific light defaults are intentionally neutralised here.
-   This stylesheet is not loaded by the individual Deal Pipeline.
-   ------------------------------------------------------------------------- */
-:root{
-  color-scheme:dark!important;
-  --hamlet-erp-bg:#0b1120;
-  --hamlet-erp-shell:#101a2b;
-  --hamlet-erp-panel:#111827;
-  --hamlet-erp-panel-alt:#172338;
-  --hamlet-erp-header:#071d4a;
-  --hamlet-erp-line:#34445c;
-  --hamlet-erp-text:#edf2f8;
-  --hamlet-erp-muted:#aebbd0;
-  --hamlet-erp-link:#93c5fd;
+/* Keep each page's heading sizes and weights; only harmonise font rendering. */
+:where(body h1, body h2, body h3, body h4, body h5, body h6) {
+  font-family: inherit;
+  letter-spacing: -0.01em;
 }
-html,body{
-  color-scheme:dark!important;
-  background:#0b1120!important;
-  background-image:none!important;
-  color:#edf2f8!important;
+
+/* Improve control ergonomics while preserving each page's own button colours,
+   borders, shadows, variants and hover states. */
+:where(body button, body .btn, body .button, body input[type="button"],
+       body input[type="submit"], body input[type="reset"]) {
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.3;
+  min-height: 36px;
+  padding: 8px 13px;
+  border-radius: 5px;
 }
-body,.page-wrapper,.page,.page-wrapper main,.page-wrapper>main,
-main,.page-content,.workspace-content,.resource-shell,.members-shell,
-.profile-shell,.rank-shell,.directory-shell,.settings-shell,.org-main,
-.shell,.wrap,.container:not(.container-nav),.content{
-  background-color:#0b1120!important;
-  background-image:none!important;
-  color:#edf2f8!important;
-  box-shadow:none!important;
+
+/* Align form-control typography and sizing without changing native/page themes. */
+:where(body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+       body select, body textarea) {
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 100%;
 }
-/* Consistent raised surfaces across legacy and newer page-specific markup. */
-body :is(
-  .auth-shell,.signed-out-shell,.directory-auth-prompt,.gate-card,
-  .panel,.feed-panel,.profile-panel,.profile-feed-panel,.requests-panel,
-  .auth-prompt-card,.rank-card,.property-card,.dash-card,.member-guide-card,
-  .security-note,.toolbar,.directory-toolbar,.directory-controls,
-  .directory-stat,.organisation-group,.organisation-card,.org-card,.org,
-  .profile-card,.listing-card,.resource-card,.payment-card,.stripe-box,
-  .cookie-bar,.payment-footer,.org-row,.org-invite-result,.stat,.event,
-  .file,.property,.notice,.empty,.format-toolbar,.rank-tools,
-  .directory-search,.directory-header,.directory-intro,.directory-stats,
-  .directory-pagination,.member-commercial-links,.form-section-heading,
-  .address-map-preview,.address-map-empty,.address-suggestions,
-  .property-meta,.meta-item,.contact-strip,.listing-disclaimer,
-  .credential-disclaimer,.description,.content-card,.section-card,
-  .settings-card,.workspace-card,.dashboard-card,.metric,.listing-toolbar,
-  .resource-tool,.resource-tools,.profile-form,.org-panel
-){
-  background-color:#111827!important;
-  background-image:none!important;
-  color:#edf2f8!important;
-  border-color:#34445c!important;
-  box-shadow:none!important;
+
+/* Make long links easier to distinguish without recolouring them. */
+:where(body a:not(.btn):not(.button)) {
+  text-underline-offset: 3px;
 }
-/* Secondary rows and nested surfaces remain visibly distinct, but not light. */
-body :is(
-  .panel-head,.panel-body,.property-top,.organisation-group-heading,
-  .directory-stat,.rank-number,.rank-score,.meta,.meta-grid,.list-group-item,
-  .dropdown-menu,.dropdown-item,.popover,.tooltip-inner,.settings-row,
-  .member-commercial-links,.request-row,.event,.file,.org-empty,.empty,
-  .address-suggestion,.mention-suggestions,.mention-option,.profile-tag,
-  .signin-method-tag,.status-badge,.chip,.org-chip,.role,.tag,.pill
-){
-  background-color:#172338!important;
-  color:#dce7f5!important;
-  border-color:#40536d!important;
-}
-/* Hero regions use the same royal-blue/navy treatment on every ERP page. */
-body :is(.hero,.org-hero,.payment-header,.directory-header,.rank-hero){
-  background:linear-gradient(135deg,#071d4a 0%,#102747 68%,#111827 100%)!important;
-  color:#f8fbff!important;
-  border-color:#29466f!important;
-  box-shadow:none!important;
-}
-body :is(.hero,.org-hero,.payment-header) :is(h1,h2,h3,p,span,strong,small,.eyebrow){
-  color:#edf4ff!important;
-}
-/* Neutralise light-theme text colours inherited from older inline styles. */
-body :is(
-  h1,h2,h3,h4,h5,h6,p,li,label,legend,small,strong,b,dt,dd,
-  blockquote,figcaption,summary,address,td,th,
-  .muted,.text-muted,.description,.subtitle,.helper-text,.meta,
-  .welcome-lead,.directory-title,.directory-intro,.directory-field,
-  .directory-status,.directory-count,.directory-counts,.filter-count,
-  .results-count,.property-meta,.property-description,.rank-score span,
-  .broker-meta,.payment-intro,.payment-note,.org-muted,.org-row-sub,
-  .org-empty,.request-detail,.request-detail small,.event p,.date,
-  .file small,.footnote,.count,.status-note,.profile-hint,.field,
-  .form-label,.field-label,.panel-intro,.empty,.security-note p,
-  .member-guide-card p,.member-guide-card ol,.dashboard-section-label,
-  .dashboard-section-label small,.organisation-group-heading p,
-  .directory-loading,.directory-auth-prompt p,.auth-shell p,
-  .signed-out-shell p,.gate-card p,.property-meta strong,
-  .credential-details,.credential-note,.listing-disclaimer,
-  .contact-strip,.meta-item span,.description-label
-){
-  color:#d4deeb!important;
-}
-/* Headings and key labels use the same high-contrast foreground. */
-body :is(h1,h2,h3,h4,h5,h6,.member-guide-card h2,.dash-card h2,
-  .panel h2,.org-card h2,.property-card h3,.broker-name,.rank-score strong,
-  .directory-title,.organisation-group-heading h3,.payment-kicker){
-  color:#f3f7fc!important;
-}
-/* Preserve legible hyperlinks without turning button labels into links. */
-body a:not(.btn):not(.button):not(.org-btn):not(.guide-action):not(.message-member-btn){
-  color:#93c5fd!important;
-}
-body a:not(.btn):not(.button):not(.org-btn):hover{
-  color:#bfdbfe!important;
-}
-/* Controls share a single dark input treatment on every page. */
-body :is(
-  input:not([type=checkbox]):not([type=radio]):not([type=range]),
-  select,textarea,.form-control,.org-select,.listing-search,
-  .rank-tools input,.rank-tools select,.directory-search input,
-  .directory-field select,.resource-tool input,.resource-tool select,
-  .controls input,.controls select
-){
-  background:#0b1728!important;
-  color:#edf2f8!important;
-  border:1px solid #40536d!important;
-  color-scheme:dark!important;
-}
-body :is(input,textarea,select)::placeholder{color:#8fa1b8!important;opacity:1}
-body :is(option){background:#111827!important;color:#edf2f8!important}
-body :is(label,.field label,.org-form label,.profile-form label){
-  color:#cbd7e6!important;
-}
-/* Buttons remain controls, not pale cards. */
-body :is(.btn-outline,.btn-secondary,.button-secondary,.btn-quiet,
-  .button,.org-btn.secondary,button.secondary,.guide-action.btn-outline,
-  .directory-controls button,.directory-controls .btn){
-  background:#1a2a40!important;
-  color:#e5effc!important;
-  border-color:#526985!important;
-}
-body :is(.btn-primary,.button-primary,button.primary,button[type=submit],
-  input[type=submit],.org-btn:not(.secondary):not(.danger),
-  .guide-action.btn-primary,.dash-card .btn-primary,.hero-message-btn){
-  background:#2563eb!important;
-  color:#fff!important;
-  border-color:#5b93e6!important;
-}
-body :is(.btn-primary,.button-primary,button.primary,button[type=submit],
-  .org-btn,.guide-action,.dash-card .btn-primary):hover{
-  color:#fff!important;
-  filter:brightness(1.08);
-}
-/* Navigation and footers are consistently dark navy, including older pages. */
-body :is(header.site-header,header.resource-nav,.site-header,.resource-nav,
-  .hamlet-header,.topbar,.payment-header,.resource-footer,.payment-footer,
-  footer,.site-footer,.footer,.footer-content,.footer-inner,.footer-bottom,
-  .footer-links,.cookie-banner,.cookie-bar){
-  background:#071d4a!important;
-  background-image:none!important;
-  color:#edf4ff!important;
-  border-color:#29466f!important;
-  box-shadow:none!important;
-}
-body :is(.hamlet-primary-nav,nav.workspace-nav,.workspace-nav,
-  .sidebar-menu-shell,.sidebar-menu-shell nav,.nav){
-  background:#0c1a30!important;
-  color:#edf2f8!important;
-  border-color:#34445c!important;
-}
-body :is(.hamlet-nav-link,.workspace-nav-link,.sidebar-menu-link,
-  .nav a,.top a,.payment-nav a){
-  color:#dceaff!important;
-}
-body :is(.hamlet-nav-link,.workspace-nav-link,.sidebar-menu-link,
-  .nav a,.top a,.payment-nav a):hover{
-  color:#fff!important;
-}
-/* Tables, dropdowns and list rows cannot fall back to white surfaces. */
-body :is(table,.table,thead,tbody,tr,th,td){
-  color:#edf2f8!important;
-  border-color:#34445c!important;
-}
-body :is(thead th,.table thead th){
-  background:#172943!important;color:#dceaff!important;
-}
-body :is(tbody tr,tbody td,.table tbody td){
-  background-color:#111c2d!important;color:#e5edf7!important;
-}
-body tbody tr:nth-child(even){background-color:#152238!important}
-body tbody tr:hover{background-color:#1b3150!important}
-/* Retain semantic status colours and readable alert contrast. */
-body :is(.success,.status.success,[data-status="success"]){color:#86efac!important}
-body :is(.error,.status.error,[data-status="error"]){color:#fca5a5!important}
-body :is(.warning,.status.warning,[data-status="warning"]){color:#fcd34d!important}
-body :is(.notice,[role=alert]){
-  background:#172338!important;color:#e5edf7!important;border-color:#40536d!important;
-}
-body .notice.error,body [role=alert].error{
-  background:#351a25!important;color:#fecaca!important;border-color:#7f1d1d!important;
-}
-body .notice.success{
-  background:#123326!important;color:#bbf7d0!important;border-color:#166534!important;
-}
-body :focus-visible{outline:2px solid #93c5fd!important;outline-offset:2px}
-body :is(.table-wrap,.table-responsive,.table-container){max-width:100%;overflow-x:auto}
-@media(max-width:760px){
-  body :is(.shell,.wrap,.container,.page-wrapper,.members-shell,.settings-shell){
-    padding-left:14px;padding-right:14px
-  }
+
+/* Preserve keyboard visibility while allowing the browser/page accent colour. */
+:where(body :focus-visible) {
+  outline-offset: 2px;
 }
