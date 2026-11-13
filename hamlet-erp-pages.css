@@ -1,0 +1,99 @@
+/* Hamlet Classic ERP Theme — presentation layer only.
+   Loaded only by in-scope Hamlet product pages. The Deal Pipeline is intentionally excluded. */
+:root{
+  --hamlet-erp-bg:#0b1120;--hamlet-erp-shell:#101a2b;--hamlet-erp-panel:#111c2d;
+  --hamlet-erp-panel-alt:#172438;--hamlet-erp-header:#071d4a;--hamlet-erp-line:#304158;
+  --hamlet-erp-text:#edf2f8;--hamlet-erp-muted:#a8b5c7;--hamlet-erp-blue:#3978d8;
+  --hamlet-erp-blue-hover:#2d67bd;--hamlet-erp-radius:5px;
+}
+html{color-scheme:dark;background:var(--hamlet-erp-bg)}
+body{
+  background:var(--hamlet-erp-bg)!important;color:var(--hamlet-erp-text)!important;
+  font-family:"Segoe UI",Arial,sans-serif!important;line-height:1.5;
+  font-size:14px;letter-spacing:0;
+}
+body :is(h1,h2,h3,h4){font-family:"Segoe UI",Arial,sans-serif!important;letter-spacing:-.015em}
+body h1{font-size:clamp(24px,2.7vw,32px);font-weight:700;line-height:1.2}
+body h2{font-size:18px;font-weight:650}
+body h3{font-size:14px;font-weight:650}
+body p{line-height:1.55}
+body :is(.shell,.wrap,.container,.page-wrapper,.members-shell,.settings-shell){
+  max-width:1480px;
+}
+body :is(header.site-header,header.resource-nav,.site-header,.resource-nav,.hamlet-header,.topbar){
+  background:var(--hamlet-erp-header)!important;background-image:none!important;
+  border-bottom:1px solid #29466f!important;box-shadow:none!important;
+}
+body :is(.hamlet-primary-nav,nav.workspace-nav,.workspace-nav,.sidebar-menu-shell){
+  background:#0c1a30!important;border-color:var(--hamlet-erp-line)!important;
+}
+body :is(.hamlet-nav-link,.workspace-nav-link,.sidebar-menu-link){
+  font-size:12px!important;font-weight:650!important;letter-spacing:.01em;
+}
+body main,body .page-content,body .workspace-content{min-width:0}
+body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.member-guide-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card){
+  background:var(--hamlet-erp-panel)!important;background-image:none!important;
+  color:var(--hamlet-erp-text)!important;border:1px solid var(--hamlet-erp-line)!important;
+  border-radius:var(--hamlet-erp-radius)!important;box-shadow:none!important;
+}
+body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card){
+  padding:16px;
+}
+body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card) :is(h2,h3){
+  color:#f2f6fc!important;
+}
+body :is(.card,.panel,.metric,.stat,.listing-card,.resource-card,.post-card,.profile-card,.settings-card,.dash-card,.dashboard-card,.workspace-card,.content-card,.section-card) p,
+body :is(.muted,.text-muted,.description,.subtitle,.helper-text,.meta){color:var(--hamlet-erp-muted)!important}
+body :is(.card,.listing-card,.resource-card,.profile-card,.dash-card,.dashboard-card):hover{
+  border-color:#58769e!important;box-shadow:0 2px 8px rgba(0,0,0,.16)!important;
+}
+body :is(table,.table){width:100%;border-collapse:collapse;color:var(--hamlet-erp-text)}
+body :is(thead th,.table thead th){
+  background:#172943!important;color:#c4d7ef!important;border-bottom:1px solid #49617e!important;
+  font-size:11px!important;font-weight:750!important;letter-spacing:.055em;text-transform:uppercase;
+  padding:11px 12px!important;text-align:left;
+}
+body :is(tbody td,.table tbody td){
+  padding:11px 12px!important;border-bottom:1px solid #293b52!important;
+  color:var(--hamlet-erp-text);font-size:13px;
+}
+body tbody tr:nth-child(even){background:rgba(255,255,255,.018)}
+body tbody tr:hover{background:rgba(57,120,216,.09)}
+body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){
+  background:#0b1728!important;color:var(--hamlet-erp-text)!important;
+  border:1px solid #40536d!important;border-radius:4px!important;
+  min-height:37px;padding:8px 10px!important;font:inherit;
+}
+body :is(input,select,textarea)::placeholder{color:#8495aa!important;opacity:1}
+body :is(label,.form-label,.field-label){color:#c2cedd!important;font-size:12px;font-weight:650}
+body :is(button,.btn,.button,input[type=button],input[type=submit]){
+  border-radius:4px!important;box-shadow:none!important;font:600 12px/1.3 "Segoe UI",Arial,sans-serif;
+  min-height:35px;padding:8px 13px;
+}
+body :is(.btn-primary,.button-primary,button.primary,button[type=submit],input[type=submit]){
+  background:var(--hamlet-erp-blue)!important;border:1px solid #5a91e0!important;color:#fff!important;
+}
+body :is(.btn-primary,.button-primary,button.primary,button[type=submit],input[type=submit]):hover{
+  background:var(--hamlet-erp-blue-hover)!important;
+}
+body :is(.btn-outline,.btn-secondary,.button-secondary,button.secondary){
+  background:#1a2a40!important;border:1px solid #526985!important;color:#dce8f7!important;
+}
+body :is(a:not(.btn):not(.button)){text-underline-offset:3px}
+body :is(.badge,.pill,.tag,.role,.status-pill){
+  border-radius:3px!important;font-size:10px!important;font-weight:750;letter-spacing:.035em;
+}
+body :is(.toolbar,.filters,.filter-bar,.search-bar,.table-toolbar){
+  background:var(--hamlet-erp-panel)!important;border:1px solid var(--hamlet-erp-line)!important;
+  border-radius:var(--hamlet-erp-radius)!important;box-shadow:none!important;
+}
+body :is(.eyebrow,.section-label,.kicker){font-size:10px!important;letter-spacing:.12em!important;font-weight:800!important}
+body :is(.notice,.alert,[role=alert]){border-radius:4px!important;box-shadow:none!important}
+body :focus-visible{outline:2px solid #8db9ff!important;outline-offset:2px}
+body :is(.table-wrap,.table-responsive,.table-container){max-width:100%;overflow-x:auto}
+@media(max-width:760px){
+ body :is(.shell,.wrap,.container,.page-wrapper,.members-shell,.settings-shell){padding-left:14px;padding-right:14px}
+ body :is(.toolbar,.filters,.filter-bar){align-items:stretch}
+ body :is(table,.table){min-width:620px}
+}
+@media(prefers-reduced-motion:reduce){body *,body *:before,body *:after{transition:none!important;scroll-behavior:auto!important}}
