@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071d4a">
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Reserve a call with the Hamlet team. Choose a convenient appointment using our online booking calendar.">
+  <title>Reserve a call — Hamlet</title>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/page-transition.css">
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261015-4">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #0b1120; color: #e5e7eb; font-family: 'Open Sans', Arial, sans-serif; }
+    .booking-page { width: min(1080px, calc(100% - 2rem)); margin: 2.5rem auto 4rem; }
+    .booking-card { padding: clamp(1.25rem, 4vw, 2.5rem); border: 1px solid #334155; border-radius: 22px; background: #111827; box-shadow: 0 20px 50px rgba(0,0,0,.24); }
+    .booking-eyebrow { display: inline-flex; padding: .35rem .7rem; border: 1px solid #35558a; border-radius: 999px; color: #bfdbfe; background: rgba(7,29,74,.7); font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    h1 { margin: 1rem 0 .65rem; color: #fff; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
+    .booking-intro { max-width: 680px; margin: 0; color: #cbd5e1; line-height: 1.7; }
+    .booking-panel { display: grid; justify-items: start; gap: 1rem; margin-top: 2rem; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #334765; border-radius: 16px; background: #0b1120; }
+    .booking-panel h2 { margin: 0; color: #fff; font-size: 1.2rem; }
+    .booking-panel p { margin: 0; color: #cbd5e1; line-height: 1.65; }
+    .timify-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: .8rem 1.25rem; border: 1px solid #fff; border-radius: 10px; background: #fff; color: #071d4a; font: inherit; font-weight: 800; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+    .timify-button:hover, .timify-button:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+    .booking-back { display: inline-block; margin-top: 1.5rem; color: #bfdbfe; font-weight: 700; text-decoration: none; }
+    .booking-back:hover, .booking-back:focus-visible { text-decoration: underline; }
+    @media (max-width: 520px) { .booking-page { width: calc(100% - 1rem); margin: 1rem auto 2rem; } .booking-card { border-radius: 16px; } .timify-button { width: 100%; } }
+  </style>
+  <script async
+    id="timify-widget"
+    src="https://reserve.timify.com/widget/widget.min.js"
+    data-position="custom"
+    data-overlay-color="#111827"
+    data-modal-border-radius="extra-large"></script>
+</head>
+<body>
+  <main class="booking-page">
+    <section class="booking-card" aria-labelledby="booking-title">
+      <span class="booking-eyebrow">Hamlet appointments</span>
+      <h1 id="booking-title">Reserve a call.</h1>
+      <p class="booking-intro">Schedule a conversation with the Hamlet team. Select the booking option below to view available appointment times and confirm a slot that suits you.</p>
+      <div class="booking-panel">
+        <h2>Choose a time to speak with us</h2>
+        <p>Our online booking calendar will guide you through the available times and appointment details.</p>
+        <button class="timify-button" type="button" data-id="60996e0106234611834f3f23">Reserve a call</button>
+      </div>
+      <a class="booking-back" href="/contact.html">← Back to Contact</a>
+    </section>
+  </main>
+  <script defer src="/page-transition.js"></script>
+  <script src="/hamlet-background.js?v=20261021-2"></script>
+</body>
+</html>
