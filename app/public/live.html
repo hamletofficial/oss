@@ -211,6 +211,43 @@
     }
   </style>
   <link rel="stylesheet" href="/hamlet-erp-pages.css?v=20261113-1">
+  <style id="live-page-targeted-style-refinements">
+    /* Keep the existing page background image visible beneath a transparent page canvas. */
+    html,
+    body,
+    body.auth-pending,
+    .page-wrapper,
+    main.resource-shell {
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+
+    /* The listing assistant's two editable text areas use the light listing palette. */
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiMessage,
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiContext {
+      background: #ffffff !important;
+      color: #111827 !important;
+      border: 1px solid #cbd5e1 !important;
+      caret-color: #111827;
+    }
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiMessage::placeholder,
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiContext::placeholder {
+      color: #64748b !important;
+      opacity: 1;
+    }
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiMessage:focus,
+    .hamlet-ai-assistant[data-variant="listing"] #hamletAiContext:focus {
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, .14) !important;
+      outline: none;
+    }
+
+    /* Match the selectable review stars to the 1.65rem Member ratings display. */
+    #reviewPanel .star-rating button {
+      font-size: 1.65rem !important;
+      line-height: 1.2;
+    }
+  </style>
 </head>
 <body class="auth-pending">
 <div class="page-wrapper">
