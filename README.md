@@ -1,10 +1,12 @@
-# hamlet — connected property intelligence
+# hamlet — an integrated property workspace (IWMS)
 
-**hamlet** is a property-focused CRM and broker-community platform developed by Impact in Business Recruitment Group Limited (IBR). It brings property listings, deal progression, broker profiles, rankings and communications into a more connected workspace.
+**hamlet** is an integrated commercial and residential property workspace (IWMS), developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider workspace; they are not the product's defining category.
 
 **Live website:** https://hamlet-ai.co.uk  
 **Repository:** https://github.com/hamletofficial/oss  
 **Hosting:** GitHub Pages and Firebase services, depending on the feature  
+**Product direction:** An integrated workspace for commercial and residential property markets.
+
 **Core principle:** *Less fragmentation, more connected deals.*
 
 ## What this repository contains
@@ -28,21 +30,24 @@ This repository contains the public website and much of the client-side Hamlet a
 
 The repository evolves frequently. Treat these paths as a navigational overview rather than a complete specification; verify the current files and their imports before making changes.
 
-## Main product areas
+## IWMS capabilities
 
-- **Property listings and portfolios** — commercial property records and sustainability-related listing information, with residential functionality in the relevant pages and services.
-- **Deal pipeline** — track deal stages, associated records and key deadlines.
-- **Broker directory and profiles** — help members find and understand other brokers in the community.
-- **Broker rankings and insights** — present broker-level performance information where data is available.
-- **Community and messaging** — member posts, replies and direct communications.
-- **AI assistance** — AI-related entry points and gateway code are present; availability depends on the relevant service configuration.
-- **Account and administration tools** — sign-in, account settings and restricted administration experiences.
+Hamlet's IWMS direction is to connect the information and workflows involved in commercial and residential property activity, rather than operate as a standalone content-management system (CMS). Its capabilities are organised around property, portfolios, transactions, organisations and the people working across them:
+
+- **Commercial and residential property** — property records, listings, portfolio views and sustainability-related building information.
+- **Portfolio and asset information** — connected property records and portfolio-related workflows across the supported commercial and residential experiences.
+- **Deal and transaction workflows** — pipeline stages, associated records, critical dates and deal progression.
+- **Organisation and team workspaces** — organisation-scoped records, membership, roles, assignments, files and governance.
+- **Broker and professional network** — member profiles, directory, rankings, posts and communications.
+- **Shared resources and documents** — access-controlled resources and files associated with supported workspace records.
+- **AI assistance and insights** — AI-related entry points, gateway integrations and analytical views, subject to service configuration.
+- **Identity and administration** — authentication, account settings, verification and restricted administrative controls.
 
 Feature availability may depend on authentication, verification state, Firebase configuration, deployed functions and external service credentials.
 
 ## Hamlet Organisations and `hamlet. / workspace`
 
-Hamlet Organisations extends the individual broker platform with **organisation-scoped workspaces** for property firms and professional teams. Each user retains an independently usable Hamlet account and may belong to multiple organisations. Organisation membership is explicit; joining a firm does not silently transfer personal deals, properties or files into its workspace.
+Hamlet Organisations is a core part of the IWMS direction: it extends individual broker functionality with **organisation-scoped workspaces** for property firms and professional teams. Each user retains an independently usable Hamlet account and may belong to multiple organisations. Organisation membership is explicit; joining a firm does not silently transfer personal deals, properties or files into its workspace.
 
 The organisation experience is presented as **hamlet. / workspace**. The Members Area is the organisation subscription and membership entry point, while the authenticated workspace provides the operational tools. Access requires a signed-in, email-verified Hamlet account and an active membership in the selected organisation. Privileged operations are enforced by trusted Cloud Functions and Firebase Security Rules, not by client-side navigation or hidden controls.
 
@@ -183,7 +188,7 @@ The presence of source files and a region declaration does not prove that a func
 
 ## Technology and services
 
-The repository includes a largely static HTML/CSS/JavaScript website and uses Firebase services for features such as authentication, Firestore data and file storage. It also contains Firebase Cloud Functions, worker/gateway code, and desktop-related assets. Inspect the relevant subdirectory configuration to confirm the runtime, environment variables and deployment process for a specific component.
+The repository includes a largely static HTML/CSS/JavaScript web application and uses Firebase services for features such as authentication, Firestore data and file storage. It also contains Firebase Cloud Functions, worker/gateway code, and desktop-related assets. Inspect the relevant subdirectory configuration to confirm the runtime, environment variables and deployment process for a specific component.
 
 The presence of configuration files does not by itself confirm that every service or integration is deployed or enabled.
 
