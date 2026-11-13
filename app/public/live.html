@@ -302,7 +302,43 @@
       color: #111827 !important;
     }
 
+    /* Align the Current Listings search icon with the input text despite ERP input overrides. */
+    #currentListingsPanel .search-wrap {
+      position: relative;
+      width: 100%;
+    }
+    #currentListingsPanel .search-wrap > svg {
+      position: absolute !important;
+      left: 14px !important;
+      top: 50% !important;
+      width: 17px !important;
+      height: 17px !important;
+      transform: translateY(-50%) !important;
+      display: block;
+      color: #64748b !important;
+      pointer-events: none;
+    }
+    #currentListingsPanel #listingSearch {
+      display: block;
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 46px !important;
+      height: 46px;
+      padding: 11px 14px 11px 44px !important;
+      line-height: 22px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
     /* Override the shared ERP footer treatment on this page only. */
+    body .page-wrapper > footer.resource-footer,
+    body .page-wrapper > footer.resource-footer::before,
+    body .page-wrapper > footer.resource-footer::after {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
     body .resource-footer {
       background: transparent !important;
       background-color: transparent !important;
