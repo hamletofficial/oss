@@ -39,6 +39,12 @@
     .windows-download-icon{display:inline-block;flex:0 0 auto;width:18px;height:18px;color:currentColor;fill:currentColor;vertical-align:-4px;transition:transform .18s ease,opacity .18s ease}
     .button.primary:hover .windows-download-icon{transform:translateY(-1px);opacity:.88}
     @media(prefers-reduced-motion:reduce){.windows-download-icon{transition:none}}
+
+/* Keep the public community feed discoverable in the compact header. */
+.hamlet-404-header .top-links a.community-feed-nav{display:inline-flex;align-items:center;flex:0 0 auto;color:#dbeafe}
+.hamlet-404-header .top-links a.community-feed-nav:hover{color:#60a5fa}
+@media(max-width:540px){.hamlet-404-header .top-links a.community-feed-nav{font-size:.78rem}}
+@media(max-width:380px){.hamlet-404-header .topbar-inner{gap:7px;padding-inline:10px}.hamlet-404-header .brand{font-size:1.25rem}.hamlet-404-header .home-brand-mark{width:28px;height:28px}.hamlet-404-header .top-links a.community-feed-nav{font-size:.72rem}.hamlet-404-header .top-links .signin{padding:7px 10px}}
     .button.primary:hover{background:#e5e7eb}
     .hero{padding:clamp(3rem,8vw,6.2rem) 0 3rem}
     .hero-grid{width:min(100%,1000px);margin-inline:auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:2rem;align-items:center}
