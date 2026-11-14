@@ -197,6 +197,77 @@ async function lookupCompaniesHouseCompany(companyNumber) {
   return profile;
 }
 
+
+async function searchCompaniesHouseCompanies(searchTerm) {
+  const apiKey = String(companiesHouseApiKey.value() || "").trim();
+  if (!apiKey) throw new HttpsError("failed-precondition", "Companies House search is not configured. Please contact Hamlet support.");
+  const url = new URL("https://api.company-information.service.gov.uk/search/companies");
+  url.searchParams.set("q", searchTerm);
+  url.searchParams.set("items_per_page", "8");
+  let response;
+  try {
+    response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {Accept: "application/json", Authorization: "Basic " + Buffer.from(apiKey + ":").toString("base64")},
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch (error) {
+    console.error("Companies House company-name search failed:", error);
+    throw new HttpsError("unavailable", "Companies House search is temporarily unavailable. Please retry shortly.");
+  }
+  if (response.status === 401 || response.status === 403) {
+    console.error("Companies House rejected search credentials (HTTP " + response.status + ").");
+    throw new HttpsError("failed-precondition", "Hamlet could not authenticate with Companies House. Please contact support.");
+  }
+  if (response.status === 429 || response.status >= 500) {
+    throw new HttpsError("unavailable", "Companies House search is temporarily unavailable. Please retry shortly.");
+  }
+  if (!response.ok) throw new HttpsError("internal", "Companies House returned an unexpected search response.");
+  let payload;
+  try { payload = await response.json(); } catch (error) {
+    throw new HttpsError("internal", "Companies House returned an unreadable search response.");
+  }
+  const items = Array.isArray(payload && payload.items) ? payload.items : [];
+  return items.slice(0, 8).filter((item) =>
+    item && typeof item.title === "string" && typeof item.company_number === "string"
+  ).map((item) => ({
+    legalName: String(item.title).slice(0, 160),
+    registrationNumber: String(item.company_number).toUpperCase().replace(/[\s-]/g, "").slice(0, 20),
+    companyStatus: String(item.company_status || "unknown").slice(0, 40),
+    companyType: String(item.company_type || "").slice(0, 80),
+    addressSnippet: String(item.address_snippet || "").slice(0, 240),
+    evidenceUrl: "https://find-and-update.company-information.service.gov.uk/company/" +
+      encodeURIComponent(String(item.company_number).toUpperCase().replace(/[\\s-]/g, "")),
+  }));
+}
+
+exports.searchCompaniesHouseCompanies = onCall({
+  region: "europe-west2",
+  timeoutSeconds: 20,
+  memory: "256MiB",
+  secrets: [companiesHouseApiKey],
+}, async (request) => {
+  requireVerifiedUser(request);
+  const query = readString(request.data && request.data.query, "company name", 2, 100);
+  if (/[<>\u0000-\u001f]/.test(query)) throw new HttpsError("invalid-argument", "Enter a valid company name.");
+  const rateKey = crypto.createHash("sha256").update(request.auth.uid + "_" + query.toLowerCase()).digest("hex");
+  const rateRef = getDb().collection("companiesHouseSearchLimits").doc(rateKey);
+  await getDb().runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(rateRef);
+    const lastSearchAt = snapshot.exists ? snapshot.data().lastSearchAt : null;
+    if (lastSearchAt && typeof lastSearchAt.toMillis === "function" &&
+        Date.now() - lastSearchAt.toMillis() < 2500) {
+      throw new HttpsError("resource-exhausted", "Please pause briefly before searching again.");
+    }
+    transaction.set(rateRef, {
+      uid: request.auth.uid,
+      lastSearchAt: Timestamp.now(),
+    });
+  });
+  const companies = await searchCompaniesHouseCompanies(query);
+  return {companies};
+});
+
 function membershipId(orgId, uid) {
   return orgId + "_" + uid;
 }

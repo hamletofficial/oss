@@ -5,8 +5,14 @@ const crypto = require("node:crypto");
 process.env.FUNCTIONS_EMULATOR = "true";
 process.env.COMPANIES_HOUSE_API_KEY ||= "test-companies-house-key";
 global.fetch = async (url, options) => {
-  assert.match(String(url), /^https:\/\/api\.company-information\.service\.gov\.uk\/company\//);
   assert.equal(options.headers.Authorization, "Basic " + Buffer.from("test-companies-house-key:").toString("base64"));
+  if (String(url).includes("/search/companies")) {
+    return {status:200, ok:true, json:async()=>({items:[{
+      title:"Verified Legal Ltd",company_number:"01234567",company_status:"active",
+      company_type:"ltd",address_snippet:"1 Example Street, London",
+    }]})};
+  }
+  assert.match(String(url), /^https:\/\/api\.company-information\.service\.gov\.uk\/company\//);
   return {status:200, ok:true, json:async()=>({company_name:"Verified Legal Ltd",company_number:"01234567",company_status:"active",type:"ltd",date_of_creation:"2001-01-01"})};
 };
 const admin = require("firebase-admin");
@@ -627,5 +633,33 @@ test("suspended organisations do not expose verification metadata through callab
   await expectCode(
     invoke("getOrganisationVerificationStatus", {organisationId: organisation.organisationId}, identity(ownerUid, "suspended-owner@example.com")),
     "not-found"
+  );
+});
+test("Companies House name search requires verified sign-in and returns registry-backed choices", async () => {
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, null),
+    "unauthenticated"
+  );
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, identity("unverified-search", "unverified@example.com", false)),
+    "failed-precondition"
+  );
+  const tag = suffix();
+  const result = await invoke(
+    "searchCompaniesHouseCompanies",
+    {query:"Verified Legal"},
+    identity("search-user-" + tag, "search@example.com")
+  );
+  assert.equal(result.companies.length, 1);
+  assert.equal(result.companies[0].legalName, "Verified Legal Ltd");
+  assert.equal(result.companies[0].registrationNumber, "01234567");
+  assert.equal(result.companies[0].evidenceUrl, "https://find-and-update.company-information.service.gov.uk/company/01234567");
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, identity("search-user-" + tag, "search@example.com")),
+    "resource-exhausted"
+  );
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"x"}, identity("search-short-" + tag, "short@example.com")),
+    "invalid-argument"
   );
 });
