@@ -117,6 +117,7 @@
   const $=id=>document.getElementById(id);
   let auth,db,currentUser,organisations=[];
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function setWorkspaceTitle(name){const title=$('pageTitle');const badge=$('workspaceVerifiedTag');title.firstChild.textContent=name+' workspace ';if(badge.parentNode!==title)title.appendChild(badge);}
   function notice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function renderWorkspaceVerifiedTag(status){$('workspaceVerifiedTag').classList.toggle('hidden',status!=='verified');}
   function renderVerificationStatus(status){
@@ -140,7 +141,7 @@
     $('selectedName').textContent=org.name;
     $('selectedSlug').textContent='Tenant workspace: '+org.slug+'.orgs.hamlet-ai.co.uk';
     $('roleBadge').textContent=org.role;
-    $('pageTitle').textContent=org.name+' workspace';
+    setWorkspaceTitle(org.name);
     $('orgSelect').value=org.id;
     $('profileName').value=org.name||'';$('profileIndustry').value=org.industry||'';$('profileWebsite').value=org.website||'';$('profileLocation').value=org.publicLocation||'';$('profileDescription').value=org.description||'';$('profileVisibility').value=org.visibility==='public'?'public':'private';
     const editable=['owner','admin'].includes(org.role);
@@ -216,7 +217,7 @@
       $('selectedName').textContent='No organisation selected';
       $('selectedSlug').textContent='Create or join an organisation to continue.';
       $('roleBadge').textContent='No membership';
-      $('pageTitle').textContent='Your organisation workspace';
+      setWorkspaceTitle('Your organisation');
       $('intro').textContent='You do not currently belong to an active organisation. Organisation creation, invitations and membership administration are available in the Members Area.';
       $('notice').className='notice show';
       $('notice').textContent=active.length
@@ -244,7 +245,7 @@
         description:$('profileDescription').value,visibility:$('profileVisibility').value
       });
       Object.assign(org,result.data);
-      $('selectedName').textContent=org.name;$('pageTitle').textContent=org.name+' workspace';
+      $('selectedName').textContent=org.name;setWorkspaceTitle(org.name);
       $('profileStatus').textContent='Organisation profile saved.';
       notice(org.visibility==='public'?'Profile saved and listed in the public directory.':'Profile saved and hidden from the public directory.');
     }catch(error){console.error('Organisation profile update failed:',error);$('profileStatus').textContent=error.message||'Unable to save the organisation profile.';}
