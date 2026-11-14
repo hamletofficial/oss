@@ -28,7 +28,7 @@ const MAIN_ORIGINS=['https://www.hamlet-ai.co.uk','https://hamlet-ai.co.uk','htt
 const $=id=>document.getElementById(id);
 // The tenant page can be opened through a cross-origin Worker proxy. Keep
 // Firebase bootstrap available if the separately hosted config script fails.
-const FIREBASE_CONFIG={apiKey:'AIzaSyChWtcZbStdG0ep7FdL8OG6ESgSXtzDZ1k',authDomain:'wale-491805.firebaseapp.com',projectId:'wale-491805',storageBucket:'wale-491805.firebasestorage.app',messagingSenderId:'753131375199',appId:'1:753131375199:web:87d3eef7edda42d640a9ea'};
+const FIREBASE_CONFIG={apiKey:'AIzaSyChWtcZbStdG0ep7FdL8OG6ESgSXtzDZ1k',authDomain:'auth.hamlet-ai.co.uk',projectId:'wale-491805',storageBucket:'wale-491805.firebasestorage.app',messagingSenderId:'753131375199',appId:'1:753131375199:web:87d3eef7edda42d640a9ea'};
 function firebaseConfiguration(){return window.firebaseConfig||FIREBASE_CONFIG;}
 function status(message,error){$('status').textContent=message;$('status').className='status'+(error?' error':'');}
 function tenantSlug(){

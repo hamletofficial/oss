@@ -1,5 +1,6 @@
 const APP_HOSTS = new Set(["www.hamlet-ai.co.uk", "hamlet-ai.co.uk"]);
 const AUTH_HOSTS = new Set([
+  "auth.hamlet-ai.co.uk",
   "wale-491805.firebaseapp.com",
   "wale-491805.web.app",
   "accounts.google.com",

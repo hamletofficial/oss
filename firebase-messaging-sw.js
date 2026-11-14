@@ -4,7 +4,7 @@ importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-comp
 
 firebase.initializeApp({
   apiKey: "AIzaSyChWtcZbStdG0ep7FdL8OG6ESgSXtzDZ1k",
-  authDomain: "wale-491805.firebaseapp.com",
+  authDomain: "auth.hamlet-ai.co.uk",
   projectId: "wale-491805",
   storageBucket: "wale-491805.firebasestorage.app",
   messagingSenderId: "753131375199",

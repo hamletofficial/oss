@@ -16,6 +16,7 @@ test("rejects lookalike hosts, HTTP and non-web schemes", () => {
 
 test("allows only explicitly approved HTTPS authentication hosts", () => {
   assert.equal(isTrustedAuthUrl("https://wale-491805.firebaseapp.com/__/auth/handler"), true);
+  assert.equal(isTrustedAuthUrl("https://auth.hamlet-ai.co.uk/__/auth/handler"), true);
   assert.equal(isTrustedAuthUrl("https://accounts.google.com/"), true);
   assert.equal(isTrustedAuthUrl("https://attacker.google.com/"), false);
   assert.equal(isTrustedAuthUrl("https://another-project.firebaseapp.com/"), false);
