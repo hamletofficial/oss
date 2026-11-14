@@ -232,7 +232,7 @@ async function searchCompaniesHouseCompanies(searchTerm) {
     item && typeof item.title === "string" && typeof item.company_number === "string"
   ).map((item) => ({
     legalName: String(item.title).slice(0, 160),
-    registrationNumber: String(item.company_number).toUpperCase().replace(/[\\s-]/g, "").slice(0, 20),
+    registrationNumber: String(item.company_number).toUpperCase().replace(/[\s-]/g, "").slice(0, 20),
     companyStatus: String(item.company_status || "unknown").slice(0, 40),
     companyType: String(item.company_type || "").slice(0, 80),
     addressSnippet: String(item.address_snippet || "").slice(0, 240),
@@ -249,7 +249,7 @@ exports.searchCompaniesHouseCompanies = onCall({
 }, async (request) => {
   requireVerifiedUser(request);
   const query = readString(request.data && request.data.query, "company name", 2, 100);
-  if (/[<>\\u0000-\\u001f]/.test(query)) throw new HttpsError("invalid-argument", "Enter a valid company name.");
+  if (/[<>\u0000-\u001f]/.test(query)) throw new HttpsError("invalid-argument", "Enter a valid company name.");
   const rateKey = crypto.createHash("sha256").update(request.auth.uid + "_" + query.toLowerCase()).digest("hex");
   const rateRef = getDb().collection("companiesHouseSearchLimits").doc(rateKey);
   await getDb().runTransaction(async (transaction) => {
