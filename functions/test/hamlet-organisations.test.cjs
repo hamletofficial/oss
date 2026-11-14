@@ -629,3 +629,31 @@ test("suspended organisations do not expose verification metadata through callab
     "not-found"
   );
 });
+test("Companies House name search requires verified sign-in and returns registry-backed choices", async () => {
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, null),
+    "unauthenticated"
+  );
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, identity("unverified-search", "unverified@example.com", false)),
+    "failed-precondition"
+  );
+  const tag = suffix();
+  const result = await invoke(
+    "searchCompaniesHouseCompanies",
+    {query:"Verified Legal"},
+    identity("search-user-" + tag, "search@example.com")
+  );
+  assert.equal(result.companies.length, 1);
+  assert.equal(result.companies[0].legalName, "Verified Legal Ltd");
+  assert.equal(result.companies[0].registrationNumber, "01234567");
+  assert.equal(result.companies[0].evidenceUrl, "https://find-and-update.company-information.service.gov.uk/company/01234567");
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"Verified Legal"}, identity("search-user-" + tag, "search@example.com")),
+    "resource-exhausted"
+  );
+  await expectCode(
+    invoke("searchCompaniesHouseCompanies", {query:"x"}, identity("search-short-" + tag, "short@example.com")),
+    "invalid-argument"
+  );
+});
