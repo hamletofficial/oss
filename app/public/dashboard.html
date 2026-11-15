@@ -475,7 +475,7 @@
         button.hidden=false;button.style.display='inline-flex';
         if(!user||!user.emailVerified||!firebase.app().functions)return;
         try{
-          const result=await firebase.app().functions('europe-west2').httpsCallable('getMyOrganisationSubscription')({});
+          const result=await firebase.app().functions('europe-west1').httpsCallable('getMyOrganisationSubscription')({});
           const entitled=!!(result.data&&result.data.hasActiveOrganisationEntitlement);
           button.hidden=entitled;button.style.display=entitled?'none':'inline-flex';
         }catch(error){console.warn('Organisation subscription status could not be confirmed; retaining upgrade link.',error);}
