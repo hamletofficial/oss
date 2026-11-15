@@ -367,7 +367,7 @@
           try {
             await user.reload();
             if (user.emailVerified !== true) throw new Error('Verify your email address before starting an organisation subscription.');
-            var result = await firebase.app().functions('europe-west2').httpsCallable('createOrganisationCheckoutSession')({});
+            var result = await firebase.app().functions('europe-west1').httpsCallable('createOrganisationCheckoutSession')({});
             if (!result.data || !result.data.url) throw new Error('Stripe did not return a checkout link.');
             window.location.assign(result.data.url);
           } catch (error) {
@@ -416,7 +416,7 @@
             organisationCard.hidden = false;
             if (isAuthenticated && user.emailVerified === true) {
               try {
-                var entitlementResult = await firebase.app().functions('europe-west2')
+                var entitlementResult = await firebase.app().functions('europe-west1')
                   .httpsCallable('getMyOrganisationSubscription')({});
                 var hasActiveEntitlement = !!(
                   entitlementResult.data &&
