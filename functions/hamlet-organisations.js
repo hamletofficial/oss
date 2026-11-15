@@ -242,7 +242,7 @@ async function searchCompaniesHouseCompanies(searchTerm) {
 }
 
 exports.searchCompaniesHouseCompanies = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 20,
   memory: "256MiB",
   secrets: [companiesHouseApiKey],
@@ -287,7 +287,7 @@ function activityRef(db, orgId) {
 }
 
 exports.createOrganisation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -387,7 +387,7 @@ exports.createOrganisation = onCall({
 });
 
 exports.requestOrganisationMembership = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -440,7 +440,7 @@ exports.requestOrganisationMembership = onCall({
 });
 
 exports.reviewOrganisationMembershipRequest = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -489,7 +489,7 @@ exports.reviewOrganisationMembershipRequest = onCall({
 });
 
 exports.updateOrganisationProfile = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -557,7 +557,7 @@ exports.updateOrganisationProfile = onCall({
   return {organisationId: orgId, ...fields};
 });
 
-exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB", secrets:[companiesHouseApiKey]}, async (request) => {
+exports.submitOrganisationVerification = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB", secrets:[companiesHouseApiKey]}, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const legalName = readString(request.data && request.data.legalName, "registered legal name", 2, 160);
@@ -636,7 +636,7 @@ exports.submitOrganisationVerification = onCall({region:"europe-west2", timeoutS
   return {organisationId:orgId, status:"pending", registryCheck:{result:registryCheck.result, nameMatch, activeStatus, registeredName:registryName, registeredNumber:registryNumber, companyStatus:registryCheck.companyStatus, evidenceUrl}};
 });
 
-exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.getOrganisationVerificationStatus = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
   const db = getDb();
@@ -657,14 +657,14 @@ exports.getOrganisationVerificationStatus = onCall({region:"europe-west2", timeo
   });
 });
 
-exports.listOrganisationVerificationRequests = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.listOrganisationVerificationRequests = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const snapshot = await getDb().collection("organisationVerificationRequests").where("status", "==", "pending").orderBy("submittedAt", "asc").limit(100).get();
   return {requests:snapshot.docs.map(doc => {const data=doc.data();const registryCheck=data.registryCheck ? {...data.registryCheck, checkedAt:data.registryCheck.checkedAt && data.registryCheck.checkedAt.toDate ? data.registryCheck.checkedAt.toDate().toISOString() : null} : null;return {id:doc.id, ...data, registryCheck, submittedAt:data.submittedAt && data.submittedAt.toDate().toISOString()};})};
 });
 
-exports.reviewOrganisationVerification = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
+exports.reviewOrganisationVerification = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async (request) => {
   const user = requireVerifiedUser(request);
   if (user.uid !== HAMLET_SUPER_ADMIN_UID) throw new HttpsError("permission-denied", "Platform administrator access is required.");
   const orgId = readDocumentId(request.data && request.data.organisationId, "organisationId");
@@ -691,7 +691,7 @@ exports.reviewOrganisationVerification = onCall({region:"europe-west2", timeoutS
 });
 
 exports.deleteOrganisationDocument = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 60,
   memory: "256MiB",
 }, async (request) => {
@@ -769,7 +769,7 @@ exports.deleteOrganisationDocument = onCall({
 });
 
 exports.createOrganisationInvitation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
   secrets: [postmarkOutboundToken],
@@ -882,7 +882,7 @@ exports.createOrganisationInvitation = onCall({
   };
 });
 exports.acceptOrganisationInvitation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -950,7 +950,7 @@ exports.acceptOrganisationInvitation = onCall({
 });
 
 exports.changeOrganisationMemberRole = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -1004,7 +1004,7 @@ exports.changeOrganisationMemberRole = onCall({
 });
 
 exports.removeOrganisationMember = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -1067,7 +1067,7 @@ exports.removeOrganisationMember = onCall({
 });
 
 exports.leaveOrganisation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -1107,7 +1107,7 @@ exports.leaveOrganisation = onCall({
 });
 
 exports.getOrganisationAnalytics = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -1145,7 +1145,7 @@ exports.getOrganisationAnalytics = onCall({
 });
 
 exports.copyPersonalResourceToOrganisation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
@@ -1249,7 +1249,7 @@ exports.copyPersonalResourceToOrganisation = onCall({
 
 
 exports.revokeOrganisationInvitation = onCall({
-  region: "europe-west2",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
