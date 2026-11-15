@@ -1,6 +1,6 @@
 const MAIN_ORIGIN = "https://www.hamlet-ai.co.uk";
 const PLATFORM_HOST = "platform.hamlet-ai.co.uk";
-const TENANT_RESOLVER = "https://europe-west2-wale-491805.cloudfunctions.net/resolveOrganisationTenant";
+const TENANT_RESOLVER = "https://europe-west1-wale-491805.cloudfunctions.net/resolveOrganisationTenant";
 const RESERVED = new Set(["admin","api","app","auth","billing","blog","cdn","dashboard","docs","help","login","mail","members","organisations","orgs","press","public","root","settings","signin","signup","support","www"]);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/;
 
