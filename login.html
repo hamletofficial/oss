@@ -1295,6 +1295,10 @@
           try { sessionStorage.removeItem('instagram_login_pending'); } catch (error) {}
           history.replaceState({}, document.title, window.location.pathname);
           completeInstagramCode(instagramCode, instagramState);
+        } else if (instagramPending) {
+          try { sessionStorage.removeItem('instagram_login_pending'); } catch (error) {}
+          history.replaceState({}, document.title, window.location.pathname);
+          showError('Instagram returned an incomplete sign-in response. Please try again.');
         }
 
         var linkedInCode = new URLSearchParams(window.location.search).get('code');
