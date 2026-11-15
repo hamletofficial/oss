@@ -139,7 +139,7 @@
           $('roleBadge').textContent=activeOrganisation.role;
           $('pageTitle').childNodes[0].textContent=(activeOrganisation.name||'Organisation')+' dashboard ';
           try{
-            const verificationResult=await firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:activeOrganisation.id});
+            const verificationResult=await firebase.app().functions('europe-west1').httpsCallable('getOrganisationVerificationStatus')({organisationId:activeOrganisation.id});
             const verification=verificationResult.data||{};
             $('workspaceVerifiedTag').classList.toggle('hidden',verification.status!=='verified');
           }catch(verificationError){
@@ -162,7 +162,7 @@
         if(!confirm('Leave '+activeOrganisation.name+'? You will lose access to this organisation workspace.')) return;
         const button=$('leaveOrganisationBtn');button.disabled=true;
         try{
-          await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:activeOrganisation.id});
+          await firebase.app().functions('europe-west1').httpsCallable('leaveOrganisation')({organisationId:activeOrganisation.id});
           await auth.signOut();
           fail('You have left this organisation. Sign in again or contact an organisation administrator for access.');
         }catch(error){
