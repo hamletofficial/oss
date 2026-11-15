@@ -128,7 +128,7 @@ The organisation backend is exported through the default Firebase Functions code
 | `setOrganisationTeamMember` | Assign or remove an active organisation member from a team. |
 | `archiveOrganisationTeam` | Archive an organisation team. |
 
-Organisation audit trigger exports include `recordOrganisationDealActivity`, `recordOrganisationPropertyActivity`, `recordOrganisationDocumentActivity` and `recordOrganisationResourceShareActivity`. These are event-triggered backend functions, not client-callable HTTPS endpoints. The callable and trigger names above are source-code exports; verify the live deployed inventory and region in the target Firebase project before relying on them in production. Organisation and tenant handoff/billing functions are configured for `europe-west2` (London) in their source modules.
+Organisation audit trigger exports include `recordOrganisationDealActivity`, `recordOrganisationPropertyActivity`, `recordOrganisationDocumentActivity` and `recordOrganisationResourceShareActivity`. These are event-triggered backend functions, not client-callable HTTPS endpoints. The callable and trigger names above are source-code exports; verify the live deployed inventory and region in the target Firebase project before relying on them in production. The root default Firebase Functions codebase is configured for `europe-west1` (Belgium) in its source modules.
 
 ### Data model and access boundaries
 
