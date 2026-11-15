@@ -1,7 +1,7 @@
 const https = require("https");
 const admin = require("firebase-admin");
 const {getFirestore} = require("firebase-admin/firestore");
-const {defineSecret} = require("firebase-functions/params");
+const {defineSecret, defineString} = require("firebase-functions/params");
 const {HttpsError, onCall} = require("firebase-functions/v2/https");
 const {onDocumentCreated, onDocumentWrittenWithAuthContext} = require("firebase-functions/v2/firestore");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
@@ -103,7 +103,7 @@ function sendPostmark(submission) {
 }
 
 exports.submitPressCommunications = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   invoker: "public",
   cors: true,
   timeoutSeconds: 30,
@@ -168,7 +168,7 @@ exports.submitPressCommunications = onCall({
 });
 
 exports.getPressCommunications = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   invoker: "public",
   cors: true,
 }, async function(request) {
@@ -195,7 +195,7 @@ exports.getPressCommunications = onCall({
 });
 
 exports.deletePressCommunications = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   invoker: "public",
   cors: true,
 }, async function(request) {
@@ -245,7 +245,7 @@ exports.deletePressCommunications = onCall({
 exports.sendPressCommunicationEmail = onDocumentCreated({
   document: "pressCommunications/{submissionId}",
   database: "chung-lee",
-  region: "us-central1",
+  region: "europe-west1",
   secrets: [postmarkOutboundToken],
   timeoutSeconds: 30,
   memory: "256MiB",
@@ -260,7 +260,7 @@ exports.sendPressCommunicationEmail = onDocumentCreated({
 
 exports.retryPressCommunicationEmail = onSchedule({
   schedule: "every 5 minutes",
-  region: "us-central1",
+  region: "europe-west1",
   secrets: [postmarkOutboundToken],
   timeoutSeconds: 60,
   memory: "256MiB",
@@ -320,7 +320,7 @@ function sendDirectMessageNotification(recipientEmail, recipientName) {
 
 exports.notifyDirectMessagePushRecipient = onDocumentCreated({
   document: "directMessages/{messageId}",
-  region: "us-central1",
+  region: "europe-west1",
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async function(event) {
@@ -412,7 +412,7 @@ exports.notifyDirectMessagePushRecipient = onDocumentCreated({
 
 exports.notifyDirectMessageRecipient = onDocumentCreated({
   document: "directMessages/{messageId}",
-  region: "us-central1",
+  region: "europe-west1",
   secrets: [postmarkOutboundToken],
   timeoutSeconds: 30,
   memory: "256MiB",
@@ -491,8 +491,120 @@ exports.notifyDirectMessageRecipient = onDocumentCreated({
   }
 });
 
+
+const instagramClientId = defineString("INSTAGRAM_CLIENT_ID");
+const instagramClientSecret = defineSecret("INSTAGRAM_CLIENT_SECRET");
+const INSTAGRAM_CALLBACK_URI = "https://www.hamlet-ai.co.uk/login.html";
+const INSTAGRAM_OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+
+function getInstagramAuthDb() {
+  try {
+    admin.app();
+  } catch (err) {
+    admin.initializeApp();
+  }
+  return getFirestore(admin.app());
+}
+
+exports.beginInstagramLogin = onCall({
+  region: "europe-west1",
+}, async function() {
+  const clientId = instagramClientId.value();
+  if (!clientId || !/^\\d+$/.test(clientId)) {
+    throw new HttpsError("failed-precondition", "Instagram Login is not configured.");
+  }
+
+  const state = require("crypto").randomBytes(32).toString("hex");
+  const createdAt = Date.now();
+  await getInstagramAuthDb().collection("instagramOAuthStates").doc(state).create({
+    clientId: clientId,
+    redirectUri: INSTAGRAM_CALLBACK_URI,
+    createdAt: createdAt,
+    expiresAt: createdAt + INSTAGRAM_OAUTH_STATE_TTL_MS,
+  });
+
+  const authorizationUrl = new URL("https://www.instagram.com/oauth/authorize");
+  authorizationUrl.searchParams.set("client_id", clientId);
+  authorizationUrl.searchParams.set("redirect_uri", INSTAGRAM_CALLBACK_URI);
+  authorizationUrl.searchParams.set("response_type", "code");
+  authorizationUrl.searchParams.set("scope", "instagram_business_basic");
+  authorizationUrl.searchParams.set("state", state);
+  return {authorizationUrl: authorizationUrl.toString()};
+});
+
+exports.exchangeInstagramAuth = onCall({
+  region: "europe-west1",
+  secrets: [instagramClientSecret],
+}, async function(request) {
+  const code = request.data && request.data.code;
+  const state = request.data && request.data.state;
+  if (typeof code !== "string" || code.length < 1 || code.length > 2048 ||
+      typeof state !== "string" || !/^[a-f0-9]{64}$/.test(state)) {
+    throw new HttpsError("invalid-argument", "Instagram sign-in response is invalid.");
+  }
+
+  const db = getInstagramAuthDb();
+  const stateRef = db.collection("instagramOAuthStates").doc(state);
+  let oauthState;
+  try {
+    await db.runTransaction(async function(transaction) {
+      const stateSnapshot = await transaction.get(stateRef);
+      if (!stateSnapshot.exists) throw new Error("invalid_state");
+      oauthState = stateSnapshot.data();
+      transaction.delete(stateRef);
+      if (!oauthState || Date.now() > oauthState.expiresAt) throw new Error("expired_state");
+    });
+  } catch (err) {
+    throw new HttpsError("failed-precondition", "Instagram sign-in expired or was already used. Please try again.");
+  }
+
+  const tokenResponse = await fetch("https://api.instagram.com/oauth/access_token", {
+    method: "POST",
+    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    body: new URLSearchParams({
+      client_id: oauthState.clientId,
+      client_secret: instagramClientSecret.value(),
+      grant_type: "authorization_code",
+      redirect_uri: oauthState.redirectUri,
+      code: code,
+    }),
+  });
+  if (!tokenResponse.ok) {
+    console.error("Instagram authorization code exchange failed with status", tokenResponse.status);
+    throw new HttpsError("unauthenticated", "Instagram could not complete sign-in.");
+  }
+
+  const tokenData = await tokenResponse.json();
+  if (!tokenData || typeof tokenData.access_token !== "string" ||
+      (typeof tokenData.user_id !== "string" && typeof tokenData.user_id !== "number")) {
+    throw new HttpsError("unauthenticated", "Instagram did not return a valid professional account.");
+  }
+
+  const profileUrl = new URL("https://graph.instagram.com/me");
+  profileUrl.searchParams.set("fields", "user_id,username");
+  profileUrl.searchParams.set("access_token", tokenData.access_token);
+  const profileResponse = await fetch(profileUrl);
+  if (!profileResponse.ok) {
+    console.error("Instagram account profile lookup failed with status", profileResponse.status);
+    throw new HttpsError("unauthenticated", "Instagram could not verify this professional account.");
+  }
+
+  const profile = await profileResponse.json();
+  const instagramUserId = String(profile && profile.user_id || tokenData.user_id);
+  if (!/^\\d+$/.test(instagramUserId)) {
+    throw new HttpsError("unauthenticated", "Instagram returned an invalid account identifier.");
+  }
+
+  const firebaseToken = await admin.auth().createCustomToken("instagram_" + instagramUserId);
+  return {
+    token: firebaseToken,
+    username: typeof profile.username === "string" ? profile.username.slice(0, 150) : "",
+  };
+});
+
+
 exports.exchangeLinkedInAuth = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   invoker: "public",
   cors: true,
   secrets: [linkedInClientSecret],
@@ -715,7 +827,7 @@ async function writeHamletAuditEvent(collection, prefix, recordId, ownerUid, tit
 
 /** Immutable server-authored history for transaction creation, edits and deletion. */
 exports.recordHamletDealHistory = onDocumentWrittenWithAuthContext({
-  document: "hamletDeals/{dealId}", region: "us-central1", timeoutSeconds: 60, memory: "256MiB", retry: true
+  document: "hamletDeals/{dealId}", region: "europe-west1", timeoutSeconds: 60, memory: "256MiB", retry: true
 }, async function(event) {
   const change = event.data;
   if (!change || (!change.before.exists && !change.after.exists)) return;
@@ -739,7 +851,7 @@ exports.recordHamletDealHistory = onDocumentWrittenWithAuthContext({
 
 /** Immutable server-authored history for commercial property listing changes. */
 exports.recordHamletPropertyHistory = onDocumentWrittenWithAuthContext({
-  document: "commercialProperties/{propertyId}", region: "us-central1", timeoutSeconds: 60, memory: "256MiB", retry: true
+  document: "commercialProperties/{propertyId}", region: "europe-west1", timeoutSeconds: 60, memory: "256MiB", retry: true
 }, async function(event) {
   const change = event.data;
   if (!change || (!change.before.exists && !change.after.exists)) return;
@@ -764,7 +876,7 @@ exports.recordHamletPropertyHistory = onDocumentWrittenWithAuthContext({
 
 /** Immutable server-authored history for residential property listing changes. */
 exports.recordHamletResidentialPropertyHistory = onDocumentWrittenWithAuthContext({
-  document: "residentialProperties/{propertyId}", region: "us-central1", timeoutSeconds: 60, memory: "256MiB", retry: true
+  document: "residentialProperties/{propertyId}", region: "europe-west1", timeoutSeconds: 60, memory: "256MiB", retry: true
 }, async function(event) {
   const change = event.data;
   if (!change || (!change.before.exists && !change.after.exists)) return;
@@ -790,7 +902,7 @@ exports.recordHamletResidentialPropertyHistory = onDocumentWrittenWithAuthContex
 exports.sendHamletCriticalPathReminders = onSchedule({
   schedule: "0 8 * * *",
   timeZone: "Europe/London",
-  region: "us-central1",
+  region: "europe-west1",
   secrets: [postmarkOutboundToken],
   timeoutSeconds: 540,
   memory: "512MiB",
@@ -909,7 +1021,7 @@ exports.sendHamletCriticalPathReminders = onSchedule({
 
 
 exports.getSuperAdminAccounts = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   timeoutSeconds: 120,
   memory: "256MiB",
 }, async (request) => {
@@ -958,7 +1070,7 @@ exports.getSuperAdminAccounts = onCall({
 });
 
 exports.getSuperAdminAccountMetrics = onCall({
-  region: "us-central1",
+  region: "europe-west1",
   timeoutSeconds: 120,
   memory: "256MiB",
 }, async (request) => {
