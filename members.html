@@ -536,7 +536,7 @@
         button.style.display = 'inline-flex';
         if (!user || !user.emailVerified || !firebase.app().functions) return;
         try {
-          var result = await firebase.app().functions('europe-west2')
+          var result = await firebase.app().functions('europe-west1')
             .httpsCallable('getMyOrganisationSubscription')({});
           var entitled = !!(result.data && result.data.hasActiveOrganisationEntitlement);
           button.hidden = entitled;
