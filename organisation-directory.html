@@ -74,7 +74,7 @@
         if(!window.firebase||!window.firebaseConfig){$('status').textContent='Organisation profiles are temporarily unavailable.';return;}
         try{
           if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-          auth=firebase.auth();functions=firebase.app().functions('europe-west2');
+          auth=firebase.auth();functions=firebase.app().functions('europe-west1');
           const snapshot=await firebase.firestore().collection('organisationDirectory').where('isPublic','==',true).where('status','==','active').get();
           // Sort the small public projection client-side. Avoid requiring a composite
           // orderBy index for the directory to load after a fresh Firestore deployment.
