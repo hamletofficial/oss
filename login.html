@@ -438,7 +438,7 @@
       .login-page .card .linkedin-btn,
       .login-page .card .x-btn,
       .login-page .card .apple-btn,
-      .login-page .card .microsoft-btn,
+      .login-page .card .instagram-btn,
       .login-page .card .portal-return-btn {
         width: 280px;
         max-width: 100%;
@@ -582,18 +582,18 @@
     .chatgpt-btn-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex-shrink: 0; font-size: 18px; line-height: 1; }
     .chatgpt-btn-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; }
     .chatgpt-openai-mark { display: block; width: 20px; height: 20px; flex: 0 0 auto; }
-    .microsoft-btn {
+    .instagram-btn {
       display:inline-flex;align-items:center;justify-content:center;gap:12px;
       padding:0 12px;min-height:48px;border-radius:8px;border:1px solid #d0d7de;
       background:#fff;color:#000000;font-family:Arial,sans-serif;font-size:14px;
       font-weight:600;cursor:pointer;width:100%;box-shadow:0 1px 2px rgba(15,23,42,.08);
     }
-    .microsoft-btn:hover { background:#f8fafc;border-color:#9fb8d2; }
-    .microsoft-btn:active { background:#f1f5f9; }
-    .login-page .card .microsoft-btn,
-    .login-page .card .microsoft-btn .microsoft-btn-text { color:#000000 !important; }
-    .microsoft-btn-icon { position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:18px;height:18px; }
-    .microsoft-btn-text { flex:1;text-align:center; }
+    .instagram-btn:hover { background:#f8fafc;border-color:#9fb8d2; }
+    .instagram-btn:active { background:#f1f5f9; }
+    .login-page .card .instagram-btn,
+    .login-page .card .instagram-btn .instagram-btn-text { color:#000000 !important; }
+    .instagram-btn-icon { position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:18px;height:18px; }
+    .instagram-btn-text { flex:1;text-align:center; }
     .apple-btn-icon {
       position: absolute;
       left: 12px;
@@ -617,7 +617,7 @@
     .linkedin-btn,
     .x-btn,
     .apple-btn,
-    .microsoft-btn,
+    .instagram-btn,
     .portal-return-btn {
       transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
     }
@@ -626,7 +626,7 @@
     .linkedin-btn:hover,
     .x-btn:hover,
     .apple-btn:hover,
-    .microsoft-btn:hover,
+    .instagram-btn:hover,
     .portal-return-btn:hover {
       filter: brightness(0.96);
       box-shadow: 0 2px 6px rgba(0,0,0,0.12);
@@ -789,7 +789,7 @@
     body.login-page .x-btn { background: #000; color: #FFF !important; border: 1px solid #64748b; }
     body.login-page .x-btn .google-btn-text { color: #FFF !important; }
     body.login-page .apple-btn { background: #fff; color: #111827; border: 1px solid #d1d5db; }
-    body.login-page .microsoft-btn { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    body.login-page .instagram-btn { background: #fff; color: #111827; border: 1px solid #d1d5db; }
     body.login-page .chatgpt-btn {
       background: #1f2937;
       color: #e5e7eb;
@@ -942,14 +942,15 @@
       <button id="signOutBtn" class="sign-out-btn">Sign Out</button>
     </div>
     <div id="signInActions" class="actions">
-      <button id="microsoftBtn" class="microsoft-btn" type="button" style="position:relative">
-        <span class="microsoft-btn-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 18 18" role="img" aria-label="Microsoft">
-            <rect x="1" y="1" width="7" height="7" fill="#f25022"/><rect x="10" y="1" width="7" height="7" fill="#7fba00"/>
-            <rect x="1" y="10" width="7" height="7" fill="#00a4ef"/><rect x="10" y="10" width="7" height="7" fill="#ffb900"/>
+      <button id="instagramBtn" class="instagram-btn" type="button" style="position:relative">
+        <span class="instagram-btn-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+            <circle cx="12" cy="12" r="4"></circle>
+            <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"></circle>
           </svg>
         </span>
-        <span class="microsoft-btn-text">Sign in with Microsoft</span>
+        <span class="instagram-btn-text">Sign in with Instagram</span>
       </button>
       <button id="facebookBtn" class="facebook-btn" type="button">
         <span class="facebook-btn-icon" aria-hidden="true">
@@ -1052,7 +1053,7 @@
         var linkedinBtn = document.getElementById('linkedinBtn');
         var xBtn = document.getElementById('xBtn');
         var appleBtn = document.getElementById('appleBtn');
-        var microsoftBtn = document.getElementById('microsoftBtn');
+        var instagramBtn = document.getElementById('instagramBtn');
         var chatgptBtn = document.getElementById('chatgptBtn');
         var signOutBtn = document.getElementById('signOutBtn');
         var errEl = document.getElementById('error');
@@ -1280,6 +1281,18 @@
           return code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/web-storage-unsupported';
         }
 
+        var instagramParams = new URLSearchParams(window.location.search);
+        var instagramCode = instagramParams.get('code');
+        var instagramState = instagramParams.get('state');
+        var instagramError = instagramParams.get('error_description') || instagramParams.get('error');
+        if (instagramError) {
+          history.replaceState({}, document.title, window.location.pathname);
+          showError('Instagram sign-in was cancelled or could not be authorized.');
+        } else if (instagramCode && instagramState) {
+          history.replaceState({}, document.title, window.location.pathname);
+          completeInstagramCode(instagramCode, instagramState);
+        }
+
         var linkedInCode = new URLSearchParams(window.location.search).get('code');
         var linkedInState = new URLSearchParams(window.location.search).get('state');
         var expectedState = '';
@@ -1358,7 +1371,7 @@
             showError('Set window.linkedinClientId in firebase-config.js. Firebase OIDC cannot send LinkedIn the client secret.');
             return Promise.resolve();
           }
-          var fn = firebase.app().functions('us-central1').httpsCallable('exchangeLinkedInAuth');
+          var fn = firebase.app().functions('europe-west1').httpsCallable('exchangeLinkedInAuth');
           return fn({code: code, clientId: clientId, redirectUri: linkedInRedirectUri()}).then(function (result) {
             var data = (result && result.data) || {};
             if (data.idToken) {
@@ -1406,10 +1419,40 @@
           provider.addScope('name');
           return signInWithProvider(provider);
         }
-        function signInWithMicrosoft() {
-          var provider = new firebase.auth.OAuthProvider('microsoft.com');
-          provider.setCustomParameters({ prompt: 'select_account' });
-          return signInWithProvider(provider);
+        function instagramRedirectUri() {
+          return window.location.origin + '/login.html';
+        }
+        function completeInstagramCode(code, state) {
+          var fn = firebase.app().functions('europe-west1').httpsCallable('exchangeInstagramAuth');
+          return fn({code: code, state: state}).then(function (result) {
+            var data = (result && result.data) || {};
+            if (!data.token) throw new Error('Instagram did not return a Firebase sign-in token.');
+            return auth.signInWithCustomToken(data.token).then(function (result) {
+              if (data.username && result.user && result.user.displayName !== data.username) {
+                return result.user.updateProfile({displayName: data.username}).then(function () { return result; });
+              }
+              return result;
+            });
+          }).then(function (result) {
+            try { sessionStorage.setItem('ibr_last_signin_method', 'instagram.com'); } catch (error) {}
+            redirectSettled = true;
+            finishSignIn(result.user);
+          }).catch(function (err) {
+            console.error('Instagram sign-in failed', err);
+            showError((err && (err.details || err.message)) || 'Instagram sign-in failed.');
+          });
+        }
+        function signInWithInstagram() {
+          rememberNext();
+          if (errEl) errEl.style.display = 'none';
+          var fn = firebase.app().functions('europe-west1').httpsCallable('beginInstagramLogin');
+          fn({}).then(function (result) {
+            var url = result && result.data && result.data.authorizationUrl;
+            if (!url) throw new Error('Instagram sign-in is not configured.');
+            window.location.assign(url);
+          }).catch(function (err) {
+            showError((err && (err.details || err.message)) || 'Instagram sign-in could not be started.');
+          });
         }
         function signInWithX() {
           rememberNext();
@@ -1472,12 +1515,12 @@
         else if (requestedProvider === 'linkedin' && linkedinBtn) linkedinBtn.click();
         else if (requestedProvider === 'x' && xBtn) xBtn.click();
         else if (requestedProvider === 'apple' && appleBtn) appleBtn.click();
-        else if (requestedProvider === 'microsoft' && microsoftBtn) microsoftBtn.click();
+        else if (requestedProvider === 'microsoft' && instagramBtn) instagramBtn.click();
         if (facebookBtn) facebookBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithFacebook(); });
         if (googleBtn) googleBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithGoogle(); });
         if (linkedinBtn) linkedinBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithLinkedIn(); });
         if (xBtn) xBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithX(); });
-        if (microsoftBtn) microsoftBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithMicrosoft(); });
+        if (instagramBtn) instagramBtn.addEventListener('click', function (event) { event.preventDefault(); signInWithInstagram(); });
         if (chatgptBtn) chatgptBtn.addEventListener('click', function (event) { event.preventDefault(); showError('ChatGPT sign-in is not yet available for Hamlet. OpenAI does not currently provide a Firebase-compatible sign-in provider for third-party websites.'); });
         if (signOutBtn) signOutBtn.addEventListener('click', function (event) { event.preventDefault(); signOut(); });
       });
