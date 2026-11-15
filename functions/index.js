@@ -537,7 +537,7 @@ exports.beginInstagramLogin = onCall({
   authorizationUrl.searchParams.set("response_type", "code");
   authorizationUrl.searchParams.set("scope", "instagram_business_basic");
   authorizationUrl.searchParams.set("state", state);
-  return {authorizationUrl: authorizationUrl.toString()};
+  return {authorizationUrl: authorizationUrl.toString(), state: state};
 });
 
 exports.exchangeInstagramAuth = onCall({
