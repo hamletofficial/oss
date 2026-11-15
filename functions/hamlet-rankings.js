@@ -5,7 +5,7 @@ const {onDocumentWritten} = require("firebase-functions/v2/firestore");
 // Recompute from source records on each write, so retries do not double-count.
 const updateBrokerRankingAggregates = onDocumentWritten({
   document: "hamletDeals/{dealId}",
-  region: "us-central1",
+  region: "europe-west1",
   timeoutSeconds: 120,
   memory: "256MiB",
 }, async (event) => {
@@ -61,7 +61,7 @@ module.exports = {updateBrokerRankingAggregates};
 // Aggregate-only writes do not re-run this calculation because isPublic is unchanged.
 const syncBrokerRankingVisibility = onDocumentWritten({
   document: "publicProfiles/{userId}",
-  region: "us-central1",
+  region: "europe-west1",
   timeoutSeconds: 120,
   memory: "256MiB",
 }, async (event) => {
