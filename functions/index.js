@@ -510,7 +510,7 @@ exports.beginInstagramLogin = onCall({
   region: "europe-west1",
 }, async function() {
   const clientId = instagramClientId.value();
-  if (!clientId || !/^\\d+$/.test(clientId)) {
+  if (!clientId || !/^\d+$/.test(clientId)) {
     throw new HttpsError("failed-precondition", "Instagram Login is not configured.");
   }
 
@@ -591,7 +591,7 @@ exports.exchangeInstagramAuth = onCall({
 
   const profile = await profileResponse.json();
   const instagramUserId = String(profile && profile.user_id || tokenData.user_id);
-  if (!/^\\d+$/.test(instagramUserId)) {
+  if (!/^\d+$/.test(instagramUserId)) {
     throw new HttpsError("unauthenticated", "Instagram returned an invalid account identifier.");
   }
 
