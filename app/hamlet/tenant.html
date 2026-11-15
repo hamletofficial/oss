@@ -52,7 +52,7 @@ async function receive(event){
  try{
   if(!window.firebase)throw new Error('Firebase SDK could not be loaded. Check the connection and try again.');
   if(!firebase.apps.length)firebase.initializeApp(firebaseConfiguration());
-  const auth=firebase.auth(),functions=firebase.app().functions('europe-west2');
+  const auth=firebase.auth(),functions=firebase.app().functions('europe-west1');
   status('Verifying the single-use sign-in handoff…');
   const result=await functions.httpsCallable('exchangeOrganisationHandoffCode')({code:data.code,slug});
   await auth.signInWithCustomToken(result.data.customToken);
