@@ -9,7 +9,7 @@ const {getFirestore, FieldValue} = require("firebase-admin/firestore");
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 const organisationPriceId = defineSecret("STRIPE_ORGANISATION_PRICE_ID");
-const REGION = "europe-west2";
+const REGION = "europe-west1";
 const SITE_ORIGIN = "https://www.hamlet-ai.co.uk";
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 function subscriptionIsEntitled(subscription) {
