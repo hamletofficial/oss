@@ -1286,17 +1286,30 @@
         var instagramState = instagramParams.get('state');
         var instagramError = instagramParams.get('error_description') || instagramParams.get('error');
         var instagramPending = false;
-        try { instagramPending = sessionStorage.getItem('instagram_login_pending') === '1'; } catch (error) {}
+        var expectedInstagramState = '';
+        try {
+          instagramPending = sessionStorage.getItem('instagram_login_pending') === '1';
+          expectedInstagramState = sessionStorage.getItem('instagram_oauth_state') || '';
+        } catch (error) {}
         if (instagramPending && instagramError) {
-          try { sessionStorage.removeItem('instagram_login_pending'); } catch (error) {}
+          try {
+            sessionStorage.removeItem('instagram_login_pending');
+            sessionStorage.removeItem('instagram_oauth_state');
+          } catch (error) {}
           history.replaceState({}, document.title, window.location.pathname);
           showError('Instagram sign-in was cancelled or could not be authorized.');
-        } else if (instagramPending && instagramCode && instagramState) {
-          try { sessionStorage.removeItem('instagram_login_pending'); } catch (error) {}
+        } else if (instagramPending && instagramCode && instagramState && instagramState === expectedInstagramState) {
+          try {
+            sessionStorage.removeItem('instagram_login_pending');
+            sessionStorage.removeItem('instagram_oauth_state');
+          } catch (error) {}
           history.replaceState({}, document.title, window.location.pathname);
           completeInstagramCode(instagramCode, instagramState);
         } else if (instagramPending) {
-          try { sessionStorage.removeItem('instagram_login_pending'); } catch (error) {}
+          try {
+            sessionStorage.removeItem('instagram_login_pending');
+            sessionStorage.removeItem('instagram_oauth_state');
+          } catch (error) {}
           history.replaceState({}, document.title, window.location.pathname);
           showError('Instagram returned an incomplete sign-in response. Please try again.');
         }
@@ -1452,9 +1465,14 @@
           if (errEl) errEl.style.display = 'none';
           var fn = firebase.app().functions('europe-west1').httpsCallable('beginInstagramLogin');
           fn({}).then(function (result) {
-            var url = result && result.data && result.data.authorizationUrl;
-            if (!url) throw new Error('Instagram sign-in is not configured.');
-            try { sessionStorage.setItem('instagram_login_pending', '1'); } catch (error) {}
+            var data = (result && result.data) || {};
+            var url = data.authorizationUrl;
+            var state = data.state;
+            if (!url || !state) throw new Error('Instagram sign-in is not configured.');
+            try {
+              sessionStorage.setItem('instagram_oauth_state', state);
+              sessionStorage.setItem('instagram_login_pending', '1');
+            } catch (error) {}
             window.location.assign(url);
           }).catch(function (err) {
             showError((err && (err.details || err.message)) || 'Instagram sign-in could not be started.');
