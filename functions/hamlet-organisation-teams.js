@@ -52,7 +52,7 @@ function writeActivity(dbRef, orgId, actorUid, action, details) {
   });
 }
 
-exports.createOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async request => {
+exports.createOrganisationTeam = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async request => {
   const user = userFrom(request);
   const orgId = text(request.data && request.data.organisationId, "organisationId", 128);
   const name = text(request.data && request.data.name, "Team name", TEAM_NAME_MAX);
@@ -67,7 +67,7 @@ exports.createOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:3
   return {teamId:teamRef.id, organisationId:orgId, name, permissions};
 });
 
-exports.updateOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async request => {
+exports.updateOrganisationTeam = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async request => {
   const user = userFrom(request);
   const orgId = text(request.data && request.data.organisationId, "organisationId", 128);
   const teamId = text(request.data && request.data.teamId, "teamId", 128);
@@ -85,7 +85,7 @@ exports.updateOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:3
   return {teamId, name, permissions};
 });
 
-exports.setOrganisationTeamMember = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async request => {
+exports.setOrganisationTeamMember = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async request => {
   const user = userFrom(request);
   const orgId = text(request.data && request.data.organisationId, "organisationId", 128);
   const teamId = text(request.data && request.data.teamId, "teamId", 128);
@@ -111,7 +111,7 @@ exports.setOrganisationTeamMember = onCall({region:"europe-west2", timeoutSecond
   return {teamId, memberUid:targetUid, active};
 });
 
-exports.archiveOrganisationTeam = onCall({region:"europe-west2", timeoutSeconds:30, memory:"256MiB"}, async request => {
+exports.archiveOrganisationTeam = onCall({region: "europe-west1", timeoutSeconds:30, memory:"256MiB"}, async request => {
   const user = userFrom(request);
   const orgId = text(request.data && request.data.organisationId, "organisationId", 128);
   const teamId = text(request.data && request.data.teamId, "teamId", 128);
