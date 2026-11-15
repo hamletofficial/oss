@@ -158,7 +158,7 @@
     setVerificationFieldsDisabled(true);
     {
       const selectedOrganisationId=org.id;
-      firebase.app().functions('europe-west2').httpsCallable('getOrganisationVerificationStatus')({organisationId:selectedOrganisationId}).then(result=>{
+      firebase.app().functions('europe-west1').httpsCallable('getOrganisationVerificationStatus')({organisationId:selectedOrganisationId}).then(result=>{
         if($('orgSelect').value!==selectedOrganisationId)return;
         const verification=result.data||{};
         const status=verification.status||'unverified';
@@ -239,7 +239,7 @@
     const button=$('saveProfileBtn');button.disabled=true;$('profileStatus').textContent='Saving organisation profile…';
     try{
       if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);
-      const result=await firebase.app().functions('europe-west2').httpsCallable('updateOrganisationProfile')({
+      const result=await firebase.app().functions('europe-west1').httpsCallable('updateOrganisationProfile')({
         organisationId:org.id,name:$('profileName').value,industry:$('profileIndustry').value,
         website:$('profileWebsite').value,publicLocation:$('profileLocation').value,
         description:$('profileDescription').value,visibility:$('profileVisibility').value
@@ -292,7 +292,7 @@
     $('companySearchStatus').textContent='Searching Companies House…';
     companySearchTimer=setTimeout(async()=>{
       try{
-        const result=await firebase.app().functions('europe-west2').httpsCallable('searchCompaniesHouseCompanies')({query});
+        const result=await firebase.app().functions('europe-west1').httpsCallable('searchCompaniesHouseCompanies')({query});
         if(requestId!==companySearchRequest||$('verificationLegalName').value.trim()!==query)return;
         renderCompanySearchResults(Array.isArray(result.data&&result.data.companies)?result.data.companies:[]);
       }catch(error){
@@ -320,7 +320,7 @@
     }
     const button=$('submitVerificationBtn');button.disabled=true;$('verificationReport').textContent='Submitting verification request…';
     try{
-      const result=await firebase.app().functions('europe-west2').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
+      const result=await firebase.app().functions('europe-west1').httpsCallable('submitOrganisationVerification')({organisationId:org.id,legalName:$('verificationLegalName').value,registrationNumber:$('verificationRegistrationNumber').value,evidenceUrl:$('verificationEvidenceUrl').value,attested:$('verificationAttestation').checked});
       org.verificationStatus=result.data.status;
       renderVerificationStatus('pending');const check=result.data.registryCheck||{};$('verificationReport').textContent='Companies House check: '+(check.result==='matched'?'registered name and active status matched':'manual review required')+'. Registered name: '+(check.registeredName||'not available')+'. Company status: '+(check.companyStatus||'unknown')+'. Your request is awaiting Hamlet approval.';
       ['verificationLegalName','verificationRegistrationNumber','verificationEvidenceUrl','verificationAttestation'].forEach(id=>$(id).disabled=true);
@@ -340,7 +340,7 @@
         const actions=document.createElement('div');actions.className='request-actions';
         [[true,'Approve'],[false,'Decline']].forEach(([approve,label])=>{
           const button=document.createElement('button');button.type='button';button.textContent=label;if(!approve)button.className='secondary';
-          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west2').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
+          button.addEventListener('click',async()=>{button.disabled=true;try{await firebase.app().functions('europe-west1').httpsCallable('reviewOrganisationMembershipRequest')({requestId:doc.id,approve});notice(approve?'Membership request approved.':'Membership request declined.');await loadMembershipRequests(orgId);}catch(error){console.error('Membership request review failed:',error);notice(error.message||'Unable to review membership request.',true);button.disabled=false;}});
           actions.appendChild(button);
         });
         row.append(detail,actions);root.appendChild(row);
@@ -352,7 +352,7 @@
     if(!org||org.role==='owner'||!confirm('Leave '+org.name+'? Your membership and team access will be removed. You will need a new invitation to rejoin.'))return;
     const button=$('leaveOrganisationBtn');button.disabled=true;
     try{
-      await firebase.app().functions('europe-west2').httpsCallable('leaveOrganisation')({organisationId:org.id});
+      await firebase.app().functions('europe-west1').httpsCallable('leaveOrganisation')({organisationId:org.id});
       notice('You have left '+org.name+'.');
       if(organisations.length<=1){location.replace('/organisation.html');return;}
       await loadMemberships();
