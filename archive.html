@@ -373,7 +373,7 @@
         refreshBtn.disabled = true;
         showStatus("Deleting selected brief(s)…",false);
         try {
-          var callable = firebase.app().functions("us-central1").httpsCallable("deletePressCommunications");
+          var callable = firebase.app().functions("europe-west1").httpsCallable("deletePressCommunications");
           var result = await callable({ids:selected});
           var deleted = result.data && result.data.deleted ? result.data.deleted : selected.length;
           selected.forEach(function(id){
@@ -400,7 +400,7 @@
         refreshBtn.disabled = true;
         showStatus("Loading your submitted briefs…",false);
         try {
-          var callable = firebase.app().functions("us-central1").httpsCallable("getPressCommunications");
+          var callable = firebase.app().functions("europe-west1").httpsCallable("getPressCommunications");
           var result = await callable({});
           var briefs = result.data && Array.isArray(result.data.briefs) ? result.data.briefs : [];
           renderBriefs(briefs);
