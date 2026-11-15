@@ -516,7 +516,15 @@ exports.beginInstagramLogin = onCall({
 
   const state = require("crypto").randomBytes(32).toString("hex");
   const createdAt = Date.now();
-  await getInstagramAuthDb().collection("instagramOAuthStates").doc(state).create({
+  const db = getInstagramAuthDb();
+  const stateCollection = db.collection("instagramOAuthStates");
+  const expiredStates = await stateCollection.where("expiresAt", "<=", createdAt).limit(100).get();
+  if (!expiredStates.empty) {
+    const cleanup = db.batch();
+    expiredStates.docs.forEach(function(doc) { cleanup.delete(doc.ref); });
+    await cleanup.commit();
+  }
+  await stateCollection.doc(state).create({
     clientId: clientId,
     redirectUri: INSTAGRAM_CALLBACK_URI,
     createdAt: createdAt,
@@ -598,7 +606,7 @@ exports.exchangeInstagramAuth = onCall({
   const firebaseToken = await admin.auth().createCustomToken("instagram_" + instagramUserId);
   return {
     token: firebaseToken,
-    username: typeof profile.username === "string" ? profile.username.slice(0, 150) : "",
+    username: profile && typeof profile.username === "string" ? profile.username.slice(0, 150) : "",
   };
 });
 
