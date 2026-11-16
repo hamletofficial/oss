@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="index, follow">
-  <meta name="description" content="How to reach Hamlet for communications briefs, member questions, and commercial enquiries. No form — use the channels below.">
+  <meta name="description" content="How to reach Hamlet for communications briefs, member questions, and commercial enquiries using our contact form and support channels.">
   <title>Contact — Hamlet</title>
   <link rel="stylesheet" href="/resource-centre.css">
   <link rel="stylesheet" href="/index.css">
@@ -63,7 +63,33 @@
     .contact-detail a,.contact-followup a { color:#bfdbfe; font-weight:700; }
     .contact-inline-links,.contact-legal-links { display:flex; flex-wrap:wrap; gap:.55rem 1rem; }
     .contact-followup { margin:1.2rem 0 0; padding:1rem; border:1px solid rgba(129,164,245,.55); border-radius:12px; background:linear-gradient(135deg,rgba(65,105,225,.28) 0%,rgba(17,24,40,.92) 100%); }
-    @media(max-width:520px) { .contact-shell { width:calc(100% - 1.1rem); margin:1rem auto 2rem; } .contact-card { padding:1rem; border-radius:16px; } .contact-actions { flex-direction:column; } .contact-action { width:100%; } }
+    .contact-form-card { margin-top: 1.2rem; padding: clamp(1rem, 2.8vw, 2rem); border: 1px solid #dbe3ee; border-radius: 18px; background: #ffffff; box-shadow: 0 14px 32px rgba(2, 6, 23, 0.08); }
+    .contact-form-card h2 { margin: 0 0 .55rem; color: #092a4b; }
+    .contact-form-card p { margin: 0; color: #475569; }
+    .contact-form { display: grid; gap: .95rem; margin-top: 1.1rem; }
+    .contact-form-row { display: grid; gap: .95rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .contact-form-field { display: grid; gap: .38rem; }
+    .contact-form-field label { color: #0f172a; font-size: .92rem; font-weight: 700; }
+    .contact-form-field input,
+    .contact-form-field textarea {
+      width: 100%;
+      padding: .72rem .78rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #0f172a;
+      font: inherit;
+      line-height: 1.5;
+    }
+    .contact-form-field input:focus,
+    .contact-form-field textarea:focus { outline: 2px solid #bfdbfe; outline-offset: 1px; border-color: #3b82f6; background: #ffffff; }
+    .contact-form-field textarea { min-height: 150px; resize: vertical; }
+    .contact-form-submit { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 44px; padding: .72rem 1.1rem; border: 1px solid #071d4a; border-radius: 10px; background: #071d4a; color: #ffffff; font: inherit; font-weight: 800; cursor: pointer; }
+    .contact-form-submit:hover, .contact-form-submit:focus-visible { background: #0b2a6f; border-color: #0b2a6f; }
+    .contact-form-note { font-size: .9rem; color: #475569; }
+    .contact-form-status { margin: 0; color: #0b2a6f; font-weight: 700; }
+    @media(max-width:760px) { .contact-form-row { grid-template-columns: 1fr; } }
+    @media(max-width:520px) { .contact-shell { width:calc(100% - 1.1rem); margin:1rem auto 2rem; } .contact-card { padding:1rem; border-radius:16px; } .contact-actions { flex-direction:column; } .contact-action { width:100%; } .contact-form-card { border-radius: 16px; } .contact-form-submit { width: 100%; } }
     .mail-header-icon { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:9px; text-decoration:none; font-size:1.15rem; transition:background-color .2s ease, transform .2s ease; }
       .mail-header-icon:hover, .mail-header-icon:focus-visible { background:rgba(255,255,255,.14); transform:translateY(-1px); }
     
@@ -175,6 +201,43 @@
           <p class="contact-followup"><strong>What happens next:</strong> The communications desk reviews saved briefs and follows up from <a href="mailto:support@mail.hamlet-ai.co.uk">support@mail.hamlet-ai.co.uk</a>. For other member questions, please use the same address.</p>
         </div>
       </section>
+      <section class="contact-form-card" aria-labelledby="contact-form-title">
+        <h2 id="contact-form-title">Contact form</h2>
+        <p>Send your enquiry directly from this page. We route submissions to the same support desk.</p>
+        <form class="contact-form" id="contactForm" novalidate>
+          <div class="contact-form-row">
+            <div class="contact-form-field">
+              <label for="contactName">Full name</label>
+              <input id="contactName" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div class="contact-form-field">
+              <label for="contactEmail">Email address</label>
+              <input id="contactEmail" name="email" type="email" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="contact-form-row">
+            <div class="contact-form-field">
+              <label for="contactCompany">Company (optional)</label>
+              <input id="contactCompany" name="company" type="text" autocomplete="organization">
+            </div>
+            <div class="contact-form-field">
+              <label for="contactPhone">Phone (optional)</label>
+              <input id="contactPhone" name="phone" type="tel" autocomplete="tel">
+            </div>
+          </div>
+          <div class="contact-form-field">
+            <label for="contactSubject">Subject</label>
+            <input id="contactSubject" name="subject" type="text" required>
+          </div>
+          <div class="contact-form-field">
+            <label for="contactMessage">Message</label>
+            <textarea id="contactMessage" name="message" required></textarea>
+          </div>
+          <button class="contact-form-submit" type="submit">Send enquiry</button>
+          <p class="contact-form-note">Submitting opens your email app and pre-fills your message to support@mail.hamlet-ai.co.uk.</p>
+          <p class="contact-form-status" id="contactFormStatus" hidden></p>
+        </form>
+      </section>
     </main>
 
     <footer class="resource-footer" role="contentinfo">
@@ -191,6 +254,49 @@
   <script defer src="/header-profile.js?v=20261020-1"></script>
   <script defer src="/mobile-compat.js"></script>
   <script defer src="/page-transition.js"></script>
+  <script>
+    (function () {
+      var form = document.getElementById('contactForm');
+      var status = document.getElementById('contactFormStatus');
+      if (!form) return;
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        var formData = new FormData(form);
+        var name = String(formData.get('name') || '').trim();
+        var email = String(formData.get('email') || '').trim();
+        var company = String(formData.get('company') || '').trim();
+        var phone = String(formData.get('phone') || '').trim();
+        var subject = String(formData.get('subject') || '').trim();
+        var message = String(formData.get('message') || '').trim();
+
+        var messageLines = [
+          'Name: ' + name,
+          'Email: ' + email,
+          'Company: ' + (company || 'Not provided'),
+          'Phone: ' + (phone || 'Not provided'),
+          '',
+          'Message:',
+          message
+        ];
+
+        var mailto = 'mailto:support@mail.hamlet-ai.co.uk'
+          + '?subject=' + encodeURIComponent('[Hamlet contact] ' + subject)
+          + '&body=' + encodeURIComponent(messageLines.join('\n'));
+
+        if (status) {
+          status.hidden = false;
+          status.textContent = 'Opening your email app...';
+        }
+        window.location.href = mailto;
+      });
+    })();
+  </script>
   <script>
     window.addEventListener('load', function () {
       if (!window.firebase || !window.firebaseConfig) return;
