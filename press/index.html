@@ -16,6 +16,16 @@
   <link rel="stylesheet" href="/theme.css">
   <link rel="stylesheet" href="/mobile-compat.css">
   <style>
+    /* Keep any header search suggestions above the hero and its background layers. */
+    body > #site-search-results.site-search-results {
+      position: fixed !important;
+      z-index: 2147483647 !important;
+      isolation: isolate;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .hero { position: relative; z-index: 0; }
     :root{color-scheme:dark;--bg:#0b1120;--surface:#111827;--line:#334155;--text:#f8fafc;--muted:#cbd5e1;--blue:#bfdbfe;--cyan:#67e8f9}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "DM Sans","Segoe UI",Arial,sans-serif}a{color:var(--blue);text-underline-offset:4px}
     .wrap{width:min(1080px,calc(100% - 2.5rem));margin-inline:auto}.top{background:#071d4a;border-bottom:1px solid rgba(148,163,184,.25)}
