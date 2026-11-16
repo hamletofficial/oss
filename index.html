@@ -16,6 +16,18 @@
   <link rel="stylesheet" href="/theme.css">
   <link rel="stylesheet" href="/mobile-compat.css">
   <link rel="stylesheet" href="/homepage.css?v=20261114-1">
+  <style id="homepage-search-layer-fix">
+    /* Keep header search suggestions above the hero and its background layers. */
+    body > #site-search-results.site-search-results {
+      position: fixed !important;
+      z-index: 2147483647 !important;
+      isolation: isolate;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    main > .hero { position: relative; z-index: 0; }
+  </style>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script defer src="/firebase-config.js"></script>
@@ -397,7 +409,11 @@
         const panel = document.getElementById('site-search-results');
         if (!input || !panel) return;
         if (panel.parentElement !== document.body) document.body.appendChild(panel);
-        const rect = input.closest('.site-search-form').getBoundingClientRect();
+        const form = input.closest('.site-search-form');
+        if (!form) return;
+        const rect = form.getBoundingClientRect();
+        panel.style.position = 'fixed';
+        panel.style.zIndex = '2147483647';
         panel.style.left = rect.left + 'px';
         panel.style.top = (rect.bottom + 8) + 'px';
         panel.style.width = rect.width + 'px';
