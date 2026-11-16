@@ -89,6 +89,25 @@
     <section class="about"><div><h2>About Hamlet</h2><p>Hamlet is an integrated commercial and residential property workspace developed by Impact in Business Recruitment Group Limited, bringing property information, broker collaboration and deal workflows into a connected digital environment.</p></div><a href="https://hamlet-ai.co.uk/">Visit hamlet-ai.co.uk ↗</a></section>
   </main>
   <footer><div class="wrap foot"><span>© 2026 Impact in Business Recruitment Group Limited · hamlet</span><span><a href="/">Home</a> · <a href="https://support.hamlet-ai.co.uk/">Support</a></span></div></footer>
+  <script>
+    // Keep each archive card's release count in sync with its monthly listing.
+    document.querySelectorAll('.month[href]').forEach(async (card) => {
+      const countLabel = card.querySelector('small');
+      if (!countLabel) return;
+      try {
+        const response = await fetch(card.getAttribute('href'), { credentials: 'same-origin' });
+        if (!response.ok) return;
+        const archiveHtml = await response.text();
+        const archiveDocument = new DOMParser().parseFromString(archiveHtml, 'text/html');
+        const releaseCount = archiveDocument.querySelectorAll('.list .item').length;
+        if (releaseCount > 0) {
+          countLabel.textContent = countLabel.textContent.replace(/\d+\s+releases?\s*$/i, `${releaseCount} releases`);
+        }
+      } catch (error) {
+        // Retain the published fallback count if the archive cannot be fetched.
+      }
+    });
+  </script>
   <script src="/hamlet-background.js?v=20261021-2"></script>
 </body>
 </html>
