@@ -968,6 +968,7 @@
         </span>
         <span class="google-btn-text">Sign in with Google</span>
       </button>
+      <p id="googleAvailability" class="provider-availability" style="display:none">Google sign-in is temporarily unavailable. Please use another sign-in option while this is being restored.</p>
       <button id="linkedinBtn" class="linkedin-btn" type="button" >
         <span class="google-btn-icon" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.73V1.73C24 .77 23.21 0 22.23 0z"/></svg>
@@ -1034,6 +1035,36 @@
         errEl.textContent = msg;
         errEl.style.display = 'block';
       }
+      function providerLabel(providerId) {
+        return ({
+          'google.com': 'Google',
+          'facebook.com': 'Facebook',
+          'apple.com': 'Apple',
+          'microsoft.com': 'Microsoft',
+          'oidc.linkedin-secure-login': 'LinkedIn'
+        })[providerId] || 'This sign-in provider';
+      }
+      function authErrorMessage(err, providerId) {
+        var code = err && err.code;
+        if (code === 'auth/operation-not-allowed') {
+          return providerLabel(providerId) + ' sign-in is currently unavailable for this environment. Please use another sign-in option while we restore it.';
+        }
+        if (code === 'auth/network-request-failed') {
+          return 'Network error while contacting the sign-in service. Check your connection and try again.';
+        }
+        return (err && err.message) || 'Authentication failed';
+      }
+      function disableProviderTemporarily(button, availabilityEl, message) {
+        if (button) {
+          button.disabled = true;
+          button.setAttribute('aria-disabled', 'true');
+          button.title = message;
+        }
+        if (availabilityEl) {
+          availabilityEl.textContent = message;
+          availabilityEl.style.display = 'block';
+        }
+      }
 
       window.addEventListener('load', function () {
         if (!window.firebase || !window.firebase.auth || !window.firebaseConfig) {
@@ -1048,6 +1079,7 @@
         var auth = firebase.auth();
         var facebookBtn = document.getElementById('facebookBtn');
         var googleBtn = document.getElementById('googleBtn');
+        var googleAvailability = document.getElementById('googleAvailability');
         var linkedinBtn = document.getElementById('linkedinBtn');
         var appleBtn = document.getElementById('appleBtn');
         var microsoftBtn = document.getElementById('microsoftBtn');
@@ -1300,7 +1332,13 @@
           markRedirectSettled();
           console.error('Redirect result error', err);
           if (err && err.code && err.code !== 'auth/no-auth-event') {
-            showError(err.message || 'Sign-in could not be completed after the provider redirect.');
+            var lastProvider = '';
+            try { lastProvider = sessionStorage.getItem('ibr_last_signin_method') || ''; } catch (error) {}
+            var redirectError = authErrorMessage(err, lastProvider);
+            if (err.code === 'auth/operation-not-allowed' && lastProvider === 'google.com') {
+              disableProviderTemporarily(googleBtn, googleAvailability, redirectError);
+            }
+            showError(redirectError);
           }
         });
 
@@ -1327,12 +1365,20 @@
             if (!shouldUseRedirect(err)) {
               if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return;
               console.warn('Popup sign-in stopped', err);
-              showError((err && err.message) || 'Authentication failed');
+              var popupError = authErrorMessage(err, provider && provider.providerId);
+              if (err && err.code === 'auth/operation-not-allowed' && provider && provider.providerId === 'google.com') {
+                disableProviderTemporarily(googleBtn, googleAvailability, popupError);
+              }
+              showError(popupError);
               return;
             }
             try { sessionStorage.setItem('linkedin_redirect_pending', '1'); } catch (error) {}
             return auth.signInWithRedirect(provider).catch(function (rerr) {
-              showError((rerr && rerr.message) || 'Authentication failed');
+              var redirectError = authErrorMessage(rerr, provider && provider.providerId);
+              if (rerr && rerr.code === 'auth/operation-not-allowed' && provider && provider.providerId === 'google.com') {
+                disableProviderTemporarily(googleBtn, googleAvailability, redirectError);
+              }
+              showError(redirectError);
             });
           });
         }
