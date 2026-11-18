@@ -12,19 +12,23 @@ Hamlet Connect is a centrally managed Slack application that provides authorised
 - The AI layer may interpret requests and propose actions, but trusted backend services make authorisation decisions and perform writes.
 - Slack workspace membership never grants Hamlet data access.
 - Personal and organisation-owned records remain separate.
-- Organisation and resource permissions are re-evaluated on every request.
+- Organisation and resource permissions are re-evaluated on every request and notification delivery.
 - Consequential writes require explicit confirmation and are recorded in the appropriate audit history.
 - No cross-tenant retrieval, caching, logging or disclosure.
+- Notifications are concise prompts to return to Hamlet, not a second source of truth for deal dates or task status.
 
 ## Initial capabilities
 
 1. Deal Copilot: summaries of deals the linked user may access.
 2. Property Intelligence: search and contextual answers over permitted property records.
-3. Action Extractor: propose tasks, owners and dates from user-submitted or explicitly selected Slack content.
-4. Organisation Assistant: answer questions using permitted organisation resources.
-5. Executive Briefing: aggregate operational summaries for authorised managers.
+3. Critical Path Reminders: scheduled alerts for assigned deal actions and milestones approaching or passing their due dates, with controlled escalation to authorised managers.
+4. Action Extractor: propose tasks, owners and dates from user-submitted or explicitly selected Slack content.
+5. Organisation Assistant: answer questions using permitted organisation resources.
+6. Executive Briefing: aggregate operational summaries for authorised managers.
 
-The first release should be read-only apart from explicitly confirmed, narrowly scoped action creation. Do not implement autonomous deal-stage changes, membership changes, permission changes, document sharing or financial/billing operations.
+Critical Path Reminders are part of the planned v1 product scope. They are not implemented or deployed by this documentation-only pull request.
+
+The first release should be read-only apart from explicitly confirmed, narrowly scoped action creation or acknowledgement. Do not implement autonomous deal-stage changes, membership changes, permission changes, document sharing or financial/billing operations.
 
 ## Tenant model
 
@@ -55,6 +59,7 @@ docs/integrations/slack/
   architecture.md
   security.md
   installation.md
+  critical-path-reminders.md
 ```
 
 These are proposed paths. No Slack credentials, secrets, deployed endpoints or production installation are implied by this documentation.
@@ -65,10 +70,11 @@ These are proposed paths. No Slack credentials, secrets, deployed endpoints or p
 2. Implement and test signature verification, replay protection and idempotent event handling in the gateway.
 3. Implement secure account linking and installation-to-organisation mapping.
 4. Implement read-only Deal Copilot and Property Intelligence.
-5. Add interactive confirmation and narrowly scoped action creation.
-6. Add operational monitoring, security testing, documentation and controlled pilot.
-7. Assess Slack Marketplace readiness only after multi-workspace behaviour, privacy disclosures and support processes are production-ready.
+5. Implement Critical Path Reminders using Hamlet-owned milestone data and a trusted scheduled backend process.
+6. Add interactive confirmation and narrowly scoped action creation or acknowledgement.
+7. Add operational monitoring, security testing, documentation and controlled pilot.
+8. Assess Slack Marketplace readiness only after multi-workspace behaviour, privacy disclosures and support processes are production-ready.
 
 ## Release gate
 
-Do not deploy or publish until tenant isolation, OAuth lifecycle, token storage, request verification, permission rechecks, audit behaviour, data retention and failure handling have been independently tested.
+Do not deploy or publish until tenant isolation, OAuth lifecycle, token storage, request verification, permission rechecks, audit behaviour, reminder idempotency, data retention and failure handling have been independently tested.
