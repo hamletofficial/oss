@@ -61,14 +61,14 @@ tests/
   hamlet-slack-static.test.cjs
 ```
 
-The first increment uses Firebase HTTPS Functions in europe-west2 as the Slack OAuth and request endpoints. A Cloudflare Worker gateway and AI-powered Slack commands are not implemented in this increment.
+The first increment uses Firebase HTTPS Functions in europe-west3 as the Slack OAuth and request endpoints. A Cloudflare Worker gateway and AI-powered Slack commands are not implemented in this increment.
 
 Repository code is present, but no Slack credentials, secrets, deployed endpoints or production installation are configured. See implementation.md for the deployment checklist.
 
 ## Delivery sequence
 
 1. Configure the centrally owned Slack app, scopes, slash command and OAuth callback.
-2. Configure Firebase secrets and deploy the europe-west2 Slack HTTPS/callable functions.
+2. Configure Firebase secrets and deploy the europe-west3 Slack HTTPS/callable functions.
 3. Complete OAuth installation from the organisation Integrations page and verify tenant isolation.
 4. Link individual Slack identities using /hamlet link.
 5. Pilot scheduled Critical Path Reminders using synthetic organisation deals and assigned members.
