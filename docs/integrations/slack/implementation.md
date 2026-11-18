@@ -115,7 +115,7 @@ The first increment supports one current next action per organisation deal:
 
 The organisation deal editor writes these fields. The scheduled function scans organisationDeals for actions due within the configured lead window or up to three days overdue. Default lead time is 24 hours; maximum configurable lead time is 168 hours. Quiet hours default to 21:00–08:00 in Europe/London.
 
-Reminders are private Slack direct messages. A manager escalation is attempted on the second overdue day, but only if that manager is currently authorised to read the deal and has linked their Slack identity. The delivery record uses a tenant-, deal-, due-date-, recipient- and stage-specific idempotency key. Acknowledgement is not treated as task completion.
+Reminders are private Slack direct messages. Manager escalation is disabled by default. An organisation owner or administrator may opt in to second-overdue-day escalation; only managers currently authorised to read the deal and linked to the Slack workspace are eligible. The delivery record uses a tenant-, deal-, due-date-, recipient- and stage-specific idempotency key. Acknowledgement is not treated as task completion.
 
 ## Deployment sequence
 
