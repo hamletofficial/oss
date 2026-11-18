@@ -27,7 +27,7 @@ function requireVerifiedUser(request) {
 }
 function membershipDocumentId(organisationId, uid) { return organisationId + "_" + uid; }
 
-async function requireOrganisationAdmin(database, organisationId, uid) {
+async function requireOrganisationAdmin(database, organisationId, uid, requireEntitlement) {
   const [organisationSnap, membershipSnap, billingSnap] = await Promise.all([
     database.collection("organisations").doc(organisationId).get(),
     database.collection("organisationMembers").doc(membershipDocumentId(organisationId, uid)).get(),
@@ -38,7 +38,7 @@ async function requireOrganisationAdmin(database, organisationId, uid) {
   if (!membership || membership.status !== "active" || !["owner", "admin"].includes(membership.role)) {
     throw new HttpsError("permission-denied", "Only an active organisation owner or administrator can manage Slack integration.");
   }
-  if (!billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status)) throw new HttpsError("failed-precondition", "An active organisation subscription is required for Hamlet Connect.");
+  if (requireEntitlement !== false && (!billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status))) throw new HttpsError("failed-precondition", "An active organisation subscription is required for Hamlet Connect.");
   return {organisation: organisationSnap.data(), membership};
 }
 
@@ -229,7 +229,7 @@ exports.getHamletSlackIntegrationStatus = onCall({region: REGION, timeoutSeconds
   const user = requireVerifiedUser(request);
   const organisationId = clean(request.data && request.data.organisationId, 128);
   if (!organisationId || organisationId.includes("/")) throw new HttpsError("invalid-argument", "A valid organisation is required.");
-  await requireOrganisationAdmin(db(), organisationId, user.uid);
+  await requireOrganisationAdmin(db(), organisationId, user.uid, false);
   const [snapshot, settingsSnap] = await Promise.all([
     db().collection("hamletSlackInstallations").where("organisationId", "==", organisationId).get(),
     db().collection("hamletSlackSettings").doc(organisationId).get(),
@@ -284,7 +284,7 @@ exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSecon
   const teamId = clean(request.data && request.data.teamId, 80);
   if (!organisationId || !teamId) throw new HttpsError("invalid-argument", "Organisation and Slack workspace are required.");
   const database = db();
-  await requireOrganisationAdmin(database, organisationId, user.uid);
+  await requireOrganisationAdmin(database, organisationId, user.uid, false);
   const ref = database.collection("hamletSlackInstallations").doc(teamId);
   const currentSnap = await ref.get();
   if (!currentSnap.exists || currentSnap.data().organisationId !== organisationId || currentSnap.data().status !== "active") {
