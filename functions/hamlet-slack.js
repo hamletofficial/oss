@@ -6,7 +6,7 @@ const {defineSecret} = require("firebase-functions/params");
 const {HttpsError, onCall, onRequest} = require("firebase-functions/v2/https");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
 
-const REGION = "europe-west3";
+const REGION = "europe-west2";
 const SITE_ORIGIN = "https://hamlet-ai.co.uk";
 const SLACK_CLIENT_ID = defineSecret("SLACK_CLIENT_ID");
 const SLACK_CLIENT_SECRET = defineSecret("SLACK_CLIENT_SECRET");
