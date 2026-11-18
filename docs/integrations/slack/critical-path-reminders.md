@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-This document defines a planned Hamlet Connect v1 capability. It is a design specification only; it does not represent deployed scheduler code, a configured Slack app or a live notification service.
+This document defines the planned Hamlet Connect v1 capability and its acceptance criteria. A first scheduler and deal-editor implementation exists in the current branch, but it is not deployed and no live Slack notification service is configured.
 
 Critical Path Reminders surface upcoming and overdue actions from Hamlet deal workflows in Slack. The first increment supports one current next-action record per organisation deal using `nextActionTitle`, `nextActionOwnerUid`, `nextActionDueAt` (Firestore Timestamp) and `nextActionStatus` (`open`, `completed` or `cancelled`). Hamlet remains the system of record for the milestone, assigned owner, due date, completion state and audit history.
 
