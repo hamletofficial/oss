@@ -278,7 +278,7 @@ exports.updateHamletSlackReminderSettings = onCall({region: REGION, timeoutSecon
   return {ok: true, timeZone, reminderLeadHours: leadHours, quietHours: {startHour, endHour}};
 });
 
-exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSeconds: 20, memory: "256MiB"}, async request => {
+exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSeconds: 30, memory: "256MiB", secrets: [SLACK_TOKEN_ENCRYPTION_KEY]}, async request => {
   const user = requireVerifiedUser(request);
   const organisationId = clean(request.data && request.data.organisationId, 128);
   const teamId = clean(request.data && request.data.teamId, 80);
@@ -286,6 +286,13 @@ exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSecon
   const database = db();
   await requireOrganisationAdmin(database, organisationId, user.uid);
   const ref = database.collection("hamletSlackInstallations").doc(teamId);
+  const currentSnap = await ref.get();
+  if (!currentSnap.exists || currentSnap.data().organisationId !== organisationId || currentSnap.data().status !== "active") {
+    throw new HttpsError("not-found", "The active Slack connection was not found.");
+  }
+  let accessToken = "";
+  try { accessToken = decryptToken(currentSnap.data()); }
+  catch (error) { console.warn("Unable to decrypt Slack token during disconnect; local access will still be revoked:", clean(error.message, 160)); }
   await database.runTransaction(async transaction => {
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists || snapshot.data().organisationId !== organisationId || snapshot.data().status !== "active") throw new HttpsError("not-found", "The active Slack connection was not found.");
@@ -299,7 +306,16 @@ exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSecon
     });
   });
   await revokeWorkspaceLinks(database, teamId);
-  return {ok: true};
+  let tokenRevoked = false;
+  if (accessToken) {
+    try {
+      await slackApi("auth.revoke", accessToken, {});
+      tokenRevoked = true;
+    } catch (error) {
+      console.warn("Slack token revocation failed after local disconnect; workspace access remains disabled in Hamlet:", clean(error.message, 180));
+    }
+  }
+  return {ok: true, tokenRevoked};
 });
 
 exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds: 20, memory: "256MiB"}, async request => {
