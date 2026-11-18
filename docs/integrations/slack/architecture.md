@@ -5,7 +5,7 @@
 ```text
 Slack workspace
   -> centrally managed Hamlet Connect Slack app
-  -> Cloudflare Worker gateway
+  -> Firebase HTTPS Functions gateway (europe-west2)
   -> Slack request signature and timestamp verification
   -> installation and linked-user resolution
   -> Hamlet account authentication and entitlement checks
@@ -29,7 +29,9 @@ Hamlet deal and critical-path records
 
 Use Slack OAuth installation, slash commands, shortcuts, event subscriptions, interactive components and bot responses as appropriate. Request the minimum scopes necessary for each feature. Do not request broad message-history or file scopes merely because they may be useful later.
 
-### Cloudflare Worker gateway
+### Firebase HTTPS Functions gateway
+
+The first implementation uses Firebase HTTPS Functions in `europe-west2` for the OAuth callback and Slack request endpoint. A Cloudflare Worker edge layer is not part of this code increment.
 
 Responsibilities:
 - Verify Slack request signatures against the raw request body and signing secret.
@@ -78,7 +80,7 @@ Critical Path Reminders are a planned v1 capability. Hamlet remains authoritativ
 
 ### Data and write operations
 
-Read from existing Hamlet services and collections through trusted server-side interfaces. Do not create a parallel property, deal or organisation database in Slack.
+Read from existing Hamlet services and collections through trusted server-side interfaces. The first reminder implementation reads `organisationDeals` and uses the existing organisation membership, team and resource-share collections. Do not create a parallel property, deal or organisation database in Slack.
 
 For write operations:
 - Generate a typed proposal with target resource, intended changes and provenance.
