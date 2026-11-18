@@ -498,7 +498,7 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   if (!await userCanReadDeal(database, organisationId, dealDoc.id, deal, recipientUid, membership)) return "suppressed";
   const reverseLinkSnap = await database.collection("hamletSlackUidLinks").doc(sha256(teamId + "_" + recipientUid)).get();
   const userLink = reverseLinkSnap.exists ? reverseLinkSnap.data() : null;
-  if (!userLink || userLink.organisationId !== organisationId) return "unlinked";
+  if (!userLink || userLink.status !== "active" || userLink.uid !== recipientUid || userLink.teamId !== teamId || userLink.organisationId !== organisationId) return "unlinked";
 
   const deliveryKey = sha256([organisationId, teamId, dealDoc.id, dueDate.getTime(), recipientUid, stage].join("|"));
   const deliveryRef = database.collection("hamletSlackReminderDeliveries").doc(deliveryKey);
@@ -518,7 +518,7 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   });
   if (!claimed) return "already-processed";
   try {
-    const token = decryptToken(installation);
+    const token = decryptToken(installationSnap.data());
     const timeZone = clean(settings && settings.timeZone, 80) || "Europe/London";
     const dueText = new Intl.DateTimeFormat("en-GB", {dateStyle: "medium", timeStyle: "short", timeZone}).format(dueDate);
     const message = [
