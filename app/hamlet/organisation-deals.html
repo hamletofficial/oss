@@ -310,12 +310,19 @@
       owner:$('dealOwner').value.trim().slice(0,120),notes:$('dealNotes').value.trim().slice(0,4000),
       visibility:canManageSharing?$('dealVisibility').value:(previous?previous.visibility:'organisation'),
       sharedWithUids:previous&&Array.isArray(previous.sharedWithUids)?previous.sharedWithUids:[],
-      nextActionTitle:actionTitle? actionTitle.slice(0,160):firebase.firestore.FieldValue.delete(),
-      nextActionOwnerUid:actionOwner||firebase.firestore.FieldValue.delete(),
-      nextActionDueAt:actionDue?firebase.firestore.Timestamp.fromDate(new Date(actionDue)):firebase.firestore.FieldValue.delete(),
-      nextActionStatus:actionTitle?$('nextActionStatus').value:'open',
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     };
+    if(actionTitle){
+      data.nextActionTitle=actionTitle.slice(0,160);
+      data.nextActionOwnerUid=actionOwner;
+      data.nextActionDueAt=firebase.firestore.Timestamp.fromDate(new Date(actionDue));
+      data.nextActionStatus=$('nextActionStatus').value;
+    }else if(previous&&(previous.nextActionTitle||previous.nextActionOwnerUid||previous.nextActionDueAt)){
+      data.nextActionTitle=firebase.firestore.FieldValue.delete();
+      data.nextActionOwnerUid=firebase.firestore.FieldValue.delete();
+      data.nextActionDueAt=firebase.firestore.FieldValue.delete();
+      data.nextActionStatus=firebase.firestore.FieldValue.delete();
+    }
     if(!previous)data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
     const button=$('saveBtn');button.disabled=true;status('formStatus','Saving securely…');
     try{
