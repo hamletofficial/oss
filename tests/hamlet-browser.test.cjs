@@ -321,7 +321,7 @@ test('organisation deal workspace creates and reloads tenant-scoped deals withou
           delete: () => ({__fieldValueDelete: true})
         };
         firebase.firestore.Timestamp = {
-          fromDate(date) { return {toDate: () => date, toMillis: () => date.getTime()}; }
+          fromDate(date) { const millis = date.getTime(); return {__timestampMillis: millis, toDate: () => new Date(millis), toMillis: () => millis}; }
         };
         window.firebase = firebase;
         window.firebaseConfig = {apiKey: 'e2e-test', authDomain: 'localhost', projectId: 'demo-hamlet-e2e'};
@@ -352,7 +352,7 @@ test('organisation deal workspace creates and reloads tenant-scoped deals withou
     assert.equal(orgDeal[1].visibility, 'organisation');
     assert.equal(orgDeal[1].nextActionTitle, 'Receive legal due diligence report');
     assert.equal(orgDeal[1].nextActionOwnerUid, 'e2e-org-owner');
-    assert.ok(orgDeal[1].nextActionDueAt && typeof orgDeal[1].nextActionDueAt.toDate === 'function');
+    assert.ok(orgDeal[1].nextActionDueAt && Number.isFinite(orgDeal[1].nextActionDueAt.__timestampMillis));
     assert.ok(persisted.some(([path]) => path === 'hamletDeals/personal-deal'), 'personal deal must remain untouched');
     assert.equal(await page.locator('#pipelineMeta').textContent(), '1 accessible organisation deal · manager view');
   } finally {
