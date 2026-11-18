@@ -97,7 +97,8 @@ test('signed-in broker can save a deal, save a search and upload a transaction d
           }};
         }
         const firebase = {apps: [], initializeApp(config) { this.apps.push({config}); }, auth, firestore: () => db, storage};
-        firebase.firestore.FieldValue = {serverTimestamp: () => ({__serverTimestamp: true})};
+        firebase.firestore.FieldValue = {serverTimestamp: () => ({__serverTimestamp: true}), delete: () => ({__fieldDelete: true})};
+        firebase.firestore.Timestamp = {fromDate: date => ({toDate: () => date, toMillis: () => date.getTime()})};
         window.firebase = firebase;
         window.firebaseConfig = {apiKey: 'e2e-test', authDomain: 'localhost', projectId: 'demo-hamlet-e2e'};
       })();
