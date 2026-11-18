@@ -17,10 +17,11 @@ function init(){
  auth.onAuthStateChanged(async user=>{
   if(used)return;
   if(!user){status.textContent='Sign in to Hamlet with the account that belongs to this organisation. You will return to this one-time link after sign-in.';loginLink.href='/login.html?next='+encodeURIComponent(location.pathname+location.search);login.hidden=false;return;}
-  used=true;history.replaceState(null,'',location.pathname);
+  used=true;
   try{
    await user.reload();await user.getIdToken(true);
    if(!user.emailVerified){status.textContent='Verify your email address before linking Slack.';used=false;return;}
+   history.replaceState(null,'',location.pathname);
    const result=await functions.httpsCallable('completeHamletSlackAccountLink')({code});
    status.textContent='Your Slack account is now linked to Hamlet. You can return to Slack and run /hamlet status.';
   }catch(error){status.textContent=error.message||'The account could not be linked. Request a fresh link in Slack.';}
