@@ -364,6 +364,11 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
       linkedAt: FieldValue.serverTimestamp(), status: "active",
     });
     transaction.update(challengeRef, {consumedAt: FieldValue.serverTimestamp(), consumedByUid: user.uid, status: "consumed"});
+    transaction.create(database.collection("organisationActivity").doc(), {
+      organisationId: challenge.organisationId, actorUid: user.uid,
+      action: "organisation.slack_account_linked", slackTeamId: challenge.teamId,
+      createdAt: FieldValue.serverTimestamp(),
+    });
     linked = {teamId: challenge.teamId, organisationId: challenge.organisationId};
   });
   return {ok: true, ...linked};
