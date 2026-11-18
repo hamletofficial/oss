@@ -244,6 +244,7 @@ exports.getHamletSlackIntegrationStatus = onCall({region: REGION, timeoutSeconds
       timeZone: clean(settings.timeZone || "Europe/London", 80),
       reminderLeadHours: Number.isInteger(settings.reminderLeadHours) ? settings.reminderLeadHours : 24,
       quietHours: settings.quietHours || {startHour: 21, endHour: 8},
+      managerEscalationEnabled: settings.managerEscalationEnabled === true,
     },
     installations: snapshot.docs.map(doc => {
       const data = doc.data() || {};
@@ -264,6 +265,7 @@ exports.updateHamletSlackReminderSettings = onCall({region: REGION, timeoutSecon
   const leadHours = Number(input.reminderLeadHours);
   const startHour = Number(input.quietHours && input.quietHours.startHour);
   const endHour = Number(input.quietHours && input.quietHours.endHour);
+  const managerEscalationEnabled = input.managerEscalationEnabled === true;
   if (!Number.isInteger(leadHours) || leadHours < 1 || leadHours > 168 ||
       !Number.isInteger(startHour) || startHour < 0 || startHour > 23 ||
       !Number.isInteger(endHour) || endHour < 0 || endHour > 23) {
@@ -272,14 +274,14 @@ exports.updateHamletSlackReminderSettings = onCall({region: REGION, timeoutSecon
   await db().collection("hamletSlackSettings").doc(organisationId).set({
     serverOnly: true,
     organisationId, timeZone, reminderLeadHours: leadHours,
-    quietHours: {startHour, endHour},
+    quietHours: {startHour, endHour}, managerEscalationEnabled,
     updatedByUid: user.uid, updatedAt: FieldValue.serverTimestamp(),
   }, {merge: true});
   await db().collection("organisationActivity").add({
     organisationId, actorUid: user.uid, action: "organisation.slack_reminder_settings_updated",
     createdAt: FieldValue.serverTimestamp(),
   });
-  return {ok: true, timeZone, reminderLeadHours: leadHours, quietHours: {startHour, endHour}};
+  return {ok: true, timeZone, reminderLeadHours: leadHours, quietHours: {startHour, endHour}, managerEscalationEnabled};
 });
 
 exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSeconds: 30, memory: "256MiB", secrets: [SLACK_TOKEN_ENCRYPTION_KEY]}, async request => {
@@ -641,7 +643,7 @@ exports.sendHamletSlackCriticalPathReminders = onSchedule({
       const installation = installationDoc.data() || {};
       const ownerResult = await dispatchCriticalPathReminder(database, installation, installationDoc.id, dealDoc, deal, deal.nextActionOwnerUid, stage, dueDate, settings, false);
       if (ownerResult === "sent") sent++; else if (ownerResult === "failed") failed++; else suppressed++;
-      if (stage === "overdue_day_2") {
+      if (stage === "overdue_day_2" && settings.managerEscalationEnabled === true) {
         const managers = await database.collection("organisationMembers")
           .where("organisationId", "==", deal.organisationId).where("status", "==", "active")
           .where("role", "in", ["owner", "admin", "manager"]).limit(50).get();
