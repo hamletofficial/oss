@@ -104,6 +104,7 @@ async function claimSlackRequestNonce(database, timestamp, signature) {
     const snapshot = await transaction.get(ref);
     if (snapshot.exists) return false;
     transaction.create(ref, {
+      serverOnly: true,
       createdAt: FieldValue.serverTimestamp(),
       expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
     });
@@ -174,6 +175,7 @@ async function slackInstallCallback(request, response) {
         throw new Error("This Slack workspace is already connected to another Hamlet organisation. Disconnect it there before reconnecting.");
       }
       transaction.set(installationRef, {
+        serverOnly: true,
         teamId, teamName: clean(payload.team.name, 120), organisationId: stateData.organisationId,
         status: "active", botUserId: clean(payload.bot_user_id, 80),
         scopes: clean(payload.scope, 1000).split(",").filter(Boolean),
@@ -263,6 +265,7 @@ exports.updateHamletSlackReminderSettings = onCall({region: REGION, timeoutSecon
     throw new HttpsError("invalid-argument", "Reminder lead time and quiet-hour settings are invalid.");
   }
   await db().collection("hamletSlackSettings").doc(organisationId).set({
+    serverOnly: true,
     organisationId, timeZone, reminderLeadHours: leadHours,
     quietHours: {startHour, endHour},
     updatedByUid: user.uid, updatedAt: FieldValue.serverTimestamp(),
@@ -328,11 +331,13 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
     if (existingLink.exists && existingLink.data().uid !== user.uid) throw new HttpsError("already-exists", "This Slack account is already linked to another Hamlet account. Ask an organisation administrator for assistance.");
     if (existingReverse.exists && existingReverse.data().slackUserId !== challenge.slackUserId) throw new HttpsError("already-exists", "Your Hamlet account is already linked to another Slack user in this workspace.");
     transaction.set(linkRef, {
+      serverOnly: true,
       teamId: challenge.teamId, slackUserId: challenge.slackUserId,
       organisationId: challenge.organisationId, uid: user.uid,
       linkedAt: FieldValue.serverTimestamp(), status: "active",
     });
     transaction.set(reverseRef, {
+      serverOnly: true,
       teamId: challenge.teamId, organisationId: challenge.organisationId,
       uid: user.uid, slackUserId: challenge.slackUserId,
       linkedAt: FieldValue.serverTimestamp(), status: "active",
@@ -360,6 +365,7 @@ exports.hamletSlackEvents = onRequest({
     if (teamId) {
       const database = db();
       await database.collection("hamletSlackInstallations").doc(teamId).set({
+        serverOnly: true,
         status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
         disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
       }, {merge: true});
@@ -387,10 +393,12 @@ exports.hamletSlackEvents = onRequest({
           throw new Error("Please wait one minute before requesting another account-linking URL.");
         }
         transaction.create(challengeRef, {
+          serverOnly: true,
           teamId, slackUserId, organisationId: installation.organisationId,
           createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000), status: "pending",
         });
         transaction.set(rateRef, {
+          serverOnly: true,
           teamId, slackUserId, lastIssuedAt: FieldValue.serverTimestamp(),
           expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
         });
@@ -473,6 +481,7 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
     if (existing.status === "processing" && existing.processingAt &&
         existing.processingAt.toMillis() > Date.now() - 600000) return false;
     transaction.set(deliveryRef, {
+      serverOnly: true,
       organisationId, teamId, dealId: dealDoc.id, recipientUid, stage,
       dueAt: Timestamp.fromDate(dueDate), status: "processing",
       processingAt: FieldValue.serverTimestamp(), attempts: FieldValue.increment(1),
