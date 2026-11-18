@@ -64,7 +64,7 @@ Supported commands:
 
 Enable Events API and set its Request URL to the same hamletSlackEvents endpoint. Subscribe to the app_uninstalled event so the integration can revoke stored identity links when the app is removed.
 
-The endpoint verifies Slack's request signature and rejects timestamps outside the five-minute replay window. It handles both form-encoded slash commands and JSON Events API payloads.
+The endpoint verifies Slack's request signature, rejects timestamps outside the five-minute window and records a short-lived request nonce so a captured signed request cannot be replayed. It handles both form-encoded slash commands and JSON Events API payloads. Account-link URL issuance is rate-limited per Slack user and workspace.
 
 ## Firebase secrets
 
@@ -80,6 +80,8 @@ Generate the encryption key locally with:
 openssl rand -base64 32
 
 Copy the generated value into the Firebase secret prompt for SLACK_TOKEN_ENCRYPTION_KEY. Do not send it in chat or commit it to the repository.
+
+Enable Firestore TTL on the expiresAt field for hamletSlackRequestNonces and hamletSlackLinkRateLimits so expired replay/throttle records are removed automatically. OAuth state and account-link challenges also carry expiry timestamps and are rejected after expiry.
 
 Set each secret using Firebase CLI:
 
