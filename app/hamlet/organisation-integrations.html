@@ -102,7 +102,7 @@ $('saveSettingsBtn').addEventListener('click',async()=>{
 });
 function init(){
  if(!window.firebase||!window.firebaseConfig){$('orgMeta').textContent='Firebase configuration is unavailable.';return;}
- try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('europe-west2');}
+ try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('europe-west3');}
  catch(error){$('orgMeta').textContent='Firebase could not be initialised.';return;}
  auth.onAuthStateChanged(async user=>{
   if(!user){location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
