@@ -9,7 +9,7 @@ This document defines release requirements, not evidence that controls have alre
 - Store Slack signing secrets and OAuth client credentials as managed secrets, never in source control, client-side code, logs or documentation examples.
 - Verify Slack signatures using the raw request body and reject stale timestamps.
 - Use short-lived, single-use challenges for Hamlet account linking.
-- Support token rotation, revocation, uninstall and organisation disconnection.
+- Support token revocation, uninstall and organisation disconnection. Slack token rotation must remain disabled for v1; a refresh-token rotation flow is not included in this increment.
 - Do not treat Slack email addresses, display names or channel membership as proof of Hamlet identity or access.
 
 ## Authorisation and tenant boundaries
