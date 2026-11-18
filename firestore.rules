@@ -1161,9 +1161,17 @@ service cloud.firestore {
     // Read-only platform-wide access for the designated Hamlet super administrator.
     // Keep this identity aligned with the administrator configured in admin.html.
     match /{document=**} {
+      // Slack installation credentials, OAuth state, account-link challenges,
+      // identity mappings, reminder settings and delivery records are server-only.
+      // Exclude them from the platform Super Administrator read-through below.
       allow read: if request.auth != null
         && request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email_verified == true
+        && !document.matches('^(hamletSlackOAuthStates|hamletSlackInstallations|hamletSlackLinkChallenges|hamletSlackUserLinks|hamletSlackUidLinks|hamletSlackReminderDeliveries|hamletSlackSettings)/.*
+
+  }
+}
+);
     }
 
   }
