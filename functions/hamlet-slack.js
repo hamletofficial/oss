@@ -42,6 +42,23 @@ async function requireOrganisationAdmin(database, organisationId, uid) {
   return {organisation: organisationSnap.data(), membership};
 }
 
+async function revokeWorkspaceLinks(database, teamId) {
+  for (const collectionName of ["hamletSlackUserLinks", "hamletSlackUidLinks"]) {
+    let last = null;
+    while (true) {
+      let query = database.collection(collectionName).where("teamId", "==", teamId).limit(400);
+      if (last) query = query.startAfter(last);
+      const snapshot = await query.get();
+      if (snapshot.empty) break;
+      const batch = database.batch();
+      snapshot.docs.forEach(doc => batch.set(doc.ref, {status: "revoked", revokedAt: FieldValue.serverTimestamp()}, {merge: true}));
+      await batch.commit();
+      last = snapshot.docs[snapshot.docs.length - 1];
+      if (snapshot.size < 400) break;
+    }
+  }
+}
+
 function redirectUri() {
   const projectId = admin.app().options.projectId || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
   if (!projectId) throw new Error("Firebase project ID is unavailable.");
@@ -263,6 +280,7 @@ exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSecon
       slackTeamId: teamId, createdAt: FieldValue.serverTimestamp(),
     });
   });
+  await revokeWorkspaceLinks(database, teamId);
   return {ok: true};
 });
 
@@ -280,14 +298,16 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
     const installationRef = database.collection("hamletSlackInstallations").doc(challenge.teamId);
     const organisationRef = database.collection("organisations").doc(challenge.organisationId);
     const membershipRef = database.collection("organisationMembers").doc(membershipDocumentId(challenge.organisationId, user.uid));
+    const billingRef = database.collection("organisationBilling").doc(challenge.organisationId);
     const linkRef = database.collection("hamletSlackUserLinks").doc(sha256(challenge.teamId + "_" + challenge.slackUserId));
     const reverseRef = database.collection("hamletSlackUidLinks").doc(sha256(challenge.teamId + "_" + user.uid));
-    const [installationSnap, organisationSnap, membershipSnap, existingLink, existingReverse] = await Promise.all([
-      transaction.get(installationRef), transaction.get(organisationRef), transaction.get(membershipRef), transaction.get(linkRef), transaction.get(reverseRef),
+    const [installationSnap, organisationSnap, membershipSnap, billingSnap, existingLink, existingReverse] = await Promise.all([
+      transaction.get(installationRef), transaction.get(organisationRef), transaction.get(membershipRef), transaction.get(billingRef), transaction.get(linkRef), transaction.get(reverseRef),
     ]);
     if (!installationSnap.exists || installationSnap.data().status !== "active" ||
         installationSnap.data().organisationId !== challenge.organisationId ||
         !organisationSnap.exists || organisationSnap.data().status !== "active" ||
+        !billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status) ||
         !membershipSnap.exists || membershipSnap.data().status !== "active") {
       throw new HttpsError("permission-denied", "Your Hamlet account does not have active access to this organisation.");
     }
@@ -319,10 +339,14 @@ exports.hamletSlackEvents = onRequest({
   if (body.type === "url_verification") return response.status(200).json({challenge: body.challenge});
   if (body.type === "event_callback" && body.event && body.event.type === "app_uninstalled") {
     const teamId = clean(body.team_id, 80);
-    if (teamId) await db().collection("hamletSlackInstallations").doc(teamId).set({
-      status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
-      disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
-    }, {merge: true});
+    if (teamId) {
+      const database = db();
+      await database.collection("hamletSlackInstallations").doc(teamId).set({
+        status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
+        disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
+      }, {merge: true});
+      await revokeWorkspaceLinks(database, teamId);
+    }
     return response.status(200).send("ok");
   }
   if (!body.command || clean(body.command, 40) !== "/hamlet") return response.status(200).send("");
@@ -371,7 +395,8 @@ function dueStage(dueDate, now, leadHours) {
 }
 async function userCanReadDeal(database, organisationId, dealId, deal, uid, membership) {
   if (!membership || membership.status !== "active") return false;
-  if (deal.visibility !== "restricted") return true;
+  if (deal.visibility === "organisation") return true;
+  if (deal.visibility !== "restricted") return false;
   if (deal.createdByUid === uid || (Array.isArray(deal.sharedWithUids) && deal.sharedWithUids.includes(uid))) return true;
   if (deal.teamId) {
     const [teamSnap, assignmentSnap] = await Promise.all([
@@ -467,7 +492,7 @@ exports.sendHamletSlackCriticalPathReminders = onSchedule({
   for (const dealDoc of snapshot.docs) {
     const deal = dealDoc.data() || {};
     if (!deal.organisationId || !deal.nextActionDueAt || typeof deal.nextActionDueAt.toDate !== "function") continue;
-    if (["complete", "completed", "cancelled", "canceled", "closed"].includes(String(deal.nextActionStatus || "").toLowerCase()) || deal.nextActionCompletedAt) continue;
+    if (String(deal.nextActionStatus || "open").toLowerCase() !== "open" || deal.nextActionCompletedAt) continue;
     if (typeof deal.nextActionOwnerUid !== "string" || !deal.nextActionOwnerUid) continue;
     const dueDate = deal.nextActionDueAt.toDate();
     const installations = await database.collection("hamletSlackInstallations")
