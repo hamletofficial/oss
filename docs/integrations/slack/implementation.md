@@ -81,7 +81,7 @@ openssl rand -base64 32
 
 Copy the generated value into the Firebase secret prompt for SLACK_TOKEN_ENCRYPTION_KEY. Do not send it in chat or commit it to the repository.
 
-Enable Firestore TTL on the expiresAt field for hamletSlackRequestNonces and hamletSlackLinkRateLimits so expired replay/throttle records are removed automatically. OAuth state and account-link challenges also carry expiry timestamps and are rejected after expiry.
+Enable Firestore TTL on the expiresAt field for hamletSlackRequestNonces, hamletSlackLinkRateLimits, hamletSlackOAuthStates and hamletSlackLinkChallenges so expired replay, throttle, OAuth-state and account-link records are removed automatically. All Slack integration metadata collections are server-only; Firestore Rules exclude records marked serverOnly from the platform Super Administrator client read-through. Trusted Admin SDK Functions retain access.
 
 Set each secret using Firebase CLI:
 
