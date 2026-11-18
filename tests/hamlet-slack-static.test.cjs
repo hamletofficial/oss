@@ -75,3 +75,15 @@ test("Slack private collections are excluded from the super-administrator client
   assert.match(slack, /serverOnly: true/);
   assert.match(rules, /resource\.data\.serverOnly != true/);
 });
+
+test("Slack slash commands are acknowledged before Firestore processing", () => {
+  const handler = slack.slice(slack.indexOf("exports.hamletSlackEvents"), slack.indexOf("function isQuietHours"));
+  assert.ok(handler.indexOf('response.status(200).send("")') < handler.indexOf("claimSlackRequestNonce(database"));
+  assert.match(handler, /sendSlackCommandResponse/);
+  assert.match(handler, /hooks\.slack\.com/);
+});
+
+test("critical-path delivery decrypts the selected tenant installation token", () => {
+  assert.match(slack, /decryptToken\(installation\)/);
+  assert.doesNotMatch(slack, /decryptToken\(installationSnap\.data\(\)\)/);
+});
