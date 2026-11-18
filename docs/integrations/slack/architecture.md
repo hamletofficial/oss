@@ -70,7 +70,7 @@ Critical Path Reminders are a planned v1 capability. Hamlet remains authoritativ
 - Read milestone and action data from existing, authorised Hamlet deal records; do not maintain a separate Slack copy of task state.
 - Evaluate due and overdue items in a trusted scheduled backend process (for example, a scheduled Firebase Cloud Function). The scheduler is server-side and must not depend on a user's Slack session being active.
 - Support organisation-configured reminder lead times and a bounded cadence for overdue reminders. Use the organisation's configured timezone when calculating local due windows.
-- Notify the assigned, linked Hamlet member by direct message. Send an escalation only to managers who are authorised for that deal and only under an organisation-approved escalation rule.
+- Notify the assigned, linked Hamlet member by direct message. Manager escalation is disabled by default and requires an explicit organisation administrator opt-in; only managers authorised for that deal may receive it.
 - Keep channel notifications off by default. Do not disclose deal names, counterparties, financial terms or sensitive property details in a channel; a minimal private prompt with a link to Hamlet is preferred.
 - Before dispatch, re-check installation status, subscription entitlement, current membership, assignment and resource-level access. Re-check again when a recipient opens the linked record or attempts an acknowledgement.
 - Use a deterministic idempotency key based on tenant, deal/action, due-date version, recipient and reminder stage so retries do not create duplicate alerts. A changed due date or reassignment must invalidate stale pending notifications.
