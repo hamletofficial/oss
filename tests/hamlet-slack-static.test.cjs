@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const root = path.resolve(__dirname, "..", "..");
+const root = path.resolve(__dirname, "..");
 const slack = fs.readFileSync(path.join(root, "functions", "hamlet-slack.js"), "utf8");
 const index = fs.readFileSync(path.join(root, "functions", "index.js"), "utf8");
 const deals = fs.readFileSync(path.join(root, "app", "hamlet", "organisation-deals.html"), "utf8");
