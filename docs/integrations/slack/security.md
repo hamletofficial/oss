@@ -1,6 +1,6 @@
 # Hamlet Connect security and privacy requirements
 
-This document defines release requirements, not evidence that controls have already been implemented.
+This document defines release requirements. Some controls are implemented in the current branch, but deployment, Firebase Emulator testing and non-production Slack validation remain outstanding.
 
 ## Authentication and secrets
 
