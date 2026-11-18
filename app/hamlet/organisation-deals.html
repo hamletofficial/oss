@@ -75,6 +75,10 @@
             <div class="field"><label for="dealClient">Client</label><input id="dealClient" maxlength="120" placeholder="Client or counterparty"></div>
             <div class="field full"><label for="dealProperty">Property / location</label><input id="dealProperty" maxlength="180" placeholder="Address, asset or location"></div>
             <div class="field full"><label for="dealOwner">Deal lead</label><input id="dealOwner" maxlength="120" placeholder="Responsible colleague"></div>
+            <div class="field full"><label for="nextActionTitle">Next critical-path action</label><input id="nextActionTitle" maxlength="160" placeholder="e.g. Receive legal due diligence report"></div>
+            <div class="field"><label for="nextActionOwnerUid">Action owner</label><select id="nextActionOwnerUid"><option value="">Select an active member…</option></select></div>
+            <div class="field"><label for="nextActionDueAt">Action due date and time</label><input id="nextActionDueAt" type="datetime-local"></div>
+            <div class="field full"><label for="nextActionStatus">Action status</label><select id="nextActionStatus"><option value="open">Open</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><p class="hint">When all three action fields are set, Hamlet Connect can send the assigned member private Slack reminders. Only members with current access to this deal can receive its notifications.</p></div>
             <div class="field full"><label for="dealVisibility">Sharing policy</label><select id="dealVisibility"><option value="organisation">Visible to active organisation members</option><option value="restricted">Restricted to creator, shared members and authorised teams</option></select><p class="hint">Restricted deals are visible only to their creator, members explicitly granted access, and members with the required team permission. Only owners and administrators can change sharing settings.</p></div>
             <div class="field full"><label for="dealNotes">Notes</label><textarea id="dealNotes" maxlength="4000" placeholder="Commercial context, next steps and relevant notes"></textarea></div>
           </div>
@@ -96,7 +100,7 @@
   const $=id=>document.getElementById(id);
   const stages=['Initial Inspection','LOI Issued','Due Diligence','Under Contract','Lease Execution','Closing','Commission Payout','Closed'];
   const stageGroups=[stages.slice(0,2),stages.slice(2,4),stages.slice(4,6),stages.slice(6)];
-  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,canManageSharing=false,activeTeams=[];
+  let auth,db,user,memberships=[],activeOrg=null,records=[],editingId=null,canManage=false,canManageSharing=false,activeTeams=[],activeActionMembers=[];
   const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showNotice(message,error){const el=$('notice');el.textContent=message;el.className='notice show'+(error?' error':'');}
   function status(id,message){$(id).textContent=message||'';}
@@ -126,11 +130,22 @@
     canManage=['owner','admin','manager'].includes(activeOrg.role);
     canManageSharing=['owner','admin'].includes(activeOrg.role);
     await loadActiveTeams();
+    await loadActionMembers();
     $('dealVisibility').disabled=!canManageSharing;
     $('dealVisibility').value='organisation';
     $('saveBtn').disabled=activeOrg.role==='viewer';
     if(canManageSharing){try{await loadShareMembers();}catch(error){console.error('Unable to load active share members:',error);activeShareMembers=[];}}
     await loadDeals();
+  }
+  async function loadActionMembers(){
+    activeActionMembers=[];
+    if(!activeOrg)return;
+    const snap=await db.collection('organisationMembers').where('organisationId','==',activeOrg.id).where('status','==','active').get();
+    activeActionMembers=snap.docs.map(d=>d.data()).filter(m=>m.uid);
+    const select=$('nextActionOwnerUid');select.replaceChildren(new Option('Select an active member…',''));
+    const profiles=await Promise.all(activeActionMembers.map(async m=>{try{const p=await db.collection('publicProfiles').doc(m.uid).get();return p.exists?p.data():{};}catch(e){return {};}}));
+    activeActionMembers=activeActionMembers.map((m,i)=>({...m,label:[profiles[i].firstName,profiles[i].lastName].filter(Boolean).join(' ')||profiles[i].displayName||m.uid.slice(0,12)}));
+    activeActionMembers.forEach(m=>select.add(new Option(m.label+' · '+m.role,m.uid)));
   }
   async function loadActiveTeams(){
     activeTeams=[];
@@ -254,6 +269,7 @@
     const visibility=document.createElement('span');visibility.className='pill';visibility.textContent=deal.visibility==='restricted'?'Restricted':'Organisation-wide';meta.appendChild(visibility);
     const type=document.createElement('span');type.className='pill';type.textContent=deal.type||'Deal';meta.appendChild(type);card.appendChild(meta);
     const value=document.createElement('p');value.textContent=money(deal.value)+' · Lead: '+(deal.owner||'Unassigned');card.appendChild(value);
+    if(deal.nextActionTitle){const action=document.createElement('p');const due=deal.nextActionDueAt&&typeof deal.nextActionDueAt.toDate==='function'?deal.nextActionDueAt.toDate().toLocaleString('en-GB'):'Date not set';action.textContent='Next action: '+deal.nextActionTitle+' · '+due+' · '+(deal.nextActionStatus||'open');card.appendChild(action);}
     if(deal.notes){const notes=document.createElement('p');notes.textContent=deal.notes;card.appendChild(notes);}
     const mayEdit=mayWriteResource(deal,'deal');
     if(mayEdit){
@@ -266,10 +282,12 @@
     renderShareTools(card,deal);
     return card;
   }
-  function resetForm(){editingId=null;$('dealForm').reset();$('dealStage').value=stages[0];$('dealVisibility').value='organisation';$('formTitle').textContent='Create an organisation deal';$('saveBtn').textContent='Save organisation deal';$('cancelBtn').classList.add('hidden');$('dealVisibility').disabled=!canManageSharing;status('formStatus','');}
+  function resetForm(){editingId=null;$('dealForm').reset();$('dealStage').value=stages[0];$('dealVisibility').value='organisation';$('nextActionStatus').value='open';$('formTitle').textContent='Create an organisation deal';$('saveBtn').textContent='Save organisation deal';$('cancelBtn').classList.add('hidden');$('dealVisibility').disabled=!canManageSharing;status('formStatus','');}
   function editDeal(id){
     const d=records.find(item=>item.id===id);if(!d)return;
-    editingId=id;$('dealName').value=d.name||'';$('dealType').value=d.type||'Acquisition';$('dealStage').value=d.stage||stages[0];$('dealValue').value=d.value==null?'':d.value;$('dealClient').value=d.client||'';$('dealProperty').value=d.property||'';$('dealOwner').value=d.owner||'';$('dealNotes').value=d.notes||'';$('dealVisibility').value=d.visibility||'organisation';$('dealVisibility').disabled=!canManageSharing;$('formTitle').textContent='Edit organisation deal';$('saveBtn').textContent='Save changes';$('cancelBtn').classList.remove('hidden');$('dealName').focus();
+    editingId=id;$('dealName').value=d.name||'';$('dealType').value=d.type||'Acquisition';$('dealStage').value=d.stage||stages[0];$('dealValue').value=d.value==null?'':d.value;$('dealClient').value=d.client||'';$('dealProperty').value=d.property||'';$('dealOwner').value=d.owner||'';$('dealNotes').value=d.notes||'';$('nextActionTitle').value=d.nextActionTitle||'';$('nextActionOwnerUid').value=d.nextActionOwnerUid||'';
+    $('nextActionDueAt').value=d.nextActionDueAt&&typeof d.nextActionDueAt.toDate==='function'?new Date(d.nextActionDueAt.toDate().getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16):'';
+    $('nextActionStatus').value=d.nextActionStatus||'open';$('dealVisibility').value=d.visibility||'organisation';$('dealVisibility').disabled=!canManageSharing;$('formTitle').textContent='Edit organisation deal';$('saveBtn').textContent='Save changes';$('cancelBtn').classList.remove('hidden');$('dealName').focus();
   }
   async function deleteDeal(id){
     const d=records.find(item=>item.id===id);if(!d||!confirm('Delete this organisation deal? This cannot be undone.'))return;
@@ -279,6 +297,9 @@
   $('dealForm').addEventListener('submit',async event=>{
     event.preventDefault();if(!activeOrg||activeOrg.role==='viewer')return;
     const name=$('dealName').value.trim();if(name.length<1)return;
+    const actionTitle=$('nextActionTitle').value.trim(),actionOwner=$('nextActionOwnerUid').value,actionDue=$('nextActionDueAt').value;
+    if((actionTitle||actionOwner||actionDue)&&!(actionTitle&&actionOwner&&actionDue)){status('formStatus','Complete the action title, owner and due date together, or clear all three fields.');return;}
+    if(actionOwner&&!activeActionMembers.some(m=>m.uid===actionOwner)){status('formStatus','Choose a currently active member of this organisation as the action owner.');return;}
     const previous=editingId?records.find(d=>d.id===editingId):null;
     const data={
       organisationId:activeOrg.id,
@@ -289,6 +310,10 @@
       owner:$('dealOwner').value.trim().slice(0,120),notes:$('dealNotes').value.trim().slice(0,4000),
       visibility:canManageSharing?$('dealVisibility').value:(previous?previous.visibility:'organisation'),
       sharedWithUids:previous&&Array.isArray(previous.sharedWithUids)?previous.sharedWithUids:[],
+      nextActionTitle:actionTitle? actionTitle.slice(0,160):firebase.firestore.FieldValue.delete(),
+      nextActionOwnerUid:actionOwner||firebase.firestore.FieldValue.delete(),
+      nextActionDueAt:actionDue?firebase.firestore.Timestamp.fromDate(new Date(actionDue)):firebase.firestore.FieldValue.delete(),
+      nextActionStatus:actionTitle?$('nextActionStatus').value:'open',
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     };
     if(!previous)data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
