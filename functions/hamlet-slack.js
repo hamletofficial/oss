@@ -390,10 +390,10 @@ async function userCanReadDeal(database, organisationId, dealId, deal, uid, memb
     shareSnap.data().resourceType === "deal" && shareSnap.data().resourceId === dealId &&
     shareSnap.data().sharedWithUid === uid;
 }
-async function sendSlackDm(token, slackUserId, text) {
+async function sendSlackDm(token, slackUserId, text, clientMsgId) {
   const opened = await slackApi("conversations.open", token, {users: slackUserId});
   if (!opened.channel || !opened.channel.id) throw new Error("Slack did not return a direct-message channel.");
-  await slackApi("chat.postMessage", token, {channel: opened.channel.id, text, unfurl_links: false, unfurl_media: false});
+  await slackApi("chat.postMessage", token, {channel: opened.channel.id, text, client_msg_id: clientMsgId, unfurl_links: false, unfurl_media: false});
 }
 async function dispatchCriticalPathReminder(database, installation, teamId, dealDoc, deal, recipientUid, stage, dueDate, settings, escalation) {
   const organisationId = installation.organisationId;
@@ -432,14 +432,20 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
       "Due: " + dueText,
       "Open the authorised deal workspace: " + SITE_ORIGIN + "/app/hamlet/organisation-deals.html",
     ].join("\n");
-    await sendSlackDm(token, userLink.slackUserId, message);
+    const uuidHash = deliveryKey.slice(0, 32);
+    const clientMsgId = uuidHash.slice(0, 8) + "-" + uuidHash.slice(8, 12) + "-4" + uuidHash.slice(13, 16) + "-a" + uuidHash.slice(17, 20) + "-" + uuidHash.slice(20, 32);
+    await sendSlackDm(token, userLink.slackUserId, message, clientMsgId);
     await deliveryRef.set({status: "sent", sentAt: FieldValue.serverTimestamp(), error: FieldValue.delete()}, {merge: true});
-    await database.collection("organisationActivity").add({
-      organisationId, actorUid: "hamlet-slack-scheduler", actorType: "system",
-      action: escalation ? "organisation.slack_reminder_escalated" : "organisation.slack_reminder_sent",
-      resourceType: "deal", resourceId: dealDoc.id, targetUid: recipientUid,
-      reminderStage: stage, createdAt: FieldValue.serverTimestamp(),
-    });
+    try {
+      await database.collection("organisationActivity").add({
+        organisationId, actorUid: "hamlet-slack-scheduler", actorType: "system",
+        action: escalation ? "organisation.slack_reminder_escalated" : "organisation.slack_reminder_sent",
+        resourceType: "deal", resourceId: dealDoc.id, targetUid: recipientUid,
+        reminderStage: stage, createdAt: FieldValue.serverTimestamp(),
+      });
+    } catch (auditError) {
+      console.warn("Slack reminder was delivered but its activity record could not be written:", deliveryKey, clean(auditError.message, 160));
+    }
     return "sent";
   } catch (error) {
     await deliveryRef.set({status: "failed", failedAt: FieldValue.serverTimestamp(), error: clean(error.message, 400)}, {merge: true});
