@@ -11,6 +11,7 @@ const index = fs.readFileSync(path.join(root, "functions", "index.js"), "utf8");
 const deals = fs.readFileSync(path.join(root, "app", "hamlet", "organisation-deals.html"), "utf8");
 const integrations = fs.readFileSync(path.join(root, "app", "hamlet", "organisation-integrations.html"), "utf8");
 const linkPage = fs.readFileSync(path.join(root, "app", "hamlet", "slack-link.html"), "utf8");
+const rules = fs.readFileSync(path.join(root, "firestore.rules"), "utf8");
 
 test("Slack Firebase module and function registry parse as JavaScript", () => {
   assert.doesNotThrow(() => new vm.Script(slack, {filename: "functions/hamlet-slack.js"}));
@@ -66,4 +67,11 @@ test("organisation integration and account-link pages invoke trusted callables",
 
 test("Firebase function registry exports Hamlet Connect", () => {
   assert.match(index, /require\("\.\/hamlet-slack"\)/);
+});
+
+test("Slack private collections are excluded from the super-administrator client read-through", () => {
+  assert.match(rules, /hamletSlackInstallations/);
+  assert.match(rules, /hamletSlackRequestNonces/);
+  assert.match(rules, /hamletSlackLinkRateLimits/);
+  assert.match(rules, /!document\.matches\(/);
 });
