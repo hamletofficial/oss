@@ -365,86 +365,116 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
   return {ok: true, ...linked};
 });
 
+async function sendSlackCommandResponse(responseUrl, message) {
+  let parsed;
+  try { parsed = new URL(String(responseUrl || "")); } catch (_) { return false; }
+  if (parsed.protocol !== "https:" || !["hooks.slack.com", "hooks.slack-gov.com"].includes(parsed.hostname)) return false;
+  const result = await fetch(parsed.toString(), {
+    method: "POST",
+    headers: {"Content-Type": "application/json; charset=utf-8"},
+    body: JSON.stringify({response_type: "ephemeral", text: clean(message, 2500)}),
+    signal: AbortSignal.timeout(10000),
+  });
+  return result.ok;
+}
+
 exports.hamletSlackEvents = onRequest({
-  region: REGION, timeoutSeconds: 15, memory: "256MiB", secrets: [SLACK_SIGNING_SECRET],
+  region: REGION, timeoutSeconds: 30, memory: "256MiB", secrets: [SLACK_SIGNING_SECRET],
 }, async (request, response) => {
   response.set("Cache-Control", "no-store");
   if (request.method !== "POST") return response.set("Allow", "POST").status(405).send("Method not allowed.");
   if (!verifySlackRequest(request)) return response.status(401).send("Invalid Slack signature.");
+  const body = request.body || {};
+  if (body.type === "url_verification") return response.status(200).json({challenge: body.challenge});
+
+  // Slack requires a prompt acknowledgement. Return it before Firestore work,
+  // then use Slack's signed response_url for the private command result.
+  const isCommand = clean(body.command, 40) === "/hamlet";
+  const isUninstall = body.type === "event_callback" && body.event && body.event.type === "app_uninstalled";
+  if (isCommand || isUninstall) response.status(200).send("");
+  else return response.status(200).send("");
+
   const database = db();
   const timestamp = String(request.get("x-slack-request-timestamp") || "");
   const signature = String(request.get("x-slack-signature") || "");
-  if (!await claimSlackRequestNonce(database, timestamp, signature)) return response.status(200).send("ok");
-  const body = request.body || {};
-  if (body.type === "url_verification") return response.status(200).json({challenge: body.challenge});
-  if (body.type === "event_callback" && body.event && body.event.type === "app_uninstalled") {
-    const teamId = clean(body.team_id, 80);
-    if (teamId) {
-      const database = db();
-      const installationRef = database.collection("hamletSlackInstallations").doc(teamId);
-      const installationSnap = await installationRef.get();
-      const organisationId = installationSnap.exists ? clean(installationSnap.data().organisationId, 128) : "";
-      await installationRef.set({
-        serverOnly: true,
-        status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
-        disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
-      }, {merge: true});
-      await revokeWorkspaceLinks(database, teamId);
-      if (organisationId) {
-        await database.collection("organisationActivity").add({
-          organisationId, actorUid: "slack-app-uninstalled", actorType: "system",
-          action: "organisation.slack_disconnected", slackTeamId: teamId,
-          createdAt: FieldValue.serverTimestamp(),
-        });
-      }
-    }
-    return response.status(200).send("ok");
-  }
-  if (!body.command || clean(body.command, 40) !== "/hamlet") return response.status(200).send("");
-  const teamId = clean(body.team_id, 80), slackUserId = clean(body.user_id, 80);
-  const textValue = clean(body.text, 300).toLowerCase();
-  const installationSnap = await db().collection("hamletSlackInstallations").doc(teamId).get();
-  if (!installationSnap.exists || installationSnap.data().status !== "active") {
-    return response.status(200).json({response_type: "ephemeral", text: "This Slack workspace is not connected to an active Hamlet organisation."});
-  }
-  const installation = installationSnap.data();
-  if (textValue === "link" || textValue.startsWith("link ")) {
-    const token = randomToken(32);
-    const challengeRef = database.collection("hamletSlackLinkChallenges").doc(sha256(token));
-    const rateRef = database.collection("hamletSlackLinkRateLimits").doc(sha256(teamId + "_" + slackUserId));
-    try {
-      await database.runTransaction(async transaction => {
-        const rateSnap = await transaction.get(rateRef);
-        const lastIssuedAt = rateSnap.exists ? rateSnap.data().lastIssuedAt : null;
-        if (lastIssuedAt && typeof lastIssuedAt.toMillis === "function" && Date.now() - lastIssuedAt.toMillis() < 60000) {
-          throw new Error("Please wait one minute before requesting another account-linking URL.");
+  try {
+    if (!await claimSlackRequestNonce(database, timestamp, signature)) return;
+    if (isUninstall) {
+      const teamId = clean(body.team_id, 80);
+      if (teamId) {
+        const installationRef = database.collection("hamletSlackInstallations").doc(teamId);
+        const installationSnap = await installationRef.get();
+        const organisationId = installationSnap.exists ? clean(installationSnap.data().organisationId, 128) : "";
+        await installationRef.set({
+          serverOnly: true,
+          status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
+          disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
+        }, {merge: true});
+        await revokeWorkspaceLinks(database, teamId);
+        if (organisationId) {
+          await database.collection("organisationActivity").add({
+            organisationId, actorUid: "slack-app-uninstalled", actorType: "system",
+            action: "organisation.slack_disconnected", slackTeamId: teamId,
+            createdAt: FieldValue.serverTimestamp(),
+          });
         }
-        transaction.create(challengeRef, {
-          serverOnly: true,
-          teamId, slackUserId, organisationId: installation.organisationId,
-          createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000), status: "pending",
-        });
-        transaction.set(rateRef, {
-          serverOnly: true,
-          teamId, slackUserId, lastIssuedAt: FieldValue.serverTimestamp(),
-          expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
-        });
-      });
-    } catch (error) {
-      return response.status(200).json({response_type: "ephemeral", text: clean(error.message, 180)});
+      }
+      return;
     }
-    const linkUrl = SITE_ORIGIN + "/app/hamlet/slack-link.html?code=" + encodeURIComponent(token);
-    return response.status(200).json({response_type: "ephemeral", text: "Link your Slack account to your verified Hamlet account using this one-time link (valid for 10 minutes): " + linkUrl});
-  }
-  if (textValue === "status") {
-    const linkRef = db().collection("hamletSlackUserLinks").doc(sha256(teamId + "_" + slackUserId));
-    const linkSnap = await linkRef.get();
-    return response.status(200).json({response_type: "ephemeral", text: linkSnap.exists && linkSnap.data().status === "active" ?
-      "Your Slack account is linked to Hamlet." : "Your Slack account is not linked. Run /hamlet link to connect it."});
-  }
-  return response.status(200).json({response_type: "ephemeral", text: "Hamlet Connect commands: /hamlet link links your verified Hamlet account; /hamlet status checks your link."});
-});
 
+    const teamId = clean(body.team_id, 80);
+    const slackUserId = clean(body.user_id, 80);
+    const textValue = clean(body.text, 300).toLowerCase();
+    const responseUrl = body.response_url;
+    const installationSnap = await database.collection("hamletSlackInstallations").doc(teamId).get();
+    if (!installationSnap.exists || installationSnap.data().status !== "active") {
+      await sendSlackCommandResponse(responseUrl, "This Slack workspace is not connected to an active Hamlet organisation.");
+      return;
+    }
+    const installation = installationSnap.data();
+    if (textValue === "link" || textValue.startsWith("link ")) {
+      const token = randomToken(32);
+      const challengeRef = database.collection("hamletSlackLinkChallenges").doc(sha256(token));
+      const rateRef = database.collection("hamletSlackLinkRateLimits").doc(sha256(teamId + "_" + slackUserId));
+      try {
+        await database.runTransaction(async transaction => {
+          const rateSnap = await transaction.get(rateRef);
+          const lastIssuedAt = rateSnap.exists ? rateSnap.data().lastIssuedAt : null;
+          if (lastIssuedAt && typeof lastIssuedAt.toMillis === "function" && Date.now() - lastIssuedAt.toMillis() < 60000) {
+            throw new Error("Please wait one minute before requesting another account-linking URL.");
+          }
+          transaction.create(challengeRef, {
+            serverOnly: true,
+            teamId, slackUserId, organisationId: installation.organisationId,
+            createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000), status: "pending",
+          });
+          transaction.set(rateRef, {
+            serverOnly: true,
+            teamId, slackUserId, lastIssuedAt: FieldValue.serverTimestamp(),
+            expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
+          });
+        });
+      } catch (error) {
+        await sendSlackCommandResponse(responseUrl, clean(error.message, 180));
+        return;
+      }
+      const linkUrl = SITE_ORIGIN + "/app/hamlet/slack-link.html?code=" + encodeURIComponent(token);
+      await sendSlackCommandResponse(responseUrl, "Link your Slack account to your verified Hamlet account using this one-time link (valid for 10 minutes): " + linkUrl);
+      return;
+    }
+    if (textValue === "status") {
+      const linkRef = database.collection("hamletSlackUserLinks").doc(sha256(teamId + "_" + slackUserId));
+      const linkSnap = await linkRef.get();
+      await sendSlackCommandResponse(responseUrl, linkSnap.exists && linkSnap.data().status === "active" ?
+        "Your Slack account is linked to Hamlet." : "Your Slack account is not linked. Run /hamlet link to connect it.");
+      return;
+    }
+    await sendSlackCommandResponse(responseUrl, "Hamlet Connect commands: /hamlet link links your verified Hamlet account; /hamlet status checks your link.");
+  } catch (error) {
+    console.error("Hamlet Slack request processing failed:", clean(error.message, 220));
+    if (isCommand) await sendSlackCommandResponse(body.response_url, "Hamlet could not complete that request. Please try again shortly.");
+  }
+});
 function isQuietHours(now, settings) {
   const quiet = settings && settings.quietHours || {};
   const start = Number.isInteger(quiet.startHour) ? quiet.startHour : 21;
