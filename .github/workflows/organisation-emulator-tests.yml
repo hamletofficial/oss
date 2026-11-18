@@ -52,5 +52,8 @@ jobs:
         working-directory: functions
         run: npm install --no-save firebase @firebase/rules-unit-testing
 
+      - name: Run Hamlet Connect static integration tests
+        run: npm --prefix functions run test:slack
+
       - name: Run callable and Firestore / Storage Rules tests against emulators
         run: npx --yes firebase-tools@15.35.0 emulators:exec --config firebase.json --project demo-hamlet-functions --only firestore,storage "npm --prefix functions run test:organisations && NODE_PATH=functions/node_modules node --test tests/hamlet-rules.test.cjs"

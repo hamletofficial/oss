@@ -7,7 +7,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test:organisations": "node --test test/hamlet-organisations.test.cjs test/hamlet-organisation-handoff.test.cjs test/hamlet-organisation-teams.test.cjs"
+    "test:organisations": "node --test test/hamlet-organisations.test.cjs test/hamlet-organisation-handoff.test.cjs test/hamlet-organisation-teams.test.cjs",
+    "test:slack": "node --test ../tests/hamlet-slack-static.test.cjs"
   },
   "engines": {
     "node": "24"

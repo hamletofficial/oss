@@ -368,6 +368,23 @@
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "submittedAt", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "hamletSlackInstallations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "organisationMembers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "role", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

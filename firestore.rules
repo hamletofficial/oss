@@ -1161,9 +1161,12 @@ service cloud.firestore {
     // Read-only platform-wide access for the designated Hamlet super administrator.
     // Keep this identity aligned with the administrator configured in admin.html.
     match /{document=**} {
+      // Integration records marked serverOnly are excluded from the platform
+      // Super Administrator client read-through. Admin SDK Functions retain access.
       allow read: if request.auth != null
         && request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email_verified == true
+        && (!('serverOnly' in resource.data) || resource.data.serverOnly != true);
     }
 
   }

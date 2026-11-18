@@ -188,7 +188,7 @@ test('workspace organisation management page JavaScript parses', () => {
   assert.match(appOrganisationsHtml, /organisationMembers/);
   assert.doesNotMatch(appOrganisationsHtml, /createOrganisationInvitation|removeOrganisationMember|acceptOrganisationInvitation|revokeOrganisationInvitation/);
   assert.doesNotMatch(appOrganisationsHtml, /location\.hash|replaceState/);
-  assert.match(html, /href="\/app\/hamlet\/organisations\.html"[^>]*>.*Organisations/);
+  assert.match(html, /href="\/app\/hamlet\/organisation\.html"[^>]*>.*Organisations/);
 });
 
 test('organisation profile editing uses a trusted callable and public directory projection', () => {
