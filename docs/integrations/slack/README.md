@@ -62,17 +62,17 @@ docs/integrations/slack/
   critical-path-reminders.md
 ```
 
-These are proposed paths. No Slack credentials, secrets, deployed endpoints or production installation are implied by this documentation.
+These are the current implementation paths for the first increment. No Slack credentials, secrets, deployed endpoints or production installation are implied; see implementation.md for the configuration and deployment checklist.
 
 ## Delivery sequence
 
-1. Confirm Slack app scopes, event subscriptions and OAuth redirect design.
-2. Implement and test signature verification, replay protection and idempotent event handling in the gateway.
-3. Implement secure account linking and installation-to-organisation mapping.
-4. Implement read-only Deal Copilot and Property Intelligence.
-5. Implement Critical Path Reminders using Hamlet-owned milestone data and a trusted scheduled backend process.
-6. Add interactive confirmation and narrowly scoped action creation or acknowledgement.
-7. Add operational monitoring, security testing, documentation and controlled pilot.
+1. Configure the centrally owned Slack app, scopes, slash command and OAuth callback.
+2. Configure Firebase secrets and deploy the europe-west2 Slack HTTPS/callable functions.
+3. Complete OAuth installation from the organisation Integrations page and verify tenant isolation.
+4. Link individual Slack identities using /hamlet link.
+5. Pilot scheduled Critical Path Reminders using synthetic organisation deals and assigned members.
+6. Implement Deal Copilot and Property Intelligence as separately permissioned capabilities.
+7. Add interactive confirmation and narrowly scoped action creation or acknowledgement.
 8. Assess Slack Marketplace readiness only after multi-workspace behaviour, privacy disclosures and support processes are production-ready.
 
 ## Release gate
