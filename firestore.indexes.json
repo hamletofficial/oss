@@ -4,54 +4,27 @@
       "collectionGroup": "organisationDirectory",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "isPublic",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "name",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "isPublic", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "name", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationMembershipRequests",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationTeamMembers",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "uid",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "uid", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
       ]
     },
     {
@@ -360,102 +333,57 @@
       "collectionGroup": "organisationDeals",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "stage",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "stage", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationProperties",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "propertyType",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "propertyType", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationTeams",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationMembers",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationVerificationRequests",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "submittedAt",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "submittedAt", "order": "ASCENDING"}
       ]
-    },
-    {
+    }
+    ,{
       "collectionGroup": "hamletSlackInstallations",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "organisationMembers",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "organisationId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "role",
-          "order": "ASCENDING"
-        }
+        {"fieldPath": "organisationId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "role", "order": "ASCENDING"}
       ]
     }
   ],
