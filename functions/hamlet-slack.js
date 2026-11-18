@@ -156,6 +156,10 @@ async function slackInstallCallback(request, response) {
     if (payload.is_enterprise_install === true) throw new Error("Enterprise-wide Slack installations are not enabled in this first release.");
     const teamId = clean(payload.team.id, 80);
     const installationRef = database.collection("hamletSlackInstallations").doc(teamId);
+    const previousInstallation = await installationRef.get();
+    if (previousInstallation.exists && previousInstallation.data().status !== "active") {
+      await revokeWorkspaceLinks(database, teamId);
+    }
     const encrypted = encryptToken(payload.access_token);
     const [organisationSnap, membershipSnap, billingSnap] = await Promise.all([
       database.collection("organisations").doc(stateData.organisationId).get(),
@@ -465,8 +469,21 @@ exports.hamletSlackEvents = onRequest({
     if (textValue === "status") {
       const linkRef = database.collection("hamletSlackUserLinks").doc(sha256(teamId + "_" + slackUserId));
       const linkSnap = await linkRef.get();
-      await sendSlackCommandResponse(responseUrl, linkSnap.exists && linkSnap.data().status === "active" ?
-        "Your Slack account is linked to Hamlet." : "Your Slack account is not linked. Run /hamlet link to connect it.");
+      let active = false;
+      if (linkSnap.exists && linkSnap.data().status === "active") {
+        const link = linkSnap.data();
+        const [organisationSnap, membershipSnap, billingSnap] = await Promise.all([
+          database.collection("organisations").doc(link.organisationId).get(),
+          database.collection("organisationMembers").doc(membershipDocumentId(link.organisationId, link.uid)).get(),
+          database.collection("organisationBilling").doc(link.organisationId).get(),
+        ]);
+        active = organisationSnap.exists && organisationSnap.data().status === "active" &&
+          membershipSnap.exists && membershipSnap.data().status === "active" &&
+          billingSnap.exists && ["active", "trialing"].includes(billingSnap.data().status);
+      }
+      await sendSlackCommandResponse(responseUrl, active ?
+        "Your Slack identity is linked and your Hamlet organisation access is active." :
+        "Your Slack identity is not currently linked to an active Hamlet organisation. Run /hamlet link to connect or relink it.");
       return;
     }
     await sendSlackCommandResponse(responseUrl, "Hamlet Connect commands: /hamlet link links your verified Hamlet account; /hamlet status checks your link.");
