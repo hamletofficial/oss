@@ -196,8 +196,17 @@ exports.getHamletSlackIntegrationStatus = onCall({region: REGION, timeoutSeconds
   const organisationId = clean(request.data && request.data.organisationId, 128);
   if (!organisationId || organisationId.includes("/")) throw new HttpsError("invalid-argument", "A valid organisation is required.");
   await requireOrganisationAdmin(db(), organisationId, user.uid);
-  const snapshot = await db().collection("hamletSlackInstallations").where("organisationId", "==", organisationId).get();
+  const [snapshot, settingsSnap] = await Promise.all([
+    db().collection("hamletSlackInstallations").where("organisationId", "==", organisationId).get(),
+    db().collection("hamletSlackSettings").doc(organisationId).get(),
+  ]);
+  const settings = settingsSnap.exists ? settingsSnap.data() : {};
   return {
+    settings: {
+      timeZone: clean(settings.timeZone || "Europe/London", 80),
+      reminderLeadHours: Number.isInteger(settings.reminderLeadHours) ? settings.reminderLeadHours : 24,
+      quietHours: settings.quietHours || {startHour: 21, endHour: 8},
+    },
     installations: snapshot.docs.map(doc => {
       const data = doc.data() || {};
       return {teamId: doc.id, teamName: clean(data.teamName, 120), status: clean(data.status, 40), scopes: Array.isArray(data.scopes) ? data.scopes : []};
