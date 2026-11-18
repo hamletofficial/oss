@@ -46,7 +46,7 @@ The scheduler must not rely on Slack message history, channel membership or an a
 
 - Default delivery: direct message to the assigned member.
 - Default channel delivery: disabled.
-- Escalation: disabled until an organisation administrator configures an explicit rule and eligible recipients.
+- Escalation: disabled by default; an organisation owner or administrator must explicitly enable the fixed second-overdue-day rule. Recipients are limited to managers who independently pass the current deal-access check and have linked Slack identities.
 - Quiet hours: respected using the organisation timezone; urgent exceptions, if ever supported, require an explicit policy.
 - Content: minimum necessary context, action label, due/overdue status and a secure Hamlet link.
 - Preferences: provide a clear way to manage or mute non-essential reminders without changing Hamlet task ownership or due dates.
