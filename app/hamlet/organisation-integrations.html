@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0b1120">
+<title>Integrations | hamlet. / workspace</title>
+<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+<script defer src="/firebase-config.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1120;--panel:#111827;--line:#2b3c55;--text:#f3f6fb;--muted:#a8b6ca;--blue:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 420px at 80% -10%,#17365a 0,transparent 65%),var(--bg);color:var(--text);font:14px Arial,sans-serif}
+main{width:min(900px,100%);margin:auto;padding:28px 18px 64px}header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px}a{color:#93c5fd}.brand{font-size:22px;font-weight:800;color:#fff;text-decoration:none}.panel{margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}h1{font-size:30px;margin:26px 0 8px}h2{font-size:18px;margin:0 0 10px}.muted{color:var(--muted);line-height:1.6}label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}select,input{width:100%;padding:11px;border:1px solid #40516a;border-radius:8px;background:#0d1728;color:var(--text)}button{padding:11px 15px;border:1px solid #3b82f6;border-radius:8px;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer;margin:10px 8px 0 0}button.secondary{background:#172338;border-color:#40516a}button:disabled{opacity:.5;cursor:wait}.notice{padding:12px;border-radius:8px;background:#142947;border:1px solid #315b8c;margin:14px 0;color:#dbeafe;display:none}.notice.show{display:block}.notice.error{background:#351a25;border-color:#7f1d1d;color:#fecaca}.install{padding:12px;border:1px solid var(--line);border-radius:9px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<header><a class="brand" href="/app/hamlet/">hamlet<span style="color:#60a5fa">.</span></a><nav><a href="/app/hamlet/organisation.html">Organisation workspace</a></nav></header>
+<h1>Integrations</h1><p class="muted">Connect a Slack workspace to an active Hamlet organisation. Hamlet remains the system of record; Slack provides private notifications and conversational access. Only organisation owners and administrators can configure this integration.</p>
+<div id="notice" class="notice" role="status" aria-live="polite"></div>
+<section class="panel">
+<h2>Organisation</h2><label for="orgSelect">Select an organisation you administer</label><select id="orgSelect"><option>Loading organisations…</option></select>
+<p class="muted" id="orgMeta">Checking your organisation access…</p>
+</section>
+<section class="panel">
+<h2>Slack connection</h2><p class="muted">One centrally managed Hamlet Connect app supports multiple isolated organisation installations. Each Slack workspace is linked to one Hamlet organisation in this release.</p>
+<div id="installations"><p class="muted">Select an organisation to check its connection.</p></div>
+<button id="connectBtn" type="button">Connect Slack workspace</button>
+</section>
+<section class="panel">
+<h2>Critical Path Reminders</h2><p class="muted">Private Slack direct messages for upcoming and overdue deal actions. Manager escalation is currently fixed to the second overdue day and is sent only to managers with current access to the deal. Reminder delivery observes the configured timezone and quiet hours.</p>
+<div class="grid">
+<div><label for="timeZone">Organisation timezone (IANA)</label><input id="timeZone" value="Europe/London" maxlength="80"></div>
+<div><label for="leadHours">Reminder lead time (hours)</label><input id="leadHours" type="number" min="1" max="168" value="24"></div>
+<div><label for="quietStart">Quiet hours start (0–23)</label><input id="quietStart" type="number" min="0" max="23" value="21"></div>
+<div><label for="quietEnd">Quiet hours end (0–23)</label><input id="quietEnd" type="number" min="0" max="23" value="8"></div>
+</div>
+<button id="saveSettingsBtn" class="secondary" type="button">Save reminder settings</button>
+</section>
+<p class="muted">Slack notifications require members to link their individual Slack identities using <code>/hamlet link</code>. A Slack workspace membership does not grant access to Hamlet records. <a href="/docs/integrations/slack/README.md">Read the integration overview</a>.</p>
+</main>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+let auth,db,functions,orgs=[],activeOrg=null;
+function notice(message,error){$('notice').textContent=message;$('notice').className='notice show'+(error?' error':'');}
+function call(name,data){return functions.httpsCallable(name)(data);}
+async function loadStatus(){
+ if(!activeOrg)return;
+ $('installations').textContent='Loading connection status…';
+ try{
+  const result=await call('getHamletSlackIntegrationStatus',{organisationId:activeOrg.id});
+  const data=result.data||{},items=data.installations||[];
+  $('timeZone').value=(data.settings&&data.settings.timeZone)||'Europe/London';
+  $('leadHours').value=(data.settings&&data.settings.reminderLeadHours)||24;
+  $('quietStart').value=(data.settings&&data.settings.quietHours&&data.settings.quietHours.startHour);
+  $('quietEnd').value=(data.settings&&data.settings.quietHours&&data.settings.quietHours.endHour);
+  $('installations').replaceChildren();
+  if(!items.length){const p=document.createElement('p');p.className='muted';p.textContent='No active Slack workspace is connected.';$('installations').appendChild(p);}
+  items.forEach(item=>{
+   const row=document.createElement('div');row.className='install';
+   const label=document.createElement('strong');label.textContent=(item.teamName||'Slack workspace')+' · Connected';
+   const button=document.createElement('button');button.className='secondary';button.textContent='Disconnect';button.addEventListener('click',async()=>{
+    if(!confirm('Disconnect this Slack workspace from the selected Hamlet organisation?'))return;
+    button.disabled=true;
+    try{await call('disconnectHamletSlackInstallation',{organisationId:activeOrg.id,teamId:item.teamId});notice('Slack workspace disconnected.');await loadStatus();}
+    catch(error){notice(error.message||'Unable to disconnect Slack.',true);button.disabled=false;}
+   });
+   row.append(label,button);$('installations').appendChild(row);
+  });
+ }catch(error){$('installations').textContent='Unable to load Slack connection status.';notice(error.message||'Unable to load integration status.',true);}
+}
+async function loadOrganisations(user){
+ const snap=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
+ const memberships=snap.docs.map(d=>d.data()).filter(m=>['owner','admin'].includes(m.role));
+ const resolved=await Promise.all(memberships.map(async m=>{
+  const s=await db.collection('organisations').doc(m.organisationId).get();
+  return s.exists&&s.data().status==='active'?{id:s.id,name:s.data().name||'Organisation',role:m.role}:null;
+ }));
+ orgs=resolved.filter(Boolean);$('orgSelect').replaceChildren();
+ if(!orgs.length){$('orgSelect').add(new Option('No administrator access',''));$('orgMeta').textContent='An active organisation owner or administrator role is required.';$('connectBtn').disabled=true;$('saveSettingsBtn').disabled=true;return;}
+ orgs.forEach(o=>$('orgSelect').add(new Option(o.name+' · '+o.role,o.id)));
+ activeOrg=orgs[0];$('orgSelect').value=activeOrg.id;$('orgMeta').textContent='Selected organisation: '+activeOrg.name;await loadStatus();
+}
+$('orgSelect').addEventListener('change',async()=>{activeOrg=orgs.find(o=>o.id===$('orgSelect').value)||null;if(activeOrg){$('orgMeta').textContent='Selected organisation: '+activeOrg.name;await loadStatus();}});
+$('connectBtn').addEventListener('click',async()=>{
+ if(!activeOrg)return;$('connectBtn').disabled=true;
+ try{const result=await call('beginHamletSlackInstallation',{organisationId:activeOrg.id});if(!result.data||!result.data.url)throw new Error('Slack authorisation URL was not returned.');location.assign(result.data.url);}
+ catch(error){notice(error.message||'Unable to start Slack installation.',true);$('connectBtn').disabled=false;}
+});
+$('saveSettingsBtn').addEventListener('click',async()=>{
+ if(!activeOrg)return;
+ const payload={organisationId:activeOrg.id,timeZone:$('timeZone').value.trim(),reminderLeadHours:Number($('leadHours').value),quietHours:{startHour:Number($('quietStart').value),endHour:Number($('quietEnd').value)}};
+ $('saveSettingsBtn').disabled=true;
+ try{await call('updateHamletSlackReminderSettings',payload);notice('Critical Path Reminder settings saved.');}
+ catch(error){notice(error.message||'Unable to save reminder settings.',true);}
+ finally{$('saveSettingsBtn').disabled=false;}
+});
+function init(){
+ if(!window.firebase||!window.firebaseConfig){$('orgMeta').textContent='Firebase configuration is unavailable.';return;}
+ try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();db=firebase.firestore();functions=firebase.app().functions('europe-west2');}
+ catch(error){$('orgMeta').textContent='Firebase could not be initialised.';return;}
+ auth.onAuthStateChanged(async user=>{
+  if(!user){location.replace('/login.html?next='+encodeURIComponent(location.pathname));return;}
+  try{await user.reload();await user.getIdToken(true);}catch(_){}
+  if(!user.emailVerified){$('orgMeta').textContent='Verify your email address before managing integrations.';$('connectBtn').disabled=true;return;}
+  try{await loadOrganisations(user);}catch(error){notice(error.message||'Unable to load organisations.',true);}
+ });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+</body></html>
