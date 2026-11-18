@@ -84,7 +84,7 @@ test("Slack slash commands are acknowledged before Firestore processing", () => 
 });
 
 test("critical-path delivery decrypts the selected tenant installation token", () => {
-  assert.match(slack, /decryptToken\(installation\)/);
+  assert.match(slack, /decryptToken\(currentInstallation\)/);
   assert.doesNotMatch(slack, /decryptToken\(installationSnap\.data\(\)\)/);
 });
 
