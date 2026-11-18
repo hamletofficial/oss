@@ -1167,7 +1167,7 @@ service cloud.firestore {
       allow read: if request.auth != null
         && request.auth.token.email == 'uk-hr-enquiries@ibrecruitment.com'
         && request.auth.token.email_verified == true
-        && !document.matches('^(hamletSlackOAuthStates|hamletSlackInstallations|hamletSlackLinkChallenges|hamletSlackUserLinks|hamletSlackUidLinks|hamletSlackReminderDeliveries|hamletSlackSettings)/.*
+        && !document.matches('^(hamletSlackOAuthStates|hamletSlackInstallations|hamletSlackLinkChallenges|hamletSlackUserLinks|hamletSlackUidLinks|hamletSlackReminderDeliveries|hamletSlackSettings|hamletSlackRequestNonces|hamletSlackLinkRateLimits)/.*
 
   }
 }
