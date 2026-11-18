@@ -368,8 +368,8 @@
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "submittedAt", "order": "ASCENDING"}
       ]
-    }
-    ,{
+    },
+    {
       "collectionGroup": "hamletSlackInstallations",
       "queryScope": "COLLECTION",
       "fields": [
