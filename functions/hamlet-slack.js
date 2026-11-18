@@ -133,7 +133,7 @@ async function slackInstallCallback(request, response) {
     if (!organisationSnap.exists || organisationSnap.data().status !== "active" ||
         !membershipSnap.exists || membershipSnap.data().status !== "active" ||
         !["owner", "admin"].includes(membershipSnap.data().role) ||
-        !billingSnap.exists || billingSnap.data().status !== "active") {
+        !billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status)) {
       throw new Error("The Hamlet organisation or installing administrator is no longer authorised.");
     }
     await database.runTransaction(async transaction => {
@@ -447,7 +447,7 @@ exports.sendHamletSlackCriticalPathReminders = onSchedule({
   const upperBound = Timestamp.fromDate(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
   const lowerBound = Timestamp.fromDate(new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000));
   const snapshot = await database.collection("organisationDeals")
-    .where("nextActionDueAt", "<=", upperBound).orderBy("nextActionDueAt", "asc").limit(300).get();
+    .where("nextActionDueAt", ">=", lowerBound).where("nextActionDueAt", "<=", upperBound).orderBy("nextActionDueAt", "asc").limit(300).get();
   let sent = 0, suppressed = 0, failed = 0;
   for (const dealDoc of snapshot.docs) {
     const deal = dealDoc.data() || {};
