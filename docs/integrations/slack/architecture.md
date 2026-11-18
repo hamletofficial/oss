@@ -13,6 +13,14 @@ Slack workspace
   -> approved Hamlet service / callable operations
   -> AI orchestration over authorised context
   -> Slack response or confirmation interaction
+
+Hamlet deal and critical-path records
+  -> trusted scheduled reminder evaluator
+  -> due/overdue candidate selection
+  -> fresh tenant, membership and resource permission checks
+  -> idempotent notification dispatch
+  -> Slack DM to assigned member / authorised escalation recipient
+  -> delivery and acknowledgement audit in Hamlet
 ```
 
 ## Components
@@ -53,6 +61,21 @@ Slack channel membership is not an authorisation input for Hamlet records. A pri
 
 The AI layer receives only the minimum authorised context required for the current request. Treat Slack messages, files and retrieved documents as untrusted data, not instructions. Defend against prompt injection and tool-output instruction attacks. The model may return structured recommendations, but it must not decide access rights or call privileged data operations directly.
 
+### Critical Path Reminders
+
+Critical Path Reminders are a planned v1 capability. Hamlet remains authoritative for deal milestones, task owners, due dates, completion state and escalation policy.
+
+- Read milestone and action data from existing, authorised Hamlet deal records; do not maintain a separate Slack copy of task state.
+- Evaluate due and overdue items in a trusted scheduled backend process (for example, a scheduled Firebase Cloud Function). The scheduler is server-side and must not depend on a user's Slack session being active.
+- Support organisation-configured reminder lead times and a bounded cadence for overdue reminders. Use the organisation's configured timezone when calculating local due windows.
+- Notify the assigned, linked Hamlet member by direct message. Send an escalation only to managers who are authorised for that deal and only under an organisation-approved escalation rule.
+- Keep channel notifications off by default. Do not disclose deal names, counterparties, financial terms or sensitive property details in a channel; a minimal private prompt with a link to Hamlet is preferred.
+- Before dispatch, re-check installation status, subscription entitlement, current membership, assignment and resource-level access. Re-check again when a recipient opens the linked record or attempts an acknowledgement.
+- Use a deterministic idempotency key based on tenant, deal/action, due-date version, recipient and reminder stage so retries do not create duplicate alerts. A changed due date or reassignment must invalidate stale pending notifications.
+- Record notification attempts, delivery outcomes and any acknowledgement in Hamlet's trusted audit/notification records. Slack delivery status is not proof that an action has been completed.
+- A Slack acknowledgement may update only a narrowly defined reminder acknowledgement state through a trusted backend operation; it must never silently mark the underlying deal action complete.
+- Respect user notification preferences and organisation quiet hours, with a clear route to view or manage reminders in Hamlet.
+
 ### Data and write operations
 
 Read from existing Hamlet services and collections through trusted server-side interfaces. Do not create a parallel property, deal or organisation database in Slack.
@@ -74,4 +97,4 @@ Default v1 relationship: one Slack installation linked to one Hamlet organisatio
 
 ## Availability and operations
 
-Use bounded retries, dead-letter handling and idempotent processing for Slack event delivery. Avoid logging message bodies, access tokens, file contents or personal data by default. Use correlation IDs and minimal operational metadata. Provide safe degradation when Firebase, AI providers or Slack APIs are unavailable.
+Use bounded retries, dead-letter handling and idempotent processing for Slack event delivery and scheduled reminder dispatch. Avoid logging message bodies, access tokens, file contents or personal data by default. Use correlation IDs and minimal operational metadata. Provide safe degradation when Firebase, AI providers or Slack APIs are unavailable.
