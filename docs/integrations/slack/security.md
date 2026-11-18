@@ -15,12 +15,13 @@ This document defines release requirements, not evidence that controls have alre
 ## Authorisation and tenant boundaries
 
 - Resolve the installation and tenant from trusted server-side records.
-- Recheck active Hamlet membership, organisation lifecycle, subscription entitlement, team assignment and resource-level permissions on every request.
+- Recheck active Hamlet membership, organisation lifecycle, subscription entitlement, team assignment and resource-level permissions on every request and notification delivery.
 - Preserve separation between personal and organisation-owned records.
 - Never expose a record merely because it appears in a Slack conversation or file.
 - Prevent cross-tenant cache, queue, search-index, file and logging access.
 - Treat organisation slugs and resource identifiers as references, not credentials.
-- Apply the same authorisation rules to AI retrieval, previews, buttons, modals, exports and background jobs.
+- Apply the same authorisation rules to AI retrieval, previews, buttons, modals, exports, notifications and background jobs.
+- A reminder recipient must be currently authorised for the specific deal/action at dispatch time; stale assignments or removed memberships must suppress delivery.
 
 ## AI safety
 
@@ -41,12 +42,15 @@ This document defines release requirements, not evidence that controls have alre
 - Re-authorise at execution time and reject replay or stale state.
 - Record consequential operations in trusted audit history.
 - Never allow the AI to change membership, roles, ownership, billing, verification status, tenant lifecycle or security configuration in v1.
+- Reminder delivery, suppression, escalation and acknowledgement must be auditable. A Slack acknowledgement must not be interpreted as completion of the underlying deal action.
 
 ## Privacy and retention
 
 - Collect only data required for the enabled feature.
 - Avoid retaining full Slack message bodies or file contents unless essential and explicitly documented.
 - Define retention and deletion handling for installation metadata, identity mappings, event payloads, generated summaries and operational logs.
+- Reminder messages should disclose the minimum information needed and normally direct the recipient to the authorised Hamlet record.
+- Define retention for reminder delivery and acknowledgement metadata in line with Hamlet's organisation retention policy.
 - Honour Slack uninstall and Hamlet disconnection by revoking credentials and disabling the integration.
 - Provide an organisation administrator with a clear view of connected workspaces and the ability to disconnect them.
 - Complete a data protection assessment before production rollout.
@@ -63,6 +67,10 @@ This document defines release requirements, not evidence that controls have alre
 - Prompt injection embedded in a Slack message or uploaded document.
 - Confirmation replayed by another user or after expiry.
 - Resource permission revoked between proposal and confirmation.
+- Reminder due-date change, reassignment or completion immediately before dispatch.
+- Duplicate scheduler invocation and retry after partial Slack API failure.
+- Escalation to a manager without current access to the underlying deal.
+- Quiet-hours and timezone boundary calculations.
 - Slack app uninstall, token revocation and account unlinking.
 - AI provider timeout, malformed output and unsafe tool arguments.
 
