@@ -71,7 +71,7 @@ test("Firebase function registry exports Hamlet Connect", () => {
 
 test("Slack private collections are excluded from the super-administrator client read-through", () => {
   assert.match(rules, /hamletSlackInstallations/);
-  assert.match(rules, /hamletSlackRequestNonces/);
-  assert.match(rules, /hamletSlackLinkRateLimits/);
-  assert.match(rules, /!document\.matches\(/);
+  assert.match(rules, /serverOnly/);
+  assert.match(slack, /serverOnly: true/);
+  assert.match(rules, /resource\.data\.serverOnly != true/);
 });
