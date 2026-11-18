@@ -64,7 +64,7 @@ Supported commands:
 
 Enable Events API and set its Request URL to the same hamletSlackEvents endpoint. Subscribe to the app_uninstalled event so the integration can revoke stored identity links when the app is removed.
 
-The endpoint verifies Slack's request signature, rejects timestamps outside the five-minute window and records a short-lived request nonce so a captured signed request cannot be replayed. It handles both form-encoded slash commands and JSON Events API payloads. Account-link URL issuance is rate-limited per Slack user and workspace.
+The endpoint verifies Slack's request signature, rejects timestamps outside the five-minute window and records a short-lived request nonce so a captured signed request cannot be replayed. Keep Slack token rotation disabled for this first release; the implementation encrypts the installed bot token and supports revocation on administrator disconnect or app uninstall, but does not yet implement refresh-token rotation. It handles both form-encoded slash commands and JSON Events API payloads. Account-link URL issuance is rate-limited per Slack user and workspace.
 
 ## Firebase secrets
 
