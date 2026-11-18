@@ -92,6 +92,9 @@ test("reminder dispatch revalidates the live deal, installation, entitlement, me
   const dispatcher = slack.slice(slack.indexOf("async function dispatchCriticalPathReminder"), slack.indexOf("exports.sendHamletSlackCriticalPathReminders"));
   assert.match(dispatcher, /dealDoc\.ref\.get\(\)/);
   assert.match(dispatcher, /currentDeal\.nextActionOwnerUid !== recipientUid/);
+  assert.match(dispatcher, /currentDeal\.nextActionOwnerUid !== deal\.nextActionOwnerUid/);
+  assert.match(dispatcher, /typeof currentDeal\.nextActionTitle !== "string"/);
+  assert.match(dispatcher, /escalation \? "overdue_day_2" : stage/);
   assert.match(dispatcher, /\["owner", "admin", "manager"\]\.includes\(membership && membership\.role\)/);
   assert.match(dispatcher, /currentInstallation\.status !== "active"/);
   assert.match(dispatcher, /billingSnap\.data\(\)\.status/);
