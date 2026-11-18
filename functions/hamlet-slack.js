@@ -349,8 +349,8 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
         !membershipSnap.exists || membershipSnap.data().status !== "active") {
       throw new HttpsError("permission-denied", "Your Hamlet account does not have active access to this organisation.");
     }
-    if (existingLink.exists && existingLink.data().uid !== user.uid) throw new HttpsError("already-exists", "This Slack account is already linked to another Hamlet account. Ask an organisation administrator for assistance.");
-    if (existingReverse.exists && existingReverse.data().slackUserId !== challenge.slackUserId) throw new HttpsError("already-exists", "Your Hamlet account is already linked to another Slack user in this workspace.");
+    if (existingLink.exists && existingLink.data().status === "active" && existingLink.data().uid !== user.uid) throw new HttpsError("already-exists", "This Slack account is already linked to another Hamlet account. Ask an organisation administrator for assistance.");
+    if (existingReverse.exists && existingReverse.data().status === "active" && existingReverse.data().slackUserId !== challenge.slackUserId) throw new HttpsError("already-exists", "Your Hamlet account is already linked to another Slack user in this workspace.");
     transaction.set(linkRef, {
       serverOnly: true,
       teamId: challenge.teamId, slackUserId: challenge.slackUserId,
@@ -472,14 +472,18 @@ exports.hamletSlackEvents = onRequest({
       let active = false;
       if (linkSnap.exists && linkSnap.data().status === "active") {
         const link = linkSnap.data();
-        const [organisationSnap, membershipSnap, billingSnap] = await Promise.all([
+        const reverseRef = database.collection("hamletSlackUidLinks").doc(sha256(teamId + "_" + link.uid));
+        const [organisationSnap, membershipSnap, billingSnap, reverseSnap] = await Promise.all([
           database.collection("organisations").doc(link.organisationId).get(),
           database.collection("organisationMembers").doc(membershipDocumentId(link.organisationId, link.uid)).get(),
           database.collection("organisationBilling").doc(link.organisationId).get(),
+          reverseRef.get(),
         ]);
         active = organisationSnap.exists && organisationSnap.data().status === "active" &&
           membershipSnap.exists && membershipSnap.data().status === "active" &&
-          billingSnap.exists && ["active", "trialing"].includes(billingSnap.data().status);
+          billingSnap.exists && ["active", "trialing"].includes(billingSnap.data().status) &&
+          reverseSnap.exists && reverseSnap.data().status === "active" &&
+          reverseSnap.data().slackUserId === slackUserId;
       }
       await sendSlackCommandResponse(responseUrl, active ?
         "Your Slack identity is linked and your Hamlet organisation access is active." :
