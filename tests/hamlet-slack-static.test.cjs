@@ -87,3 +87,10 @@ test("critical-path delivery decrypts the selected tenant installation token", (
   assert.match(slack, /decryptToken\(installation\)/);
   assert.doesNotMatch(slack, /decryptToken\(installationSnap\.data\(\)\)/);
 });
+
+test("manager escalation is an explicit organisation administrator opt-in", () => {
+  assert.match(integrations, /id="managerEscalation"/);
+  assert.match(integrations, /managerEscalationEnabled:\$\('managerEscalation'\)\.checked/);
+  assert.match(slack, /managerEscalationEnabled: settings\.managerEscalationEnabled === true/);
+  assert.match(slack, /stage === "overdue_day_2" && settings\.managerEscalationEnabled === true/);
+});
