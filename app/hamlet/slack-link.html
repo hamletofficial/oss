@@ -2,11 +2,11 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0b1120"><title>Link Slack account | Hamlet</title><link rel="icon" href="/assets/images/favicon.ico">
 <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script><script defer src="/firebase-config.js"></script>
 <style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#0b1120;color:#f3f6fb;font:15px Arial,sans-serif}.card{width:min(520px,100%);padding:28px;border:1px solid #2b3c55;border-radius:16px;background:#111827}h1{font-size:26px}p{color:#a8b6ca;line-height:1.6}a{color:#93c5fd}.status{padding:12px;border-radius:8px;background:#142947;border:1px solid #315b8c;color:#dbeafe}</style></head>
-<body><main class="card"><a href="/">hamlet.</a><h1>Link your Slack account</h1><p>This one-time link connects your Slack identity to your signed-in Hamlet account. It expires after 10 minutes and can be used once.</p><p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p><p id="login" hidden><a href="/login.html">Sign in to Hamlet</a>, then reopen the link from your Slack message.</p></main>
+<body><main class="card"><a href="/">hamlet.</a><h1>Link your Slack account</h1><p>This one-time link connects your Slack identity to your signed-in Hamlet account. It expires after 10 minutes and can be used once.</p><p id="status" class="status" role="status" aria-live="polite">Checking your sign-in…</p><p id="login" hidden><a id="loginLink" href="/login.html">Sign in to Hamlet</a>, then return to this one-time link.</p></main>
 <script>
 (function(){
 'use strict';
-const status=document.getElementById('status'),login=document.getElementById('login');
+const status=document.getElementById('status'),login=document.getElementById('login'),loginLink=document.getElementById('loginLink');
 const params=new URLSearchParams(location.search);const code=params.get('code')||'';
 let auth,functions,used=false;
 function init(){
@@ -16,7 +16,7 @@ function init(){
  catch(error){status.textContent='Hamlet sign-in could not be initialised.';return;}
  auth.onAuthStateChanged(async user=>{
   if(used)return;
-  if(!user){status.textContent='Sign in to Hamlet with the account that belongs to this organisation, then reopen this one-time link.';login.hidden=false;return;}
+  if(!user){status.textContent='Sign in to Hamlet with the account that belongs to this organisation. You will return to this one-time link after sign-in.';loginLink.href='/login.html?next='+encodeURIComponent(location.pathname+location.search);login.hidden=false;return;}
   used=true;history.replaceState(null,'',location.pathname);
   try{
    await user.reload();await user.getIdToken(true);
