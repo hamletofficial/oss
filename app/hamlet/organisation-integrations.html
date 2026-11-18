@@ -35,6 +35,7 @@ main{width:min(900px,100%);margin:auto;padding:28px 18px 64px}header{display:fle
 <div><label for="leadHours">Reminder lead time (hours)</label><input id="leadHours" type="number" min="1" max="168" value="24"></div>
 <div><label for="quietStart">Quiet hours start (0–23)</label><input id="quietStart" type="number" min="0" max="23" value="21"></div>
 <div><label for="quietEnd">Quiet hours end (0–23)</label><input id="quietEnd" type="number" min="0" max="23" value="8"></div>
+<div style="grid-column:1/-1"><label style="display:flex;align-items:center;gap:9px;font-weight:600"><input id="managerEscalation" type="checkbox" style="width:auto"> Enable manager escalation on the second overdue day</label><p class="muted">Disabled by default. Only managers who have current access to the deal and have linked their Slack account can receive an escalation.</p></div>
 </div>
 <button id="saveSettingsBtn" class="secondary" type="button">Save reminder settings</button>
 </section>
@@ -57,6 +58,7 @@ async function loadStatus(){
   $('leadHours').value=(data.settings&&data.settings.reminderLeadHours)||24;
   $('quietStart').value=(data.settings&&data.settings.quietHours&&data.settings.quietHours.startHour);
   $('quietEnd').value=(data.settings&&data.settings.quietHours&&data.settings.quietHours.endHour);
+  $('managerEscalation').checked=!!(data.settings&&data.settings.managerEscalationEnabled);
   $('installations').replaceChildren();
   if(!items.length){const p=document.createElement('p');p.className='muted';p.textContent='No active Slack workspace is connected.';$('installations').appendChild(p);}
   items.forEach(item=>{
@@ -92,7 +94,7 @@ $('connectBtn').addEventListener('click',async()=>{
 });
 $('saveSettingsBtn').addEventListener('click',async()=>{
  if(!activeOrg)return;
- const payload={organisationId:activeOrg.id,timeZone:$('timeZone').value.trim(),reminderLeadHours:Number($('leadHours').value),quietHours:{startHour:Number($('quietStart').value),endHour:Number($('quietEnd').value)}};
+ const payload={organisationId:activeOrg.id,timeZone:$('timeZone').value.trim(),reminderLeadHours:Number($('leadHours').value),quietHours:{startHour:Number($('quietStart').value),endHour:Number($('quietEnd').value)},managerEscalationEnabled:$('managerEscalation').checked};
  $('saveSettingsBtn').disabled=true;
  try{await call('updateHamletSlackReminderSettings',payload);notice('Critical Path Reminder settings saved.');}
  catch(error){notice(error.message||'Unable to save reminder settings.',true);}
