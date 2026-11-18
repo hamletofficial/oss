@@ -570,10 +570,14 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   if (currentDeal.organisationId !== organisationId ||
       String(currentDeal.nextActionStatus || "open").toLowerCase() !== "open" ||
       currentDeal.nextActionCompletedAt ||
+      typeof currentDeal.nextActionTitle !== "string" || !currentDeal.nextActionTitle.trim() ||
+      typeof currentDeal.nextActionOwnerUid !== "string" || !currentDeal.nextActionOwnerUid ||
+      currentDeal.nextActionOwnerUid !== deal.nextActionOwnerUid ||
       !currentDeal.nextActionDueAt || typeof currentDeal.nextActionDueAt.toMillis !== "function" ||
       currentDeal.nextActionDueAt.toMillis() !== dueDate.getTime()) return "suppressed";
   if (!escalation && currentDeal.nextActionOwnerUid !== recipientUid) return "suppressed";
-  if (escalation && (!["owner", "admin", "manager"].includes(membership && membership.role) ||
+  if (escalation && (currentDeal.nextActionOwnerUid === recipientUid ||
+      !["owner", "admin", "manager"].includes(membership && membership.role) ||
       currentSettings.managerEscalationEnabled !== true)) return "suppressed";
   if (currentInstallation.status !== "active" || currentInstallation.organisationId !== organisationId ||
       organisationSnap.data().status !== "active" ||
@@ -586,7 +590,7 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
 
   const currentLeadHours = Number.isFinite(Number(currentSettings.reminderLeadHours)) ?
     Math.max(1, Math.min(168, Math.floor(Number(currentSettings.reminderLeadHours)))) : 24;
-  if (!escalation && dueStage(dueDate, new Date(), currentLeadHours) !== stage) return "suppressed";
+  if (dueStage(dueDate, new Date(), currentLeadHours) !== (escalation ? "overdue_day_2" : stage)) return "suppressed";
 
   const deliveryKey = sha256([organisationId, teamId, dealDoc.id, dueDate.getTime(), recipientUid, stage].join("|"));
   const deliveryRef = database.collection("hamletSlackReminderDeliveries").doc(deliveryKey);
