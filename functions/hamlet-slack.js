@@ -272,8 +272,9 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
     const organisationRef = database.collection("organisations").doc(challenge.organisationId);
     const membershipRef = database.collection("organisationMembers").doc(membershipDocumentId(challenge.organisationId, user.uid));
     const linkRef = database.collection("hamletSlackUserLinks").doc(sha256(challenge.teamId + "_" + challenge.slackUserId));
-    const [installationSnap, organisationSnap, membershipSnap, existingLink] = await Promise.all([
-      transaction.get(installationRef), transaction.get(organisationRef), transaction.get(membershipRef), transaction.get(linkRef),
+    const reverseRef = database.collection("hamletSlackUidLinks").doc(sha256(challenge.teamId + "_" + user.uid));
+    const [installationSnap, organisationSnap, membershipSnap, existingLink, existingReverse] = await Promise.all([
+      transaction.get(installationRef), transaction.get(organisationRef), transaction.get(membershipRef), transaction.get(linkRef), transaction.get(reverseRef),
     ]);
     if (!installationSnap.exists || installationSnap.data().status !== "active" ||
         installationSnap.data().organisationId !== challenge.organisationId ||
@@ -282,9 +283,15 @@ exports.completeHamletSlackAccountLink = onCall({region: REGION, timeoutSeconds:
       throw new HttpsError("permission-denied", "Your Hamlet account does not have active access to this organisation.");
     }
     if (existingLink.exists && existingLink.data().uid !== user.uid) throw new HttpsError("already-exists", "This Slack account is already linked to another Hamlet account. Ask an organisation administrator for assistance.");
+    if (existingReverse.exists && existingReverse.data().slackUserId !== challenge.slackUserId) throw new HttpsError("already-exists", "Your Hamlet account is already linked to another Slack user in this workspace.");
     transaction.set(linkRef, {
       teamId: challenge.teamId, slackUserId: challenge.slackUserId,
       organisationId: challenge.organisationId, uid: user.uid,
+      linkedAt: FieldValue.serverTimestamp(), status: "active",
+    });
+    transaction.set(reverseRef, {
+      teamId: challenge.teamId, organisationId: challenge.organisationId,
+      uid: user.uid, slackUserId: challenge.slackUserId,
       linkedAt: FieldValue.serverTimestamp(), status: "active",
     });
     transaction.update(challengeRef, {consumedAt: FieldValue.serverTimestamp(), consumedByUid: user.uid, status: "consumed"});
@@ -385,9 +392,8 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   const membership = membershipSnap.exists ? membershipSnap.data() : null;
   if (!membership || membership.status !== "active") return "suppressed";
   if (!await userCanReadDeal(database, organisationId, dealDoc.id, deal, recipientUid, membership)) return "suppressed";
-  const links = await database.collection("hamletSlackUserLinks")
-    .where("teamId", "==", teamId).where("uid", "==", recipientUid).where("status", "==", "active").limit(1).get();
-  const userLink = links.empty ? null : links.docs[0].data();
+  const reverseLinkSnap = await database.collection("hamletSlackUidLinks").doc(sha256(teamId + "_" + recipientUid)).get();
+  const userLink = reverseLinkSnap.exists ? reverseLinkSnap.data() : null;
   if (!userLink || userLink.organisationId !== organisationId) return "unlinked";
 
   const deliveryKey = sha256([organisationId, teamId, dealDoc.id, dueDate.getTime(), recipientUid, stage].join("|"));
