@@ -217,6 +217,33 @@
         <p class="archive-note">Hamlet v1.04.06 has been signed using Microsoft Azure Artifact Signing. GitHub Actions verified the Authenticode signature and generated the matching SHA-256 checksum; the installer has also passed real-device installation, launch and uninstallation checks. The published checksum is <code>477A619C7C468F26CC53215EB070E97D062E8EFF345D009F5387C7FA03F65A7F</code>. Notifications and in-place upgrade behaviour have not yet been independently verified. Code signing verifies publisher identity and file integrity; secure automatic updates remain a separate future capability.</p>
       </div>
     </section>
+    <section class="panel hamlet-connect-panel" aria-labelledby="hamlet-connect-title">
+      <span class="eyebrow">Connected organisation workflows</span>
+      <h2 id="hamlet-connect-title">Hamlet Connect for Slack</h2>
+      <p>Bring important organisation activity and critical-path deadlines into the communication workspace your team already uses. Hamlet Connect links an active Hamlet organisation with a Slack workspace through a secure OAuth installation.</p>
+      <div class="release-layout" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:1rem 0">
+        <div>
+          <h3 style="font-size:1rem;margin:.25rem 0">Critical-path reminders</h3>
+          <p class="archive-note">Receive private Slack reminders for upcoming and overdue deal actions assigned to linked team members, subject to organisation settings and access permissions.</p>
+        </div>
+        <div>
+          <h3 style="font-size:1rem;margin:.25rem 0">Slack commands</h3>
+          <p class="archive-note">Use <code>/hamlet link</code> to connect your Slack identity with your verified Hamlet account, and <code>/hamlet status</code> to check the link.</p>
+        </div>
+        <div>
+          <h3 style="font-size:1rem;margin:.25rem 0">Organisation-controlled</h3>
+          <p class="archive-note">An active organisation owner or administrator manages the connection and reminder preferences from Hamlet. The integration uses encrypted token storage and verifies incoming Slack requests.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin:1.1rem 0">
+        <figure style="margin:0"><img src="/assets/images/hamlet-connect-preview-01.jpg" alt="Hamlet Connect secure Slack installation and authorisation workflow" loading="lazy" style="display:block;width:100%;height:auto;border:1px solid #475569;border-radius:10px"><figcaption class="archive-note" style="margin-top:.4rem">Secure installation and connection</figcaption></figure>
+        <figure style="margin:0"><img src="/assets/images/hamlet-connect-preview-02.jpg" alt="Hamlet organisation workspace with deal pipeline and Slack integration" loading="lazy" style="display:block;width:100%;height:auto;border:1px solid #475569;border-radius:10px"><figcaption class="archive-note" style="margin-top:.4rem">The connected organisation workspace</figcaption></figure>
+        <figure style="margin:0"><img src="/assets/images/hamlet-connect-preview-03.jpg" alt="Hamlet property dashboard alongside Slack mobile commands and status" loading="lazy" style="display:block;width:100%;height:auto;border:1px solid #475569;border-radius:10px"><figcaption class="archive-note" style="margin-top:.4rem">Hamlet and Slack across devices</figcaption></figure>
+      </div>
+      <p class="archive-note"><strong>Availability:</strong> Hamlet Connect is designed for active Hamlet organisation subscriptions. An authorised organisation administrator initiates installation from the Hamlet organisation workspace and approves the requested Slack permissions.</p>
+      <p><a class="button secondary" href="https://slack.com/">About Slack</a> <a class="button secondary" href="/orgs.html">Explore Hamlet for Organisations</a></p>
+    </section>
+
     <section class="panel" aria-labelledby="help-title">
       <h2 id="help-title">Need help?</h2>
       <p>Visit the Hamlet Support Centre for assistance with installation, sign-in or desktop behaviour.</p>
