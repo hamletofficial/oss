@@ -41,7 +41,7 @@ Do not configure the Slack app until the Firebase Functions have been deployed a
 
 ## Critical Path Reminders
 
-The planned reminder capability uses due dates, ownership and completion state already held in Hamlet. Organisation administrators should be able to configure reminder lead times, quiet hours and escalation recipients. The assigned member receives a private Slack reminder; authorised managers receive escalations only when the configured policy requires them. Each alert links back to the relevant Hamlet record.
+The planned reminder capability uses due dates, ownership and completion state already held in Hamlet. Organisation administrators should be able to configure reminder lead times, quiet hours and escalation recipients. The assigned member receives a private Slack reminder. Manager escalation is disabled by default and can be enabled by an organisation administrator; eligible managers must also have current access to the deal. Each alert links back to the relevant Hamlet record.
 
 The pilot must verify timezone handling, duplicate suppression, due-date changes, reassignment, completed actions, removed members, revoked permissions, delivery failures and escalation access. Slack messages are notifications only; the underlying milestone and task status remain authoritative in Hamlet.
 
