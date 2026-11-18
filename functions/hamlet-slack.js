@@ -381,12 +381,22 @@ exports.hamletSlackEvents = onRequest({
     const teamId = clean(body.team_id, 80);
     if (teamId) {
       const database = db();
-      await database.collection("hamletSlackInstallations").doc(teamId).set({
+      const installationRef = database.collection("hamletSlackInstallations").doc(teamId);
+      const installationSnap = await installationRef.get();
+      const organisationId = installationSnap.exists ? clean(installationSnap.data().organisationId, 128) : "";
+      await installationRef.set({
         serverOnly: true,
         status: "disconnected", tokenCiphertext: FieldValue.delete(), tokenIv: FieldValue.delete(), tokenTag: FieldValue.delete(),
         disconnectedAt: FieldValue.serverTimestamp(), disconnectReason: "slack_app_uninstalled",
       }, {merge: true});
       await revokeWorkspaceLinks(database, teamId);
+      if (organisationId) {
+        await database.collection("organisationActivity").add({
+          organisationId, actorUid: "slack-app-uninstalled", actorType: "system",
+          action: "organisation.slack_disconnected", slackTeamId: teamId,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      }
     }
     return response.status(200).send("ok");
   }
