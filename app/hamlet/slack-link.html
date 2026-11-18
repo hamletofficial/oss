@@ -12,7 +12,7 @@ let auth,functions,used=false;
 function init(){
  if(!code){status.textContent='The one-time link is missing. Run /hamlet link in Slack to request another.';return;}
  if(!window.firebase||!window.firebaseConfig){status.textContent='Hamlet sign-in could not be initialised.';return;}
- try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();functions=firebase.app().functions('europe-west3');}
+ try{if(!firebase.apps.length)firebase.initializeApp(window.firebaseConfig);auth=firebase.auth();functions=firebase.app().functions('europe-west2');}
  catch(error){status.textContent='Hamlet sign-in could not be initialised.';return;}
  auth.onAuthStateChanged(async user=>{
   if(used)return;
