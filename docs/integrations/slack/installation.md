@@ -2,7 +2,7 @@
 
 ## Status
 
-Planning document only. No Slack application, OAuth credentials, callback URL, production gateway or customer installation is created by this document.
+The repository now contains the first Slack/Firebase implementation. This document describes the deployment procedure; no Slack application credentials, Firebase secrets, production endpoints or customer installations have been configured yet.
 
 ## Slack app setup
 
