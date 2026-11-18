@@ -26,7 +26,7 @@ Hamlet Connect is a centrally managed Slack application that provides authorised
 5. Organisation Assistant: answer questions using permitted organisation resources.
 6. Executive Briefing: aggregate operational summaries for authorised managers.
 
-Critical Path Reminders are part of the planned v1 product scope. They are not implemented or deployed by this documentation-only pull request.
+Critical Path Reminders are part of the planned v1 product scope. A first repository implementation now provides the deal next-action fields, Slack installation/account-linking flows and scheduled Firebase reminder function. It remains undeployed pending Slack credentials, Firebase secret configuration and test-workspace validation.
 
 The first release should be read-only apart from explicitly confirmed, narrowly scoped action creation or acknowledgement. Do not implement autonomous deal-stage changes, membership changes, permission changes, document sharing or financial/billing operations.
 
@@ -40,29 +40,30 @@ The first release should be read-only apart from explicitly confirmed, narrowly 
 - Slack user identity is mapped to a verified Hamlet account through an OAuth-backed account-linking flow. Email matching alone is not sufficient.
 - Organisation subscription entitlement is checked server-side.
 
-## Proposed repository layout
+## Current repository implementation
 
 ```text
-slack/
-  manifest.json
-  README.md
-  commands/
-  events/
-  interactions/
-  blocks/
-worker/
-  hamlet-slack-gateway/
 functions/
-  hamlet-slack-integration.js
+  hamlet-slack.js
+  index.js
+app/hamlet/
+  organisation-integrations.html
+  slack-link.html
+  organisation-deals.html
 docs/integrations/slack/
   README.md
   architecture.md
   security.md
   installation.md
   critical-path-reminders.md
+  implementation.md
+tests/
+  hamlet-slack-static.test.cjs
 ```
 
-These are the current implementation paths for the first increment. No Slack credentials, secrets, deployed endpoints or production installation are implied; see implementation.md for the configuration and deployment checklist.
+The first increment uses Firebase HTTPS Functions in europe-west2 as the Slack OAuth and request endpoints. A Cloudflare Worker gateway and AI-powered Slack commands are not implemented in this increment.
+
+Repository code is present, but no Slack credentials, secrets, deployed endpoints or production installation are configured. See implementation.md for the deployment checklist.
 
 ## Delivery sequence
 
