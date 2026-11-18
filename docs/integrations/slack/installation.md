@@ -17,7 +17,7 @@ Before enabling a feature, define:
 - Uninstall and token-revocation handling.
 - Privacy policy, terms, support contact and AI processing disclosures.
 
-Do not publish placeholder callback URLs or configure production OAuth until the gateway endpoint exists and is tested.
+Do not configure the Slack app until the Firebase Functions have been deployed and their HTTPS endpoints have been verified. The current project-specific callback and request URLs are recorded in `implementation.md`.
 
 ## Organisation administrator journey
 
