@@ -207,6 +207,7 @@ exports.beginHamletSlackInstallation = onCall({region: REGION, timeoutSeconds: 2
   if (!clientId) throw new HttpsError("failed-precondition", "Slack app credentials have not been configured.");
   const state = randomToken(32);
   await db().collection("hamletSlackOAuthStates").doc(sha256(state)).create({
+    serverOnly: true,
     organisationId, installedByUid: user.uid, status: "pending",
     createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000),
   });
