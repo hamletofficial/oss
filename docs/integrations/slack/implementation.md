@@ -17,17 +17,17 @@ This is repository code, not a live deployment. No Slack app credentials have be
 
 Firebase project ID: wale-491805
 
-All new Slack functions are configured for europe-west3.
+All new Slack functions are configured for europe-west2.
 
 ### HTTPS endpoints
 
 OAuth redirect URL:
 
-https://europe-west3-wale-491805.cloudfunctions.net/hamletSlackOAuthCallback
+https://europe-west2-wale-491805.cloudfunctions.net/hamletSlackOAuthCallback
 
 Slack slash-command and Events API request URL:
 
-https://europe-west3-wale-491805.cloudfunctions.net/hamletSlackEvents
+https://europe-west2-wale-491805.cloudfunctions.net/hamletSlackEvents
 
 These URLs become usable only after the corresponding functions are successfully deployed.
 
@@ -39,7 +39,7 @@ Create one centrally owned Slack app for Hamlet Connect.
 
 Add this exact redirect URL to the Slack app's Redirect URLs:
 
-https://europe-west3-wale-491805.cloudfunctions.net/hamletSlackOAuthCallback
+https://europe-west2-wale-491805.cloudfunctions.net/hamletSlackOAuthCallback
 
 Configure bot token scopes:
 
@@ -53,7 +53,7 @@ The implementation does not request channel history, file access or broad user-d
 
 Create /hamlet and set its Request URL to:
 
-https://europe-west3-wale-491805.cloudfunctions.net/hamletSlackEvents
+https://europe-west2-wale-491805.cloudfunctions.net/hamletSlackEvents
 
 Supported commands:
 
@@ -121,7 +121,7 @@ Reminders are private Slack direct messages. Manager escalation is disabled by d
 
 1. Merge the implementation after review and passing tests.
 2. Set the four secrets in the correct Firebase project.
-3. Deploy the named Slack functions to europe-west3.
+3. Deploy the named Slack functions to europe-west2.
 4. Configure the Slack OAuth redirect URL, /hamlet command endpoint and app_uninstalled event subscription.
 5. In a test Slack workspace, connect an active test Hamlet organisation from Organisation workspace → Integrations.
 6. Run /hamlet link and complete account linking for two test members.

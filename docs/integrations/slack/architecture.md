@@ -5,7 +5,7 @@
 ```text
 Slack workspace
   -> centrally managed Hamlet Connect Slack app
-  -> Firebase HTTPS Functions gateway (europe-west3)
+  -> Firebase HTTPS Functions gateway (europe-west2)
   -> Slack request signature and timestamp verification
   -> installation and linked-user resolution
   -> Hamlet account authentication and entitlement checks
@@ -31,7 +31,7 @@ Use Slack OAuth installation, slash commands, shortcuts, event subscriptions, in
 
 ### Firebase HTTPS Functions gateway
 
-The first implementation uses Firebase HTTPS Functions in `europe-west3` for the OAuth callback and Slack request endpoint. A Cloudflare Worker edge layer is not part of this code increment.
+The first implementation uses Firebase HTTPS Functions in `europe-west2` for the OAuth callback and Slack request endpoint. A Cloudflare Worker edge layer is not part of this code increment.
 
 Responsibilities:
 - Verify Slack request signatures against the raw request body and signing secret.
