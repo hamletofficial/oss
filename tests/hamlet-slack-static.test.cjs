@@ -56,7 +56,7 @@ test("organisation deal editor exposes an action owner and due date for reminder
   assert.match(deals, /id="nextActionTitle"/);
   assert.match(deals, /id="nextActionOwnerUid"/);
   assert.match(deals, /id="nextActionDueAt"/);
-  assert.match(deals, /nextActionDueAt:actionDue\?firebase\.firestore\.Timestamp\.fromDate/);
+  assert.match(deals, /data\.nextActionDueAt=firebase\.firestore\.Timestamp\.fromDate\(new Date\(actionDue\)\)/);
 });
 
 test("organisation integration and account-link pages invoke trusted callables", () => {
