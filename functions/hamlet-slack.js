@@ -550,13 +550,43 @@ async function sendSlackDm(token, slackUserId, text, clientMsgId) {
 }
 async function dispatchCriticalPathReminder(database, installation, teamId, dealDoc, deal, recipientUid, stage, dueDate, settings, escalation) {
   const organisationId = installation.organisationId;
-  const membershipSnap = await database.collection("organisationMembers").doc(membershipDocumentId(organisationId, recipientUid)).get();
+  // Re-read mutable authorisation and resource state immediately before dispatch.
+  // The scheduler's original query is only a candidate list, never an authority.
+  const [dealSnap, installationSnap, organisationSnap, billingSnap, settingsSnap, membershipSnap, reverseLinkSnap] = await Promise.all([
+    dealDoc.ref.get(),
+    database.collection("hamletSlackInstallations").doc(teamId).get(),
+    database.collection("organisations").doc(organisationId).get(),
+    database.collection("organisationBilling").doc(organisationId).get(),
+    database.collection("hamletSlackSettings").doc(organisationId).get(),
+    database.collection("organisationMembers").doc(membershipDocumentId(organisationId, recipientUid)).get(),
+    database.collection("hamletSlackUidLinks").doc(sha256(teamId + "_" + recipientUid)).get(),
+  ]);
+  if (!dealSnap.exists || !installationSnap.exists || !organisationSnap.exists || !billingSnap.exists) return "suppressed";
+  const currentDeal = dealSnap.data() || {};
+  const currentInstallation = installationSnap.data() || {};
   const membership = membershipSnap.exists ? membershipSnap.data() : null;
-  if (!membership || membership.status !== "active") return "suppressed";
-  if (!await userCanReadDeal(database, organisationId, dealDoc.id, deal, recipientUid, membership)) return "suppressed";
-  const reverseLinkSnap = await database.collection("hamletSlackUidLinks").doc(sha256(teamId + "_" + recipientUid)).get();
+  const currentSettings = settingsSnap.exists ? settingsSnap.data() : {};
   const userLink = reverseLinkSnap.exists ? reverseLinkSnap.data() : null;
-  if (!userLink || userLink.status !== "active" || userLink.uid !== recipientUid || userLink.teamId !== teamId || userLink.organisationId !== organisationId) return "unlinked";
+  if (currentDeal.organisationId !== organisationId ||
+      String(currentDeal.nextActionStatus || "open").toLowerCase() !== "open" ||
+      currentDeal.nextActionCompletedAt ||
+      !currentDeal.nextActionDueAt || typeof currentDeal.nextActionDueAt.toMillis !== "function" ||
+      currentDeal.nextActionDueAt.toMillis() !== dueDate.getTime()) return "suppressed";
+  if (!escalation && currentDeal.nextActionOwnerUid !== recipientUid) return "suppressed";
+  if (escalation && (!["owner", "admin", "manager"].includes(membership && membership.role) ||
+      currentSettings.managerEscalationEnabled !== true)) return "suppressed";
+  if (currentInstallation.status !== "active" || currentInstallation.organisationId !== organisationId ||
+      organisationSnap.data().status !== "active" ||
+      !["active", "trialing"].includes(billingSnap.data().status)) return "suppressed";
+  if (!membership || membership.status !== "active") return "suppressed";
+  if (isQuietHours(new Date(), currentSettings)) return "suppressed";
+  if (!await userCanReadDeal(database, organisationId, dealDoc.id, currentDeal, recipientUid, membership)) return "suppressed";
+  if (!userLink || userLink.status !== "active" || userLink.uid !== recipientUid ||
+      userLink.teamId !== teamId || userLink.organisationId !== organisationId) return "unlinked";
+
+  const currentLeadHours = Number.isFinite(Number(currentSettings.reminderLeadHours)) ?
+    Math.max(1, Math.min(168, Math.floor(Number(currentSettings.reminderLeadHours)))) : 24;
+  if (!escalation && dueStage(dueDate, new Date(), currentLeadHours) !== stage) return "suppressed";
 
   const deliveryKey = sha256([organisationId, teamId, dealDoc.id, dueDate.getTime(), recipientUid, stage].join("|"));
   const deliveryRef = database.collection("hamletSlackReminderDeliveries").doc(deliveryKey);
@@ -576,13 +606,13 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   });
   if (!claimed) return "already-processed";
   try {
-    const token = decryptToken(installation);
-    const timeZone = clean(settings && settings.timeZone, 80) || "Europe/London";
+    const token = decryptToken(currentInstallation);
+    const timeZone = clean(currentSettings.timeZone, 80) || "Europe/London";
     const dueText = new Intl.DateTimeFormat("en-GB", {dateStyle: "medium", timeStyle: "short", timeZone}).format(dueDate);
     const message = [
       "*Hamlet Critical Path Reminder*",
-      (escalation ? "Manager escalation" : stage.startsWith("upcoming") ? "Due soon" : "Overdue") + ": " + clean(deal.nextActionTitle || "Critical-path action", 160),
-      "Deal: " + clean(deal.name || "Organisation deal", 120),
+      (escalation ? "Manager escalation" : stage.startsWith("upcoming") ? "Due soon" : "Overdue") + ": " + clean(currentDeal.nextActionTitle || "Critical-path action", 160),
+      "Deal: " + clean(currentDeal.name || "Organisation deal", 120),
       "Due: " + dueText,
       "Open the authorised deal workspace: " + SITE_ORIGIN + "/app/hamlet/organisation-deals.html",
     ].join("\n");
