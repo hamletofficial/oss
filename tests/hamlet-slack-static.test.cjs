@@ -49,7 +49,7 @@ test("critical-path scheduler uses organisation deals and tenant access checks",
   assert.match(slack, /userCanReadDeal/);
   assert.match(slack, /hamletSlackReminderDeliveries/);
   assert.match(slack, /every 15 minutes/);
-  assert.match(slack, /europe-west3/);
+  assert.match(slack, /europe-west2/);
 });
 
 test("organisation deal editor exposes an action owner and due date for reminders", () => {
