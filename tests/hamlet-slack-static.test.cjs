@@ -37,6 +37,7 @@ test("Slack account linking binds a Slack workspace identity to an active Hamlet
   assert.match(slack, /completeHamletSlackAccountLink/);
   assert.match(slack, /hamletSlackUserLinks/);
   assert.match(slack, /hamletSlackUidLinks/);
+  assert.match(slack, /userLink\.status !== "active"/);
   assert.match(slack, /membershipSnap\.data\(\)\.status !== "active"/);
 });
 
