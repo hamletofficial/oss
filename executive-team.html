@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f7f2">
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Meet Hamlet's executive team and learn why teamwork drives our delivery for members and organisations.">
+  <title>Executive Team | Hamlet</title>
+  <link rel="stylesheet" href="/mobile-compat.css">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/hamlet-workspace.css?v=20261016-2">
+  <script src="/theme.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7f2;
+      --surface:#ffffff;
+      --ink:#17342e;
+      --muted:#4f615a;
+      --line:#d5e1da;
+      --brand:#146b59;
+      --hero:#102d43;
+      --shadow:0 18px 42px rgba(25,66,53,.09);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        linear-gradient(180deg, rgba(244,247,242,.55), rgba(244,247,242,.82)),
+        url("/assets/images/grade-ii-listed-london.jfif") center top/cover no-repeat;
+      line-height:1.6;
+    }
+    .page{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .header{
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(12px);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .header-inner{
+      width:min(1120px,calc(100% - 2rem));
+      min-height:72px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .brand{
+      color:var(--ink);
+      text-decoration:none;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .header-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      padding:9px 14px;
+      border:1px solid #374151;
+      border-radius:10px;
+      color:#fff;
+      background:#111827;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .header-link:hover,.header-link:focus-visible{border-color:#93b4f5}
+    .main{
+      width:min(920px,calc(100% - 2rem));
+      margin:0 auto;
+      padding:54px 0 72px;
+      flex:1;
+    }
+    .hero{
+      border:1px solid #21415a;
+      border-radius:20px;
+      background:linear-gradient(145deg, #102d43 0%, #146b59 100%);
+      color:#f8fafc;
+      box-shadow:var(--shadow);
+      padding:clamp(1.2rem,2.8vw,2.2rem);
+    }
+    .hero-kicker{
+      margin:0 0 8px;
+      color:#bfdbfe;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .hero h1{
+      margin:0 0 12px;
+      font-size:clamp(1.9rem,4.4vw,2.8rem);
+      line-height:1.08;
+      letter-spacing:-.03em;
+    }
+    .hero p{
+      margin:0;
+      max-width:760px;
+      color:#e2e8f0;
+      font-size:1rem;
+    }
+    .team{
+      margin-top:1.3rem;
+      display:grid;
+      gap:1rem;
+    }
+    .exec-row{
+      display:grid;
+      grid-template-columns:76px 1fr;
+      gap:1rem;
+      align-items:start;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:var(--surface);
+      box-shadow:0 10px 24px rgba(2,6,23,.06);
+      padding:1rem 1.1rem;
+    }
+    .icon{
+      width:62px;
+      height:62px;
+      border-radius:14px;
+      background:#ebf5f1;
+      border:1px solid #cde3da;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .icon svg{width:34px;height:34px;fill:none;stroke:#146b59;stroke-width:1.9}
+    .bio h2{
+      margin:0 0 .22rem;
+      color:#102d43;
+      font-size:1.2rem;
+    }
+    .title{
+      margin:0 0 .58rem;
+      color:#146b59;
+      font-weight:700;
+      font-size:.92rem;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+    .bio p{margin:0;color:var(--muted)}
+    .bio a{color:#146b59;font-weight:700;text-decoration:none}
+    .bio a:hover,.bio a:focus-visible{text-decoration:underline}
+    .footer{
+      border-top:1px solid var(--line);
+      padding:22px 1rem 30px;
+      text-align:center;
+      color:#5a6b65;
+      font-size:.82rem;
+    }
+    .footer-links{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .footer a{color:#5a6b65;text-decoration:none}
+    .footer a:hover{color:#146b59;text-decoration:underline}
+    @media (max-width:560px){
+      .header-inner{min-height:60px}
+      .header-link{min-height:38px;padding:8px 11px;font-size:.84rem}
+      .main{width:calc(100% - 1.5rem);padding:34px 0 48px}
+      .exec-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header hamlet-404-header" role="banner">
+      <div class="header-inner">
+        <a class="brand" href="/index.html">hamlet<span class="brand-dot" style="color:#146b59">.</span></a>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <a class="header-link" href="/members.html">Members</a>
+          <a class="header-link" href="/sectors.html">Back to Sectors</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main" role="main">
+      <section class="hero" aria-labelledby="teamHeroTitle">
+        <p class="hero-kicker">Executive Team</p>
+        <h1 id="teamHeroTitle">Great teamwork powers every Hamlet outcome.</h1>
+        <p>At Hamlet, teamwork connects strategy, operations and member experience so every decision is practical, accountable and built for long-term impact across people, property and organisations.</p>
+      </section>
+
+      <section class="team" aria-label="Hamlet co-founders">
+        <article class="exec-row">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="4" y="7" width="16" height="12" rx="2"></rect>
+              <path d="M9 7V5a3 3 0 0 1 6 0v2"></path>
+              <path d="M4 12h16"></path>
+            </svg>
+          </div>
+          <div class="bio">
+            <h2>Alfred Mayaki</h2>
+            <p class="title">CEO | Co-Founder</p>
+            <p>Alfred co-founded Hamlet and leads the company as Chief Executive Officer, shaping vision, market direction and strategic partnerships. He works closely with members and organisations to translate business goals into measurable platform outcomes. LinkedIn: <a href="https://www.linkedin.com/in/alfredmayaki" target="_blank" rel="noopener noreferrer">linkedin.com/in/alfredmayaki</a>.</p>
+          </div>
+        </article>
+
+        <article class="exec-row">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8"></circle>
+              <path d="M12 8v4l3 2"></path>
+              <path d="M4 12h2M18 12h2M12 4v2M12 18v2"></path>
+            </svg>
+          </div>
+          <div class="bio">
+            <h2>Gerard Pambu</h2>
+            <p class="title">COO | Co-Founder</p>
+            <p>Gerard co-founded Hamlet and serves as Chief Operating Officer, leading delivery, execution standards and cross-team coordination. He focuses on turning strategy into reliable operations so members receive consistent service and platform quality at scale. LinkedIn: <a href="https://www.linkedin.com/in/gerard-pambu" target="_blank" rel="noopener noreferrer">linkedin.com/in/gerard-pambu</a>.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+      <div class="footer-links">
+        <a href="/legals/privacy.html">Privacy</a>
+        <a href="/legals/terms.html">Terms</a>
+        <a href="/legals/cookies.html">Cookies</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div>&copy; 2026 Hamlet. All rights reserved.</div>
+    </footer>
+  </div>
+</body>
+</html>
