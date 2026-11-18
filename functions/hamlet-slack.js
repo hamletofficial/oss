@@ -548,7 +548,7 @@ async function dispatchCriticalPathReminder(database, installation, teamId, deal
   });
   if (!claimed) return "already-processed";
   try {
-    const token = decryptToken(installationSnap.data());
+    const token = decryptToken(installation);
     const timeZone = clean(settings && settings.timeZone, 80) || "Europe/London";
     const dueText = new Intl.DateTimeFormat("en-GB", {dateStyle: "medium", timeStyle: "short", timeZone}).format(dueDate);
     const message = [
