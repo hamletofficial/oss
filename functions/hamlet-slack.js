@@ -97,6 +97,20 @@ function verifySlackRequest(request) {
   const left = Buffer.from(expected, "utf8"), right = Buffer.from(signature, "utf8");
   return left.length === right.length && crypto.timingSafeEqual(left, right);
 }
+async function claimSlackRequestNonce(database, timestamp, signature) {
+  const nonceId = sha256(String(timestamp) + "|" + String(signature));
+  const ref = database.collection("hamletSlackRequestNonces").doc(nonceId);
+  return database.runTransaction(async transaction => {
+    const snapshot = await transaction.get(ref);
+    if (snapshot.exists) return false;
+    transaction.create(ref, {
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
+    });
+    return true;
+  });
+}
+
 async function slackApi(method, token, body) {
   const response = await fetch("https://slack.com/api/" + method, {
     method: "POST",
@@ -335,6 +349,10 @@ exports.hamletSlackEvents = onRequest({
   response.set("Cache-Control", "no-store");
   if (request.method !== "POST") return response.set("Allow", "POST").status(405).send("Method not allowed.");
   if (!verifySlackRequest(request)) return response.status(401).send("Invalid Slack signature.");
+  const database = db();
+  const timestamp = String(request.get("x-slack-request-timestamp") || "");
+  const signature = String(request.get("x-slack-signature") || "");
+  if (!await claimSlackRequestNonce(database, timestamp, signature)) return response.status(200).send("ok");
   const body = request.body || {};
   if (body.type === "url_verification") return response.status(200).json({challenge: body.challenge});
   if (body.type === "event_callback" && body.event && body.event.type === "app_uninstalled") {
@@ -359,10 +377,27 @@ exports.hamletSlackEvents = onRequest({
   const installation = installationSnap.data();
   if (textValue === "link" || textValue.startsWith("link ")) {
     const token = randomToken(32);
-    await db().collection("hamletSlackLinkChallenges").doc(sha256(token)).create({
-      teamId, slackUserId, organisationId: installation.organisationId,
-      createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000), status: "pending",
-    });
+    const challengeRef = database.collection("hamletSlackLinkChallenges").doc(sha256(token));
+    const rateRef = database.collection("hamletSlackLinkRateLimits").doc(sha256(teamId + "_" + slackUserId));
+    try {
+      await database.runTransaction(async transaction => {
+        const rateSnap = await transaction.get(rateRef);
+        const lastIssuedAt = rateSnap.exists ? rateSnap.data().lastIssuedAt : null;
+        if (lastIssuedAt && typeof lastIssuedAt.toMillis === "function" && Date.now() - lastIssuedAt.toMillis() < 60000) {
+          throw new Error("Please wait one minute before requesting another account-linking URL.");
+        }
+        transaction.create(challengeRef, {
+          teamId, slackUserId, organisationId: installation.organisationId,
+          createdAt: FieldValue.serverTimestamp(), expiresAt: Timestamp.fromMillis(Date.now() + 600000), status: "pending",
+        });
+        transaction.set(rateRef, {
+          teamId, slackUserId, lastIssuedAt: FieldValue.serverTimestamp(),
+          expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
+        });
+      });
+    } catch (error) {
+      return response.status(200).json({response_type: "ephemeral", text: clean(error.message, 180)});
+    }
     const linkUrl = SITE_ORIGIN + "/app/hamlet/slack-link.html?code=" + encodeURIComponent(token);
     return response.status(200).json({response_type: "ephemeral", text: "Link your Slack account to your verified Hamlet account using this one-time link (valid for 10 minutes): " + linkUrl});
   }
