@@ -88,6 +88,16 @@ test("critical-path delivery decrypts the selected tenant installation token", (
   assert.doesNotMatch(slack, /decryptToken\(installationSnap\.data\(\)\)/);
 });
 
+test("reminder dispatch revalidates the live deal, installation, entitlement, membership and role", () => {
+  const dispatcher = slack.slice(slack.indexOf("async function dispatchCriticalPathReminder"), slack.indexOf("exports.sendHamletSlackCriticalPathReminders"));
+  assert.match(dispatcher, /dealDoc\.ref\.get\(\)/);
+  assert.match(dispatcher, /currentDeal\.nextActionOwnerUid !== recipientUid/);
+  assert.match(dispatcher, /\["owner", "admin", "manager"\]\.includes\(membership && membership\.role\)/);
+  assert.match(dispatcher, /currentInstallation\.status !== "active"/);
+  assert.match(dispatcher, /billingSnap\.data\(\)\.status/);
+  assert.match(dispatcher, /isQuietHours\(new Date\(\), currentSettings\)/);
+});
+
 test("manager escalation is an explicit organisation administrator opt-in", () => {
   assert.match(integrations, /id="managerEscalation"/);
   assert.match(integrations, /managerEscalationEnabled:\$\('managerEscalation'\)\.checked/);
