@@ -59,7 +59,8 @@ Start with a non-production Slack workspace and test Hamlet organisation. Use sy
 - Data protection and AI provider review.
 - Rate limiting, monitoring, incident response and support runbook.
 - Clear organisation disconnect and Slack uninstall behaviour.
-- Tested rollback and credential rotation procedures.
+- Tested rollback and credential revocation/reinstallation procedures.
+- Confirm Slack token rotation remains disabled until a server-side refresh-token lifecycle is implemented and tested.
 
 ## Marketplace readiness
 
