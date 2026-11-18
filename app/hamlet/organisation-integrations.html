@@ -38,7 +38,7 @@ main{width:min(900px,100%);margin:auto;padding:28px 18px 64px}header{display:fle
 </div>
 <button id="saveSettingsBtn" class="secondary" type="button">Save reminder settings</button>
 </section>
-<p class="muted">Slack notifications require members to link their individual Slack identities using <code>/hamlet link</code>. A Slack workspace membership does not grant access to Hamlet records. <a href="/docs/integrations/slack/README.md">Read the integration overview</a>.</p>
+<p class="muted">Slack notifications require members to link their individual Slack identities using <code>/hamlet link</code>. A Slack workspace membership does not grant access to Hamlet records. Review the Hamlet Connect integration documentation in the repository before production rollout.</p>
 </main>
 <script>
 (function(){
@@ -73,8 +73,8 @@ async function loadStatus(){
  }catch(error){$('installations').textContent='Unable to load Slack connection status.';notice(error.message||'Unable to load integration status.',true);}
 }
 async function loadOrganisations(user){
- const snap=await db.collection('organisationMembers').where('uid','==',user.uid).where('status','==','active').get();
- const memberships=snap.docs.map(d=>d.data()).filter(m=>['owner','admin'].includes(m.role));
+ const snap=await db.collection('organisationMembers').where('uid','==',user.uid).get();
+ const memberships=snap.docs.map(d=>d.data()).filter(m=>m.status==='active'&&['owner','admin'].includes(m.role));
  const resolved=await Promise.all(memberships.map(async m=>{
   const s=await db.collection('organisations').doc(m.organisationId).get();
   return s.exists&&s.data().status==='active'?{id:s.id,name:s.data().name||'Organisation',role:m.role}:null;
