@@ -38,7 +38,7 @@ async function requireOrganisationAdmin(database, organisationId, uid) {
   if (!membership || membership.status !== "active" || !["owner", "admin"].includes(membership.role)) {
     throw new HttpsError("permission-denied", "Only an active organisation owner or administrator can manage Slack integration.");
   }
-  if (!billingSnap.exists || billingSnap.data().status !== "active") throw new HttpsError("failed-precondition", "An active organisation subscription is required for Hamlet Connect.");
+  if (!billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status)) throw new HttpsError("failed-precondition", "An active organisation subscription is required for Hamlet Connect.");
   return {organisation: organisationSnap.data(), membership};
 }
 
@@ -189,6 +189,50 @@ exports.hamletSlackOAuthCallback = onRequest({
   region: REGION, timeoutSeconds: 30, memory: "256MiB",
   secrets: [SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, SLACK_TOKEN_ENCRYPTION_KEY],
 }, slackInstallCallback);
+
+
+exports.getHamletSlackIntegrationStatus = onCall({region: REGION, timeoutSeconds: 20, memory: "256MiB"}, async request => {
+  const user = requireVerifiedUser(request);
+  const organisationId = clean(request.data && request.data.organisationId, 128);
+  if (!organisationId || organisationId.includes("/")) throw new HttpsError("invalid-argument", "A valid organisation is required.");
+  await requireOrganisationAdmin(db(), organisationId, user.uid);
+  const snapshot = await db().collection("hamletSlackInstallations").where("organisationId", "==", organisationId).get();
+  return {
+    installations: snapshot.docs.map(doc => {
+      const data = doc.data() || {};
+      return {teamId: doc.id, teamName: clean(data.teamName, 120), status: clean(data.status, 40), scopes: Array.isArray(data.scopes) ? data.scopes : []};
+    }).filter(item => item.status === "active"),
+  };
+});
+
+exports.updateHamletSlackReminderSettings = onCall({region: REGION, timeoutSeconds: 20, memory: "256MiB"}, async request => {
+  const user = requireVerifiedUser(request);
+  const organisationId = clean(request.data && request.data.organisationId, 128);
+  if (!organisationId || organisationId.includes("/")) throw new HttpsError("invalid-argument", "A valid organisation is required.");
+  await requireOrganisationAdmin(db(), organisationId, user.uid);
+  const input = request.data || {};
+  const timeZone = clean(input.timeZone || "Europe/London", 80);
+  try { new Intl.DateTimeFormat("en-GB", {timeZone}).format(new Date()); }
+  catch (_) { throw new HttpsError("invalid-argument", "Choose a valid IANA timezone."); }
+  const leadHours = Number(input.reminderLeadHours);
+  const startHour = Number(input.quietHours && input.quietHours.startHour);
+  const endHour = Number(input.quietHours && input.quietHours.endHour);
+  if (!Number.isInteger(leadHours) || leadHours < 1 || leadHours > 168 ||
+      !Number.isInteger(startHour) || startHour < 0 || startHour > 23 ||
+      !Number.isInteger(endHour) || endHour < 0 || endHour > 23) {
+    throw new HttpsError("invalid-argument", "Reminder lead time and quiet-hour settings are invalid.");
+  }
+  await db().collection("hamletSlackSettings").doc(organisationId).set({
+    organisationId, timeZone, reminderLeadHours: leadHours,
+    quietHours: {startHour, endHour},
+    updatedByUid: user.uid, updatedAt: FieldValue.serverTimestamp(),
+  }, {merge: true});
+  await db().collection("organisationActivity").add({
+    organisationId, actorUid: user.uid, action: "organisation.slack_reminder_settings_updated",
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  return {ok: true, timeZone, reminderLeadHours: leadHours, quietHours: {startHour, endHour}};
+});
 
 exports.disconnectHamletSlackInstallation = onCall({region: REGION, timeoutSeconds: 20, memory: "256MiB"}, async request => {
   const user = requireVerifiedUser(request);
@@ -394,7 +438,8 @@ exports.sendHamletSlackCriticalPathReminders = onSchedule({
   timeoutSeconds: 540, memory: "512MiB", secrets: [SLACK_TOKEN_ENCRYPTION_KEY],
 }, async () => {
   const database = db(), now = new Date();
-  const upperBound = Timestamp.fromDate(new Date(now.getTime() + 24 * 60 * 60 * 1000));
+  const upperBound = Timestamp.fromDate(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
+  const lowerBound = Timestamp.fromDate(new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000));
   const snapshot = await database.collection("organisationDeals")
     .where("nextActionDueAt", "<=", upperBound).orderBy("nextActionDueAt", "asc").limit(300).get();
   let sent = 0, suppressed = 0, failed = 0;
@@ -405,27 +450,34 @@ exports.sendHamletSlackCriticalPathReminders = onSchedule({
     if (typeof deal.nextActionOwnerUid !== "string" || !deal.nextActionOwnerUid) continue;
     const dueDate = deal.nextActionDueAt.toDate();
     const installations = await database.collection("hamletSlackInstallations")
-      .where("organisationId", "==", deal.organisationId).where("status", "==", "active").limit(1).get();
+      .where("organisationId", "==", deal.organisationId).where("status", "==", "active").limit(20).get();
     if (installations.empty) continue;
-    const installationDoc = installations.docs[0], installation = installationDoc.data() || {};
-    const settingsSnap = await database.collection("hamletSlackSettings").doc(deal.organisationId).get();
+    const [organisationSnap, billingSnap, settingsSnap] = await Promise.all([
+      database.collection("organisations").doc(deal.organisationId).get(),
+      database.collection("organisationBilling").doc(deal.organisationId).get(),
+      database.collection("hamletSlackSettings").doc(deal.organisationId).get(),
+    ]);
+    if (!organisationSnap.exists || organisationSnap.data().status !== "active" ||
+        !billingSnap.exists || !["active", "trialing"].includes(billingSnap.data().status)) continue;
     const settings = settingsSnap.exists ? settingsSnap.data() : {};
     if (isQuietHours(now, settings)) continue;
     const leadHours = Number.isFinite(Number(settings.reminderLeadHours)) ? Math.max(1, Math.min(168, Math.floor(Number(settings.reminderLeadHours)))) : 24;
     const stage = dueStage(dueDate, now, leadHours);
     if (!stage) continue;
-    const ownerResult = await dispatchCriticalPathReminder(database, installation, installationDoc.id, dealDoc, deal, deal.nextActionOwnerUid, stage, dueDate, settings, false);
-    if (ownerResult === "sent") sent++; else if (ownerResult === "failed") failed++; else suppressed++;
-
-    if (stage === "overdue_day_2") {
-      const managers = await database.collection("organisationMembers")
-        .where("organisationId", "==", deal.organisationId).where("status", "==", "active")
-        .where("role", "in", ["owner", "admin", "manager"]).limit(50).get();
-      for (const managerDoc of managers.docs) {
-        const manager = managerDoc.data() || {};
-        if (!manager.uid || manager.uid === deal.nextActionOwnerUid) continue;
-        const result = await dispatchCriticalPathReminder(database, installation, installationDoc.id, dealDoc, deal, manager.uid, "escalation_day_2", dueDate, settings, true);
-        if (result === "sent") sent++; else if (result === "failed") failed++; else suppressed++;
+    for (const installationDoc of installations.docs) {
+      const installation = installationDoc.data() || {};
+      const ownerResult = await dispatchCriticalPathReminder(database, installation, installationDoc.id, dealDoc, deal, deal.nextActionOwnerUid, stage, dueDate, settings, false);
+      if (ownerResult === "sent") sent++; else if (ownerResult === "failed") failed++; else suppressed++;
+      if (stage === "overdue_day_2") {
+        const managers = await database.collection("organisationMembers")
+          .where("organisationId", "==", deal.organisationId).where("status", "==", "active")
+          .where("role", "in", ["owner", "admin", "manager"]).limit(50).get();
+        for (const managerDoc of managers.docs) {
+          const manager = managerDoc.data() || {};
+          if (!manager.uid || manager.uid === deal.nextActionOwnerUid) continue;
+          const result = await dispatchCriticalPathReminder(database, installation, installationDoc.id, dealDoc, deal, manager.uid, "escalation_day_2", dueDate, settings, true);
+          if (result === "sent") sent++; else if (result === "failed") failed++; else suppressed++;
+        }
       }
     }
   }
