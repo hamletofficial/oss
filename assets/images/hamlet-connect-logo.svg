@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
   <title id="title">Hamlet Connect logo</title>
-  <desc id="desc">Hamlet's h symbol connected to a circular communication ring.</desc>
+  <desc id="desc">Hamlet's h symbol precisely centred within a circular communication orbit.</desc>
   <defs>
     <linearGradient id="background" x1="80" y1="40" x2="720" y2="760" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#073ca8"/>
@@ -24,7 +24,8 @@
 
   <circle cx="400" cy="344" r="224" fill="none" stroke="url(#orbit)" stroke-width="34" stroke-linecap="round" stroke-dasharray="1020 290" stroke-dashoffset="-70" transform="rotate(-32 400 344)"/>
 
-  <path d="M278 174H352V290C374 260 410 245 454 245C527 245 570 296 570 378V530H494V397C494 348 471 320 431 320C379 320 352 354 352 412V530H278Z" fill="#fff" transform="translate(77.76 76.48) scale(.76)"/>
+  <!-- The glyph's visual bounds are centred at (400, 344) inside the orbit. -->
+  <path d="M325 197H380V284C397 261 424 249 457 249C512 249 545 287 545 348V461H488V363C488 327 471 307 441 307C402 307 380 332 380 375V461H325Z" fill="#fff"/>
 
   <circle cx="621" cy="408" r="38" fill="#082b96" stroke="#25d1ed" stroke-width="14"/>
   <circle cx="621" cy="408" r="10" fill="#fff"/>
