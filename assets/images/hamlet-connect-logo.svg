@@ -24,7 +24,7 @@
 
   <circle cx="400" cy="344" r="224" fill="none" stroke="url(#orbit)" stroke-width="34" stroke-linecap="round" stroke-dasharray="1020 290" stroke-dashoffset="-70" transform="rotate(-32 400 344)"/>
 
-  <path d="M278 174H352V290C374 260 410 245 454 245C527 245 570 296 570 378V530H494V397C494 348 471 320 431 320C379 320 352 354 352 412V530H278Z" fill="#fff" transform="translate(78 76) scale(.76)"/>
+  <path d="M278 174H352V290C374 260 410 245 454 245C527 245 570 296 570 378V530H494V397C494 348 471 320 431 320C379 320 352 354 352 412V530H278Z" fill="#fff" transform="translate(77.76 76.48) scale(.76)"/>
 
   <circle cx="621" cy="408" r="38" fill="#082b96" stroke="#25d1ed" stroke-width="14"/>
   <circle cx="621" cy="408" r="10" fill="#fff"/>
