@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">Hamlet Connect logo</title>
+  <desc id="desc">Hamlet's h symbol connected to a circular communication ring.</desc>
+  <defs>
+    <linearGradient id="background" x1="80" y1="40" x2="720" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#073ca8"/>
+      <stop offset="0.55" stop-color="#082b96"/>
+      <stop offset="1" stop-color="#061b5f"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="170" y1="160" x2="650" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1767ff"/>
+      <stop offset="0.52" stop-color="#25d1ed"/>
+      <stop offset="1" stop-color="#1767ff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="58%">
+      <stop offset="0" stop-color="#1bcbe8" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#1bcbe8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="800" rx="160" fill="url(#background)"/>
+  <rect width="800" height="800" rx="160" fill="url(#glow)"/>
+  <rect x="8" y="8" width="784" height="784" rx="152" fill="none" stroke="#55ddf6" stroke-opacity=".16" stroke-width="16"/>
+
+  <circle cx="400" cy="344" r="224" fill="none" stroke="url(#orbit)" stroke-width="34" stroke-linecap="round" stroke-dasharray="1020 290" stroke-dashoffset="-70" transform="rotate(-32 400 344)"/>
+
+  <path d="M278 174H352V290C374 260 410 245 454 245C527 245 570 296 570 378V530H494V397C494 348 471 320 431 320C379 320 352 354 352 412V530H278Z" fill="#fff" transform="translate(96 82) scale(.76)"/>
+
+  <circle cx="621" cy="408" r="38" fill="#082b96" stroke="#25d1ed" stroke-width="14"/>
+  <circle cx="621" cy="408" r="10" fill="#fff"/>
+  <circle cx="172" cy="498" r="28" fill="#082b96" stroke="#1767ff" stroke-width="12"/>
+  <circle cx="172" cy="498" r="8" fill="#fff"/>
+  <path d="M196 485C234 448 246 405 232 354" fill="none" stroke="#1767ff" stroke-width="12" stroke-linecap="round" opacity=".72"/>
+
+  <text x="400" y="665" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700" letter-spacing="-3">hamlet</text>
+  <text x="400" y="724" text-anchor="middle" fill="#69dced" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" letter-spacing="10">CONNECT</text>
+</svg>
