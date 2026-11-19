@@ -1,11 +1,11 @@
-# hamlet — an integrated property workspace (IWMS)
+# hamlet — a workflow automation ERP for property (IWMS)
 
-**hamlet** is an integrated commercial and residential property workspace (IWMS), developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider workspace; they are not the product's defining category.
+**hamlet** is a workflow automation ERP for commercial and residential property operations, developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider ERP workspace; they are not the product's defining category.
 
 **Live website:** https://hamlet-ai.co.uk  
 **Repository:** https://github.com/hamletofficial/oss  
 **Hosting:** GitHub Pages and Firebase services, depending on the feature  
-**Product direction:** An integrated workspace for commercial and residential property markets.
+**Product direction:** A workflow automation ERP for commercial and residential property markets.
 
 **Core principle:** *Less fragmentation, more connected deals.*
 
@@ -30,9 +30,9 @@ This repository contains the public website and much of the client-side Hamlet a
 
 The repository evolves frequently. Treat these paths as a navigational overview rather than a complete specification; verify the current files and their imports before making changes.
 
-## IWMS capabilities
+## Workflow automation ERP capabilities
 
-Hamlet's IWMS direction is to connect the information and workflows involved in commercial and residential property activity, rather than operate as a standalone content-management system (CMS). Its capabilities are organised around property, portfolios, transactions, organisations and the people working across them:
+Hamlet's workflow automation ERP direction is to connect the information and workflows involved in commercial and residential property activity, rather than operate as a standalone content-management system (CMS) or CRM. Its capabilities are organised around property, portfolios, transactions, organisations and the people working across them:
 
 - **Commercial and residential property** — property records, listings, portfolio views and sustainability-related building information.
 - **Portfolio and asset information** — connected property records and portfolio-related workflows across the supported commercial and residential experiences.
@@ -166,7 +166,7 @@ organisationDocuments/{organisationId}/{resourceType}/{resourceId}/{documentId}/
 - Personal deals and properties stay in their personal collections unless the user explicitly chooses to copy an eligible record into an organisation.
 - Copying creates a distinct organisation snapshot; it does not move, delete, mutate or automatically synchronise the personal source record.
 - The copy workflow warns that images, documents and personal record links are not copied. The snapshot begins with restricted access and is governed by tenant resource permissions.
-- Organisation-owned records are stored separately from personal CRM collections and public listing projections.
+- Organisation-owned records are stored separately from personal account collections and public listing projections.
 - Organisation files and images do not become public listing media merely because they are uploaded.
 
 ### Verification
