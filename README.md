@@ -1,11 +1,11 @@
-# hamlet — a workflow automation ERP for property (IWMS)
+# hamlet — an integrated property workspace (IWMS)
 
-**hamlet** is a workflow automation ERP for commercial and residential property operations, developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider ERP workspace; they are not the product's defining category.
+**hamlet** is an integrated commercial and residential property workspace (IWMS), developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider workspace; they are not the product's defining category.
 
 **Live website:** https://hamlet-ai.co.uk  
 **Repository:** https://github.com/hamletofficial/oss  
 **Hosting:** GitHub Pages and Firebase services, depending on the feature  
-**Product direction:** A workflow automation ERP for commercial and residential property markets.
+**Product direction:** An integrated workspace for commercial and residential property markets, with technical support for sustainability-focused property data.
 
 **Core principle:** *Less fragmentation, more connected deals.*
 
@@ -30,9 +30,9 @@ This repository contains the public website and much of the client-side Hamlet a
 
 The repository evolves frequently. Treat these paths as a navigational overview rather than a complete specification; verify the current files and their imports before making changes.
 
-## Workflow automation ERP capabilities
+## IWMS capabilities and sustainability credentials
 
-Hamlet's workflow automation ERP direction is to connect the information and workflows involved in commercial and residential property activity, rather than operate as a standalone content-management system (CMS) or CRM. Its capabilities are organised around property, portfolios, transactions, organisations and the people working across them:
+Hamlet's IWMS direction is to connect the information and workflows involved in commercial and residential property activity, rather than operate as a standalone CMS or pure CRM. Its capabilities are organised around property, portfolios, transactions, organisations and the people working across them:
 
 - **Commercial and residential property** — property records, listings, portfolio views and sustainability-related building information.
 - **Portfolio and asset information** — connected property records and portfolio-related workflows across the supported commercial and residential experiences.
@@ -44,6 +44,17 @@ Hamlet's workflow automation ERP direction is to connect the information and wor
 - **Identity and administration** — authentication, account settings, verification and restricted administrative controls.
 
 Feature availability may depend on authentication, verification state, Firebase configuration, deployed functions and external service credentials.
+
+### Sustainability credentials (technical scope)
+
+Hamlet includes sustainability-oriented property content paths and workflows, including Passivhaus and EnerPHit resources (`/resources/passivhaus.html`, `/resources/enerphit.html`) and sustainability-related listing fields used across commercial and residential property experiences.
+
+In technical terms, sustainability credential handling should follow these repository principles:
+
+- **Evidence-backed claims:** sustainability statements should be traceable to supporting source evidence, not inferred by UI copy.
+- **Controlled publication paths:** public-facing sustainability summaries should be explicitly projected from intended fields, not from private account metadata.
+- **Owner-scoped governance:** updates to sustainability-related records remain subject to authenticated owner/member permissions and rule enforcement.
+- **No implied certification:** member-entered claims are data inputs, not independent certification by the platform.
 
 ## Hamlet Organisations and `hamlet. / workspace`
 
