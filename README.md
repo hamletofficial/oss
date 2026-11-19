@@ -56,6 +56,14 @@ In technical terms, sustainability credential handling should follow these repos
 - **Owner-scoped governance:** updates to sustainability-related records remain subject to authenticated owner/member permissions and rule enforcement.
 - **No implied certification:** member-entered claims are data inputs, not independent certification by the platform.
 
+#### Google Places API -> UK EPC API -> AI assistance flow
+
+Sustainability credential enrichment in the property workflow is designed as a chained data-assist path:
+
+1. **Google Places API** supports address discovery and normalization in the property-entry workflow (`/app/public/dashboard.html`), helping users select a structured location and postcode.
+2. **UK EPC register API lookup** then uses the normalized address/postcode context to fetch EPC-backed records (including non-domestic register matches where available), which can be reviewed and applied into property fields such as EPC band and related energy data.
+3. **AI assistance components** (`Deal Copilot` and `Listings Assistant` in `/app/hamlet/ai-assistant.html` and `hamlet-ai-assistants.js`) consume those sustainability/energy inputs as structured prompt context, improving listing and deal guidance while still requiring user review and evidence validation.
+
 ## Hamlet Organisations and `hamlet. / workspace`
 
 Hamlet Organisations is a core part of the IWMS direction: it extends individual broker functionality with **organisation-scoped workspaces** for property firms and professional teams. Each user retains an independently usable Hamlet account and may belong to multiple organisations. Organisation membership is explicit; joining a firm does not silently transfer personal deals, properties or files into its workspace.
