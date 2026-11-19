@@ -24,7 +24,6 @@
     .github-update-bar:after{content:"";position:absolute;inset:auto 0 0;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,#60a5fa 18%,#67e8f9 50%,#a5b4fc 82%,transparent);background-size:200% 100%;animation:hamletTickerLine 7s linear infinite}
     .github-update-label{position:relative;display:inline-flex;align-items:center;gap:.55rem;flex:0 0 auto;font-weight:850;letter-spacing:.015em;white-space:nowrap;color:#fff}
     .github-update-icon{display:block;width:19px;height:19px;flex:0 0 19px;color:#fff;filter:drop-shadow(0 1px 3px rgba(255,255,255,.28))}
-
     .github-update-label:before{content:"";width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#67e8f9;box-shadow:0 0 0 3px rgba(103,232,249,.14),0 0 12px rgba(103,232,249,.8);animation:hamletTickerPulse 2.4s ease-in-out infinite}
     .github-update-viewport{position:relative;min-width:0;max-width:min(700px,100%);flex:1 1 320px;overflow:hidden;text-align:left}
     .github-update-slide{display:flex;align-items:center;gap:.55rem;min-width:0;opacity:1;transform:translate3d(0,0,0);transition:opacity .32s ease,transform .42s cubic-bezier(.2,.75,.25,1);text-shadow:0 1px 1px rgba(0,0,0,.18)}
@@ -51,7 +50,8 @@
     .release-stats{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0;color:#cbd5e1;font-size:.84rem}
     .release-stats span{border:1px solid #475569;border-radius:8px;padding:.35rem .55rem}
     .side-card{padding:1.3rem;border-radius:18px;border:1px solid var(--line);background:#111827;display:flex;flex-direction:column;justify-content:space-between}
-    .side-card h2{font-size:1.1rem}.side-card p{font-size:.92rem}\n    .side-card > .button{align-self:flex-start;max-width:100%;margin:.5rem 0 0;text-align:center;white-space:normal}
+    .side-card h2{font-size:1.1rem}.side-card p{font-size:.92rem}
+    .side-card > .button{align-self:flex-start;max-width:100%;margin:.5rem 0 0;text-align:center;white-space:normal}
     .archive-panel{padding:0;overflow:hidden}
     .archive-head{padding:1.25rem 1.3rem;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     .archive-head h2{margin:0}.archive-head p{margin:.35rem 0 0;font-size:.9rem}
@@ -79,36 +79,14 @@
     /* Mobile header, activity banner and release badge refinements */
     .verification-icon,.verification-mobile{display:none}
     @media(max-width:620px){
-      .latest-card > .verification-pill{
-        display:flex;
-        align-items:center;
-        justify-content:flex-start;
-        gap:.55rem;
-        width:fit-content;
-        max-width:100%;
-        min-height:46px;
-        padding:.5rem .8rem;
-        white-space:normal;
-        text-align:left;
-        line-height:1.2;
-        font-size:.67rem;
-        letter-spacing:.045em;
-        border-radius:12px;
-        overflow-wrap:anywhere;
-      }
+      .latest-card > .verification-pill{display:flex;align-items:center;justify-content:flex-start;gap:.55rem;width:fit-content;max-width:100%;min-height:46px;padding:.5rem .8rem;white-space:normal;text-align:left;line-height:1.2;font-size:.67rem;letter-spacing:.045em;border-radius:12px;overflow-wrap:anywhere}
       .verification-icon{display:block;width:19px;height:19px;flex:0 0 19px}
       .verification-desktop{display:none}
       .verification-mobile{display:flex;flex-direction:column;gap:.18rem}
       .verification-mobile span:first-child{font-weight:900}
       .verification-mobile span:last-child{font-size:.61rem;letter-spacing:.035em}
     }
-    .latest-card > .pill{
-      color:#071d4a;
-      background:linear-gradient(135deg,#e0f2fe 0%,#93c5fd 48%,#67e8f9 100%);
-      border:1px solid #e0f2fe;
-      box-shadow:0 0 0 3px rgba(96,165,250,.18),0 0 22px rgba(103,232,249,.32),inset 0 1px 0 rgba(255,255,255,.85);
-      text-shadow:0 1px 0 rgba(255,255,255,.35);
-    }
+    .latest-card > .pill{color:#071d4a;background:linear-gradient(135deg,#e0f2fe 0%,#93c5fd 48%,#67e8f9 100%);border:1px solid #e0f2fe;box-shadow:0 0 0 3px rgba(96,165,250,.18),0 0 22px rgba(103,232,249,.32),inset 0 1px 0 rgba(255,255,255,.85);text-shadow:0 1px 0 rgba(255,255,255,.35)}
     @media(max-width:620px){
       header .head{min-height:0;display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;padding:.8rem 0}
       header .brand{font-size:1.25rem;line-height:1.2}
@@ -122,13 +100,7 @@
       .github-update-count{grid-column:1;justify-self:start}
       .github-update-bar > .github-update-link{grid-column:2;justify-self:end}
     }
-    @media(max-width:380px){
-      header .head{gap:.55rem}
-      header .brand{font-size:1.15rem}
-      header .back{font-size:.84rem;padding:.5rem .6rem}
-      .github-update-bar{padding:.7rem .75rem}
-    }
-
+    @media(max-width:380px){header .head{gap:.55rem}header .brand{font-size:1.15rem}header .back{font-size:.84rem;padding:.5rem .6rem}.github-update-bar{padding:.7rem .75rem}}
   </style>
   <style id="root-brand-background">body{background:#111827!important}</style>
 </head>
@@ -162,7 +134,7 @@
         <span class="pill verification-pill"><svg class="verification-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 10.2 8.2 13.3 15.2 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verification-copy"><span class="verification-desktop">Authenticode signed · SHA-256 verified</span><span class="verification-mobile"><span>AUTHENTICODE SIGNED</span><span>SHA-256 VERIFIED</span></span></span></span>
         <h2 id="latest-title">Hamlet v1.04.08</h2>
         <p class="version-meta">Installer <code>hamlet-Setup-1.4.8.exe</code> · Released 8 November 2026</p>
-        <p>Recommended for new installations. This release adds persistent Firebase authentication across application launches. The installer is digitally signed by Impact in Business Recruitment Group Limited using Microsoft Azure Artifact Signing; its Authenticode signature and SHA-256 checksum were verified by the release pipeline. Real-device Windows acceptance testing remains outstanding. Verify the checksum before running the installer.</p>
+        <p>Recommended for new installations. This release adds persistent Firebase authentication across application launches. The installer is digitally signed by Impact in Business Recruitment Group Limited using Microsoft Azure Artifact Signing. The release pipeline validates the Authenticode signature and publishes a SHA-256 checksum alongside the signed installer. Real-device Windows acceptance testing remains outstanding; verify the signature and checksum before installation.</p>
         <div class="release-stats">
           <span>Windows 10 / 11</span>
           <span>97.3 MiB · 101.99 MB</span>
@@ -186,7 +158,7 @@
       <div class="archive-head">
         <div>
           <h2 id="archive-title">Download archive</h2>
-          <p>Published Windows installers, newest first. Release assets are served from the official Hamlet GitHub repository. Verify each installer against its matching SHA-256 checksum.</p>
+          <p>Published Windows installers, newest first. Release assets are served from the official Hamlet download domain. Verify each installer against its matching SHA-256 checksum.</p>
         </div>
         <div class="archive-tools">
           <label for="release-search" style="position:absolute;left:-9999px">Search releases</label>
@@ -202,19 +174,23 @@
     <section class="panel" aria-labelledby="install-title">
       <h2 id="install-title">Install and verify</h2>
       <ol>
-        <li>Download the installer and the matching <code>SHA256SUMS.txt</code> file from the same release.</li>
-        <li>In PowerShell, run <code>Get-FileHash .\hamlet-Setup-1.4.6.exe -Algorithm SHA256</code> in the folder containing the latest installer. If using an older version, replace the filename with that version’s exact installer name.</li>
-        <li>Compare the computed hash with the entry for the same filename in <code>SHA256SUMS.txt</code>. The values must match exactly.</li>
-        <li>If the checksum does not match, do not run the installer. Delete it and download it again from the official GitHub release.</li>
-        <li>Review Windows security or publisher prompts before proceeding. Do not bypass a warning if you cannot establish that the file is authentic.</li>
+        <li>Download the installer and the matching <code>SHA256SUMS.txt</code> file from the same release. Use the official Hamlet download domain or the <a href="https://github.com/hamletofficial/oss/releases">Hamlet GitHub Releases page</a>; avoid third-party download mirrors.</li>
+        <li>In PowerShell, verify the publisher signature using the exact installer filename, for example: <code>Get-AuthenticodeSignature .\hamlet-Setup-1.4.8.exe | Format-List Status,StatusMessage,SignerCertificate</code>. The status should be <code>Valid</code> and the signer should identify Impact in Business Recruitment Group Limited.</li>
+        <li>Calculate the installer checksum: <code>Get-FileHash .\hamlet-Setup-1.4.8.exe -Algorithm SHA256</code>.</li>
+        <li>Compare the resulting hash with the entry for that exact filename in the matching release’s <code>SHA256SUMS.txt</code>. The values must match exactly. Do not compare an installer against a checksum file from a different version.</li>
+        <li>If the signature is not valid, the signer is unexpected, or the checksum differs, do not run the installer. Delete the file and obtain a fresh copy from an official release source.</li>
+        <li>Review Windows security prompts before proceeding. Do not bypass a warning or disable security software to install Hamlet. Contact the Support Centre if the publisher or file integrity cannot be verified.</li>
       </ol>
     </section>
 
     <section class="panel safety-note" aria-labelledby="security-title">
       <div class="safety-mark" aria-hidden="true">i</div>
       <div>
-        <h2 id="security-title">Security and update guidance</h2>
-        <p class="archive-note">Hamlet v1.04.06 has been signed using Microsoft Azure Artifact Signing. GitHub Actions verified the Authenticode signature and generated the matching SHA-256 checksum; the installer has also passed real-device installation, launch and uninstallation checks. The published checksum is <code>477A619C7C468F26CC53215EB070E97D062E8EFF345D009F5387C7FA03F65A7F</code>. Notifications and in-place upgrade behaviour have not yet been independently verified. Code signing verifies publisher identity and file integrity; secure automatic updates remain a separate future capability.</p>
+        <h2 id="security-title">Security, updates and responsible installation</h2>
+        <p class="archive-note">Hamlet v1.04.08 is digitally signed using Microsoft Azure Artifact Signing, with an RFC 3161 trusted timestamp. The release pipeline validates the Authenticode signature and generates a SHA-256 checksum from the final signed installer; the checksum is published with the corresponding release. These controls help users verify the publisher and detect changes to the downloaded file. They do not establish that software is free from defects or guarantee the security of a device.</p>
+        <p class="archive-note"><strong>Keep Hamlet up to date:</strong> Check the <a href="https://github.com/hamletofficial/oss/releases">official GitHub Releases page</a> and this download page for new versions and release notes. When a newer stable release is published, download its installer and matching checksum, verify both the Authenticode signature and SHA-256 digest, and then run the installer. Back up important work and close Hamlet before upgrading. Do not rely on an in-app updater: secure automatic update delivery and validation are not currently configured.</p>
+        <p class="archive-note"><strong>Current validation status:</strong> Automated release checks cover the signing and checksum process. Real-device Windows 10/11 acceptance testing, including installation, sign-in, notifications, upgrade and uninstallation, remains a validation requirement and should not be assumed complete. Where a release note identifies a limitation, treat it as outstanding until a later release explicitly records its resolution.</p>
+        <p class="archive-note"><strong>Report a concern:</strong> Do not install a file with an invalid signature, unexpected publisher, or mismatched checksum. Report suspected tampering, security issues or unexpected installer behaviour through the <a href="https://support.hamlet-ai.co.uk/">Hamlet Support Centre</a>. Include the release version, Windows version and relevant error details, but never send passwords, authentication codes, API keys or other secrets.</p>
       </div>
     </section>
     <section class="panel hamlet-connect-panel" aria-labelledby="hamlet-connect-title">
