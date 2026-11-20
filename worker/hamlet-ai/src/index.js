@@ -102,6 +102,37 @@ function getText(value, maxLength) {
 }
 
 
+function epcText(value) { return typeof value === "string" ? value.trim() : (value == null ? "" : String(value)); }
+function epcField(record, ...keys) { for (const key of keys) { const value=record?.[key]; if(value!==undefined && value!==null && value!=="") return value; } return ""; }
+function normalizeEpcRecord(record) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) return null;
+  return {
+    certificateNumber: epcText(epcField(record,"certificateNumber","certificate_number")),
+    addressLine1: epcText(epcField(record,"addressLine1","address_line_1")),
+    addressLine2: epcText(epcField(record,"addressLine2","address_line_2")),
+    addressLine3: epcText(epcField(record,"addressLine3","address_line_3")),
+    addressLine4: epcText(epcField(record,"addressLine4","address_line_4")),
+    postTown: epcText(epcField(record,"postTown","post_town")),
+    postcode: epcText(epcField(record,"postcode")),
+    uprn: epcText(epcField(record,"uprn")),
+    currentEnergyEfficiencyBand: epcText(epcField(record,"currentEnergyEfficiencyBand","current_energy_efficiency_band")),
+    registrationDate: epcText(epcField(record,"registrationDate","registration_date")),
+    inspectionDate: epcText(epcField(record,"inspectionDate","inspection_date")),
+    validUntil: epcText(epcField(record,"validUntil","valid_until")),
+    floorArea: epcField(record,"floorArea","floor_area") === "" ? null : (epcField(record,"floorArea","floor_area") ?? null),
+    assessmentType: epcText(epcField(record,"assessmentType","assessment_type")),
+    propertyType: epcText(epcField(record,"propertyType","property_type")),
+    rawSchemaVersion: epcText(epcField(record,"schemaVersion","schema_version"))
+  };
+}
+function epcAddressNorm(value) { return String(value||"").toLowerCase().replace(/[^a-z0-9]/g,""); }
+function epcAddressMatches(record,address,postcode) {
+  const normalized=normalizeEpcRecord(record);
+  if(!normalized) return false;
+  const returned=epcAddressNorm([normalized.addressLine1,normalized.addressLine2,normalized.addressLine3,normalized.addressLine4,normalized.postTown].filter(Boolean).join(" "));
+  const expected=epcAddressNorm(address.replace(/\\b[A-Z]{1,2}\\d[A-Z\\d]?\\s*\\d[A-Z]{2}\\b/i," "));
+  return epcAddressNorm(normalized.postcode)===epcAddressNorm(postcode) && returned && expected && (returned.includes(expected)||expected.includes(returned));
+}
 async function handleEpcSearch(request, env, origin) {
   if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
   let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
@@ -113,7 +144,10 @@ async function handleEpcSearch(request, env, origin) {
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(upstream.status===404)return json({records:[]},200,origin);
     if(!upstream.ok){console.error("Government EPC search failed",{status:upstream.status});return json({error:upstream.status===429?"Government EPC service is busy. Try again shortly.":"Government EPC search failed."},upstream.status===429?429:502,origin);}
-    const payload=await upstream.json();return json({records:Array.isArray(payload?.data)?payload.data.slice(0,100):[]},200,origin);
+    const payload=await upstream.json();
+    if(!payload || typeof payload!=="object" || !Array.isArray(payload.data)) return json({error:"Invalid search response from Government EPC service."},502,origin);
+    const records=payload.data.map(normalizeEpcRecord).filter(Boolean).slice(0,100);
+    return json({records},200,origin);
   }catch(error){console.error("Government EPC search request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
 }
 async function handleEpcCertificate(request, env, origin) {
@@ -128,11 +162,10 @@ async function handleEpcCertificate(request, env, origin) {
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(!upstream.ok){console.error("Government EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government EPC certificate verification failed."},upstream.status===404?404:502,origin);}
-    const payload=await upstream.json(),certificate=payload?.data;if(!certificate||typeof certificate!=="object")return json({error:"Invalid certificate response from Government EPC service."},502,origin);
-    const norm=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const returnedAddress=[certificate.address_line_1,certificate.address_line_2,certificate.address_line_3,certificate.address_line_4,certificate.post_town].filter(Boolean).join(" ");
-    const submittedAddress=address.replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i," ");
-    if(norm(certificate.postcode)!==norm(postcode)||!norm(returnedAddress)||!(norm(returnedAddress).includes(norm(submittedAddress))||norm(submittedAddress).includes(norm(returnedAddress))))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
+    const payload=await upstream.json(),rawCertificate=payload?.data;
+    if(!rawCertificate||typeof rawCertificate!=="object"||Array.isArray(rawCertificate))return json({error:"Invalid certificate response from Government EPC service."},502,origin);
+    const certificate=normalizeEpcRecord(rawCertificate);
+    if(!epcAddressMatches(certificate,address,postcode))return json({error:"Full certificate address and postcode do not match the submitted property."},409,origin);
     return json({certificate},200,origin);
   }catch(error){console.error("Government EPC certificate request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
 }
