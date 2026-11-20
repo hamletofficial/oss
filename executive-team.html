@@ -113,30 +113,32 @@
     .team{
       margin-top:1.3rem;
       display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:1rem;
     }
     .exec-row{
-      display:grid;
-      grid-template-columns:76px 1fr;
-      gap:1rem;
-      align-items:start;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
       border:1px solid #334155;
       border-radius:16px;
       background:#111827;
       box-shadow:0 10px 24px rgba(2,6,23,.2);
-      padding:1rem 1.1rem;
+      padding:1.1rem;
     }
-    .icon{
-      width:62px;
-      height:62px;
-      border-radius:14px;
+    .exec-photo{
+      display:block;
+      width:100%;
+      max-width:320px;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      object-position:center;
+      border:3px solid #bfdbfe;
+      border-radius:16px;
       background:#0f172a;
-      border:1px solid #334155;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      margin:0 auto 1rem;
     }
-    .icon svg{width:34px;height:34px;fill:none;stroke:#93c5fd;stroke-width:1.9}
     .bio h2{
       margin:0 0 .22rem;
       color:#f8fafc;
@@ -173,7 +175,8 @@
       .header-inner{min-height:60px}
       .header-link{min-height:38px;padding:8px 11px;font-size:.84rem}
       .main{width:calc(100% - 1.5rem);padding:34px 0 48px}
-      .exec-row{grid-template-columns:1fr}
+      .team{grid-template-columns:1fr}
+      .exec-photo{max-width:300px}
     }
   </style>
 </head>
@@ -198,30 +201,18 @@
 
       <section class="team" aria-label="Hamlet co-founders">
         <article class="exec-row">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <rect x="4" y="7" width="16" height="12" rx="2"></rect>
-              <path d="M9 7V5a3 3 0 0 1 6 0v2"></path>
-              <path d="M4 12h16"></path>
-            </svg>
-          </div>
+          <img class="exec-photo" src="/assets/images/gerard-pambu.jpg" alt="Gerard Pambu, COO and Co-Founder" loading="lazy" decoding="async">
           <div class="bio">
-            <h2>Alfred Mayaki</h2>
+            <h2>Gerard Pambu</h2>
             <p class="title">CEO | Co-Founder</p>
             <p>Alfred co-founded Hamlet and leads the company as Chief Executive Officer, shaping vision, market direction and strategic partnerships. He works closely with members and organisations to translate business goals into measurable platform outcomes. LinkedIn: <a href="https://www.linkedin.com/in/alfredmayaki" target="_blank" rel="noopener noreferrer">linkedin.com/in/alfredmayaki</a>.</p>
           </div>
         </article>
 
         <article class="exec-row">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <rect x="4" y="7" width="16" height="12" rx="2"></rect>
-              <path d="M9 7V5a3 3 0 0 1 6 0v2"></path>
-              <path d="M4 12h16"></path>
-            </svg>
-          </div>
+          <img class="exec-photo" src="/assets/images/alfred-mayak.jpg" alt="Alfred Mayaki, CEO and Co-Founder" loading="lazy" decoding="async">
           <div class="bio">
-            <h2>Gerard Pambu</h2>
+            <h2>Alfred Mayaki</h2>
             <p class="title">COO | Co-Founder</p>
             <p>Gerard co-founded Hamlet and serves as Chief Operating Officer, leading delivery, execution standards and cross-team coordination. He focuses on turning strategy into reliable operations so members receive consistent service and platform quality at scale. LinkedIn: <a href="https://www.linkedin.com/in/gerard-pambu" target="_blank" rel="noopener noreferrer">linkedin.com/in/gerard-pambu</a>.</p>
           </div>
