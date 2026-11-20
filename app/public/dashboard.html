@@ -531,7 +531,7 @@
       function epcNorm(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
       function epcMatchesProperty(record,address,postcode){
         const actualPostcode=epcNorm(record.postcode),expectedPostcode=epcNorm(postcode);
-        const actualAddress=epcNorm([record.addressLine1||record.address_line_1,record.addressLine2||record.address_line_2,record.addressLine3||record.address_line_3,record.addressLine4||record.address_line_4,record.postTown||record.post_town].filter(Boolean).join(' '));
+        const actualAddress=epcNorm([record.addressLine1,record.addressLine2,record.addressLine3,record.addressLine4,record.postTown].filter(Boolean).join(' '));
         const expectedAddress=epcNorm(address);
         return Boolean(expectedPostcode&&actualPostcode===expectedPostcode&&expectedAddress&&actualAddress&&(actualAddress.includes(expectedAddress)||expectedAddress.includes(actualAddress)));
       }
@@ -563,9 +563,9 @@
           const token=await currentUser.getIdToken(),response=await fetch('https://hamlet-ai-gateway-staging.alfred-mayaki.workers.dev/v1/epc-certificate',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({certificateNumber:r.certificateNumber,address,postcode})});
           const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||'EPC certificate verification failed.');
           const c=payload.certificate||{};if(!epcMatchesProperty(c,address,postcode))throw new Error('The certificate does not match the submitted property. No EPC fields were changed.');
-          document.getElementById('epcRating').value=c.current_energy_efficiency_band||c.currentEnergyEfficiencyBand||r.currentEnergyEfficiencyBand||'';
+          document.getElementById('epcRating').value=c.currentEnergyEfficiencyBand||r.currentEnergyEfficiencyBand||'';
           document.getElementById('epcCertificateNumber').value=r.certificateNumber;
-          const date=c.registration_date||c.registrationDate||r.registrationDate||'';document.getElementById('epcRegistrationDate').value=String(date).slice(0,10);
+          const date=c.registrationDate||r.registrationDate||'';document.getElementById('epcRegistrationDate').value=String(date).slice(0,10);
           document.getElementById('epcUprn').value=c.uprn||r.uprn||'';
           epcLookupStatus.textContent='Verified EPC applied to '+address+'.';epcLookupStatus.className='status success';
         }catch(error){epcLookupStatus.textContent=error.message||'Could not verify EPC. Manual entry remains available.';epcLookupStatus.className='status error';}
