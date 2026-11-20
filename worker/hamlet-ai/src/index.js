@@ -5,6 +5,7 @@ const MODEL = "gpt-5.2-pro";
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_CONTEXT_CHARS = 8000;
 const ALLOWED_ORIGINS = new Set([
+  "https://hamlet-ai.co.uk",
   "https://www.hamlet-ai.co.uk",
 ]);
 const FIREBASE_KEYS = createRemoteJWKSet(
