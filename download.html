@@ -132,17 +132,17 @@
       <section class="latest-card" aria-labelledby="latest-title">
         <img class="release-hero-art" src="/release-download-hero.svg" alt="Download-themed illustration with a software package, downward arrow and verification check on a dark navy and royal-blue gradient" width="1600" height="900" fetchpriority="high">
         <span class="pill verification-pill"><svg class="verification-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 10.2 8.2 13.3 15.2 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="verification-copy"><span class="verification-desktop">Authenticode signed · SHA-256 verified</span><span class="verification-mobile"><span>AUTHENTICODE SIGNED</span><span>SHA-256 VERIFIED</span></span></span></span>
-        <h2 id="latest-title">Hamlet v1.04.08</h2>
-        <p class="version-meta">Installer <code>hamlet-Setup-1.4.8.exe</code> · Released 8 November 2026</p>
-        <p>Recommended for new installations. This release adds persistent Firebase authentication across application launches. The installer is digitally signed by Impact in Business Recruitment Group Limited using Microsoft Azure Artifact Signing. The release pipeline validates the Authenticode signature and publishes a SHA-256 checksum alongside the signed installer. Real-device Windows acceptance testing remains outstanding; verify the signature and checksum before installation.</p>
+        <h2 id="latest-title">Hamlet v1.04.09</h2>
+        <p class="version-meta">Installer <code>hamlet-Setup-1.4.9.exe</code> · Released 21 November 2026</p>
+        <p>Recommended for new installations. This release restores in-app sign-in popups for Microsoft, Google and Apple, with persistent Firebase authentication across application launches. The installer is digitally signed by Impact in Business Recruitment Group Limited using Microsoft Azure Artifact Signing. The release pipeline validates the Authenticode signature and publishes a SHA-256 checksum alongside the signed installer. Real-device Windows acceptance testing remains outstanding; verify the signature and checksum before installation.</p>
         <div class="release-stats">
           <span>Windows 10 / 11</span>
           <span>97.3 MiB · 101.99 MB</span>
           <span>SHA-256 available</span>
         </div>
         <p class="archive-note"><strong>Compatibility:</strong> This installer supports 64-bit Windows (x64) only. It is not compatible with 32-bit (x86) Windows.</p>
-        <a class="button" href="https://downloads.hamlet-ai.co.uk/v1.04.08/hamlet-Setup-1.4.8.exe">Download latest .exe</a>
-        <a class="button secondary" href="https://downloads.hamlet-ai.co.uk/v1.04.08/SHA256SUMS.txt">SHA-256 checksum</a>
+        <a class="button" href="https://github.com/hamletofficial/oss/releases/download/v1.04.09/hamlet-Setup-1.4.9.exe">Download latest .exe</a>
+        <a class="button secondary" href="https://github.com/hamletofficial/oss/releases/download/v1.04.09/SHA256SUMS.txt">SHA-256 checksum</a>
         <a class="button secondary" href="https://github.com/hamletofficial/oss/blob/main/desktop/hamlet-windows/RELEASE-NOTES.md">Release notes</a>
       </section>
       <aside class="side-card">
@@ -158,7 +158,7 @@
       <div class="archive-head">
         <div>
           <h2 id="archive-title">Download archive</h2>
-          <p>Published Windows installers, newest first. Release assets are served from the official Hamlet download domain. Verify each installer against its matching SHA-256 checksum.</p>
+          <p>Published Windows installers, newest first. Release assets are served directly from official GitHub Releases. Verify each installer against its matching SHA-256 checksum.</p>
         </div>
         <div class="archive-tools">
           <label for="release-search" style="position:absolute;left:-9999px">Search releases</label>
@@ -175,8 +175,8 @@
       <h2 id="install-title">Install and verify</h2>
       <ol>
         <li>Download the installer and the matching <code>SHA256SUMS.txt</code> file from the same release. Use the official Hamlet download domain or the <a href="https://github.com/hamletofficial/oss/releases">Hamlet GitHub Releases page</a>; avoid third-party download mirrors.</li>
-        <li>In PowerShell, verify the publisher signature using the exact installer filename, for example: <code>Get-AuthenticodeSignature .\hamlet-Setup-1.4.8.exe | Format-List Status,StatusMessage,SignerCertificate</code>. The status should be <code>Valid</code> and the signer should identify Impact in Business Recruitment Group Limited.</li>
-        <li>Calculate the installer checksum: <code>Get-FileHash .\hamlet-Setup-1.4.8.exe -Algorithm SHA256</code>.</li>
+        <li>In PowerShell, verify the publisher signature using the exact installer filename, for example: <code>Get-AuthenticodeSignature .\hamlet-Setup-1.4.9.exe | Format-List Status,StatusMessage,SignerCertificate</code>. The status should be <code>Valid</code> and the signer should identify Impact in Business Recruitment Group Limited.</li>
+        <li>Calculate the installer checksum: <code>Get-FileHash .\hamlet-Setup-1.4.9.exe -Algorithm SHA256</code>.</li>
         <li>Compare the resulting hash with the entry for that exact filename in the matching release’s <code>SHA256SUMS.txt</code>. The values must match exactly. Do not compare an installer against a checksum file from a different version.</li>
         <li>If the signature is not valid, the signer is unexpected, or the checksum differs, do not run the installer. Delete the file and obtain a fresh copy from an official release source.</li>
         <li>Review Windows security prompts before proceeding. Do not bypass a warning or disable security software to install Hamlet. Contact the Support Centre if the publisher or file integrity cannot be verified.</li>
@@ -187,7 +187,7 @@
       <div class="safety-mark" aria-hidden="true">i</div>
       <div>
         <h2 id="security-title">Security, updates and responsible installation</h2>
-        <p class="archive-note">Hamlet v1.04.08 is digitally signed using Microsoft Azure Artifact Signing, with an RFC 3161 trusted timestamp. The release pipeline validates the Authenticode signature and generates a SHA-256 checksum from the final signed installer; the checksum is published with the corresponding release. These controls help users verify the publisher and detect changes to the downloaded file. They do not establish that software is free from defects or guarantee the security of a device.</p>
+        <p class="archive-note">Hamlet v1.04.09 is digitally signed using Microsoft Azure Artifact Signing, with an RFC 3161 trusted timestamp. The release pipeline validates the Authenticode signature and generates a SHA-256 checksum from the final signed installer; the checksum is published with the corresponding release. These controls help users verify the publisher and detect changes to the downloaded file. They do not establish that software is free from defects or guarantee the security of a device.</p>
         <p class="archive-note"><strong>Keep Hamlet up to date:</strong> Check the <a href="https://github.com/hamletofficial/oss/releases">official GitHub Releases page</a> and this download page for new versions and release notes. When a newer stable release is published, download its installer and matching checksum, verify both the Authenticode signature and SHA-256 digest, and then run the installer. Back up important work and close Hamlet before upgrading. Do not rely on an in-app updater: secure automatic update delivery and validation are not currently configured.</p>
         <p class="archive-note"><strong>Current validation status:</strong> Automated release checks cover the signing and checksum process. Real-device Windows 10/11 acceptance testing, including installation, sign-in, notifications, upgrade and uninstallation, remains a validation requirement and should not be assumed complete. Where a release note identifies a limitation, treat it as outstanding until a later release explicitly records its resolution.</p>
         <p class="archive-note"><strong>Report a concern:</strong> Do not install a file with an invalid signature, unexpected publisher, or mismatched checksum. Report suspected tampering, security issues or unexpected installer behaviour through the <a href="https://support.hamlet-ai.co.uk/">Hamlet Support Centre</a>. Include the release version, Windows version and relevant error details, but never send passwords, authentication codes, API keys or other secrets.</p>
@@ -363,13 +363,8 @@
           const latest = index === 0 && !query;
           const label = release.name || ('Hamlet ' + release.tag_name);
           const tag = String(release.tag_name || '').trim();
-          // All archive downloads are served from the enabled Hamlet R2 custom domain.
-          // Keep the release tag as the version directory so each published release
-          // resolves to its corresponding R2 asset path.
-          const r2Version = tag.replace(/^v/i, 'v');
-          const r2Base = 'https://downloads.hamlet-ai.co.uk/' + encodeURIComponent(r2Version) + '/';
-          const installerUrl = r2Base + encodeURIComponent(installer.name);
-          const checksumUrl = checksum ? r2Base + 'SHA256SUMS.txt' : '';
+          const installerUrl = installer.browser_download_url;
+          const checksumUrl = checksum ? checksum.browser_download_url : '';
           const details = [formatDate(release.published_at), installer.name, formatSize(installer.size)]
             .filter(Boolean).join(' · ');
           return '<article class="release-row' + (latest ? ' latest' : '') + '">' +
