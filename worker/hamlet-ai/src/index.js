@@ -140,12 +140,12 @@ async function handleDomesticEpcSearch(request, env, origin) {
   const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
   const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/domestic/search");
-  apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("size","100");
+  apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("page_size","100");apiUrl.searchParams.set("current_page","1");
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(upstream.status===404)return json({records:[]},200,origin);
     if(!upstream.ok){console.error("Government domestic EPC search failed",{status:upstream.status});return json({error:upstream.status===429?"Government EPC service is busy. Try again shortly.":"Government domestic EPC search failed."},upstream.status===429?429:502,origin);}
-    const payload=await upstream.json(),source=Array.isArray(payload?.data)?payload.data:(Array.isArray(payload?.results)?payload.results:null);
+    const payload=await upstream.json(),source=Array.isArray(payload?.data)?payload.data:(Array.isArray(payload?.data?.data)?payload.data.data:(Array.isArray(payload?.results)?payload.results:null));
     if(!source)return json({error:"Invalid domestic search response from Government EPC service."},502,origin);
     return json({records:source.map(normalizeEpcRecord).filter(Boolean).slice(0,100).map(record=>({...record,certificateCategory:"domestic"}))},200,origin);
   }catch(error){console.error("Government domestic EPC search request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
@@ -155,7 +155,7 @@ async function handleDomesticEpcCertificate(request, env, origin) {
   let body;try{body=await readJsonLimited(request,8000);}catch{return json({error:"Provide a valid JSON request."},400,origin);}
   const certificateNumber=getText(body?.certificateNumber,120),address=getText(body?.address,250),postcode=getText(body?.postcode,20);
   if(!certificateNumber||!address||!postcode)return json({error:"A certificate number, property address and postcode are required."},400,origin);
-  const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/domestic/certificate/"+encodeURIComponent(certificateNumber));
+  const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/certificate");apiUrl.searchParams.set("certificate_number",certificateNumber);
   try{
     const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
     if(!upstream.ok){console.error("Government domestic EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government domestic EPC certificate verification failed."},upstream.status===404?404:502,origin);}
