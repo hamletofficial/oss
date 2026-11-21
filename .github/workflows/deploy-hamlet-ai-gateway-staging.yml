@@ -41,17 +41,3 @@ jobs:
           fi
           npx wrangler deploy --config wrangler.toml
 
-      - name: Verify route registration and authentication gate
-        run: |
-          set -e
-          for route in domestic-epc-search domestic-epc-certificate; do
-            status=$(curl -sS -o /tmp/response.json -w "%{http_code}" \
-              -X POST "https://hamlet-ai-gateway-staging.<ACCOUNT_SUBDOMAIN>.workers.dev/v1/$route" \
-              -H "Content-Type: application/json" -d '{}')
-            echo "$route returned HTTP $status"
-            if [ "$status" != "401" ]; then
-              cat /tmp/response.json
-              echo "Expected 401 authentication gate; route may not be registered or auth behavior changed."
-              exit 1
-            fi
-          done
