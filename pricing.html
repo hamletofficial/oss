@@ -163,6 +163,16 @@
     .pricing-table tbody tr.best-value td.price,
     .pricing-table tbody tr.best-value td.price small{color:#102d43;}
     .pricing-table tbody tr.best-value td:first-child{font-weight:800;}
+    /* Dark-mode specificity fix: preserve ice-blue best-value highlight against theme.css !important rules. */
+    html[data-appearance="dark"] .pricing-table tbody tr.best-value td{
+      background-color:#BFEFFF !important;
+      color:#102D43 !important;
+      border-color:#93D9F2 !important;
+    }
+    html[data-appearance="dark"] .pricing-table tbody tr.best-value td.price,
+    html[data-appearance="dark"] .pricing-table tbody tr.best-value td.price small{
+      color:#102D43 !important;
+    }
     .pricing-cta{
       margin-top:24px;
       padding:24px;
