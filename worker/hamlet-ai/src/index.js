@@ -134,6 +134,38 @@ function epcAddressMatches(record,address,postcode) {
   const expected=epcAddressNorm(address.replace(/\\b[A-Z]{1,2}\\d[A-Z\\d]?\\s*\\d[A-Z]{2}\\b/i," "));
   return epcAddressNorm(normalized.postcode)===epcAddressNorm(postcode) && returned && expected && (returned.includes(expected)||expected.includes(returned));
 }
+async function handleDomesticEpcSearch(request, env, origin) {
+  if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
+  let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
+  const address=getText(body?.address,250),postcode=getText(body?.postcode,20);
+  if(!address||!postcode)return json({error:"A property address and postcode are required."},400,origin);
+  const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/domestic/search");
+  apiUrl.searchParams.set("postcode",postcode);apiUrl.searchParams.set("address",address);apiUrl.searchParams.set("size","100");
+  try{
+    const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
+    if(upstream.status===404)return json({records:[]},200,origin);
+    if(!upstream.ok){console.error("Government domestic EPC search failed",{status:upstream.status});return json({error:upstream.status===429?"Government EPC service is busy. Try again shortly.":"Government domestic EPC search failed."},upstream.status===429?429:502,origin);}
+    const payload=await upstream.json(),source=Array.isArray(payload?.data)?payload.data:(Array.isArray(payload?.results)?payload.results:null);
+    if(!source)return json({error:"Invalid domestic search response from Government EPC service."},502,origin);
+    return json({records:source.map(normalizeEpcRecord).filter(Boolean).slice(0,100).map(record=>({...record,certificateCategory:"domestic"}))},200,origin);
+  }catch(error){console.error("Government domestic EPC search request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
+}
+async function handleDomesticEpcCertificate(request, env, origin) {
+  if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
+  let body;try{body=await readJsonLimited(request,8000);}catch{return json({error:"Provide a valid JSON request."},400,origin);}
+  const certificateNumber=getText(body?.certificateNumber,120),address=getText(body?.address,250),postcode=getText(body?.postcode,20);
+  if(!certificateNumber||!address||!postcode)return json({error:"A certificate number, property address and postcode are required."},400,origin);
+  const apiUrl=new URL("https://api.get-energy-performance-data.communities.gov.uk/api/domestic/certificate/"+encodeURIComponent(certificateNumber));
+  try{
+    const upstream=await fetch(apiUrl,{headers:{"Authorization":`Bearer ${env.UK_EPC_API_BEARER_TOKEN}`,"Accept":"application/json"}});
+    if(!upstream.ok){console.error("Government domestic EPC certificate fetch failed",{status:upstream.status});return json({error:upstream.status===404?"EPC certificate not found.":"Government domestic EPC certificate verification failed."},upstream.status===404?404:502,origin);}
+    const payload=await upstream.json(),raw=payload?.data||payload?.certificate||payload?.result;
+    if(!raw||typeof raw!=="object"||Array.isArray(raw))return json({error:"Invalid domestic certificate response from Government EPC service."},502,origin);
+    const certificate=normalizeEpcRecord(raw);
+    if(!epcAddressMatches(certificate,address,postcode))return json({error:"Full domestic certificate address and postcode do not match the submitted property."},409,origin);
+    return json({certificate},200,origin);
+  }catch(error){console.error("Government domestic EPC certificate request failed",{message:String(error?.message||error)});return json({error:"Government EPC service is temporarily unavailable."},502,origin);}
+}
 async function handleEpcSearch(request, env, origin) {
   if (!env.UK_EPC_API_BEARER_TOKEN) return json({ error: "The Government EPC API is not configured." }, 503, origin);
   let body; try { body = await readJsonLimited(request, 8000); } catch { return json({ error: "Provide a valid JSON request." }, 400, origin); }
@@ -197,7 +229,7 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
-    if (url.pathname !== "/v1/assist" && url.pathname !== "/v1/login-notification" && url.pathname !== "/v1/epc-search" && url.pathname !== "/v1/epc-certificate") return json({ error: "Not found." }, 404, origin);
+    if (url.pathname !== "/v1/assist" && url.pathname !== "/v1/login-notification" && url.pathname !== "/v1/epc-search" && url.pathname !== "/v1/epc-certificate" && url.pathname !== "/v1/domestic-epc-search" && url.pathname !== "/v1/domestic-epc-certificate") return json({ error: "Not found." }, 404, origin);
     if (request.method !== "POST") return json({ error: "Method not allowed." }, 405, origin);
     if (origin && !ALLOWED_ORIGINS.has(origin)) return json({ error: "Origin not allowed." }, 403, null);
     if (url.pathname === "/v1/assist" && !env.OPENAI_API_KEY) return json({ error: "AI service is not configured." }, 503, origin);
@@ -210,6 +242,8 @@ export default {
     }
 
     if (url.pathname === "/v1/epc-search") return handleEpcSearch(request, env, origin);
+    if (url.pathname === "/v1/domestic-epc-search") return handleDomesticEpcSearch(request, env, origin);
+    if (url.pathname === "/v1/domestic-epc-certificate") return handleDomesticEpcCertificate(request, env, origin);
     if (url.pathname === "/v1/epc-certificate") return handleEpcCertificate(request, env, origin);
 
     if (url.pathname === "/v1/login-notification") {
