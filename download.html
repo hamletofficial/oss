@@ -366,8 +366,8 @@
           const tag = String(release.tag_name || '').trim();
           const installerUrl = installer.browser_download_url;
           const checksumUrl = checksum ? checksum.browser_download_url : '';
-          const mirrorTag = /^v1\\.04\\.0([1-9]|10)$/i.exec(tag);
-          const mirrorFile = /^hamlet-Setup-1\\.4\\.(\\d+)\\.exe$/i.exec(installer.name);
+          const mirrorTag = /^v1\.04\.0([1-9]|10)$/i.exec(tag);
+          const mirrorFile = /^hamlet-Setup-1\.4\.(\d+)\.exe$/i.exec(installer.name);
           const mirrorMatchesRelease = mirrorTag && mirrorFile && Number(mirrorTag[1]) === Number(mirrorFile[1]);
           const mirrorBase = mirrorMatchesRelease
             ? 'https://downloads.hamlet-ai.co.uk/' + encodeURIComponent(tag) + '/'
