@@ -4,14 +4,10 @@ const AUTH_HOSTS = new Set([
   "wale-491805.firebaseapp.com",
   "wale-491805.web.app",
   "accounts.google.com",
-  "www.facebook.com",
-  "m.facebook.com",
-  "www.linkedin.com",
-  "linkedin.com",
+  "login.microsoftonline.com",
+  "login.live.com",
   "appleid.apple.com",
-  "appleid.cdn-apple.com",
-  "x.com",
-  "twitter.com"
+  "appleid.cdn-apple.com"
 ]);
 
 function parseHttpsUrl(value) {
