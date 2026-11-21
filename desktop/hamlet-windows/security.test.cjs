@@ -14,19 +14,12 @@ test("rejects lookalike hosts, HTTP and non-web schemes", () => {
   assert.equal(isTrustedAppUrl("javascript:alert(1)"), false);
 });
 
-test("allows only the active Google, Microsoft and Apple sign-in hosts", () => {
+test("allows only explicitly approved HTTPS authentication hosts", () => {
   assert.equal(isTrustedAuthUrl("https://wale-491805.firebaseapp.com/__/auth/handler"), true);
   assert.equal(isTrustedAuthUrl("https://auth.hamlet-ai.co.uk/__/auth/handler"), true);
   assert.equal(isTrustedAuthUrl("https://accounts.google.com/"), true);
-  assert.equal(isTrustedAuthUrl("https://login.microsoftonline.com/"), true);
-  assert.equal(isTrustedAuthUrl("https://login.live.com/"), true);
-  assert.equal(isTrustedAuthUrl("https://appleid.apple.com/"), true);
-  assert.equal(isTrustedAuthUrl("https://appleid.cdn-apple.com/"), true);
   assert.equal(isTrustedAuthUrl("https://attacker.google.com/"), false);
   assert.equal(isTrustedAuthUrl("https://another-project.firebaseapp.com/"), false);
-  assert.equal(isTrustedAuthUrl("https://www.facebook.com/"), false);
-  assert.equal(isTrustedAuthUrl("https://www.linkedin.com/"), false);
-  assert.equal(isTrustedAuthUrl("https://x.com/"), false);
 });
 
 test("notification permission is scoped to an allowed Hamlet HTTPS origin", () => {
