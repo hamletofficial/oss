@@ -196,7 +196,24 @@
         document.querySelectorAll('[data-auth-profile]').forEach(function (chip) {
           var nameEl = chip.querySelector('[data-auth-name]');
           var photoEl = chip.querySelector('[data-auth-photo]');
-          if (nameEl) nameEl.textContent = savedName;
+          if (nameEl) {
+            var username = typeof data.username === 'string' ? data.username.trim().toLowerCase() : '';
+            var profileHref = /^[a-z0-9_]{3,20}$/.test(username)
+              ? '/profile.html?username=' + encodeURIComponent(username)
+              : '/profile.html?uid=' + encodeURIComponent(user.uid);
+            var profileLink = document.createElement('a');
+            profileLink.href = profileHref;
+            profileLink.textContent = savedName;
+            profileLink.className = 'ibr-header-profile-name-link';
+            profileLink.setAttribute('aria-label', 'View your Hamlet member profile');
+            profileLink.style.color = 'inherit';
+            profileLink.style.textDecoration = 'none';
+            profileLink.style.cursor = 'pointer';
+            profileLink.style.display = 'inline';
+            profileLink.addEventListener('mouseenter', function () { profileLink.style.textDecoration = 'underline'; });
+            profileLink.addEventListener('mouseleave', function () { profileLink.style.textDecoration = 'none'; });
+            nameEl.replaceChildren(profileLink);
+          }
           if (photoEl) {
             photoEl.alt = savedName + ' profile photo';
             photoEl.onerror = function () { photoEl.onerror = null; setFallbackPhoto(photoEl); };
