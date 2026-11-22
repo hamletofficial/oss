@@ -26,14 +26,11 @@
     .social-login-buttons { display: grid; gap: .65rem; }
     .btn-social { width: 100%; justify-content: center; text-decoration: none; min-height: 46px; }
     .btn-google { background: #fff; color: #092a4b; border: 1px solid #cbd8e6; }
-    .btn-facebook { background: #1877f2; color: #fff; border: 1px solid #1877f2; }
-    .btn-linkedin { background: #0a66c2; color: #fff; border: 1px solid #0a66c2; }
-    .btn-x { background: #000; color: #fff; border: 1px solid #000; }
+    .btn-microsoft { background: #fff; color: #092a4b; border: 1px solid #cbd8e6; }
+            .btn-x { background: #000; color: #fff; border: 1px solid #000; }
     .btn-apple { background: #fff; color: #000; border: 1px solid #000; }
-    .btn-google:hover, .btn-google:focus-visible { background: #f5f9fd; }
-    .btn-facebook:hover, .btn-facebook:focus-visible { background: #166fe5; }
-    .btn-linkedin:hover, .btn-linkedin:focus-visible { background: #004182; }
-    .btn-x:hover, .btn-x:focus-visible { background: #1f1f1f; }
+    .btn-google:hover, .btn-google:focus-visible, .btn-microsoft:hover, .btn-microsoft:focus-visible { background: #f5f9fd; }
+            .btn-x:hover, .btn-x:focus-visible { background: #1f1f1f; }
     .btn-apple:hover, .btn-apple:focus-visible { background: #f5f5f5; }
     .archive-link-wrap { margin: 0; text-align: left; }
     .archive-link-wrap .btn { width: 220px; min-width: 220px; }
@@ -163,14 +160,13 @@
       <div class="social-login-options" aria-label="Social sign-in options">
         <p class="social-login-label">Choose a sign-in method</p>
         <div class="social-login-buttons">
-          <a class="btn btn-social btn-facebook" href="/login?next=%2Frequests.html&provider=facebook">Continue with Facebook</a>
           <a class="btn btn-social btn-google" href="/login?next=%2Frequests.html&provider=google">Continue with Google</a>
-          <a class="btn btn-social btn-linkedin" href="/login?next=%2Frequests.html&provider=linkedin">Continue with LinkedIn</a>
+          <a class="btn btn-social btn-microsoft" href="/login?next=%2Frequests.html&provider=microsoft">Continue with Microsoft</a>
           <a class="btn btn-social btn-apple" href="/login?next=%2Frequests.html&provider=apple">Continue with Apple</a>
         </div>
       </div>
       <ol class="signin-steps" aria-label="What happens after sign-in">
-        <li><span class="step-no" aria-hidden="true">1</span><strong>Sign in</strong><span>Use Google, Facebook, LinkedIn or Apple through the secure portal.</span></li>
+        <li><span class="step-no" aria-hidden="true">1</span><strong>Sign in</strong><span>Use Google, Microsoft or Apple through the secure portal.</span></li>
         <li><span class="step-no" aria-hidden="true">2</span><strong>Shape the brief</strong><span>Capture the headline, audience, embargo, and the message to carry.</span></li>
         <li><span class="step-no" aria-hidden="true">3</span><strong>Desk review</strong><span>The brief is saved and sent for communications follow-up.</span></li>
       </ol>
