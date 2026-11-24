@@ -32,6 +32,112 @@
   <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script defer src="/firebase-config.js"></script>
   
+
+  <style id="hamlet-black-friday-campaign-styles">
+    .black-friday-campaign {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: clamp(22px, 3.5vw, 38px) 20px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 82% 15%, rgba(114, 174, 255, .24), transparent 34%),
+        linear-gradient(115deg, #050b19 0%, #071d4a 58%, #102e62 100%);
+      border-bottom: 1px solid rgba(160, 196, 255, .24);
+    }
+    .black-friday-campaign::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: .18;
+      background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(90deg, transparent, #000 45%, #000);
+    }
+    .black-friday-campaign-inner {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(220px, .8fr);
+      align-items: center;
+      gap: clamp(22px, 5vw, 64px);
+    }
+    .black-friday-kicker, .black-friday-season {
+      display: inline-block;
+      color: #b9d7ff;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .black-friday-copy h2 {
+      margin: 8px 0 9px;
+      color: #fff;
+      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
+      line-height: 1.05;
+      letter-spacing: -.035em;
+    }
+    .black-friday-copy h2 span { color: #a9d2ff; }
+    .black-friday-copy p {
+      max-width: 690px;
+      margin: 0;
+      color: #e0e9f8;
+      font-size: .98rem;
+      line-height: 1.65;
+    }
+    .black-friday-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 19px;
+      padding: 11px 17px;
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 7px;
+      color: #071d4a;
+      background: #d9ecff;
+      font-size: .9rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .black-friday-cta:hover { transform: translateY(-2px); background: #fff; }
+    .black-friday-cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    .black-friday-side {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px 24px;
+      border: 1px solid rgba(189, 216, 255, .32);
+      border-radius: 12px;
+      background: rgba(4, 13, 32, .42);
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+    }
+    .black-friday-offer-label {
+      color: #b9d7ff;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .black-friday-side strong {
+      color: #fff;
+      font-size: clamp(1.2rem, 2vw, 1.65rem);
+      line-height: 1.2;
+    }
+    @media (max-width: 700px) {
+      .black-friday-campaign { padding: 24px 17px; }
+      .black-friday-campaign-inner { grid-template-columns: 1fr; gap: 18px; }
+      .black-friday-side { min-height: 0; padding: 16px 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .black-friday-cta { transition: none; }
+      .black-friday-cta:hover { transform: none; }
+    }
+  </style>
+
   </head>
 <body>
   <header class="topbar hamlet-404-header">
@@ -50,6 +156,21 @@
   </header>
 
   <main>
+    <section id="hamlet-black-friday-campaign" class="black-friday-campaign" aria-labelledby="black-friday-title">
+      <div class="black-friday-campaign-inner">
+        <div class="black-friday-copy">
+          <span class="black-friday-kicker">Limited-time seasonal campaign · 2026</span>
+          <h2 id="black-friday-title">Black Friday at <span>hamlet.</span></h2>
+          <p>Make more room for connected work. Explore Hamlet’s integrated commercial and residential property workspace, bringing listings, portfolio intelligence, deal progression and professional connections together.</p>
+          <a class="black-friday-cta" href="/orgs.html">Explore Hamlet for Organisations <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="black-friday-side" aria-hidden="true">
+          <span class="black-friday-offer-label">A clearer way to work</span>
+          <strong>Less fragmentation.<br>More connected deals.</strong>
+          <span class="black-friday-season">BLACK FRIDAY · 2026</span>
+        </div>
+      </div>
+    </section>
     <section class="hero">
       <div class="container hero-grid">
         <div>
