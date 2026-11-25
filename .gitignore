@@ -27,8 +27,3 @@ success.html
 # Local Visual Studio state and private university documents
 .vs/
 uni/
-# Ignore the first four root-level directories
-/.codex-worktrees/
-/.firebase/
-/.github/
-/.well-known/
