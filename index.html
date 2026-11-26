@@ -140,6 +140,8 @@
 
   
 <style id="homepage-mobile-hamburger">
+.hamlet-404-header{position:relative!important;z-index:10020!important}
+@media(max-width:700px){.hamlet-404-header .top-links{z-index:10030!important}}
 @media(max-width:700px){.hamlet-404-header .topbar-inner{display:flex!important;position:relative!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;width:100%!important;min-height:64px!important;padding:10px 14px!important}.hamlet-404-header .brand{display:inline-flex!important;flex:0 1 auto!important;min-width:0!important;align-items:center!important;white-space:nowrap!important}.hamlet-404-header .brand img{display:block!important;width:32px!important;height:32px!important;flex:0 0 auto!important}.hamlet-mobile-menu-toggle{display:flex!important;position:relative!important;inset:auto!important;flex:0 0 44px!important;width:44px!important;height:44px!important;align-items:center!important;justify-content:center!important;padding:0!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:9px!important;background:#071d4a!important;color:#fff!important;font-size:25px!important;line-height:1!important;cursor:pointer!important;z-index:1002!important}.hamlet-404-header .top-links{display:none!important;position:fixed!important;top:calc(64px + env(safe-area-inset-top,0px))!important;right:max(12px,env(safe-area-inset-right,0px))!important;left:auto!important;z-index:10010!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;width:min(300px,calc(100vw - 24px))!important;max-height:calc(100dvh - 90px)!important;overflow-y:auto!important;padding:8px!important;background:#071d4a!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:12px!important;box-shadow:0 16px 40px rgba(0,0,0,.45)!important;font-size:1rem!important}.hamlet-404-header .top-links.mobile-menu-open{display:flex!important}.hamlet-404-header .top-links a,.hamlet-404-header .top-links a:not(.signin){display:flex!important;align-items:center!important;white-space:normal!important;min-height:44px!important;padding:12px 14px!important;border-bottom:1px solid rgba(255,255,255,.14)!important;color:#fff!important}.hamlet-404-header .top-links .signin{display:flex!important;align-items:center!important;justify-content:flex-start!important;min-height:44px!important;margin:6px 0 0!important;padding:12px 14px!important;border-radius:8px!important;background:#075bea!important;color:#fff!important}}
 @media(min-width:701px){.hamlet-mobile-menu-toggle{display:none!important}.hamlet-404-header .top-links{display:flex!important;position:static!important}}
 </style>
@@ -148,7 +150,8 @@
   <header class="topbar hamlet-404-header">
     <div class="topbar-inner">
       <a class="brand" href="/" aria-label="hamlet home"><span class="home-brand-word" style="color:#FFF">hamlet<span class="home-brand-period">.</span></span></a>
-      <button class="hamlet-mobile-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="homepage-main-nav" style="display:none">☰</button>\n      <nav id="homepage-main-nav" class="top-links" aria-label="Main navigation">
+      <button class="hamlet-mobile-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="homepage-main-nav" style="display:none">☰</button>
+      <nav id="homepage-main-nav" class="top-links" aria-label="Main navigation">
         <a class="community-feed-nav" href="/app/public/feed.html">Community Feed</a>
         <a class="organisations-nav-link" href="/orgs.html" aria-label="Explore Hamlet for Organisations">For Organisations</a>
         <a href="/executive-team.html">Executive Team</a>
