@@ -35,12 +35,12 @@ Discussion of the proposal also raises broader questions about the allocation of
 
 Mr Mayaki drew attention to the continuing public concern about social and affordable housing in Southwark. He said:
 
-> “The public may naturally still be concerned about the current state of Southwark Council’s waiting list for social and affordable housing, which the Mayor has already set aside funding for. People are right to feel aggrieved by the proposal.”
+> “The 21 St George’s Road proposal offers an opportunity to contribute positively to Elephant and Castle through investment, new activity and a cultural space, while improving the quality of the streetscape. I welcome the dialogue that public consultations make possible: regeneration is strongest when ambitions for design, sustainability and economic vitality are considered alongside the needs and concerns of local residents. I hope the project can move forward through constructive engagement and deliver lasting value for the neighbourhood.”
 
 **Alfred Anate Bodurin Mayaki**  
 Chief Executive Officer, Hamlet
 
-The quotation reflects Mr Mayaki’s view that development proposals should be considered against the wider social and housing context. It should not be read as a verified statement about the precise scale, eligibility criteria or current status of any particular Mayoral funding allocation. Nor does this release assert that the scheme is being advanced in preference to a specific social-housing programme.
+The statement reflects Mr Mayaki’s support for constructive engagement and for assessing regeneration proposals in terms of their potential contribution to the neighbourhood, while recognising that local concerns and housing needs remain important parts of the discussion.
 
 ## Technical and planning considerations
 
