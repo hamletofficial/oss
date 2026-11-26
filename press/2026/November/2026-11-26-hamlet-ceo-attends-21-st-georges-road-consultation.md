@@ -11,7 +11,7 @@
 
 **Alfred Anate Bodurin Mayaki attended a public consultation at BOLD Elephant on 25 November, contributing a property-sector perspective to discussion of a proposed 21-storey mixed-use development.**
 
-**LONDON, UNITED KINGDOM — 26 November 2026** — Alfred Anate Bodurin Mayaki, Chief Executive Officer of Hamlet, participated in a public consultation concerning the emerging redevelopment proposals for 21 St George’s Road, Elephant and Castle, SE1. The consultation took place at BOLD Elephant on Wednesday 25 November 2026, from 5pm to 8pm, and was organised by Kanda Consulting.
+**London, England — 26 November 2026** — Alfred Anate Bodurin Mayaki, Chief Executive Officer of Hamlet, participated in a public consultation concerning the emerging redevelopment proposals for 21 St George’s Road, Elephant and Castle, SE1. The consultation took place at BOLD Elephant on Wednesday 25 November 2026, from 5pm to 8pm, and was organised by Kanda Consulting.
 
 ![Architectural visualisation of the proposed 21 St George’s Road mixed-use tower in Elephant and Castle.](/assets/images/download%20(1).jfif)
 
