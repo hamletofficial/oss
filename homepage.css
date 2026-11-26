@@ -526,3 +526,6 @@ footer{border-top-color:var(--hamlet-border);background:#080f1d}
     text-align:center;
   }
 }
+
+/* Match the lower homepage Log in CTA typography to the average hero-button sizing. */
+.cta .actions-centered .button{font-size:.92rem}
