@@ -138,12 +138,17 @@
     }
   </style>
 
-  </head>
+  
+<style id="homepage-mobile-hamburger">
+@media (max-width:700px){.hamlet-mobile-menu-toggle{display:flex!important;position:absolute;right:16px;top:12px;z-index:1002;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.35);border-radius:8px;background:#071d4a;color:#fff;font-size:26px;cursor:pointer}.topbar-inner{position:relative}.top-links{display:none!important;position:absolute!important;right:12px!important;top:60px!important;z-index:1001!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;width:min(260px,calc(100vw - 24px))!important;padding:10px!important;background:#071d4a!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:10px!important;box-shadow:0 12px 30px rgba(0,0,0,.3)}.top-links.mobile-menu-open{display:flex!important}.top-links a{display:block!important;padding:12px!important;border-bottom:1px solid rgba(255,255,255,.12)}.top-links a:last-child{border-bottom:0}}
+@media (min-width:701px){.hamlet-mobile-menu-toggle{display:none!important}}
+</style>
+</head>
 <body>
   <header class="topbar hamlet-404-header">
     <div class="topbar-inner">
       <a class="brand" href="/" aria-label="hamlet home"><img class="home-brand-mark" src="/assets/images/hamlet-icon.svg" alt="" width="34" height="34"><span class="home-brand-word" style="color:#FFF">hamlet<span class="home-brand-period">.</span></span></a>
-      <nav class="top-links" aria-label="Main navigation">
+      <button class="hamlet-mobile-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="homepage-main-nav" style="display:none">☰</button>\n      <nav id="homepage-main-nav" class="top-links" aria-label="Main navigation">
         <a class="community-feed-nav" href="/app/public/feed.html">Community Feed</a>
         <a class="organisations-nav-link" href="/orgs.html" aria-label="Explore Hamlet for Organisations">For Organisations</a>
         <a href="/executive-team.html">Executive Team</a>
@@ -731,5 +736,9 @@
     })();
   </script>
 
+
+<script id="homepage-mobile-menu-script">
+(()=>{const btn=document.querySelector('.hamlet-mobile-menu-toggle'),nav=document.getElementById('homepage-main-nav');if(!btn||!nav)return;btn.addEventListener('click',()=>{const open=nav.classList.toggle('mobile-menu-open');btn.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');btn.textContent=open?'×':'☰'});nav.addEventListener('click',e=>{if(e.target.closest('a')){nav.classList.remove('mobile-menu-open');btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-label','Open navigation menu');btn.textContent='☰'}});window.addEventListener('resize',()=>{if(window.innerWidth>700){nav.classList.remove('mobile-menu-open');btn.setAttribute('aria-expanded','false');btn.textContent='☰'}})})();
+</script>
 </body>
 </html>
