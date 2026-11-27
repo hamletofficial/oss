@@ -31,7 +31,7 @@
     .bf-hero h1{font-size:clamp(2.35rem,5.5vw,4.5rem);line-height:1.04;letter-spacing:-.055em;margin:15px 0 20px}
     .bf-hero h1 span{color:#93c5fd}
     .bf-hero p{max-width:780px;color:var(--bf-muted);font-size:1.08rem;line-height:1.75}
-    .bf-code{display:inline-block;margin:18px 0;padding:14px 22px;border:1px dashed #93c5fd;border-radius:10px;background:#14213a;font-size:clamp(1.5rem,4vw,2.3rem);font-weight:900;letter-spacing:.12em;color:#fff}
+    .bf-code-wrap{display:inline-flex;align-items:center;gap:10px;margin:18px 0;max-width:100%}.bf-code{display:inline-block;margin:0;padding:14px 22px;border:1px dashed #93c5fd;border-radius:10px;background:#14213a;font-size:clamp(1.5rem,4vw,2.3rem);font-weight:900;letter-spacing:.12em;color:#fff}.bf-copy{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 13px;border:1px solid #93c5fd;border-radius:9px;background:#071D4A;color:#fff;font-weight:750;cursor:pointer}.bf-copy svg{width:18px;height:18px;flex:0 0 auto}.bf-copy:hover{background:#123778}.bf-copy:focus-visible{outline:3px solid #bfdbfe;outline-offset:3px}.bf-copy-status{font-size:.8rem;color:#bfdbfe;min-height:1em}
     .bf-cta{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 18px;border-radius:9px;background:#2563eb;color:#fff!important;text-decoration:none;font-weight:800;border:1px solid #3b82f6;margin-top:12px}
     .bf-cta.secondary{background:#172338;border-color:#475569;color:#e5e7eb!important}
     .bf-section{padding:48px 0}
@@ -47,7 +47,7 @@
     @media(max-width:760px){.bf-grid{grid-template-columns:1fr}.bf-nav-links{gap:12px}.bf-hero{padding:32px 0}.bf-section{padding:26px 0}}
 
     /* Mobile-first responsive refinements */
-    @media(max-width:760px){.bf-page{width:calc(100% - 28px)}.bf-nav{padding:14px 0;align-items:center}.bf-brand{font-size:1.35rem}.bf-nav-links{gap:10px}.bf-nav-links a{font-size:.82rem}.bf-hero{padding:40px 0 34px}.bf-hero h1{font-size:clamp(2.1rem,9vw,3.1rem);line-height:1.08;letter-spacing:-.045em}.bf-hero p{font-size:1rem;line-height:1.65}.bf-code{font-size:1.65rem;max-width:100%;padding:12px 16px;letter-spacing:.08em}.bf-cta{width:100%;text-align:center;min-height:48px}.bf-section{padding:32px 0}.bf-section h2{font-size:1.65rem;line-height:1.2}.bf-grid{grid-template-columns:1fr;gap:12px}.bf-card{padding:18px}.bf-final{margin:28px auto 40px;padding:24px 18px}.bf-final h2{font-size:1.6rem;line-height:1.2}footer .footer-row{display:flex;flex-direction:column;gap:12px;text-align:center;padding:20px 0}footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:14px}}
+    @media(max-width:760px){.bf-page{width:calc(100% - 28px)}.bf-nav{padding:14px 0;align-items:center}.bf-brand{font-size:1.35rem}.bf-nav-links{gap:10px}.bf-nav-links a{font-size:.82rem}.bf-hero{padding:40px 0 34px}.bf-hero h1{font-size:clamp(2.1rem,9vw,3.1rem);line-height:1.08;letter-spacing:-.045em}.bf-hero p{font-size:1rem;line-height:1.65}.bf-code{font-size:1.65rem;max-width:100%;padding:12px 16px;letter-spacing:.08em}.bf-code-wrap{width:100%;flex-wrap:wrap}.bf-copy{min-height:44px}.bf-cta{width:100%;text-align:center;min-height:48px}.bf-section{padding:32px 0}.bf-section h2{font-size:1.65rem;line-height:1.2}.bf-grid{grid-template-columns:1fr;gap:12px}.bf-card{padding:18px}.bf-final{margin:28px auto 40px;padding:24px 18px}.bf-final h2{font-size:1.6rem;line-height:1.2}footer .footer-row{display:flex;flex-direction:column;gap:12px;text-align:center;padding:20px 0}footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:14px}}
     @media(max-width:420px){.bf-page{width:calc(100% - 24px)}.bf-nav{flex-direction:column;align-items:flex-start;gap:10px}.bf-nav-links{width:100%;justify-content:flex-start;gap:14px}.bf-hero h1{font-size:2rem}.bf-code{font-size:1.45rem}.bf-section h2{font-size:1.5rem}.bf-card strong{font-size:1.3rem}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   </style>
@@ -61,7 +61,7 @@
       <span class="bf-eyebrow">Black Friday 2026 · Limited-time offer</span>
       <h1>Make connected work<br><span>70% more accessible.</span></h1>
       <p>Bring your organisation's commercial and residential property work into a more connected workspace. For Black Friday, discover Hamlet Organisations with a substantial first-year saving—designed to help teams get started with less fragmentation and more connected deals.</p>
-      <div class="bf-code" aria-label="Discount code STUNT101">STUNT101</div>
+      <div class="bf-code-wrap"><div class="bf-code" id="bfCouponCode">STUNT101</div><button class="bf-copy" type="button" id="bfCopyCode" aria-label="Copy coupon code STUNT101"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg><span>Copy</span></button></div><div class="bf-copy-status" id="bfCopyStatus" aria-live="polite"></div>
       <p><strong>Save 70% for 12 months.</strong> Apply the code at eligible checkout.</p>
       <a class="bf-cta" href="/orgs.html">Explore Hamlet Organisations →</a>
     </section>
@@ -85,6 +85,9 @@
     <section class="bf-final"><h2>Discover Hamlet Organisations</h2><p>Less fragmentation. More connected deals.</p><a class="bf-cta" href="/orgs.html">Explore Hamlet Organisations →</a></section>
   </main>
   <footer><div class="bf-page footer-row"><div>© 2026 Impact in Business Recruitment Group Limited</div><nav class="footer-links" aria-label="Footer links"><a href="/">Home</a><a href="/orgs.html">For Organisations</a><a href="/contact.html">Contact</a></nav></div></footer>
+  <script>
+    (function(){const btn=document.getElementById('bfCopyCode');const code=document.getElementById('bfCouponCode');const status=document.getElementById('bfCopyStatus');if(!btn||!code)return;btn.addEventListener('click',async()=>{const text=code.textContent.trim();try{await navigator.clipboard.writeText(text);status.textContent='Coupon code copied!';btn.querySelector('span').textContent='Copied';}catch(e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();status.textContent=ok?'Coupon code copied!':'Please copy STUNT101 manually.';btn.querySelector('span').textContent=ok?'Copied':'Copy';}setTimeout(()=>{btn.querySelector('span').textContent='Copy';status.textContent='';},2200);});})();
+  </script>
   <script src="/theme.js"></script>
 </body>
 </html>
