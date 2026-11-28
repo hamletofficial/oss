@@ -4,7 +4,7 @@ Press releases published in November 2026. Follow the naming and publishing conv
 
 ## Published releases
 
-- **28 November 2026** — [Hamlet launches Organisations pilot with five UK agencies](2026-11-28-hamlet-organisations-pilot.md)
+- **28 November 2026** — [Hamlet launches Organisations pilot with a maximum of five UK agencies](2026-11-28-hamlet-organisations-pilot.md)
 
 - **26 November 2026** — [Hamlet CEO participates in consultation on 21 St George’s Road](2026-11-26-hamlet-ceo-attends-21-st-georges-road-consultation.md)
 - **13 November 2026** — [Impact in Business Recruitment Group joins OpenAI's ChatGPT Business Hub](2026-11-13-ibr-chatgpt-business-hub.md)
