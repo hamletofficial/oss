@@ -48,6 +48,10 @@
     .org-section-head p,.org-card p,.org-note{color:var(--org-muted);line-height:1.65}
     .org-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
     .org-card{padding:22px;border:1px solid var(--org-border);border-radius:13px;background:var(--org-card);min-width:0}
+    .org-card{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background-color .22s ease}
+    @media(hover:hover) and (pointer:fine){.org-card:hover{transform:translateY(-4px);border-color:#93c5fd;box-shadow:0 14px 30px #0005,0 0 0 1px #60a5fa26}}
+    .org-card:focus-within{border-color:#93c5fd;box-shadow:0 0 0 2px #60a5fa33,0 12px 28px #0004}
+    @media(prefers-reduced-motion:reduce){.org-card{transition:none}.org-card:hover{transform:none}}
     .org-icon{font-size:1.35rem;margin-bottom:12px}
     .org-card h3{font-size:1.02rem;margin:0 0 9px}
     .org-card p{font-size:.9rem;margin:0}
