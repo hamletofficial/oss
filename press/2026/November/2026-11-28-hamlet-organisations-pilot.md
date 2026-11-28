@@ -10,7 +10,7 @@
 
 *Five UK agencies will test Hamlet Organisations, provide structured feedback and work with Hamlet to coordinate feature enhancements.*
 
-**LONDON, United Kingdom — 28 November 2026** — Impact in Business Recruitment Group Limited today announces the launch of a product pilot for **hamlet Organisations**, bringing together a cohort of five UK agencies to test the organisational workspace and help shape its development.
+**LONDON, England — 28 November 2026** — Impact in Business Recruitment Group Limited today announces the launch of a product pilot for **hamlet Organisations**, bringing together a cohort of five UK agencies to test the organisational workspace and help shape its development.
 
 The pilot follows the introduction of Hamlet Organisations, which gives property businesses and professional teams a dedicated organisational layer within Hamlet. It supports organisation identity, team membership and role-based access while keeping individual accounts and personal records distinct.
 
