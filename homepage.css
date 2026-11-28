@@ -529,3 +529,11 @@ footer{border-top-color:var(--hamlet-border);background:#080f1d}
 
 /* Match the lower homepage Log in CTA typography to the average hero-button sizing. */
 .cta .actions-centered .button{font-size:.92rem}
+
+
+/* Seasonal Black Friday 2026 header navigation highlight. */
+.top-links a.black-friday-nav-link{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid rgba(191,219,254,.65);border-radius:999px;background:linear-gradient(110deg,#0b2457,#17458b 55%,#0b2457);color:#fff!important;font-weight:850;letter-spacing:.015em;text-decoration:none;box-shadow:0 0 0 1px rgba(96,165,250,.12),0 4px 14px rgba(37,99,235,.22);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.top-links a.black-friday-nav-link span{color:#bfdbfe!important;font-size:.85em}
+.top-links a.black-friday-nav-link:hover,.top-links a.black-friday-nav-link:focus-visible{color:#fff!important;border-color:#bfdbfe;transform:translateY(-1px);box-shadow:0 0 0 2px rgba(147,197,253,.2),0 8px 22px rgba(37,99,235,.32)}
+@media(max-width:700px){.hamlet-404-header .top-links a.black-friday-nav-link{justify-content:flex-start;border-radius:8px;margin:4px 0;background:linear-gradient(110deg,#0b2457,#17458b 55%,#0b2457);min-height:44px;padding:12px 14px}}
+@media(prefers-reduced-motion:reduce){.top-links a.black-friday-nav-link{transition:none}.top-links a.black-friday-nav-link:hover{transform:none}}
