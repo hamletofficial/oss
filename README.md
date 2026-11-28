@@ -2,7 +2,7 @@
 
 **hamlet** is an integrated commercial and residential property workspace (IWMS), developed by Impact in Business Recruitment Group Limited (IBR). It brings property information, portfolios, listings, deal progression, organisation and team workflows, broker profiles, rankings, communications and shared resources into one connected environment. CRM and community features support this wider workspace; they are not the product's defining category.
 
-**Live website:** https://hamlet-ai.co.uk  
+**Live website:** https://www.hamlet-ai.co.uk  
 **Repository:** https://github.com/hamletofficial/oss  
 **Hosting:** GitHub Pages and Firebase services, depending on the feature  
 **Product direction:** An integrated workspace for commercial and residential property markets, with technical support for sustainability-focused property data.
@@ -271,7 +271,7 @@ Use concise commit messages that describe the user-visible change or technical f
 
 ## Useful links
 
-- [Live website](https://hamlet-ai.co.uk)
+- [Live website](https://www.hamlet-ai.co.uk)
 - [Source repository](https://github.com/hamletofficial/oss)
 - [Security guidance](SECURITY.md)
 - [Page standards](PAGE-STANDARDS.md)
