@@ -24,7 +24,7 @@
   
   // Brand consistency: the homepage is intentionally excluded from this wordmark treatment.
   function applyHamletWordmarkDot() {
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') return;
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html' || window.location.pathname === '/search.html') return;
     document.querySelectorAll('a.brand, a.sector-brand, a.search-brand, .brand-wordmark').forEach(el => {
       if (!/^hamlet$/i.test((el.childNodes[0]?.textContent || '').trim()) && !/^hamlet(?:\\s|$)/i.test(el.textContent.trim())) return;
       const existingDot = Array.from(el.querySelectorAll('span')).find(span => span.textContent.trim() === '.');
